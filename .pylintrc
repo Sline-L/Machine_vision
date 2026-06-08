@@ -1,0 +1,17 @@
+[MASTER]
+extension-pkg-whitelist=PyQt5
+disable = missing-docstring
+[FORMAT]
+disable=trailing-whitespace,
+        C0301,  # line-too-long
+        C0303,  # trailing-whitespace
+[TYPECHECK]
+ignored-modules=cv2,cv2.cv2
+[VARIABLES]
+const-rgx=[a-z_][a-z0-9_]{2,30}$
+[MESSAGES CONTROL]
+disable=global-statement,
+        global-variable-not-assigned,
+	broad-except,
+	invalid-name
+	
