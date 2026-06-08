@@ -1,4 +1,6 @@
+import os
 import threading
+from pathlib import Path
 from ultralytics import YOLO
 
 
@@ -8,7 +10,8 @@ frame_lock = threading.Lock()
 results_lock = threading.Lock()
 frame = None
 
-model = YOLO("/home/fibo/Desktop/ultralytics-8.4.13/gear.pt")
+MODEL_PATH = Path(os.environ.get("GP_MODEL_PATH", Path(__file__).resolve().parent / "best.pt"))
+model = YOLO(str(MODEL_PATH))
 
 
 detection_results = None
