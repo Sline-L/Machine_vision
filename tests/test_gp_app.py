@@ -2,7 +2,7 @@ import os
 import unittest
 from unittest.mock import patch
 
-from gp.app import configure_qt_platform
+from gp.app import build_parser, configure_qt_platform
 
 
 class QtPlatformTests(unittest.TestCase):
@@ -22,6 +22,12 @@ class QtPlatformTests(unittest.TestCase):
         with patch.dict(os.environ, environment, clear=True):
             configure_qt_platform()
             self.assertEqual(os.environ["XDG_CURRENT_DESKTOP"], "generic")
+
+
+class CommandLineTests(unittest.TestCase):
+    def test_video_argument_accepts_path(self):
+        args = build_parser().parse_args(["--video", "fixtures/gears.mp4"])
+        self.assertEqual(str(args.video), "fixtures/gears.mp4")
 
 
 if __name__ == "__main__":

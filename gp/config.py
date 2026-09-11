@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 import os
 from pathlib import Path
+from typing import Optional
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -28,6 +29,8 @@ class AppConfig:
     mode: str = "自由模式"
     target_quantity: int = 100
     duration_minutes: int = 10
+    video_path: Optional[Path] = None
+    serial_enabled: bool = True
 
     @classmethod
     def from_environment(cls):

@@ -1,5 +1,6 @@
 """Main window and settings UI for GearPro."""
 
+from pathlib import Path
 import time
 
 from PyQt5.QtCore import Qt, QTimer
@@ -9,6 +10,7 @@ from PyQt5.QtWidgets import (
     QDialog,
     QDialogButtonBox,
     QDoubleSpinBox,
+    QFileDialog,
     QFormLayout,
     QFrame,
     QGridLayout,
@@ -66,7 +68,10 @@ class SettingsDialog(QDialog):
 
         self.mode = QComboBox()
         self.mode.addItems(("自由模式", "定量模式", "定时模式"))
+        if config.video_path is not None:
+            self.mode.addItem("视频测试模式")
         self.mode.setCurrentText(config.mode)
+        self.mode.setEnabled(config.video_path is None)
         self.quantity = QSpinBox()
         self.quantity.setRange(1, 100000)
         self.quantity.setValue(config.target_quantity)
@@ -135,7 +140,9 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(960, 640)
         self.resize(1280, 800)
         self._build_ui()
-        self._start_camera()
+        source_started = self._start_source()
+        if source_started and self.config.video_path is not None:
+            QTimer.singleShot(0, self.start_inspection)
 
     def _build_ui(self):
         root = QWidget()
@@ -147,8 +154,15 @@ class MainWindow(QMainWindow):
         title.setObjectName("title")
         self.settings_button = QPushButton("设置")
         self.settings_button.clicked.connect(self.open_settings)
+        self.video_button = QPushButton("测试视频")
+        self.video_button.clicked.connect(self.choose_video)
+        self.camera_button = QPushButton("实时相机")
+        self.camera_button.clicked.connect(self.use_camera)
+        self.camera_button.setVisible(self.config.video_path is not None)
         header.addWidget(title)
         header.addStretch()
+        header.addWidget(self.camera_button)
+        header.addWidget(self.video_button)
         header.addWidget(self.settings_button)
         layout.addLayout(header)
 
@@ -230,12 +244,22 @@ class MainWindow(QMainWindow):
         grid.addWidget(frame, 0, column)
         return value
 
-    def _start_camera(self):
+    def _start_source(self):
+        if self.config.video_path is not None:
+            self.camera_timer.stop()
+            self.camera_view.stop()
+            self.camera_view.setText(f"视频测试：{self.config.video_path.name}")
+            self.status_label.setText("正在准备视频测试…")
+            self.camera_button.setVisible(True)
+            return True
         if self.camera_view.start():
             self.camera_timer.start(max(1, int(1000 / self.config.camera_fps)))
             self.status_label.setText("摄像头已连接")
+            self.camera_button.setVisible(False)
+            return True
         else:
             self.status_label.setText(self.camera_view.error_message or "摄像头连接失败，请检查设置和设备")
+            return False
 
     def toggle_inspection(self):
         if self.worker is not None and self.worker.isRunning():
@@ -244,8 +268,11 @@ class MainWindow(QMainWindow):
             self.start_inspection()
 
     def start_inspection(self):
-        if self.camera_view.capture is None:
+        if self.config.video_path is None and self.camera_view.capture is None:
             self.status_label.setText("无法开始：摄像头未连接")
+            return
+        if self.config.video_path is not None and not self.config.video_path.is_file():
+            self.status_label.setText(f"无法开始：找不到视频 {self.config.video_path}")
             return
         self.worker = InspectionThread(self.config, self.frame_store, self)
         self.worker.result_ready.connect(self.show_result)
@@ -256,6 +283,8 @@ class MainWindow(QMainWindow):
         self.last_counted_at = 0.0
         self.start_button.setText("停止运行")
         self.settings_button.setEnabled(False)
+        self.video_button.setEnabled(False)
+        self.camera_button.setEnabled(False)
         self.worker.start()
 
     def stop_inspection(self):
@@ -267,9 +296,13 @@ class MainWindow(QMainWindow):
     def _worker_finished(self):
         self.start_button.setText("开始运行")
         self.settings_button.setEnabled(True)
+        self.video_button.setEnabled(True)
+        self.camera_button.setEnabled(True)
 
     def show_result(self, result):
         self.result_image.setPixmap(frame_to_pixmap(result.annotated_frame, self.result_image.size()))
+        if self.config.video_path is not None:
+            self.camera_view.setPixmap(frame_to_pixmap(result.annotated_frame, self.camera_view.size()))
         self.verdict_label.setText(result.verdict)
         state = "idle" if not result.has_gear else ("bad" if result.is_defective else "good")
         self.verdict_label.setProperty("state", state)
@@ -287,13 +320,42 @@ class MainWindow(QMainWindow):
             self.last_counted_at = now
             self.stats.add(result.is_defective)
             self._refresh_stats()
-            _ok, message = self.serial_output.send_verdict(result.is_defective)
-            self.status_label.setText(message)
+            if self.config.serial_enabled:
+                _ok, message = self.serial_output.send_verdict(result.is_defective)
+                self.status_label.setText(message)
             self._check_mode_limit()
 
     def show_failure(self, message):
         self.status_label.setText("检测错误：" + message)
         self.result_details.setText(message)
+
+    def choose_video(self):
+        path, _selected_filter = QFileDialog.getOpenFileName(
+            self,
+            "选择测试视频",
+            "",
+            "视频文件 (*.mp4 *.avi *.mov *.mkv *.m4v);;所有文件 (*)",
+        )
+        if not path:
+            return
+        self.stop_inspection()
+        self.camera_timer.stop()
+        self.camera_view.stop()
+        self.config.video_path = Path(path).resolve()
+        self.config.mode = "视频测试模式"
+        self.config.serial_enabled = False
+        self._refresh_settings_summary()
+        if self._start_source():
+            self.start_inspection()
+
+    def use_camera(self):
+        self.stop_inspection()
+        self.config.video_path = None
+        self.config.mode = "自由模式"
+        self.config.serial_enabled = True
+        self.camera_view.clear()
+        self._refresh_settings_summary()
+        self._start_source()
 
     def clear_stats(self):
         self.stats.clear()
@@ -316,7 +378,7 @@ class MainWindow(QMainWindow):
             self.camera_timer.stop()
             self.camera_view.stop()
             self.config.camera_index = new_camera_index
-            self._start_camera()
+            self._start_source()
         if (serial_port, serial_baudrate) != (self.config.serial_port, self.config.serial_baudrate):
             self.config.serial_port = serial_port
             self.config.serial_baudrate = serial_baudrate
@@ -331,8 +393,14 @@ class MainWindow(QMainWindow):
             f"定位阈值：{self.config.locator_confidence:.2f}",
             f"缺陷阈值：{self.config.defect_threshold:.2f}",
             f"推理间隔：{self.config.inference_interval:.2f} 秒",
-            f"串口：{self.config.serial_port} @ {self.config.serial_baudrate}",
+            (
+                "串口：已禁用（视频测试）"
+                if not self.config.serial_enabled
+                else f"串口：{self.config.serial_port} @ {self.config.serial_baudrate}"
+            ),
         ]
+        if self.config.video_path is not None:
+            details.append(f"测试视频：{self.config.video_path.name}")
         if self.config.mode == "定量模式":
             details.append(f"目标数量：{self.config.target_quantity}")
         elif self.config.mode == "定时模式":
