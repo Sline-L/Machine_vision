@@ -10,6 +10,7 @@ class GearObservation:
     location_confidence: float
     defect_score: float
 
+
 @dataclass
 class InspectionResult:
     annotated_frame: Any

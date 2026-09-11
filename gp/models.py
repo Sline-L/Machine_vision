@@ -5,7 +5,7 @@ import time
 import cv2
 import numpy as np
 
-from gearpro_types import GearObservation, InspectionResult
+from .types import GearObservation, InspectionResult
 
 
 class TwoStageInspector:

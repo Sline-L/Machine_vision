@@ -24,10 +24,10 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-from gearpro_camera import CameraView, LatestFrame, frame_to_pixmap
-from gearpro_serial import SerialOutput
-from gearpro_types import InspectionStats
-from gearpro_worker import InspectionThread
+from .camera import CameraView, LatestFrame, frame_to_pixmap
+from .serial_io import SerialOutput
+from .types import InspectionStats
+from .worker import InspectionThread
 
 
 class StatsChart(QWidget):

@@ -22,7 +22,7 @@ frame_lock = threading.Lock()
 detection_results = None
 results_lock = threading.Lock()
 running = True
-model = YOLO(os.environ.get("GP_MODEL_PATH", str(PROJECT_ROOT / "best.pt")))
+model = YOLO(os.environ.get("GP_MODEL_PATH", str(Path(__file__).resolve().parent / "models" / "best.pt")))
 
 class DetectionWorker(QObject):
     """工作线程类，用于处理YOLO检测"""

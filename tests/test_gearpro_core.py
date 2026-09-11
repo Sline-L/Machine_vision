@@ -3,8 +3,8 @@ from pathlib import Path
 import unittest
 from unittest.mock import patch
 
-from gearpro_config import AppConfig, PROJECT_ROOT
-from gearpro_types import GearObservation, InspectionResult, InspectionStats
+from gp.config import AppConfig, PROJECT_ROOT
+from gp.types import GearObservation, InspectionResult, InspectionStats
 
 
 class ConfigTests(unittest.TestCase):

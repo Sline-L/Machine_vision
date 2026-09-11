@@ -4,7 +4,7 @@ import threading
 
 from PyQt5.QtCore import QThread, pyqtSignal
 
-from gearpro_models import TwoStageInspector
+from .models import TwoStageInspector
 
 
 class InspectionThread(QThread):

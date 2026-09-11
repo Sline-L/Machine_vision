@@ -10,7 +10,7 @@ frame_lock = threading.Lock()
 results_lock = threading.Lock()
 frame = None
 
-MODEL_PATH = Path(os.environ.get("GP_MODEL_PATH", Path(__file__).resolve().parent.parent / "best.pt"))
+MODEL_PATH = Path(os.environ.get("GP_MODEL_PATH", Path(__file__).resolve().parent / "models" / "best.pt"))
 model = YOLO(str(MODEL_PATH))
 
 
