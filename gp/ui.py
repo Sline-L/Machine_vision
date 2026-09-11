@@ -19,7 +19,6 @@ from PyQt5.QtWidgets import (
     QMainWindow,
     QPushButton,
     QSpinBox,
-    QTextEdit,
     QVBoxLayout,
     QWidget,
 )
@@ -34,7 +33,7 @@ class StatsChart(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.stats = InspectionStats()
-        self.setMinimumHeight(150)
+        self.setMinimumHeight(120)
 
     def set_stats(self, stats):
         self.stats = stats
@@ -48,13 +47,13 @@ class StatsChart(QWidget):
         values = (("合格", self.stats.good, "#16a34a"), ("不合格", self.stats.defective, "#dc2626"))
         maximum = max(1, self.stats.good, self.stats.defective)
         bar_width = max(50, self.width() // 5)
-        base_y = self.height() - 30
+        base_y = self.height() - 34
         for index, (label, value, color) in enumerate(values):
             x = self.width() // 4 + index * self.width() // 2 - bar_width // 2
-            height = int((self.height() - 65) * value / maximum)
+            height = int(max(0, self.height() - 70) * value / maximum)
             painter.fillRect(x, base_y - height, bar_width, height, QColor(color))
             painter.setPen(QColor("#334155"))
-            painter.drawText(x, base_y + 20, bar_width, 20, Qt.AlignCenter, label)
+            painter.drawText(x, base_y + 4, bar_width, 20, Qt.AlignCenter, label)
             painter.drawText(x, max(2, base_y - height - 22), bar_width, 20, Qt.AlignCenter, str(value))
 
 
@@ -133,7 +132,8 @@ class MainWindow(QMainWindow):
         self.last_counted_at = 0.0
         self.serial_output = SerialOutput(config.serial_port, config.serial_baudrate)
         self.setWindowTitle("GearPro 齿轮视觉检测系统")
-        self.resize(1360, 820)
+        self.setMinimumSize(960, 640)
+        self.resize(1280, 800)
         self._build_ui()
         self._start_camera()
 
@@ -175,16 +175,19 @@ class MainWindow(QMainWindow):
         self.verdict_label = QLabel("等待开始")
         self.verdict_label.setAlignment(Qt.AlignCenter)
         self.verdict_label.setObjectName("verdict")
-        self.result_details = QTextEdit()
-        self.result_details.setReadOnly(True)
+        self.result_details = QLabel()
+        self.result_details.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+        self.result_details.setWordWrap(True)
+        self.result_details.setMaximumHeight(50)
+        self.result_details.setStyleSheet("background:#f8fafc; padding:5px; border-radius:5px;")
         self.result_image = QLabel("等待检测画面")
         self.result_image.setAlignment(Qt.AlignCenter)
-        self.result_image.setMinimumHeight(220)
+        self.result_image.setMinimumHeight(130)
         self.result_image.setStyleSheet("background:#111827; color:#94a3b8; border-radius:6px;")
         result_layout.addWidget(self.verdict_label)
         result_layout.addWidget(self.result_image, 2)
         result_layout.addWidget(self.result_details)
-        side.addWidget(result_group, 2)
+        side.addWidget(result_group)
 
         chart_group = QGroupBox("检测统计")
         chart_layout = QVBoxLayout(chart_group)
@@ -232,7 +235,7 @@ class MainWindow(QMainWindow):
             self.camera_timer.start(max(1, int(1000 / self.config.camera_fps)))
             self.status_label.setText("摄像头已连接")
         else:
-            self.status_label.setText("摄像头连接失败，请检查设置和设备")
+            self.status_label.setText(self.camera_view.error_message or "摄像头连接失败，请检查设置和设备")
 
     def toggle_inspection(self):
         if self.worker is not None and self.worker.isRunning():
@@ -277,7 +280,7 @@ class MainWindow(QMainWindow):
             lines.append(
                 f"齿轮 {index}：定位 {item.location_confidence:.1%}，缺陷概率 {item.defect_score:.1%}"
             )
-        self.result_details.setPlainText("\n".join(lines))
+        self.result_details.setText("\n".join(lines))
 
         now = time.monotonic()
         if result.has_gear and now - self.last_counted_at >= self.config.result_cooldown:
@@ -290,7 +293,7 @@ class MainWindow(QMainWindow):
 
     def show_failure(self, message):
         self.status_label.setText("检测错误：" + message)
-        self.result_details.setPlainText(message)
+        self.result_details.setText(message)
 
     def clear_stats(self):
         self.stats.clear()
@@ -373,5 +376,4 @@ QPushButton { padding: 8px 18px; border: 0; border-radius: 6px; background: #e2e
 QPushButton:hover { background: #cbd5e1; }
 QPushButton#startButton { background: #2563eb; color: white; font-weight: 700; min-width: 110px; }
 QPushButton#startButton:hover { background: #1d4ed8; }
-QTextEdit { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 5px; }
 """

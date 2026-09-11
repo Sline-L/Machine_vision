@@ -48,7 +48,8 @@ model/model2.pt（ResNet18，输入 512×512）
 
 UI 线程负责相机刷新与界面绘制，模型加载和推理在独立 `QThread` 中执行。帧缓冲只保存
 最新一帧，不建立积压队列。根目录 `gp_main.py` 与 `python -m gp` 最终都调用
-`gp.app.main()`。
+`gp.app.main()`。在 Wayland 会话中程序优先使用 Qt Wayland 平台插件，在 X11 会话中使用
+`xcb`；导入 OpenCV 后会恢复 PyQt5 自带的插件目录，避免加载 `cv2/qt/plugins`。
 
 ## 4. 配置与接口
 

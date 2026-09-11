@@ -3,14 +3,21 @@
 import os
 import sys
 
-from PyQt5.QtCore import QLibraryInfo
+from PyQt5.QtCore import QLibraryInfo, QT_VERSION_STR
 from PyQt5.QtWidgets import QApplication
 
 
 def configure_qt_platform():
     os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = QLibraryInfo.location(QLibraryInfo.PluginsPath)
+    # The application uses its own Fusion stylesheet. Avoid parsing KDE's Qt 6
+    # font serialization with the bundled Qt 5 runtime.
+    os.environ.setdefault("QT_QPA_PLATFORMTHEME", "none")
+    if os.environ.get("KDE_SESSION_VERSION") == "6" and QT_VERSION_STR.startswith("5."):
+        os.environ["XDG_CURRENT_DESKTOP"] = "generic"
     if not os.environ.get("DISPLAY") and not os.environ.get("WAYLAND_DISPLAY"):
         os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    elif os.environ.get("WAYLAND_DISPLAY"):
+        os.environ.setdefault("QT_QPA_PLATFORM", "wayland")
     else:
         os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
 

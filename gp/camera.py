@@ -1,5 +1,7 @@
 """Camera capture, frame sharing, and Qt image conversion."""
 
+from pathlib import Path
+import sys
 import threading
 
 import cv2
@@ -41,18 +43,26 @@ class CameraView(QLabel):
         self.config = config
         self.frame_store = frame_store
         self.capture = None
+        self.error_message = ""
         self.setAlignment(Qt.AlignCenter)
-        self.setMinimumSize(640, 480)
+        self.setMinimumSize(480, 360)
         self.setText("等待摄像头")
         self.setStyleSheet("background:#111827; color:#94a3b8; border-radius:8px;")
 
     def start(self):
+        device_path = Path(f"/dev/video{self.config.camera_index}")
+        if sys.platform.startswith("linux") and not device_path.exists():
+            self.error_message = f"未找到摄像头设备 {device_path}"
+            self.setText(self.error_message)
+            return False
         self.capture = cv2.VideoCapture(self.config.camera_index, cv2.CAP_V4L2)
         if not self.capture.isOpened():
             self.capture.release()
             self.capture = None
-            self.setText("摄像头打开失败")
+            self.error_message = f"无法打开摄像头设备 {device_path}，请检查权限"
+            self.setText(self.error_message)
             return False
+        self.error_message = ""
         self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, self.config.camera_width)
         self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, self.config.camera_height)
         self.capture.set(cv2.CAP_PROP_FPS, self.config.camera_fps)
