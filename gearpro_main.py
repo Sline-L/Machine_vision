@@ -20,6 +20,9 @@ def main():
     from gearpro_config import AppConfig
     from gearpro_ui import APP_STYLE, MainWindow
 
+    # Importing gearpro_ui imports cv2, whose wheel rewrites the Qt plugin path
+    # to cv2/qt/plugins. Restore PyQt5's plugin directory before QApplication.
+    configure_qt_platform()
     app = QApplication(sys.argv)
     app.setApplicationName("GearPro")
     app.setStyle("Fusion")
