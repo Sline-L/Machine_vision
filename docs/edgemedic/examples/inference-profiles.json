@@ -7,7 +7,7 @@
     "detector_enabled": true,
     "detector_imgsz": 960,
     "inference_interval_s": 0.1,
-    "ui_refresh_hz": null,
+    "ui_refresh_hz": 15,
     "mission_quality": 1.0,
     "rollback_target": "FULL",
     "notes": "Current default pipeline."
@@ -27,16 +27,16 @@
   },
   {
     "name": "SPARSE",
-    "implemented": false,
+    "implemented": true,
     "locator": "keep",
     "classifiers_enabled": true,
     "detector_enabled": true,
     "detector_imgsz": 960,
     "inference_interval_s": 0.2,
-    "ui_refresh_hz": null,
+    "ui_refresh_hz": 15,
     "mission_quality": 0.9,
     "rollback_target": null,
-    "notes": "Interval exists on AppConfig; named profile switch not wired."
+    "notes": "Named switch sets AppConfig.inference_interval to 0.20."
   },
   {
     "name": "CLASSIFY_ONLY",
@@ -66,15 +66,15 @@
   },
   {
     "name": "SAFE_STOP",
-    "implemented": false,
+    "implemented": true,
     "locator": "off",
     "classifiers_enabled": false,
     "detector_enabled": false,
     "detector_imgsz": 960,
     "inference_interval_s": null,
-    "ui_refresh_hz": null,
+    "ui_refresh_hz": 15,
     "mission_quality": 0.0,
     "rollback_target": null,
-    "notes": "Maps to stop inspection; named profile API not wired."
+    "notes": "Stops the inspection worker; camera preview may continue."
   }
 ]

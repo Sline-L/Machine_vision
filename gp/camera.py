@@ -77,7 +77,6 @@ class CameraView(QLabel):
             return
         self._ok_stamps.append(time.monotonic())
         self.frame_store.publish(frame)
-        self.setPixmap(frame_to_pixmap(frame, self.size()))
 
     def stop(self):
         if self.capture is not None:

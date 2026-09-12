@@ -4,7 +4,7 @@ Agent 与人工只切换**命名档位**，不直接拧几十个内部旋钮。�
 
 ## 相对当前代码（禁止写假接口）
 
-当前 `TwoStageInspector` **每次**跑 Locator + V5 两路分类 + P2 检测（`imgsz=960`）。`AppConfig.inference_interval` 存在。定位 `.pt`/`.engine` 只在进程启动时加载。Camera 采集与 Qt `QTimer`+`setPixmap` 绑在一起。
+当前 `TwoStageInspector` **每次**跑 Locator + V5 两路分类 + P2 检测（`imgsz=960`）。`AppConfig.inference_interval` 与 `inference_profile` 存在。定位 `.pt`/`.engine` 只在进程启动时加载。Camera 采集与 Qt 预览已拆成两个定时器。
 
 因此：
 
@@ -16,7 +16,7 @@ Agent 与人工只切换**命名档位**，不直接拧几十个内部旋钮。�
 | 关闭 P2、只分类 | **先改 `ScratchV5Runtime.predict`**，再开放 CLASSIFY_ONLY |
 | 关掉两路分类（LOCATE_ONLY） | **先改 `inspect()`** |
 | P2 960→640/768 | **不做**。权重与配置写死 960，改尺寸不是 runtime 开关 |
-| 独立 UI FPS | **先把采集从 Qt 拆开**，此前不要声称可降 UI |
+| 独立 UI FPS | 采集定时器与 `preview_timer` 已分开；`ui_refresh_hz` 默认 15 |
 
 ## 档位
 
@@ -24,10 +24,10 @@ Agent 与人工只切换**命名档位**，不直接拧几十个内部旋钮。�
 | --- | --- | --- | --- | --- | --- | --- |
 | `FULL` | 启动时的 pt 或 engine | 开 | 开 960 | 0.10 | 即当前默认 | 1.00 |
 | `TRT_FAST` | `model1.engine` | 开 | 开 960 | 0.10 | 需重建 inspector；缺文件则拒绝 | 1.00 |
-| `SPARSE` | 保持当前 locator | 开 | 开 960 | 0.20 | 只改 interval | 0.90 |
+| `SPARSE` | 保持当前 locator | 开 | 开 960 | 0.20 | 已实现：改 interval | 0.90 |
 | `CLASSIFY_ONLY` | 保持当前 locator | 开 | **跳过前向**；`defect_score` = 分类均值（融合 \(\alpha=1\)） | 0.20 | **未实现** | 0.65 |
 | `LOCATE_ONLY` | 保持当前 locator | 关 | 关 | 0.30 | **未实现** | 0.20 |
-| `SAFE_STOP` | 不推理 | 关 | 关 | — | 停 worker | 0.00 |
+| `SAFE_STOP` | 不推理 | 关 | 关 | — | 已实现：停 worker | 0.00 |
 
 `TRT_FAST` 与 `FULL` 的检测质量相同，差在延迟；\(Q_D\) 同为 1.0。Mission Utility：
 

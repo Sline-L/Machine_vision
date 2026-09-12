@@ -27,6 +27,8 @@ class AppConfig:
     defect_threshold: float = 0.300273610279458
     inference_interval: float = 0.10
     result_cooldown: float = 5.0
+    inference_profile: str = "FULL"
+    ui_refresh_hz: float = 15.0
     mode: str = "自由模式"
     target_quantity: int = 100
     duration_minutes: int = 10

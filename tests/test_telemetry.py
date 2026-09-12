@@ -5,6 +5,7 @@ from gp.config import AppConfig
 from gp.frames import LatestFrame
 from gp.serial_io import SerialOutput
 from gp.telemetry import build_snapshot, camera_health, locator_backend
+from gp.profiles import apply_to_config
 from gp.types import InspectionResult
 
 
@@ -68,8 +69,27 @@ class SnapshotTests(unittest.TestCase):
             self.assertIn(key, snapshot)
         self.assertEqual(snapshot["locator"]["backend"], "pt")
         self.assertEqual(snapshot["scratch_v5"]["profile"], "FULL")
-        self.assertIsNone(snapshot["mission"]["utility"])
+        self.assertEqual(snapshot["mission"]["current_profile"], "FULL")
+        self.assertEqual(snapshot["mission"]["utility"], 0.8)
         self.assertEqual(snapshot["serial"]["consecutive_failures"], 2)
+
+    def test_snapshot_tracks_named_profile(self):
+        config = AppConfig()
+        apply_to_config(config, "SPARSE")
+        store = LatestFrame()
+        snapshot = build_snapshot(
+            config,
+            store,
+            camera_opened=True,
+            camera_device="/dev/video0",
+            read_failures=0,
+            actual_fps=12.0,
+            serial=None,
+            last_result=None,
+            inspection_active=False,
+        )
+        self.assertEqual(snapshot["mission"]["current_profile"], "SPARSE")
+        self.assertEqual(snapshot["mission"]["utility"], 0.45)
 
 
 class SerialStatsTests(unittest.TestCase):

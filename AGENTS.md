@@ -88,7 +88,7 @@ git diff --check
 For Python code changes:
 
 ```bash
-python -m py_compile gp_main.py run_pt.py run_engine.py export_engine.py gp/app.py gp/camera.py gp/config.py gp/export_engine.py gp/frames.py gp/launch.py gp/models.py gp/serial_io.py gp/telemetry.py gp/types.py gp/ui.py gp/worker.py gp/weights.py
+python -m py_compile gp_main.py run_pt.py run_engine.py export_engine.py gp/app.py gp/camera.py gp/config.py gp/export_engine.py gp/frames.py gp/launch.py gp/models.py gp/profiles.py gp/serial_io.py gp/telemetry.py gp/types.py gp/ui.py gp/worker.py gp/weights.py
 python -m unittest discover -s tests -v
 ```
 

@@ -3,6 +3,8 @@
 from datetime import datetime, timezone
 from pathlib import Path
 
+from .profiles import mission_utility
+
 
 def utc_now():
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
@@ -166,7 +168,11 @@ def build_snapshot(
             "inspection_active": bool(inspection_active),
             "output_valid": last_result is not None,
             "inspection_rate_hz": None,
-            "current_profile": "FULL",
-            "utility": None,
+            "current_profile": getattr(config, "inference_profile", "FULL"),
+            "utility": mission_utility(
+                getattr(config, "inference_profile", "FULL"),
+                last_result is not None,
+                (not serial_required) or last_ok is True,
+            ),
         },
     }

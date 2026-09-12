@@ -42,7 +42,7 @@
   "serial": {
     "port": "/dev/ttyHS1",
     "connected": false,
-    "last_send_ok": null,
+    "last_send_ok": true,
     "consecutive_failures": 0,
     "last_error": null,
     "health": 1.0
@@ -52,6 +52,6 @@
     "output_valid": true,
     "inspection_rate_hz": 8.4,
     "current_profile": "FULL",
-    "utility": 0.9
+    "utility": 1.0
   }
 }
