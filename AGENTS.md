@@ -4,18 +4,26 @@ This file defines project-specific instructions for Codex agents working in this
 
 ## Project Context
 
-This repository is a Python machine vision prototype using PyQt5, OpenCV, serial communication, and a vendored Ultralytics YOLO source tree.
+This repository is GearPro, a Python machine vision app using PyQt5, OpenCV,
+serial communication, and a vendored Ultralytics YOLO source tree.
 
-The current application entry point is `gp_main.py`. Runtime behavior is split across:
+Develop on branch `srtp`. `main` is the published app; `archive-old` is the
+pre-refactor tree. Do not add features on `archive-old`.
 
-- `gp_mainwindow.py` for the main window layout
-- `gp_cameradisplaywidget.py` for camera capture and raw frame display
-- `gp_detectionworker.py` for YOLO inference
-- `gp_detectiondisplaywidget.py` for result display and serial-trigger logic
-- `gp_globals.py` for current shared global state
-- `gp_serial.py` for serial communication
+The current application entry point is `gp_main.py` (or `python -m gp`).
+Runtime behavior lives in `gp/`:
 
-`new1` and `aicode.py` are prototype or historical UI scripts unless the user says otherwise.
+- `gp/app.py` for Qt startup
+- `gp/ui.py` for the main window and settings
+- `gp/camera.py` for capture and the latest-frame buffer
+- `gp/worker.py` for background inference
+- `gp/models.py` for the two-stage YOLO + classifier pipeline
+- `gp/serial_io.py` for serial output
+- `gp/config.py` and `gp/types.py` for settings and result objects
+
+Old `gp_*.py` scripts, `new1`, and `aicode.py` live under `legacy/` unless
+the user says otherwise. Jetson NX checkout: `/home/jetson/Projects/Machine_vision`
+(branch `srtp`); the previous NX tree is `/home/jetson/archive/Machine_vision-old-2026-09-12`.
 
 ## Work Rules
 
@@ -75,7 +83,8 @@ git diff --check
 For Python code changes:
 
 ```bash
-python -m py_compile gp_main.py gp_mainwindow.py gp_cameradisplaywidget.py gp_detectiondisplaywidget.py gp_detectionworker.py gp_globals.py gp_serial.py
+python -m py_compile gp_main.py gp/app.py gp/camera.py gp/config.py gp/models.py gp/serial_io.py gp/types.py gp/ui.py gp/worker.py gp/weights.py
+python -m unittest discover -s tests -v
 ```
 
 If validation cannot run because dependencies, hardware, or display access are missing, state that clearly in the final response.

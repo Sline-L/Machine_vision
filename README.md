@@ -7,7 +7,7 @@ GearPro 是基于 PyQt5、OpenCV、PyTorch 和 Ultralytics 的齿轮在线视觉
 ## 功能
 
 - 实时工业相机或 USB 摄像头画面。
-- YOLO 齿轮定位与 ResNet18 缺陷分类两阶段推理。
+- YOLO 齿轮定位与缺陷分类两阶段推理（当前分类器为 EfficientNet-B0）。
 - 原图、标注结果、缺陷概率和推理耗时显示。
 - 已检测、合格、不合格计数及柱状统计图。
 - 自由、定量和定时三种运行模式。
@@ -21,7 +21,7 @@ GearPro 是基于 PyQt5、OpenCV、PyTorch 和 Ultralytics 的齿轮在线视觉
 摄像头画面
   └─ model/model1.pt：YOLO 定位 gear
        └─ 裁剪高分辨率齿轮 ROI
-            └─ model/model2.pt：ResNet18 计算缺陷概率
+            └─ model/model2.pt：EfficientNet-B0 计算缺陷概率
                  ├─ UI 显示与统计
                  └─ 串口输出 01 / 02
 ```
@@ -105,7 +105,8 @@ python gp_main.py --video /path/to/test.mp4
 | 文件 | 类型 | 作用 |
 | --- | --- | --- |
 | `model/model1.pt` | Ultralytics YOLO | 从完整相机画面定位 `gear` |
-| `model/model2.pt` | ResNet18 二分类 | 对 512×512 齿轮 ROI 计算缺陷概率 |
+| `model/model2.pt` | EfficientNet-B0 二分类 | 对 384×384 齿轮 ROI 计算缺陷概率 |
+| `model/model_old.pt` | ResNet18 二分类 | 旧分类器，仅作对照 |
 
 分类器当前采用 RGB 与 ImageNet mean/std 归一化。如果模型训练预处理不同，需要同步修改
 `gp/models.py`。
@@ -114,6 +115,9 @@ python gp_main.py --video /path/to/test.mp4
 改 UI 或串口；说明见 [模型格式](docs/model-formats.md)。
 
 ## 部署配置
+
+Jetson NX 当前工作副本是 `/home/jetson/Projects/Machine_vision`（分支 `srtp`）。
+重构前的旧树已归档到 `/home/jetson/archive/Machine_vision-old-2026-09-12`，不要在归档目录里继续改程序。
 
 除界面设置外，可使用环境变量覆盖设备和模型路径：
 

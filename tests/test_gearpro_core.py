@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 from gp.config import AppConfig, PROJECT_ROOT
 from gp.types import GearObservation, InspectionResult, InspectionStats
+from gp.weights import classifier_family, classifier_outputs
 
 
 class ConfigTests(unittest.TestCase):
@@ -18,6 +19,27 @@ class ConfigTests(unittest.TestCase):
             config = AppConfig.from_environment()
         self.assertEqual(config.camera_index, 4)
         self.assertEqual(config.locator_model, Path("/tmp/one.pt"))
+
+
+class ClassifierCheckpointTests(unittest.TestCase):
+    def test_family_from_metadata_and_weight_keys(self):
+        self.assertEqual(
+            classifier_family({"family": "efficientnet_b0"}, {}),
+            "efficientnet_b0",
+        )
+        self.assertEqual(classifier_family({}, {"fc.weight": object()}), "resnet18")
+        self.assertEqual(
+            classifier_family({}, {"classifier.1.weight": object()}),
+            "efficientnet_b0",
+        )
+
+    def test_output_dim_from_head_weights(self):
+        class Fake:
+            def __init__(self, shape):
+                self.shape = shape
+
+        self.assertEqual(classifier_outputs({"fc.weight": Fake((1, 512))}), 1)
+        self.assertEqual(classifier_outputs({"classifier.1.weight": Fake((1, 1280))}), 1)
 
 
 class ResultTests(unittest.TestCase):

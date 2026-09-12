@@ -6,15 +6,15 @@ import cv2
 import numpy as np
 
 from .types import GearObservation, InspectionResult
+from .weights import classifier_family, classifier_outputs
 
 
 class TwoStageInspector:
-    """Locate gear ROIs with YOLO, then classify each ROI with ResNet18."""
+    """Locate gear ROIs with YOLO, then classify each ROI."""
 
     def __init__(self, config):
         config.validate_models()
         import torch
-        from torchvision.models import resnet18
         from ultralytics import YOLO
 
         self.config = config
@@ -26,19 +26,33 @@ class TwoStageInspector:
 
         checkpoint = self._load_checkpoint(config.classifier_model)
         state_dict = checkpoint.get("model", checkpoint)
-        output_features = int(state_dict["fc.weight"].shape[0])
-        self.classifier = resnet18(weights=None)
-        self.classifier.fc = torch.nn.Linear(self.classifier.fc.in_features, output_features)
+        family = classifier_family(checkpoint, state_dict)
+        self.output_features = classifier_outputs(state_dict)
+        self.classifier = self._build_classifier(family, self.output_features)
         self.classifier.load_state_dict(state_dict)
         self.classifier.to(self.device).eval()
         self.classifier_size = int(checkpoint.get("size", 512))
-        self.output_features = output_features
+        self.classifier_family = family
 
     def _load_checkpoint(self, path):
         try:
             return self.torch.load(str(path), map_location="cpu", weights_only=True)
         except TypeError:
             return self.torch.load(str(path), map_location="cpu")
+
+    def _build_classifier(self, family, output_features):
+        from torchvision.models import efficientnet_b0, resnet18
+
+        if family == "resnet18":
+            model = resnet18(weights=None)
+            model.fc = self.torch.nn.Linear(model.fc.in_features, output_features)
+            return model
+        if family == "efficientnet_b0":
+            model = efficientnet_b0(weights=None)
+            in_features = model.classifier[1].in_features
+            model.classifier[1] = self.torch.nn.Linear(in_features, output_features)
+            return model
+        raise ValueError(f"不支持的分类器 family：{family}")
 
     def inspect(self, frame):
         started = time.perf_counter()

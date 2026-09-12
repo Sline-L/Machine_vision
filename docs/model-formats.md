@@ -38,7 +38,9 @@
 - **定位 YOLO（`model1`）**：结构更深、通常占时更多。开发期继续 `.pt`；
   上板冲节拍时优先转 TensorRT。Ultralytics 对 `.pt` / `.onnx` / `.engine`
   均可 `YOLO(path).predict()`，应用层改动很小。
-- **分类 ResNet18（`model2`）**：体积已经较小，只对裁剪后的 ROI 推理。
+- **分类器（`model2`）**：当前默认是 EfficientNet-B0（checkpoint `family` /
+  `size`，现为 384）。旧对照 `model_old.pt` 仍是 ResNet18 / 512。体积已经较小，
+  只对裁剪后的 ROI 推理。
   若 YOLO 已是瓶颈，分类器可以继续 `.pt` 或停在 ONNX。分类预处理
   （BGR→RGB、缩放到 checkpoint 中的尺寸、ImageNet mean/std）应留在
   Python 侧，以便和训练对齐。
@@ -61,7 +63,7 @@ python gp_main.py
 ```
 
 YOLO 换成 `.onnx` / `.engine` 后，Ultralytics 仍可能直接加载；分类器若仍是
-`.pt`，继续走现有 ResNet18 路径。分类器要上 ONNX/TensorRT 时，只需扩展
+`.pt`，继续走 checkpoint 中的 family 路径。分类器要上 ONNX/TensorRT 时，只需扩展
 `gp/models.py` 的加载与前向，不必改 UI 或串口。
 
 旧版 YOLO 导出示例见 `legacy/zhuanhua.py`，仅作参考。新版导出应固定

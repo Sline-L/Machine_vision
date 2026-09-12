@@ -17,7 +17,7 @@ model/model1.pt（YOLO，类别 gear）
 裁剪齿轮 ROI（保留约 4% 边缘）
     │
     ▼
-model/model2.pt（ResNet18，输入 512×512）
+model/model2.pt（当前 EfficientNet-B0，输入 384；旧对照为 ResNet18 / 512）
     │ sigmoid 缺陷概率
     ▼
 阈值判定 ──► UI、统计、串口
@@ -40,7 +40,7 @@ model/model2.pt（ResNet18，输入 512×512）
 | `app.py` | Qt 平台初始化、应用创建与启动 |
 | `camera.py` | 相机采集、原图显示、线程安全最新帧缓冲 |
 | `config.py` | 项目路径、硬件默认值和运行参数 |
-| `models.py` | YOLO 定位与 ResNet18 分类流水线；唯一绑定模型格式的模块 |
+| `models.py` | YOLO 定位与分类流水线；唯一绑定模型格式的模块 |
 | `worker.py` | 模型加载和后台推理线程 |
 | `serial_io.py` | 串口懒连接及判定代码发送 |
 | `types.py` | 检测结果与统计数据对象 |

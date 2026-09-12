@@ -104,7 +104,8 @@ git diff --stat
 如果改动了可运行代码，尽量执行对应验证命令，例如：
 
 ```bash
-python -m py_compile gp_main.py gp_mainwindow.py gp_cameradisplaywidget.py gp_detectiondisplaywidget.py gp_detectionworker.py gp_globals.py gp_serial.py
+python -m py_compile gp_main.py gp/app.py gp/camera.py gp/config.py gp/models.py gp/serial_io.py gp/types.py gp/ui.py gp/worker.py gp/weights.py
+python -m unittest discover -s tests -v
 ```
 
 如果无法运行验证，需要在最终说明中明确原因。
