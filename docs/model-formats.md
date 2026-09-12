@@ -29,7 +29,9 @@
 | 适合阶段 | 开发、精度对照、第一次 NX 测试 | 跨框架交换、转 TRT 的桥 | 节拍不够时的产线加速 |
 
 `.engine` 与 Jetson 架构、JetPack、TensorRT 大版本绑定。不要在 Windows 或
-另一块板上预先编译 NX 使用的 engine。
+另一块板上预先编译 NX 使用的 engine。当前 NX 上的 ONNX Runtime 只有 CPU
+Execution Provider，因此 `model1.onnx` 会比 `.pt` 更慢；定位加速应走
+`model1.engine`（在 NX 本机 FP16 编译）。
 
 ## 3. 和两阶段流水线的关系
 

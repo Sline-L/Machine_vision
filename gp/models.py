@@ -22,7 +22,7 @@ class TwoStageInspector:
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         # Locator currently expects a Ultralytics checkpoint. .onnx / .engine
         # can be pointed at via GEARPRO_MODEL1 once exported on the target NX.
-        self.locator = YOLO(str(config.locator_model))
+        self.locator = YOLO(str(config.locator_model), task="detect")
 
         checkpoint = self._load_checkpoint(config.classifier_model)
         state_dict = checkpoint.get("model", checkpoint)
