@@ -29,10 +29,10 @@ class InspectionThread(QThread):
             self.status_changed.emit("检测运行中")
             last_sequence = -1
             while not self._stop_event.is_set():
-                sequence, frame = self.frame_store.read()
-                if frame is not None and sequence != last_sequence:
-                    last_sequence = sequence
-                    self.result_ready.emit(inspector.inspect(frame))
+                packet = self.frame_store.read()
+                if packet.frame is not None and packet.sequence != last_sequence:
+                    last_sequence = packet.sequence
+                    self.result_ready.emit(inspector.inspect(packet.frame))
                 self._stop_event.wait(self.config.inference_interval)
         except Exception as exc:
             self.failed.emit(f"{type(exc).__name__}: {exc}")

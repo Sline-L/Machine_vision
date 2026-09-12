@@ -27,6 +27,7 @@ from PyQt5.QtWidgets import (
 
 from .camera import CameraView, LatestFrame, frame_to_pixmap
 from .serial_io import SerialOutput
+from .telemetry import build_snapshot
 from .types import InspectionStats
 from .worker import InspectionThread
 
@@ -136,6 +137,8 @@ class MainWindow(QMainWindow):
         self.started_at = None
         self.last_counted_at = 0.0
         self.serial_output = SerialOutput(config.serial_port, config.serial_baudrate)
+        self.last_result = None
+        self.scratch_errors = 0
         self.setWindowTitle("GearPro 齿轮视觉检测系统")
         self.setMinimumSize(960, 640)
         self.resize(1280, 800)
@@ -300,6 +303,7 @@ class MainWindow(QMainWindow):
         self.camera_button.setEnabled(True)
 
     def show_result(self, result):
+        self.last_result = result
         self.result_image.setPixmap(frame_to_pixmap(result.annotated_frame, self.result_image.size()))
         if self.config.video_path is not None:
             self.camera_view.setPixmap(frame_to_pixmap(result.annotated_frame, self.camera_view.size()))
@@ -310,6 +314,11 @@ class MainWindow(QMainWindow):
         self.verdict_label.style().polish(self.verdict_label)
         lines = [
             f"模型：{result.model_version or '未知'}，推理耗时：{result.elapsed_ms:.1f} ms",
+            (
+                f"定位 {result.locator_latency_ms:.1f} ms，"
+                f"分类 {result.classifier1_latency_ms:.1f}+{result.classifier2_latency_ms:.1f} ms，"
+                f"检测 {result.detector_latency_ms:.1f} ms"
+            ),
             f"定位数量：{len(result.observations)}",
         ]
         for index, item in enumerate(result.observations, 1):
@@ -330,8 +339,24 @@ class MainWindow(QMainWindow):
             self._check_mode_limit()
 
     def show_failure(self, message):
+        self.scratch_errors += 1
         self.status_label.setText("检测错误：" + message)
         self.result_details.setText(message)
+
+    def current_snapshot(self):
+        worker_running = self.worker is not None and self.worker.isRunning()
+        return build_snapshot(
+            self.config,
+            self.frame_store,
+            self.camera_view.opened,
+            self.camera_view.device_path,
+            self.camera_view.read_failures,
+            self.camera_view.actual_fps,
+            self.serial_output,
+            last_result=self.last_result,
+            inspection_active=worker_running,
+            scratch_errors=self.scratch_errors,
+        )
 
     def choose_video(self):
         path, _selected_filter = QFileDialog.getOpenFileName(

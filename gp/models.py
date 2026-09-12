@@ -28,8 +28,10 @@ class TwoStageInspector:
             iou=self.config.locator_iou,
             verbose=False,
         )[0]
+        locator_ms = (time.perf_counter() - started) * 1000
         observations = []
         annotated = frame.copy()
+        cls1_ms = cls2_ms = det_ms = fuse_ms = 0.0
         if located.boxes is not None:
             boxes = located.boxes.xyxy.detach().cpu().numpy()
             confidences = located.boxes.conf.detach().cpu().numpy()
@@ -39,6 +41,10 @@ class TwoStageInspector:
                 if crop.size == 0:
                     raise ValueError("Model1 生成了空齿轮 ROI")
                 prediction = self.model2.predict(crop)
+                cls1_ms += prediction.classifier1_latency_ms
+                cls2_ms += prediction.classifier2_latency_ms
+                det_ms += prediction.detector_latency_ms
+                fuse_ms += prediction.fusion_latency_ms
                 auxiliary_box = self._map_auxiliary_box(prediction.auxiliary_box, crop_box)
                 observation = GearObservation(
                     coordinates,
@@ -55,6 +61,12 @@ class TwoStageInspector:
             annotated_frame=annotated,
             observations=observations,
             elapsed_ms=elapsed_ms,
+            locator_latency_ms=locator_ms,
+            classifier1_latency_ms=cls1_ms,
+            classifier2_latency_ms=cls2_ms,
+            detector_latency_ms=det_ms,
+            fusion_latency_ms=fuse_ms,
+            scratch_latency_ms=cls1_ms + cls2_ms + det_ms + fuse_ms,
             defect_threshold=self.config.defect_threshold,
             model_version=self.model2.version,
         )

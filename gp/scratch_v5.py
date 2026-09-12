@@ -5,6 +5,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import time
 from typing import Optional, Tuple
 
 import cv2
@@ -21,6 +22,10 @@ class ScratchV5Prediction:
     classifier_probability: float
     detector_probability: float
     auxiliary_box: Optional[Box] = None
+    classifier1_latency_ms: float = 0.0
+    classifier2_latency_ms: float = 0.0
+    detector_latency_ms: float = 0.0
+    fusion_latency_ms: float = 0.0
 
 
 def apply_temperature(probability, temperature):
@@ -198,14 +203,18 @@ class ScratchV5Runtime:
             raise ValueError("Scratch V5 收到空齿轮 ROI")
         rgb = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB)
         classifier_scores = []
+        classifier_times = []
         with self.torch.inference_mode():
             for item, model in self.classifiers:
+                started = time.perf_counter()
                 image = square_rgb_image(rgb, int(item["imgsz"]))
                 tensor = self.tensor_transform(image).unsqueeze(0).to(self.device)
                 raw = float(model(tensor).sigmoid()[0, 0].item())
+                classifier_times.append((time.perf_counter() - started) * 1000)
                 classifier_scores.append(apply_temperature(raw, item.get("temperature", 1.0)))
 
         detector = self.config["detector"]
+        started = time.perf_counter()
         result = self.detector.predict(
             crop,
             imgsz=int(detector["imgsz"]),
@@ -214,6 +223,7 @@ class ScratchV5Runtime:
             device=self.yolo_device,
             verbose=False,
         )[0]
+        detector_ms = (time.perf_counter() - started) * 1000
         raw_detector = 0.0
         auxiliary_box = None
         if result.boxes is not None and len(result.boxes):
@@ -223,15 +233,25 @@ class ScratchV5Runtime:
             if raw_detector >= float(detector.get("display_confidence", 0.05)):
                 coordinates = result.boxes.xyxy[best_index].detach().cpu().tolist()
                 auxiliary_box = _clip_box(coordinates, crop.shape)
+        started = time.perf_counter()
         detector_score = apply_temperature(raw_detector, detector.get("temperature", 1.0))
         fused, classifier_score = fuse_probabilities(
             classifier_scores[0], classifier_scores[1], detector_score, self.config["fusion"]["alpha"]
         )
+        fusion_ms = (time.perf_counter() - started) * 1000
         values = (fused, classifier_score, detector_score)
         if not all(math.isfinite(value) for value in values):
             raise RuntimeError("Scratch V5 输出包含 NaN 或 Inf")
-        return ScratchV5Prediction(fused, classifier_score, detector_score, auxiliary_box)
-
+        return ScratchV5Prediction(
+            fused,
+            classifier_score,
+            detector_score,
+            auxiliary_box,
+            classifier_times[0] if classifier_times else 0.0,
+            classifier_times[1] if len(classifier_times) > 1 else 0.0,
+            detector_ms,
+            fusion_ms,
+        )
 
 def _clip_box(box, shape):
     height, width = shape[:2]
