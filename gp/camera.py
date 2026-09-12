@@ -53,10 +53,15 @@ class CameraView(QLabel):
             self.error_message = f"未找到摄像头设备 {device_path}"
             self.setText(self.error_message)
             return False
-        self.capture = cv2.VideoCapture(self.config.camera_index, cv2.CAP_V4L2)
-        if not self.capture.isOpened():
-            self.capture.release()
-            self.capture = None
+        backends = (cv2.CAP_V4L2,) if sys.platform.startswith("linux") else (cv2.CAP_DSHOW, cv2.CAP_MSMF, cv2.CAP_ANY)
+        self.capture = None
+        for backend in backends:
+            capture = cv2.VideoCapture(self.config.camera_index, backend)
+            if capture.isOpened():
+                self.capture = capture
+                break
+            capture.release()
+        if self.capture is None:
             self.error_message = f"无法打开摄像头设备 {device_path}，请检查权限"
             self.setText(self.error_message)
             return False

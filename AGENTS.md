@@ -25,6 +25,8 @@ Runtime behavior lives in `gp/`:
 - `gp/scratch_v5.py` for fusion runtime
 - `gp/serial_io.py` for serial output
 - `gp/config.py` and `gp/types.py` for settings and result objects
+- `gp/actions.py`, `gp/control.py`, and `gp/guardian.py` for Control API and in-process L0
+- `edgemedic/` is a **separate process** (`python -m edgemedic`) talking HTTP only
 
 Old `gp_*.py` scripts, `new1`, and `aicode.py` live under `legacy/` unless
 the user says otherwise. Jetson NX checkout: `/home/jetson/Projects/Machine_vision`
@@ -88,7 +90,7 @@ git diff --check
 For Python code changes:
 
 ```bash
-python -m py_compile gp_main.py run_pt.py run_engine.py export_engine.py gp/app.py gp/camera.py gp/config.py gp/export_engine.py gp/frames.py gp/launch.py gp/models.py gp/profiles.py gp/serial_io.py gp/telemetry.py gp/types.py gp/ui.py gp/worker.py gp/weights.py
+python -m py_compile gp_main.py run_pt.py run_engine.py export_engine.py gp/app.py gp/actions.py gp/camera.py gp/config.py gp/control.py gp/export_engine.py gp/frames.py gp/guardian.py gp/launch.py gp/models.py gp/profiles.py gp/serial_io.py gp/telemetry.py gp/types.py gp/ui.py gp/worker.py gp/weights.py edgemedic/__init__.py edgemedic/__main__.py edgemedic/client.py edgemedic/memory.py edgemedic/policy.py edgemedic/reasoner.py edgemedic/runtime.py
 python -m unittest discover -s tests -v
 ```
 

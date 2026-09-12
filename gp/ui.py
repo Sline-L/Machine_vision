@@ -26,6 +26,7 @@ from PyQt5.QtWidgets import (
 )
 
 from .camera import CameraView, LatestFrame, frame_to_pixmap
+from .guardian import thermal_stop_needed
 from .profiles import IMPLEMENTED, ProfileError, SPECS, apply_to_config
 from .serial_io import SerialOutput
 from .telemetry import build_snapshot
@@ -156,11 +157,14 @@ class MainWindow(QMainWindow):
         self.serial_output = SerialOutput(config.serial_port, config.serial_baudrate)
         self.last_result = None
         self.scratch_errors = 0
+        self.worker_failed = False
+        self.control_server = None
         self.setWindowTitle("GearPro 齿轮视觉检测系统")
         self.setMinimumSize(960, 640)
         self.resize(1280, 800)
         self._build_ui()
         source_started = self._start_source()
+        self._start_control_api()
         if source_started and self.config.video_path is not None:
             QTimer.singleShot(0, self.start_inspection)
 
@@ -323,6 +327,7 @@ class MainWindow(QMainWindow):
         self.worker.finished.connect(self._worker_finished)
         self.started_at = time.monotonic()
         self.last_counted_at = 0.0
+        self.worker_failed = False
         self.start_button.setText("停止运行")
         self.settings_button.setEnabled(False)
         self.video_button.setEnabled(False)
@@ -391,6 +396,7 @@ class MainWindow(QMainWindow):
 
     def show_failure(self, message):
         self.scratch_errors += 1
+        self.worker_failed = True
         self.status_label.setText("检测错误：" + message)
         self.result_details.setText(message)
 
@@ -408,6 +414,90 @@ class MainWindow(QMainWindow):
             inspection_active=worker_running,
             scratch_errors=self.scratch_errors,
         )
+
+    def control_extras(self):
+        return {
+            "worker_failed": bool(self.worker_failed),
+            "serial_enabled": bool(self.config.serial_enabled),
+            "serial_open": bool(self.serial_output.is_open),
+            "video_mode": self.config.video_path is not None,
+        }
+
+    def _restart_camera(self):
+        self.camera_timer.stop()
+        self.preview_timer.stop()
+        self.camera_view.stop()
+        return self._start_source()
+
+    def execute_action(self, name, params):
+        if name == "restart_camera":
+            token = {"camera_index": self.config.camera_index}
+            if not self._restart_camera():
+                raise RuntimeError(self.camera_view.error_message or "摄像头重启失败")
+            return token
+        if name == "restart_worker":
+            self.stop_inspection()
+            self.start_inspection()
+            if self.worker is None or not self.worker.isRunning():
+                raise RuntimeError(self.status_label.text() or "worker 启动失败")
+            return {}
+        if name == "reconnect_serial":
+            token = {"port": self.config.serial_port, "baudrate": self.config.serial_baudrate}
+            self.serial_output.reconfigure(self.config.serial_port, self.config.serial_baudrate)
+            ok, error = self.serial_output.ensure_open()
+            if not ok:
+                raise RuntimeError(error or "串口打开失败")
+            return token
+        if name == "set_inference_profile":
+            previous = self.config.inference_profile
+            ok, message = self.set_inference_profile(params.get("profile"))
+            if not ok:
+                raise RuntimeError(message)
+            return {"previous": previous}
+        if name == "pause_inspection":
+            self.stop_inspection()
+            return {}
+        if name == "resume_inspection":
+            self.start_inspection()
+            if self.worker is None or not self.worker.isRunning():
+                raise RuntimeError(self.status_label.text() or "检测未能恢复")
+            return {}
+        raise RuntimeError(f"动作 {name} 没有执行器")
+
+    def rollback_action(self, name, token):
+        token = token or {}
+        if name == "restart_camera":
+            self._restart_camera()
+            return
+        if name == "restart_worker":
+            self.stop_inspection()
+            return
+        if name == "reconnect_serial":
+            self.serial_output.close()
+            return
+        if name == "set_inference_profile":
+            previous = token.get("previous")
+            if previous:
+                self.set_inference_profile(previous)
+            return
+        if name == "pause_inspection":
+            self.start_inspection()
+            return
+        if name == "resume_inspection":
+            self.stop_inspection()
+
+    def _start_control_api(self):
+        port = int(getattr(self.config, "control_port", 8787) or 0)
+        host = getattr(self.config, "control_host", "127.0.0.1")
+        if not port:
+            return
+        from .control import start_control_api
+
+        try:
+            self.control_server = start_control_api(self, host=host, port=port)
+        except OSError as exc:
+            self.control_server = None
+            print(f"Control API 未能监听 {host}:{port}：{exc}")
 
     def choose_video(self):
         path, _selected_filter = QFileDialog.getOpenFileName(
@@ -494,6 +584,7 @@ class MainWindow(QMainWindow):
         self.settings_summary.setText("\n".join(details))
 
     def _check_mode_limit(self):
+        self._guardian_tick()
         if self.worker is None or not self.worker.isRunning():
             return
         quantity_done = self.config.mode == "定量模式" and self.stats.total >= self.config.target_quantity
@@ -506,6 +597,12 @@ class MainWindow(QMainWindow):
             self.status_label.setText("当前任务已完成")
             QTimer.singleShot(0, self.stop_inspection)
 
+    def _guardian_tick(self):
+        snapshot = self.current_snapshot()
+        if thermal_stop_needed(snapshot, self.config.inference_profile):
+            self.set_inference_profile("SAFE_STOP")
+            self.status_label.setText("Guardian：温度过高，已切换 SAFE_STOP")
+
     def closeEvent(self, event):
         if self.worker is not None and self.worker.isRunning():
             self.worker.request_stop()
@@ -514,6 +611,10 @@ class MainWindow(QMainWindow):
         self.preview_timer.stop()
         self.camera_view.stop()
         self.serial_output.close()
+        if self.control_server is not None:
+            self.control_server.shutdown()
+            self.control_server.server_close()
+            self.control_server = None
         event.accept()
 
 

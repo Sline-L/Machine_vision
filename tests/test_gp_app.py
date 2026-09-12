@@ -29,6 +29,10 @@ class CommandLineTests(unittest.TestCase):
         args = build_parser().parse_args(["--video", "fixtures/gears.mp4"])
         self.assertEqual(str(args.video), "fixtures/gears.mp4")
 
+    def test_no_control_flag(self):
+        args = build_parser().parse_args(["--no-control"])
+        self.assertTrue(args.no_control)
+
 
 if __name__ == "__main__":
     unittest.main()

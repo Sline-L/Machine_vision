@@ -6,12 +6,13 @@
 
 约束、等级、RQ 与原则见 Cursor 规则 `.cursor/rules/edgemedic.mdc`。
 
-当前 **只冻结协议，不改运行时**：
+当前状态：SystemSnapshot、InferenceProfile、Control API、L0/L1、episode memory、L2 钩子已落地。L2 默认连 `127.0.0.1:8080` 的 Qwen；健康状态不调用。
 
 | 协议 | 文档 | JSON Schema |
 | --- | --- | --- |
 | SystemSnapshot v1 | [edgemedic-system-snapshot-v1.md](edgemedic-system-snapshot-v1.md) | [edgemedic/system-snapshot.schema.json](edgemedic/system-snapshot.schema.json) |
 | InferenceProfile v1 | [edgemedic-inference-profile-v1.md](edgemedic-inference-profile-v1.md) | [edgemedic/inference-profile.schema.json](edgemedic/inference-profile.schema.json) |
 | Action Schema v1 | [edgemedic-action-schema-v1.md](edgemedic-action-schema-v1.md) | [edgemedic/action.schema.json](edgemedic/action.schema.json) |
+| Guardian / Reflex v1 | [edgemedic-guardian-reflex-v1.md](edgemedic-guardian-reflex-v1.md) | 确定性规则，无独立 schema |
 
 实现顺序：帧时间戳与阶段耗时 → Camera 与 Qt 解耦 → Snapshot → Profile → Control API → Guardian/Reflex → 再接 Qwen。第一里程碑是 **不跑 LLM 也能观察、降级、验证动作**。
