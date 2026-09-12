@@ -10,6 +10,10 @@ serial communication, and a vendored Ultralytics YOLO source tree.
 Develop on branch `srtp`. `main` is the published app; `archive-old` is the
 pre-refactor tree. Do not add features on `archive-old`.
 
+EdgeMedic (bounded autonomy around GearPro) is specified in `docs/edgemedic.md`
+and `.cursor/rules/edgemedic.mdc`. Implement telemetry and control APIs before
+any LLM reasoner. Do not add ROS/LiDAR. Do not claim unimplemented V5 modes.
+
 The current application entry point is `gp_main.py` (or `python -m gp`).
 Runtime behavior lives in `gp/`:
 
@@ -17,7 +21,8 @@ Runtime behavior lives in `gp/`:
 - `gp/ui.py` for the main window and settings
 - `gp/camera.py` for capture and the latest-frame buffer
 - `gp/worker.py` for background inference
-- `gp/models.py` for the two-stage YOLO + classifier pipeline
+- `gp/models.py` for the two-stage YOLO + Scratch V5 pipeline
+- `gp/scratch_v5.py` for fusion runtime
 - `gp/serial_io.py` for serial output
 - `gp/config.py` and `gp/types.py` for settings and result objects
 
