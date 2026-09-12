@@ -40,10 +40,10 @@ Execution Provider，因此 `model1.onnx` 会比 `.pt` 更慢；定位加速应�
 - **定位 YOLO（`model1`）**：结构更深、通常占时更多。开发期继续 `.pt`；
   上板冲节拍时优先转 TensorRT。Ultralytics 对 `.pt` / `.onnx` / `.engine`
   均可 `YOLO(path).predict()`，应用层改动很小。
-- **分类器（`model2`）**：当前默认是 EfficientNet-B0（checkpoint `family` /
-  `size`，现为 384）。旧对照 `model_old.pt` 仍是 ResNet18 / 512。体积已经较小，
-  只对裁剪后的 ROI 推理。
-  若 YOLO 已是瓶颈，分类器可以继续 `.pt` 或停在 ONNX。分类预处理
+- **融合模型（`model2`）**：当前由 EfficientNet-B0、ResNet18 和 YOLO26-P2
+  三份 `.pt` 组成，统一由 `model/model2/inference_config.json` 描述。旧对照
+  `model_old.pt` 仍是 ResNet18 / 512。
+  分类器可以继续 `.pt` 或停在 ONNX。分类预处理
   （BGR→RGB、缩放到 checkpoint 中的尺寸、ImageNet mean/std）应留在
   Python 侧，以便和训练对齐。
 
@@ -60,13 +60,13 @@ ONNX 做数值对照，然后在 **NX 本机** 编 FP16 engine。只有 FP16 精
 
 ```bash
 GEARPRO_MODEL1=/path/to/model1.engine \
-GEARPRO_MODEL2=/path/to/model2.pt \
+GEARPRO_MODEL2=/path/to/model2/inference_config.json \
 python gp_main.py
 ```
 
-YOLO 换成 `.onnx` / `.engine` 后，Ultralytics 仍可能直接加载；分类器若仍是
-`.pt`，继续走 checkpoint 中的 family 路径。分类器要上 ONNX/TensorRT 时，只需扩展
-`gp/models.py` 的加载与前向，不必改 UI 或串口。
+Model1 换成 `.onnx` / `.engine` 后，Ultralytics 仍可能直接加载；Model2 的三个分支
+目前全部保持 `.pt`。后续转换其中任一分支时必须重新验证三路概率、温度校准和最终融合
+结果，不能只验证单模型输出。
 
 旧版 YOLO 导出示例见 `legacy/zhuanhua.py`，仅作参考。新版导出应固定
 `imgsz`、batch=1，并确认 NMS 是否包含在图内，避免后处理与训练时不一致。
@@ -76,5 +76,5 @@ YOLO 换成 `.onnx` / `.engine` 后，Ultralytics 仍可能直接加载；分类
 - `.pt` 和经过验证的 `.onnx` 可作为可搬运资产保留。
 - `.engine` 视为构建产物：换板或升级 JetPack 后必须重编，不要把它当成
   跨机器分发的“最终模型”。
-- 当前默认文件仍是 `model/model1.pt` 与 `model/model2.pt`。
+- 当前默认资产是 `model/model1.pt` 与 `model/model2/inference_config.json` 引用的模型包。
   `model/model_old.pt` 是替换分类器之前的旧权重，只用于对照。

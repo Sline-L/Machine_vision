@@ -79,7 +79,7 @@ class SettingsDialog(QDialog):
         self.duration.setRange(1, 1440)
         self.duration.setValue(config.duration_minutes)
         self.locator_conf = self._double_spin(config.locator_confidence)
-        self.defect_threshold = self._double_spin(config.defect_threshold)
+        self.defect_threshold = self._double_spin(config.defect_threshold, decimals=6, step=0.01)
         self.interval = QDoubleSpinBox()
         self.interval.setRange(0.03, 5.0)
         self.interval.setDecimals(2)
@@ -108,11 +108,11 @@ class SettingsDialog(QDialog):
         form.addRow(buttons)
 
     @staticmethod
-    def _double_spin(value):
+    def _double_spin(value, decimals=2, step=0.05):
         spin = QDoubleSpinBox()
         spin.setRange(0.01, 0.99)
-        spin.setDecimals(2)
-        spin.setSingleStep(0.05)
+        spin.setDecimals(decimals)
+        spin.setSingleStep(step)
         spin.setValue(value)
         return spin
 
@@ -192,7 +192,7 @@ class MainWindow(QMainWindow):
         self.result_details = QLabel()
         self.result_details.setAlignment(Qt.AlignLeft | Qt.AlignTop)
         self.result_details.setWordWrap(True)
-        self.result_details.setMaximumHeight(50)
+        self.result_details.setMaximumHeight(110)
         self.result_details.setStyleSheet("background:#f8fafc; padding:5px; border-radius:5px;")
         self.result_image = QLabel("等待检测画面")
         self.result_image.setAlignment(Qt.AlignCenter)
@@ -308,10 +308,14 @@ class MainWindow(QMainWindow):
         self.verdict_label.setProperty("state", state)
         self.verdict_label.style().unpolish(self.verdict_label)
         self.verdict_label.style().polish(self.verdict_label)
-        lines = [f"推理耗时：{result.elapsed_ms:.1f} ms", f"定位数量：{len(result.observations)}"]
+        lines = [
+            f"模型：{result.model_version or '未知'}，推理耗时：{result.elapsed_ms:.1f} ms",
+            f"定位数量：{len(result.observations)}",
+        ]
         for index, item in enumerate(result.observations, 1):
             lines.append(
-                f"齿轮 {index}：定位 {item.location_confidence:.1%}，缺陷概率 {item.defect_score:.1%}"
+                f"齿轮 {index}：定位 {item.location_confidence:.1%}，缺陷 {item.defect_score:.1%}，"
+                f"分类 {item.classifier_probability:.1%}，检测 {item.detector_probability:.1%}"
             )
         self.result_details.setText("\n".join(lines))
 
@@ -389,9 +393,9 @@ class MainWindow(QMainWindow):
         details = [
             f"模式：{self.config.mode}",
             f"模型 1：{self.config.locator_model.name}（齿轮定位）",
-            f"模型 2：{self.config.classifier_model.name}（缺陷分类）",
+            f"模型 2：{self.config.model2_config.parent.name}（Scratch V5 融合）",
             f"定位阈值：{self.config.locator_confidence:.2f}",
-            f"缺陷阈值：{self.config.defect_threshold:.2f}",
+            f"缺陷阈值：{self.config.defect_threshold:.6f}",
             f"推理间隔：{self.config.inference_interval:.2f} 秒",
             (
                 "串口：已禁用（视频测试）"

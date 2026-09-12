@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""右键运行：实时相机 + 当前 .pt 模型（定位 YOLO，分类 EfficientNet-B0）。"""
+"""右键运行：实时相机 + Model1 PT + Scratch V5 融合 Model2。"""
 
 import sys
 

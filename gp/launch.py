@@ -8,7 +8,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 EXPORTS = PROJECT_ROOT / ".cache" / "exports"
 
 
-def start(locator=None, classifier=None, camera_index=0):
+def start(locator=None, model2_config=None, camera_index=0):
     """Set deployment env vars, then open the normal GearPro window."""
     os.chdir(PROJECT_ROOT)
     os.environ["GEARPRO_CAMERA_INDEX"] = str(camera_index)
@@ -19,11 +19,11 @@ def start(locator=None, classifier=None, camera_index=0):
             print("engine / onnx 只在 NX 上导出后存在于 .cache/exports/", file=sys.stderr)
             return 1
         os.environ["GEARPRO_MODEL1"] = str(locator.resolve())
-    if classifier is not None:
-        classifier = Path(classifier)
-        if not classifier.is_file():
-            print(f"找不到分类模型：{classifier}", file=sys.stderr)
+    if model2_config is not None:
+        model2_config = Path(model2_config)
+        if not model2_config.is_file():
+            print(f"找不到 Model2 配置：{model2_config}", file=sys.stderr)
             return 1
-        os.environ["GEARPRO_MODEL2"] = str(classifier.resolve())
+        os.environ["GEARPRO_MODEL2"] = str(model2_config.resolve())
     from .app import main
     return main()

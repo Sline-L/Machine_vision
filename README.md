@@ -1,14 +1,14 @@
 # GearPro 齿轮视觉检测系统
 
 GearPro 是基于 PyQt5、OpenCV、PyTorch 和 Ultralytics 的齿轮在线视觉检测程序。系统
-先从相机画面定位齿轮，再对高分辨率齿轮区域进行缺陷分类，降低整图缩放造成的微小缺陷
+先从相机画面定位齿轮，再对高分辨率齿轮区域执行 Scratch V5 融合推理，降低整图缩放造成的微小缺陷
 信息损失。
 
 ## 功能
 
 - 实时工业相机或 USB 摄像头画面。
-- YOLO 齿轮定位与缺陷分类两阶段推理（当前分类器为 EfficientNet-B0）。
-- 原图、标注结果、缺陷概率和推理耗时显示。
+- YOLO 齿轮定位与 Scratch V5 三模型融合两阶段推理。
+- 原图、划痕辅助框、融合概率、分支概率和推理耗时显示。
 - 已检测、合格、不合格计数及柱状统计图。
 - 自由、定量和定时三种运行模式。
 - 可配置定位阈值、缺陷阈值、推理间隔、摄像头和串口。
@@ -21,7 +21,10 @@ GearPro 是基于 PyQt5、OpenCV、PyTorch 和 Ultralytics 的齿轮在线视觉
 摄像头画面
   └─ model/model1.pt：YOLO 定位 gear
        └─ 裁剪高分辨率齿轮 ROI
-            └─ model/model2.pt：EfficientNet-B0 计算缺陷概率
+            └─ model/model2/inference_config.json：Scratch V5
+                 ├─ EfficientNet-B0 + ResNet18 分类均值
+                 ├─ YOLO26-P2 划痕检测概率
+                 └─ 0.25 × 分类 + 0.75 × 检测
                  ├─ UI 显示与统计
                  └─ 串口输出 01 / 02
 ```
@@ -36,11 +39,12 @@ GearPro 是基于 PyQt5、OpenCV、PyTorch 和 Ultralytics 的齿轮在线视觉
 │   ├── camera.py             # 相机与最新帧缓冲
 │   ├── config.py             # 路径及运行配置
 │   ├── models.py             # 两阶段模型流水线
+│   ├── scratch_v5.py         # Model2 配置、校准和融合运行时
 │   ├── serial_io.py          # 串口输出
 │   ├── types.py              # 结果与统计类型
 │   ├── ui.py                 # 主界面与设置界面
 │   └── worker.py             # 后台推理线程
-├── model/                    # 当前定位与分类模型
+├── model/                    # Model1 及 Scratch V5 Model2 模型包
 ├── docs/                     # 架构和优化文档
 ├── tests/                    # 无硬件单元测试
 ├── legacy/                   # 旧程序、模型和实验资料
@@ -80,7 +84,7 @@ source .venv/bin/activate
 | 文件 | 作用 |
 | --- | --- |
 | `run_pt.py` | 当前 `.pt` 基线 |
-| `run_engine.py` | 定位用板上的 `model1.engine`，分类仍是 `.pt` |
+| `run_engine.py` | 定位用板上的 `model1.engine`，Model2 仍使用融合 `.pt` 包 |
 | `run_onnx.py` | 定位用 ONNX（这台 NX 上是 CPU，只做对比） |
 
 也可以命令行启动，两种方式等价：
@@ -114,11 +118,15 @@ python gp_main.py --video /path/to/test.mp4
 | 文件 | 类型 | 作用 |
 | --- | --- | --- |
 | `model/model1.pt` | Ultralytics YOLO | 从完整相机画面定位 `gear` |
-| `model/model2.pt` | EfficientNet-B0 二分类 | 对 384×384 齿轮 ROI 计算缺陷概率 |
+| `model/model2/inference_config.json` | Scratch V5 配置 | 解析三份权重、校准参数和融合阈值 |
+| `model/model2/classifier_1.pt` | EfficientNet-B0 | 384×384 ROI 划痕分类 |
+| `model/model2/classifier_2.pt` | ResNet18 | 384×384 ROI 划痕分类 |
+| `model/model2/detector.pt` | YOLO26-P2 | 960×960 ROI 划痕检测与辅助框 |
 | `model/model_old.pt` | ResNet18 二分类 | 旧分类器，仅作对照 |
 
-分类器当前采用 RGB 与 ImageNet mean/std 归一化。如果模型训练预处理不同，需要同步修改
-`gp/models.py`。
+两个分类器采用等比缩放、灰色居中填充和 ImageNet mean/std 归一化。三路概率经过温度
+校准后融合，默认阈值为 `0.300273610279458`；界面仍统一显示为“缺陷概率”。V5 实际
+只识别划痕，不覆盖缺齿等其他缺陷，详细说明见 [Scratch V5 运行说明](docs/scratch-v5.md)。
 
 当前交付格式是 `.pt`。Jetson NX 上可按 `.pt` → `.onnx` → `.engine` 加速，不必先
 改 UI 或串口；说明见 [模型格式](docs/model-formats.md)。
@@ -135,7 +143,7 @@ Jetson NX 当前工作副本是 `/home/jetson/Projects/Machine_vision`（分支 
 | `GEARPRO_CAMERA_INDEX` | `2` | 摄像头索引 |
 | `GEARPRO_SERIAL_PORT` | `/dev/ttyHS1` | 串口设备 |
 | `GEARPRO_MODEL1` | `model/model1.pt` | 定位模型 |
-| `GEARPRO_MODEL2` | `model/model2.pt` | 分类模型 |
+| `GEARPRO_MODEL2` | `model/model2/inference_config.json` | Scratch V5 模型包配置 |
 
 示例：
 
@@ -164,6 +172,7 @@ QT_QPA_PLATFORM=offscreen python gp_main.py
 - [文档索引](docs/README.md)
 - [系统架构](docs/architecture.md)
 - [模型格式](docs/model-formats.md)
+- [Scratch V5 运行说明](docs/scratch-v5.md)
 - [模型优化路线](docs/optimization-roadmap.md)
 - [旧版归档说明](legacy/README.md)
 
@@ -181,6 +190,8 @@ python legacy/gp_main.py
 - 视频测试按帧顺序执行，但零件计数仍沿用当前 5 秒防重复策略。
 - 模型阈值和推理性能必须在目标 Jetson、工业相机及实际照明条件下标定。第一次
   上板继续使用 `.pt`；TensorRT engine 必须在 NX 本机编译。
+- Scratch V5 独立测试 Recall 为 `0.8065`、正常误报率为 `0.1681`，当前是可运行
+  基线，不是已经达到生产目标的最终模型。
 - 当前没有摄像头或串口时仍可打开界面，但无法执行完整硬件闭环验证。
 
 ## License

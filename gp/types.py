@@ -1,7 +1,7 @@
 """Small data objects passed between GearPro components."""
 
 from dataclasses import dataclass, field
-from typing import Any, List, Tuple
+from typing import Any, List, Optional, Tuple
 
 
 @dataclass(frozen=True)
@@ -9,6 +9,9 @@ class GearObservation:
     box: Tuple[int, int, int, int]
     location_confidence: float
     defect_score: float
+    classifier_probability: float = 0.0
+    detector_probability: float = 0.0
+    auxiliary_box: Optional[Tuple[int, int, int, int]] = None
 
 
 @dataclass
@@ -17,6 +20,7 @@ class InspectionResult:
     observations: List[GearObservation] = field(default_factory=list)
     elapsed_ms: float = 0.0
     defect_threshold: float = 0.5
+    model_version: str = ""
 
     @property
     def has_gear(self):
