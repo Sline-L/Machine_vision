@@ -110,6 +110,9 @@ python gp_main.py --video /path/to/test.mp4
 分类器当前采用 RGB 与 ImageNet mean/std 归一化。如果模型训练预处理不同，需要同步修改
 `gp/models.py`。
 
+当前交付格式是 `.pt`。Jetson NX 上可按 `.pt` → `.onnx` → `.engine` 加速，不必先
+改 UI 或串口；说明见 [模型格式](docs/model-formats.md)。
+
 ## 部署配置
 
 除界面设置外，可使用环境变量覆盖设备和模型路径：
@@ -147,6 +150,7 @@ QT_QPA_PLATFORM=offscreen python gp_main.py
 
 - [文档索引](docs/README.md)
 - [系统架构](docs/architecture.md)
+- [模型格式](docs/model-formats.md)
 - [模型优化路线](docs/optimization-roadmap.md)
 - [旧版归档说明](legacy/README.md)
 
@@ -162,7 +166,8 @@ python legacy/gp_main.py
 
 - 固定 5 秒冷却时间用于减少连续帧重复计数；正式产线建议由光电传感器触发。
 - 视频测试按帧顺序执行，但零件计数仍沿用当前 5 秒防重复策略。
-- 模型阈值和推理性能必须在目标 Jetson、工业相机及实际照明条件下标定。
+- 模型阈值和推理性能必须在目标 Jetson、工业相机及实际照明条件下标定。第一次
+  上板继续使用 `.pt`；TensorRT engine 必须在 NX 本机编译。
 - 当前没有摄像头或串口时仍可打开界面，但无法执行完整硬件闭环验证。
 
 ## License

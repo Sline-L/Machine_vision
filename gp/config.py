@@ -40,6 +40,7 @@ class AppConfig:
         config.serial_port = os.getenv("GEARPRO_SERIAL_PORT", config.serial_port)
         config.locator_model = Path(os.getenv("GEARPRO_MODEL1", str(config.locator_model)))
         config.classifier_model = Path(os.getenv("GEARPRO_MODEL2", str(config.classifier_model)))
+        # Paths may be .pt, .onnx or .engine; see docs/model-formats.md.
         return config
 
     def validate_models(self):
