@@ -1,0 +1,258 @@
+{
+  "runtime": {
+    "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "cuda": "13.0",
+    "torch": "2.14.0+cu130",
+    "cpu_logical_cores": 22,
+    "workers": 4,
+    "amp": true,
+    "train_images": 364,
+    "val_images": 150
+  },
+  "elapsed_hours": 0.017757854722221963,
+  "data": {
+    "raw_images": 514,
+    "raw_counts": {
+      "train": {
+        "scratch": 119,
+        "normal": 245
+      },
+      "val": {
+        "normal": 107,
+        "scratch": 43
+      }
+    },
+    "usable_images": 514,
+    "usable_counts": {
+      "train": {
+        "scratch": 119,
+        "normal": 245
+      },
+      "val": {
+        "normal": 107,
+        "scratch": 43
+      }
+    },
+    "scratch_boxes": 373,
+    "excluded_train_near_duplicates": 0,
+    "class_names": {
+      "0": "scratch"
+    },
+    "status": "passed",
+    "copied_missing_images": [
+      {
+        "split": "train",
+        "stem": "train_008",
+        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_008.jpg",
+        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_008.jpg"
+      },
+      {
+        "split": "train",
+        "stem": "train_010",
+        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_010.jpg",
+        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_010.jpg"
+      },
+      {
+        "split": "train",
+        "stem": "train_017",
+        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_017.jpg",
+        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_017.jpg"
+      },
+      {
+        "split": "train",
+        "stem": "train_099",
+        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_099.jpg",
+        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_099.jpg"
+      },
+      {
+        "split": "train",
+        "stem": "train_100",
+        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_100.jpg",
+        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_100.jpg"
+      },
+      {
+        "split": "train",
+        "stem": "train_118",
+        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_118.jpg",
+        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_118.jpg"
+      },
+      {
+        "split": "train",
+        "stem": "train_120",
+        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_120.jpg",
+        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_120.jpg"
+      },
+      {
+        "split": "train",
+        "stem": "train_209",
+        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_209.jpg",
+        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_209.jpg"
+      },
+      {
+        "split": "train",
+        "stem": "train_210",
+        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_210.jpg",
+        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_210.jpg"
+      },
+      {
+        "split": "train",
+        "stem": "train_361",
+        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_361.jpg",
+        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_361.jpg"
+      },
+      {
+        "split": "train",
+        "stem": "train_378",
+        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_378.jpg",
+        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_378.jpg"
+      },
+      {
+        "split": "train",
+        "stem": "train_399",
+        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_399.jpg",
+        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_399.jpg"
+      },
+      {
+        "split": "train",
+        "stem": "train_469",
+        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_469.jpg",
+        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_469.jpg"
+      },
+      {
+        "split": "train",
+        "stem": "train_495",
+        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_495.jpg",
+        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_495.jpg"
+      },
+      {
+        "split": "train",
+        "stem": "train_496",
+        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_496.jpg",
+        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_496.jpg"
+      },
+      {
+        "split": "val",
+        "stem": "val_059",
+        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\val\\val_059.jpg",
+        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\val_scratch\\val_059.jpg"
+      }
+    ],
+    "cross_split_near_duplicate_pairs": 0
+  },
+  "selection_split": "val",
+  "strict_blind_test": false,
+  "winner": {
+    "name": "weighted_classifier_mean_a0.25",
+    "rule": {
+      "type": "weighted",
+      "alpha": 0.25,
+      "classifier": {
+        "type": "classifier_mean",
+        "models": [
+          "f_efficientnet_b0_384_w1_s20260911",
+          "p_resnet18_384_w1"
+        ]
+      }
+    },
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.300273610279458,
+        "recall": 0.9767441860465116,
+        "precision": 0.8235294117647058,
+        "f1": 0.8936170212765957,
+        "fpr": 0.08411214953271028,
+        "specificity": 0.9158878504672897,
+        "tp": 42,
+        "fp": 9,
+        "tn": 98,
+        "fn": 1
+      },
+      "0.2": {
+        "threshold": 0.300273610279458,
+        "recall": 0.9767441860465116,
+        "precision": 0.8235294117647058,
+        "f1": 0.8936170212765957,
+        "fpr": 0.08411214953271028,
+        "specificity": 0.9158878504672897,
+        "tp": 42,
+        "fp": 9,
+        "tn": 98,
+        "fn": 1
+      },
+      "0.3": {
+        "threshold": 0.300273610279458,
+        "recall": 0.9767441860465116,
+        "precision": 0.8235294117647058,
+        "f1": 0.8936170212765957,
+        "fpr": 0.08411214953271028,
+        "specificity": 0.9158878504672897,
+        "tp": 42,
+        "fp": 9,
+        "tn": 98,
+        "fn": 1
+      },
+      "0.5": {
+        "threshold": 0.203814024552052,
+        "recall": 1.0,
+        "precision": 0.5,
+        "f1": 0.6666666666666666,
+        "fpr": 0.40186915887850466,
+        "specificity": 0.5981308411214954,
+        "tp": 43,
+        "fp": 43,
+        "tn": 64,
+        "fn": 0
+      }
+    },
+    "auroc": 0.9715279287111497,
+    "auprc": 0.9366317941118105
+  },
+  "validation": {
+    "overall": {
+      "threshold": 0.300273610279458,
+      "recall": 0.9767441860465116,
+      "precision": 0.8235294117647058,
+      "f1": 0.8936170212765957,
+      "fpr": 0.08411214953271028,
+      "specificity": 0.9158878504672897,
+      "npv": 0.98989898989899,
+      "tp": 42,
+      "fp": 9,
+      "tn": 98,
+      "fn": 1,
+      "auroc": 0.9715279287111497,
+      "auprc": 0.9366317941118105
+    },
+    "views": {
+      "face": {
+        "count": 21,
+        "recall": 1.0
+      },
+      "oblique": {
+        "count": 21,
+        "recall": 0.9523809523809523
+      },
+      "side": {
+        "count": 1,
+        "recall": 1.0
+      }
+    },
+    "unused_unconstrained": {
+      "threshold": 0.203814024552052,
+      "recall": 1.0,
+      "precision": 0.5,
+      "f1": 0.6666666666666666,
+      "fpr": 0.40186915887850466,
+      "specificity": 0.5981308411214954,
+      "tp": 43,
+      "fp": 43,
+      "tn": 64,
+      "fn": 0
+    }
+  },
+  "target": {
+    "scratch_recall": 0.95,
+    "normal_fpr_max": 0.2
+  },
+  "target_met": true
+}

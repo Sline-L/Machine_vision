@@ -1,0 +1,57 @@
+{
+  "schema_version": "system-snapshot.v1",
+  "timestamp": "2026-09-12T13:00:00Z",
+  "system": {
+    "cpu_percent": 41.2,
+    "ram_used_mb": 9200,
+    "ram_percent": 58.7,
+    "gpu_util": 72.0,
+    "gpu_mem_mb": 4100,
+    "temperature_c": 68.0,
+    "power_w": null
+  },
+  "camera": {
+    "device": "/dev/video0",
+    "opened": true,
+    "frame_seq": 1204,
+    "actual_fps": 28.6,
+    "frame_age_ms": 38,
+    "read_failures": 0,
+    "health": 1.0
+  },
+  "locator": {
+    "backend": "engine",
+    "loaded": true,
+    "latency_ms": 15.2,
+    "gears_found": 1,
+    "confidence_mean": 0.91,
+    "health": 1.0
+  },
+  "scratch_v5": {
+    "profile": "FULL",
+    "classifier1_latency_ms": 8.1,
+    "classifier2_latency_ms": 6.4,
+    "detector_latency_ms": 41.0,
+    "fusion_latency_ms": 0.2,
+    "total_latency_ms": 56.0,
+    "detector_enabled": true,
+    "classifiers_enabled": true,
+    "error_count": 0,
+    "health": 0.84
+  },
+  "serial": {
+    "port": "/dev/ttyHS1",
+    "connected": false,
+    "last_send_ok": null,
+    "consecutive_failures": 0,
+    "last_error": null,
+    "health": 1.0
+  },
+  "mission": {
+    "inspection_active": true,
+    "output_valid": true,
+    "inspection_rate_hz": 8.4,
+    "current_profile": "FULL",
+    "utility": 0.9
+  }
+}

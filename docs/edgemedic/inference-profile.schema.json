@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gearpro.local/edgemedic/inference-profile.schema.json",
+  "title": "GearPro InferenceProfile v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "implemented", "locator", "classifiers_enabled", "detector_enabled", "inference_interval_s", "mission_quality", "rollback_target"],
+  "properties": {
+    "name": {
+      "enum": ["FULL", "TRT_FAST", "SPARSE", "CLASSIFY_ONLY", "LOCATE_ONLY", "SAFE_STOP"]
+    },
+    "implemented": { "type": "boolean" },
+    "locator": { "enum": ["keep", "pt", "engine", "off"] },
+    "classifiers_enabled": { "type": "boolean" },
+    "detector_enabled": { "type": "boolean" },
+    "detector_imgsz": { "const": 960 },
+    "inference_interval_s": { "type": ["number", "null"], "minimum": 0 },
+    "ui_refresh_hz": { "type": ["number", "null"], "minimum": 0 },
+    "mission_quality": { "type": "number", "minimum": 0, "maximum": 1 },
+    "rollback_target": { "type": ["string", "null"] },
+    "notes": { "type": "string" }
+  }
+}

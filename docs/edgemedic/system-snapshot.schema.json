@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gearpro.local/edgemedic/system-snapshot.schema.json",
+  "title": "GearPro SystemSnapshot v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "timestamp", "system", "camera", "locator", "scratch_v5", "serial", "mission"],
+  "properties": {
+    "schema_version": { "const": "system-snapshot.v1" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "system": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cpu_percent", "ram_used_mb", "ram_percent", "gpu_util", "gpu_mem_mb", "temperature_c"],
+      "properties": {
+        "cpu_percent": { "type": "number", "minimum": 0 },
+        "ram_used_mb": { "type": "number", "minimum": 0 },
+        "ram_percent": { "type": "number", "minimum": 0, "maximum": 100 },
+        "gpu_util": { "type": ["number", "null"], "minimum": 0, "maximum": 100 },
+        "gpu_mem_mb": { "type": ["number", "null"], "minimum": 0 },
+        "temperature_c": { "type": ["number", "null"] },
+        "power_w": { "type": ["number", "null"], "minimum": 0 }
+      }
+    },
+    "camera": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["device", "opened", "frame_seq", "actual_fps", "frame_age_ms", "read_failures", "health"],
+      "properties": {
+        "device": { "type": "string" },
+        "opened": { "type": "boolean" },
+        "frame_seq": { "type": "integer", "minimum": 0 },
+        "actual_fps": { "type": "number", "minimum": 0 },
+        "frame_age_ms": { "type": ["number", "null"], "minimum": 0 },
+        "read_failures": { "type": "integer", "minimum": 0 },
+        "health": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "locator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["backend", "loaded", "latency_ms", "gears_found", "health"],
+      "properties": {
+        "backend": { "enum": ["pt", "engine", "none"] },
+        "loaded": { "type": "boolean" },
+        "latency_ms": { "type": ["number", "null"], "minimum": 0 },
+        "gears_found": { "type": "integer", "minimum": 0 },
+        "confidence_mean": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "health": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "scratch_v5": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile", "detector_enabled", "classifiers_enabled", "total_latency_ms", "error_count", "health"],
+      "properties": {
+        "profile": { "type": "string" },
+        "classifier1_latency_ms": { "type": ["number", "null"], "minimum": 0 },
+        "classifier2_latency_ms": { "type": ["number", "null"], "minimum": 0 },
+        "detector_latency_ms": { "type": ["number", "null"], "minimum": 0 },
+        "fusion_latency_ms": { "type": ["number", "null"], "minimum": 0 },
+        "total_latency_ms": { "type": ["number", "null"], "minimum": 0 },
+        "detector_enabled": { "type": "boolean" },
+        "classifiers_enabled": { "type": "boolean" },
+        "error_count": { "type": "integer", "minimum": 0 },
+        "health": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "serial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["port", "connected", "last_send_ok", "consecutive_failures", "health"],
+      "properties": {
+        "port": { "type": "string" },
+        "connected": { "type": "boolean" },
+        "last_send_ok": { "type": ["boolean", "null"] },
+        "consecutive_failures": { "type": "integer", "minimum": 0 },
+        "last_error": { "type": ["string", "null"] },
+        "health": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "mission": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["inspection_active", "current_profile", "utility"],
+      "properties": {
+        "inspection_active": { "type": "boolean" },
+        "output_valid": { "type": "boolean" },
+        "inspection_rate_hz": { "type": ["number", "null"], "minimum": 0 },
+        "current_profile": { "type": "string" },
+        "utility": { "type": ["number", "null"], "minimum": 0, "maximum": 1 }
+      }
+    }
+  }
+}
