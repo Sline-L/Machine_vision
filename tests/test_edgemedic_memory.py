@@ -43,6 +43,10 @@ class ReasonerParseTests(unittest.TestCase):
         self.assertIsNone(parse_tool_json('{"tool": "shell", "params": {"cmd": "reboot"}}'))
         self.assertIsNone(parse_tool_json('{"tool": "set_inference_profile", "params": {"profile": "CLASSIFY_ONLY"}}'))
 
+    def test_close_typo_maps_to_whitelist(self):
+        action = parse_tool_json('{"tool": "econnect_serial", "params": {}}')
+        self.assertEqual(action["name"], "reconnect_serial")
+
     def test_strips_think_and_reads_json(self):
         text = "<think>planning</think>\n{\"tool\": \"restart_camera\", \"params\": {}}\n"
         self.assertEqual(parse_tool_json(text)["name"], "restart_camera")

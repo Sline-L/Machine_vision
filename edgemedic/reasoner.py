@@ -1,6 +1,7 @@
 """L2 reasoner: Qwen reads SystemSnapshot and may emit one whitelist action."""
 
 import json
+from difflib import get_close_matches
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -48,7 +49,10 @@ def parse_tool_json(text):
     if not tool or tool in ("null", "none", "None"):
         return None
     if tool not in ALLOWED_TOOLS:
-        return None
+        matches = get_close_matches(tool, ALLOWED_TOOLS, n=1, cutoff=0.85)
+        if not matches:
+            return None
+        tool = matches[0]
     params = payload.get("params") or {}
     if not isinstance(params, dict):
         params = {}
@@ -84,7 +88,7 @@ def complete(llm_url, snapshot, extra_note="", timeout=45.0):
     chat_body = {
         "model": "qwen3-4b",
         "temperature": 0.1,
-        "max_tokens": 512,
+        "max_tokens": 1024,
         "enable_thinking": False,
         "chat_template_kwargs": {"enable_thinking": False},
         "messages": [
