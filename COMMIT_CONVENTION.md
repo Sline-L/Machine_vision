@@ -37,7 +37,7 @@ refactor(ui): split camera display widget
 - `camera`: 摄像头采集与显示
 - `detection`: YOLO 检测流程
 - `serial`: 串口通信
-- `ui`: PyQt 界面
+- `ui`: Web 前端界面
 - `model`: 模型加载、权重、导出
 - `config`: 配置项、路径、参数
 - `docs`: 文档
@@ -104,7 +104,7 @@ git diff --stat
 如果改动了可运行代码，尽量执行对应验证命令，例如：
 
 ```bash
-python -m py_compile gp_main.py run_pt.py run_engine.py export_engine.py gp/app.py gp/camera.py gp/config.py gp/export_engine.py gp/frames.py gp/launch.py gp/models.py gp/serial_io.py gp/telemetry.py gp/types.py gp/ui.py gp/worker.py gp/weights.py
+python -m py_compile gp_main.py run_pt.py run_engine.py export_engine.py gp/*.py
 python -m unittest discover -s tests -v
 ```
 

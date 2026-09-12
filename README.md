@@ -1,65 +1,59 @@
 # GearPro 齿轮视觉检测系统
 
-GearPro 是基于 PyQt5、OpenCV、PyTorch 和 Ultralytics 的齿轮在线视觉检测程序。系统
-先从相机画面定位齿轮，再对高分辨率齿轮区域执行 Scratch V5 融合推理，降低整图缩放造成的微小缺陷
-信息损失。
+GearPro 是运行在 Jetson 或 Linux 工控机上的齿轮在线视觉检测系统。当前 `main-web`
+版本使用 FastAPI 提供后端服务、Vue 3 提供局域网浏览器界面，不再依赖 Qt 桌面环境。
+模型首先定位齿轮，再通过 Scratch V5 三模型融合判断划痕，并把结果显示、统计和发送给
+外部串口设备。
 
-## 功能
+## 主要功能
 
-- 实时工业相机或 USB 摄像头画面。
-- YOLO 齿轮定位与 Scratch V5 三模型融合两阶段推理。
-- 原图、划痕辅助框、融合概率、分支概率和推理耗时显示。
-- 已检测、合格、不合格计数及柱状统计图。
-- 自由、定量和定时三种运行模式。
-- 可配置定位阈值、缺陷阈值、推理间隔、摄像头和串口。
-- 合格发送串口代码 `01`，不合格发送 `02`。
-- 推理线程与 UI 解耦，只处理最新相机帧。
+- 浏览器实时查看相机原图或标注结果，默认最高 10 FPS。
+- Model1 齿轮定位与 Scratch V5 两阶段推理。
+- 显示融合概率、分类概率、检测概率及各阶段耗时。
+- 自由、定量、定时和视频测试模式。
+- 浏览器上传测试视频，测试期间自动禁用串口。
+- 多终端同时查看、单操作员控制锁和共享密码登录。
+- 运行参数跨重启保存，密码和模型路径不写入本地设置。
+- 合格发送 ASCII `01`，不合格发送 ASCII `02`。
 
 ## 检测流程
 
 ```text
-摄像头画面
+相机或测试视频
   └─ model/model1.pt：YOLO 定位 gear
        └─ 裁剪高分辨率齿轮 ROI
-            └─ model/model2/inference_config.json：Scratch V5
-                 ├─ EfficientNet-B0 + ResNet18 分类均值
-                 ├─ YOLO26-P2 划痕检测概率
-                 └─ 0.25 × 分类 + 0.75 × 检测
-                 ├─ UI 显示与统计
-                 └─ 串口输出 01 / 02
+            └─ model/model2/：Scratch V5
+                 ├─ EfficientNet-B0 分类器
+                 ├─ ResNet18 分类器
+                 ├─ YOLO26-P2 划痕检测器
+                 └─ 0.25 × 分类均值 + 0.75 × 检测概率
+                      ├─ Web 实时显示与统计
+                      └─ 串口输出 01 / 02
 ```
 
 ## 项目结构
 
 ```text
 .
-├── gp_main.py                # 直接启动入口
-├── gp/                       # 新版应用包
-│   ├── app.py                # Qt 初始化与应用启动
-│   ├── camera.py             # 相机与最新帧缓冲
-│   ├── config.py             # 路径及运行配置
-│   ├── models.py             # 两阶段模型流水线
-│   ├── scratch_v5.py         # Model2 配置、校准和融合运行时
-│   ├── serial_io.py          # 串口输出
-│   ├── types.py              # 结果与统计类型
-│   ├── ui.py                 # 主界面与设置界面
-│   └── worker.py             # 后台推理线程
-├── model/                    # Model1 及 Scratch V5 Model2 模型包
-├── docs/                     # 架构和优化文档
-├── tests/                    # 无硬件单元测试
-├── legacy/                   # 旧程序、模型和实验资料
-├── ultralytics/              # 项目内置 Ultralytics 源码
-└── requirements.txt
+├── gp_main.py             # 直接启动入口
+├── gp/                    # Python 后端、运行时及构建后的前端
+│   ├── app.py             # CLI 与 Uvicorn 启动
+│   ├── web.py             # FastAPI、WebSocket 和视频流 API
+│   ├── runtime.py         # 相机、推理、统计和串口生命周期
+│   ├── camera.py          # 无界面的 OpenCV 相机线程
+│   ├── worker.py          # 常驻推理线程
+│   ├── models.py          # 两阶段推理流水线
+│   ├── scratch_v5.py      # Model2 融合运行时
+│   └── static/            # 已构建的 Web 页面，可直接部署
+├── web/                   # Vue 3/Vite 前端源代码
+├── model/                 # Model1 与 Scratch V5 模型包
+├── docs/                  # 架构、API 和模型文档
+├── tests/                 # 无硬件测试
+├── legacy/                # 历史程序和资产
+└── ultralytics/           # 项目内置 Ultralytics
 ```
 
-## 环境要求
-
-- Linux；当前相机实现使用 OpenCV V4L2。
-- Python 3.10 或更高版本。
-- PyQt5、OpenCV、PyTorch、Torchvision、NumPy 和 PySerial。
-- 运行检测需要摄像头；发送结果需要串口设备。
-
-创建新环境：
+## 安装
 
 ```bash
 python -m venv .venv
@@ -68,131 +62,94 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-仓库本地已有环境时，只需激活：
+生产端使用已构建的 `gp/static/`，不需要安装 Node。只有修改前端时才需要：
+
+```bash
+cd web
+npm install
+npm run build
+```
+
+## 启动与访问
+
+局域网运行必须设置共享密码：
 
 ```bash
 source .venv/bin/activate
-```
-
-`.venv/` 是本机运行环境，不纳入 Git。
-
-## 启动
-
-在 NX 的 VS Code 里可右键下面的文件，选“在终端中运行 Python 文件”（需已选中
-项目 `.venv` 解释器）。摄像头默认索引 `0`，可在设置里改。
-
-| 文件 | 作用 |
-| --- | --- |
-| `run_pt.py` | 当前 `.pt` 基线 |
-| `export_engine.py` | 仅 NX：把 `model1.pt` 编成 TensorRT engine |
-| `run_engine.py` | 定位用板上的 `model1.engine`，Model2 仍用融合 `.pt` 包 |
-
-也可以命令行启动，两种方式等价：
-
-```bash
+export GEARPRO_WEB_PASSWORD='请替换为现场密码'
 python gp_main.py
 ```
 
-```bash
-python -m gp
-```
-
-测试视频可通过命令行直接传入，程序会自动进入视频测试模式并开始逐帧识别：
+也可以使用：
 
 ```bash
-python gp_main.py --video /path/to/test.mp4
+python -m gp --host 0.0.0.0 --port 8000
 ```
 
-也可以在主界面点击“测试视频”选择文件。视频测试模式按原始帧率顺序处理每一帧，默认
-禁用串口输出，防止离线测试误触发外部设备；识别结束后窗口保留最终结果，可点击
-“实时相机”返回相机模式。
+终端会显示服务地址。在同一局域网的电脑或平板访问 `http://<Jetson-IP>:8000`。
 
-程序默认使用摄像头索引 `2`、串口 `/dev/ttyHS1` 和波特率 `9600`。可在界面右上角
-“设置”中修改运行模式、阈值、推理间隔和硬件参数。
+仅本机开发可免密码：
 
-如果画面提示“摄像头打开失败”，先确认系统存在 `/dev/video*`，再按实际设备选择摄像头
-索引。没有视频设备时程序仍可打开，但不会产生检测结果。
+```bash
+python gp_main.py --host 127.0.0.1
+```
 
-## 模型
+服务器已有视频时仍可从命令行进入测试模式：
 
-| 文件 | 类型 | 作用 |
+```bash
+python gp_main.py --host 127.0.0.1 --video /path/to/test.mp4
+```
+
+网页中也可上传 `mp4/avi/mov/mkv/m4v`。默认上传上限为 2048 MB；测试视频保存在
+Git 忽略的 `var/uploads/`，切换视频、返回相机或关闭服务时自动清理。
+
+## Web 操作规则
+
+登录后的终端都可查看画面和状态，但只有一个终端能“接管控制”。控制租约每 10 秒续期，
+30 秒未收到心跳后自动释放。只有控制终端可以启停检测、上传视频、切换相机、清空统计
+和修改设置。浏览器关闭不会停止正在运行的检测任务。
+
+网页设置写入 `var/settings.json`。配置优先级为代码默认值、本地设置、部署环境变量。
+模型路径、访问密码只通过部署环境配置。
+
+## 环境变量
+
+| 变量 | 默认值 | 说明 |
 | --- | --- | --- |
-| `model/model1.pt` | Ultralytics YOLO | 从完整相机画面定位 `gear` |
-| `model/model2/inference_config.json` | Scratch V5 配置 | 解析三份权重、校准参数和融合阈值 |
-| `model/model2/classifier_1.pt` | EfficientNet-B0 | 384×384 ROI 划痕分类 |
-| `model/model2/classifier_2.pt` | ResNet18 | 384×384 ROI 划痕分类 |
-| `model/model2/detector.pt` | YOLO26-P2 | 960×960 ROI 划痕检测与辅助框 |
-| `model/model_old.pt` | ResNet18 二分类 | 旧分类器，仅作对照 |
-
-两个分类器采用等比缩放、灰色居中填充和 ImageNet mean/std 归一化。三路概率经过温度
-校准后融合，默认阈值为 `0.300273610279458`；界面仍统一显示为“缺陷概率”。V5 实际
-只识别划痕，不覆盖缺齿等其他缺陷，详细说明见 [Scratch V5 运行说明](docs/scratch-v5.md)。
-
-当前运行格式是 `.pt` 与 NX 本机编译的 `.engine`。定位加速不必改 UI 或串口；
-说明见 [模型格式](docs/model-formats.md)。
-
-## 部署配置
-
-Jetson NX 当前工作副本是 `/home/jetson/Projects/Machine_vision`（分支 `srtp`）。
-重构前的旧树已归档到 `/home/jetson/archive/Machine_vision-old-2026-09-12`，不要在归档目录里继续改程序。
-
-除界面设置外，可使用环境变量覆盖设备和模型路径：
-
-| 环境变量 | 默认值 | 说明 |
-| --- | --- | --- |
+| `GEARPRO_WEB_HOST` | `0.0.0.0` | Web 监听地址 |
+| `GEARPRO_WEB_PORT` | `8000` | Web 端口 |
+| `GEARPRO_WEB_PASSWORD` | 无 | 局域网访问密码；非回环监听时必填 |
+| `GEARPRO_MAX_UPLOAD_MB` | `2048` | 浏览器视频上传上限 |
 | `GEARPRO_CAMERA_INDEX` | `2` | 摄像头索引 |
 | `GEARPRO_SERIAL_PORT` | `/dev/ttyHS1` | 串口设备 |
-| `GEARPRO_MODEL1` | `model/model1.pt` | 定位模型 |
-| `GEARPRO_MODEL2` | `model/model2/inference_config.json` | Scratch V5 模型包配置 |
+| `GEARPRO_MODEL1` | `model/model1.pt` | 齿轮定位模型 |
+| `GEARPRO_MODEL2` | `model/model2/inference_config.json` | Scratch V5 配置 |
 
-示例：
-
-```bash
-GEARPRO_CAMERA_INDEX=0 \
-GEARPRO_SERIAL_PORT=/dev/ttyUSB0 \
-python gp_main.py
-```
+内置服务使用 HTTP，适用于可信且隔离的生产局域网。跨网段或公网访问必须放在 HTTPS
+反向代理后，并增加相应的网络访问控制。
 
 ## 验证
 
 ```bash
+source .venv/bin/activate
 python -m unittest discover -s tests -v
 python -m py_compile gp_main.py gp/*.py legacy/*.py
 python -m pip check
+cd web && npm run build
 ```
 
-无显示器环境可验证 Qt 启动：
+真实相机、CUDA、串口和局域网多终端仍需在目标 Jetson NX 上完成硬件联调。
 
-```bash
-QT_QPA_PLATFORM=offscreen python gp_main.py
-```
-
-## 文档与旧版
+## 文档
 
 - [文档索引](docs/README.md)
 - [系统架构](docs/architecture.md)
-- [模型格式](docs/model-formats.md)
-- [Scratch V5 运行说明](docs/scratch-v5.md)
-- [模型优化路线](docs/optimization-roadmap.md)
-- [旧版归档说明](legacy/README.md)
+- [Web API](docs/web-api.md)
+- [Scratch V5](docs/scratch-v5.md)
+- [模型格式与 Jetson 部署](docs/model-formats.md)
 
-旧版主程序仍可从项目根目录运行：
-
-```bash
-python legacy/gp_main.py
-```
-
-旧版代码和模型与新版互相隔离。
-
-## 当前限制
-
-- 固定 5 秒冷却时间用于减少连续帧重复计数；正式产线建议由光电传感器触发。
-- 视频测试按帧顺序执行，但零件计数仍沿用当前 5 秒防重复策略。
-- 模型阈值和推理性能必须在目标 Jetson、工业相机及实际照明条件下标定。第一次
-  上板继续使用 `.pt`；TensorRT engine 必须在 NX 本机编译。
-- Scratch V5 独立测试 Recall 为 `0.8065`、正常误报率为 `0.1681`，当前是可运行
-  基线，不是已经达到生产目标的最终模型。
-- 当前没有摄像头或串口时仍可打开界面，但无法执行完整硬件闭环验证。
+当前 Scratch V5 只识别划痕，独立测试 Recall 为 `0.8065`，仍是可运行基线而不是已经
+达到生产目标的最终模型。
 
 ## License
 

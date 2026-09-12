@@ -1,58 +1,41 @@
-"""GearPro application entry point."""
+"""GearPro Web application entry point."""
 
 import argparse
 import os
 from pathlib import Path
-import sys
 
-from PyQt5.QtCore import QLibraryInfo, QT_VERSION_STR
-from PyQt5.QtWidgets import QApplication
-
-
-def configure_qt_platform():
-    os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = QLibraryInfo.location(QLibraryInfo.PluginsPath)
-    # The application uses its own Fusion stylesheet. Avoid parsing KDE's Qt 6
-    # font serialization with the bundled Qt 5 runtime.
-    os.environ.setdefault("QT_QPA_PLATFORMTHEME", "none")
-    if os.environ.get("KDE_SESSION_VERSION") == "6" and QT_VERSION_STR.startswith("5."):
-        os.environ["XDG_CURRENT_DESKTOP"] = "generic"
-    if not os.environ.get("DISPLAY") and not os.environ.get("WAYLAND_DISPLAY"):
-        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
-    elif os.environ.get("WAYLAND_DISPLAY"):
-        os.environ.setdefault("QT_QPA_PLATFORM", "wayland")
-    else:
-        os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
+from .config import AppConfig
 
 
 def build_parser():
-    parser = argparse.ArgumentParser(description="GearPro 齿轮视觉检测系统")
-    parser.add_argument("--video", type=Path, help="使用视频文件进入测试模式")
+    parser = argparse.ArgumentParser(description="GearPro 齿轮视觉检测 Web 系统")
+    parser.add_argument("--host", default=os.getenv("GEARPRO_WEB_HOST", "0.0.0.0"))
+    parser.add_argument("--port", type=int, default=int(os.getenv("GEARPRO_WEB_PORT", "8000")))
+    parser.add_argument("--video", type=Path, help="使用服务器上的视频文件进入测试模式")
     return parser
 
 
-def main(argv=None):
-    parser = build_parser()
-    args = parser.parse_args(argv)
-    configure_qt_platform()
-    from .config import AppConfig
-    from .ui import APP_STYLE, MainWindow
+def build_application(config=None):
+    from .web import create_app
+    return create_app(config or AppConfig.from_environment())
 
+
+def main(argv=None):
+    args = build_parser().parse_args(argv)
+    password = os.getenv("GEARPRO_WEB_PASSWORD", "")
+    if args.host not in ("127.0.0.1", "localhost", "::1") and not password:
+        raise SystemExit("局域网监听必须设置 GEARPRO_WEB_PASSWORD")
     config = AppConfig.from_environment()
     if args.video is not None:
         video_path = args.video.expanduser().resolve()
         if not video_path.is_file():
-            parser.error(f"找不到视频文件：{video_path}")
+            raise SystemExit(f"找不到视频文件：{video_path}")
         config.video_path = video_path
         config.mode = "视频测试模式"
         config.serial_enabled = False
-
-    # Importing gp.ui imports cv2, whose wheel rewrites the Qt plugin path
-    # to cv2/qt/plugins. Restore PyQt5's plugin directory before QApplication.
-    configure_qt_platform()
-    app = QApplication([sys.argv[0]])
-    app.setApplicationName("GearPro")
-    app.setStyle("Fusion")
-    app.setStyleSheet(APP_STYLE)
-    window = MainWindow(config)
-    window.show()
-    return app.exec_()
+    try:
+        import uvicorn
+    except ImportError as exc:
+        raise SystemExit("Web 依赖未安装，请运行 python -m pip install -r requirements.txt") from exc
+    uvicorn.run(build_application(config), host=args.host, port=args.port, log_level="info")
+    return 0

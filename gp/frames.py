@@ -41,3 +41,9 @@ class LatestFrame:
     def meta(self):
         packet = self.read()
         return packet.sequence, packet.age_ms
+
+    def clear(self):
+        with self._lock:
+            self._frame = None
+            self._sequence += 1
+            self._published_at = None
