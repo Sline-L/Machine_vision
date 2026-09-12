@@ -22,6 +22,7 @@ set_inference_profile params.profile must be FULL, SPARSE, or SAFE_STOP.
 Never invent tools. Never shell, reboot, or edit files.
 If the snapshot is healthy or you are unsure, output {"tool": null, "params": {}}.
 Do not repeat an action that just failed verify.
+/no_think
 """
 
 
@@ -33,6 +34,8 @@ def parse_tool_json(text):
     if not text or not str(text).strip():
         return None
     raw = str(text).strip()
+    if "<think>" in raw and "</think>" in raw:
+        raw = raw.split("</think>", 1)[-1]
     start = raw.find("{")
     end = raw.rfind("}")
     if start < 0 or end <= start:
@@ -63,7 +66,16 @@ def _post_json(url, payload, timeout):
         return json.loads(response.read().decode("utf-8"))
 
 
-def complete(llm_url, snapshot, extra_note="", timeout=20.0):
+def _message_text(data):
+    choice = (data.get("choices") or [{}])[0]
+    message = choice.get("message") or {}
+    text = message.get("content") or message.get("reasoning_content") or choice.get("text") or ""
+    if "<think>" in text and "</think>" in text:
+        text = text.split("</think>", 1)[-1]
+    return text
+
+
+def complete(llm_url, snapshot, extra_note="", timeout=45.0):
     """Ask llama-server. Returns parsed action or None. Does not execute."""
     base = llm_url.rstrip("/")
     user = "SystemSnapshot:\n" + json.dumps(snapshot, ensure_ascii=False)
@@ -72,7 +84,9 @@ def complete(llm_url, snapshot, extra_note="", timeout=20.0):
     chat_body = {
         "model": "qwen3-4b",
         "temperature": 0.1,
-        "max_tokens": 256,
+        "max_tokens": 512,
+        "enable_thinking": False,
+        "chat_template_kwargs": {"enable_thinking": False},
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": user},
@@ -80,8 +94,7 @@ def complete(llm_url, snapshot, extra_note="", timeout=20.0):
     }
     try:
         data = _post_json(base + "/v1/chat/completions", chat_body, timeout)
-        text = (((data.get("choices") or [{}])[0].get("message") or {}).get("content")) or ""
-        return parse_tool_json(text)
+        return parse_tool_json(_message_text(data))
     except HTTPError:
         pass
     except (URLError, TimeoutError, json.JSONDecodeError, OSError) as exc:

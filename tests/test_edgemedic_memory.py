@@ -43,8 +43,9 @@ class ReasonerParseTests(unittest.TestCase):
         self.assertIsNone(parse_tool_json('{"tool": "shell", "params": {"cmd": "reboot"}}'))
         self.assertIsNone(parse_tool_json('{"tool": "set_inference_profile", "params": {"profile": "CLASSIFY_ONLY"}}'))
 
-    def test_null_tool_is_idle(self):
-        self.assertIsNone(parse_tool_json('{"tool": null, "params": {}}'))
+    def test_strips_think_and_reads_json(self):
+        text = "<think>planning</think>\n{\"tool\": \"restart_camera\", \"params\": {}}\n"
+        self.assertEqual(parse_tool_json(text)["name"], "restart_camera")
 
 
 if __name__ == "__main__":
