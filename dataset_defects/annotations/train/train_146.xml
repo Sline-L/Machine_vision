@@ -1,0 +1,26 @@
+<annotation>
+	<folder>train</folder>
+	<filename>train_146.jpg</filename>
+	<path>F:\Work\VSCode\Projects\DATASET\dataset_defects\images\train\train_146.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>472</width>
+		<height>339</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>missing_tooth</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>76</xmin>
+			<ymin>110</ymin>
+			<xmax>112</xmax>
+			<ymax>167</ymax>
+		</bndbox>
+	</object>
+</annotation>

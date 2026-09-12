@@ -1,0 +1,6 @@
+path: F:/Work/VSCode/Projects/DATASET/dataset_defects/auto_search_v3/detectors/f_missing_tooth_standard_original_seed42
+train: images/train
+val: images/val
+test: images/test
+names:
+  0: missing_tooth

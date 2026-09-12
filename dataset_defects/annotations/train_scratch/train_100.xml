@@ -1,0 +1,26 @@
+<annotation>
+	<folder>train</folder>
+	<filename>train_100.jpg</filename>
+	<path>F:\Work\VSCode\Projects\DATASET\dataset_defects\images\train\train_100.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>183</width>
+		<height>508</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>scratch</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>116</xmin>
+			<ymin>188</ymin>
+			<xmax>126</xmax>
+			<ymax>341</ymax>
+		</bndbox>
+	</object>
+</annotation>

@@ -1,0 +1,26 @@
+<annotation>
+	<folder>test_scratch</folder>
+	<filename>test_086.jpg</filename>
+	<path>F:\Work\VSCode\Projects\DATASET\dataset_defects\images\test_scratch\test_086.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>343</width>
+		<height>275</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>scratch</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>112</xmin>
+			<ymin>136</ymin>
+			<xmax>284</xmax>
+			<ymax>178</ymax>
+		</bndbox>
+	</object>
+</annotation>

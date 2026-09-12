@@ -1,0 +1,6 @@
+path: F:/Work/VSCode/Projects/DATASET/dataset_defects/temp_scratch_model_211_from_343
+train: images/train
+val: images/val
+
+names:
+  0: scratch

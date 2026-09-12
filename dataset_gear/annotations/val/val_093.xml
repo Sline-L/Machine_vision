@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<annotation>
+  <folder>val</folder>
+  <filename>val_093.jpg</filename>
+  <path>F:\Work\VSCode\Projects\DATASET\DATASET\images\val\val_093.jpg</path>
+  <source>
+    <database>Unknown</database>
+  </source>
+  <size>
+    <width>2560</width>
+    <height>1440</height>
+    <depth>3</depth>
+  </size>
+  <segmented>0</segmented>
+  <object>
+    <name>gear</name>
+    <pose>Unspecified</pose>
+    <truncated>0</truncated>
+    <difficult>0</difficult>
+    <bndbox>
+      <xmin>1173</xmin>
+      <ymin>290</ymin>
+      <xmax>1421</xmax>
+      <ymax>468</ymax>
+    </bndbox>
+  </object>
+</annotation>

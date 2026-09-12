@@ -1,0 +1,2746 @@
+[
+  {
+    "stem": "train_001",
+    "category": "scratch",
+    "view": "face",
+    "split": "train",
+    "group": 0,
+    "dhash": "9f73e1ccc8f979bd"
+  },
+  {
+    "stem": "train_002",
+    "category": "scratch",
+    "view": "face",
+    "split": "train",
+    "group": 1,
+    "dhash": "0671e0d4d0c8f8e0"
+  },
+  {
+    "stem": "train_003",
+    "category": "scratch",
+    "view": "face",
+    "split": "train",
+    "group": 2,
+    "dhash": "dc72e8dcd0c0e0e2"
+  },
+  {
+    "stem": "train_004",
+    "category": "scratch",
+    "view": "face",
+    "split": "train",
+    "group": 3,
+    "dhash": "ec52d8d0d2c2f0f0"
+  },
+  {
+    "stem": "train_005",
+    "category": "scratch",
+    "view": "face",
+    "split": "train",
+    "group": 4,
+    "dhash": "c8b666e4fcdcf8f8"
+  },
+  {
+    "stem": "train_006",
+    "category": "scratch",
+    "view": "face",
+    "split": "train",
+    "group": 5,
+    "dhash": "1068ece4f4dc7838"
+  },
+  {
+    "stem": "train_007",
+    "category": "scratch",
+    "view": "face",
+    "split": "train",
+    "group": 6,
+    "dhash": "1f71e8e8f4ec7939"
+  },
+  {
+    "stem": "train_008",
+    "category": "scratch",
+    "view": "side",
+    "split": "train",
+    "group": 7,
+    "dhash": "7e78f8d4e4c8e8e6"
+  },
+  {
+    "stem": "train_009",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "train",
+    "group": 8,
+    "dhash": "3ce2c9c8c8e8f0f3"
+  },
+  {
+    "stem": "train_010",
+    "category": "scratch",
+    "view": "side",
+    "split": "train",
+    "group": 9,
+    "dhash": "7274f4f4f4f8781d"
+  },
+  {
+    "stem": "train_011",
+    "category": "scratch",
+    "view": "face",
+    "split": "train",
+    "group": 10,
+    "dhash": "8ff1f0d0f0f0e0c1"
+  },
+  {
+    "stem": "train_012",
+    "category": "scratch",
+    "view": "face",
+    "split": "train",
+    "group": 11,
+    "dhash": "96e9e8d0b0f0e1c2"
+  },
+  {
+    "stem": "train_013",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "train",
+    "group": 12,
+    "dhash": "1771f4e6664c7838"
+  },
+  {
+    "stem": "train_014",
+    "category": "scratch",
+    "view": "face",
+    "split": "train",
+    "group": 13,
+    "dhash": "0671c8ecd0f0f1e2"
+  },
+  {
+    "stem": "train_015",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "train",
+    "group": 14,
+    "dhash": "1f79fcf4e4e8f9e6"
+  },
+  {
+    "stem": "train_016",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "train",
+    "group": 15,
+    "dhash": "1679e8ccf4f0f1e6"
+  },
+  {
+    "stem": "train_017",
+    "category": "normal",
+    "view": "side",
+    "split": "train",
+    "group": 16,
+    "dhash": "f272fbd3d3d9cbc3"
+  },
+  {
+    "stem": "train_018",
+    "category": "normal",
+    "view": "side",
+    "split": "train",
+    "group": 17,
+    "dhash": "f9f9fdd0d8d4e8cc"
+  },
+  {
+    "stem": "train_019",
+    "category": "normal",
+    "view": "side",
+    "split": "train",
+    "group": 17,
+    "dhash": "f979fcd0d8d0e9c9"
+  },
+  {
+    "stem": "train_020",
+    "category": "scratch",
+    "view": "face",
+    "split": "train",
+    "group": 18,
+    "dhash": "0670f8c8f0f0f1f0"
+  },
+  {
+    "stem": "train_021",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 19,
+    "dhash": "a671f8f4c4f0f0fc"
+  },
+  {
+    "stem": "train_022",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 20,
+    "dhash": "6f71d8f0f0e474fc"
+  },
+  {
+    "stem": "train_023",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "val",
+    "group": 21,
+    "dhash": "0773f0f4f0f8f1f0"
+  },
+  {
+    "stem": "train_024",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "val",
+    "group": 21,
+    "dhash": "1c73f0f4f0f9f1f2"
+  },
+  {
+    "stem": "train_025",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "val",
+    "group": 21,
+    "dhash": "0e72f0f4f0f9f1f0"
+  },
+  {
+    "stem": "train_026",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "val",
+    "group": 21,
+    "dhash": "0e72f0f4f0f9f1d1"
+  },
+  {
+    "stem": "train_027",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "val",
+    "group": 21,
+    "dhash": "0e72f0f4f0f9f1d0"
+  },
+  {
+    "stem": "train_028",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 22,
+    "dhash": "edfbd0d8d8d0c7cd"
+  },
+  {
+    "stem": "train_029",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 22,
+    "dhash": "edfbd0d8d8d0c3cd"
+  },
+  {
+    "stem": "train_030",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 23,
+    "dhash": "f8fbd0d8d8d4d3d9"
+  },
+  {
+    "stem": "train_031",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 24,
+    "dhash": "a77958d0e4e4f0f0"
+  },
+  {
+    "stem": "train_032",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 24,
+    "dhash": "a771d8dce4ecf078"
+  },
+  {
+    "stem": "train_033",
+    "category": "normal",
+    "view": "face",
+    "split": "val",
+    "group": 25,
+    "dhash": "0573f9d8f0f0f0f0"
+  },
+  {
+    "stem": "train_034",
+    "category": "normal",
+    "view": "face",
+    "split": "val",
+    "group": 25,
+    "dhash": "0473f9d8f4f0f0f0"
+  },
+  {
+    "stem": "train_035",
+    "category": "normal",
+    "view": "face",
+    "split": "val",
+    "group": 25,
+    "dhash": "0773f9d8d0f0f1f0"
+  },
+  {
+    "stem": "train_036",
+    "category": "normal",
+    "view": "face",
+    "split": "val",
+    "group": 25,
+    "dhash": "0671f9d8f4f0f1f0"
+  },
+  {
+    "stem": "train_037",
+    "category": "normal",
+    "view": "face",
+    "split": "val",
+    "group": 25,
+    "dhash": "1573f9d8d4f0f8f0"
+  },
+  {
+    "stem": "train_038",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 26,
+    "dhash": "e9f1d0d8d8ece0f3"
+  },
+  {
+    "stem": "train_039",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 27,
+    "dhash": "b478f8d4c8c8e8e6"
+  },
+  {
+    "stem": "train_040",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "val",
+    "group": 28,
+    "dhash": "b468e8d4d8c8e8e6"
+  },
+  {
+    "stem": "train_041",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 29,
+    "dhash": "966968f4c4ccf878"
+  },
+  {
+    "stem": "train_042",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 30,
+    "dhash": "073968d8d4e4f078"
+  },
+  {
+    "stem": "train_043",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "val",
+    "group": 31,
+    "dhash": "2779f9ecf0f8f1e3"
+  },
+  {
+    "stem": "train_044",
+    "category": "normal",
+    "view": "oblique",
+    "split": "val",
+    "group": 31,
+    "dhash": "0779f8ecf0f8f9e3"
+  },
+  {
+    "stem": "train_045",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "val",
+    "group": 31,
+    "dhash": "0771f9ecd8d8e1e3"
+  },
+  {
+    "stem": "train_046",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "val",
+    "group": 31,
+    "dhash": "1779f8ecf0f8f9e7"
+  },
+  {
+    "stem": "train_047",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "val",
+    "group": 31,
+    "dhash": "2779f8e4f8f8f1c7"
+  },
+  {
+    "stem": "train_048",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 32,
+    "dhash": "f678f8d0f8d8e8c6"
+  },
+  {
+    "stem": "train_049",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 33,
+    "dhash": "fe7cfcd8f0f8e8cc"
+  },
+  {
+    "stem": "train_050",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 32,
+    "dhash": "fc7cfcd0d8d8e9cc"
+  },
+  {
+    "stem": "train_051",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 34,
+    "dhash": "0d3168d4e0ccf8f8"
+  },
+  {
+    "stem": "train_052",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 35,
+    "dhash": "4e31d8d8f4e47078"
+  },
+  {
+    "stem": "train_053",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 36,
+    "dhash": "8d72f1e8f8f87979"
+  },
+  {
+    "stem": "train_054",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "train",
+    "group": 36,
+    "dhash": "1d72f1e8f8f87879"
+  },
+  {
+    "stem": "train_055",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 36,
+    "dhash": "2d72f9e8f0f8f9f1"
+  },
+  {
+    "stem": "train_056",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 36,
+    "dhash": "1c72f9e8f0f8f9f1"
+  },
+  {
+    "stem": "train_057",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 36,
+    "dhash": "0c72f9e8f8f8f9f1"
+  },
+  {
+    "stem": "train_058",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 37,
+    "dhash": "be64ecd4ccc8e8cc"
+  },
+  {
+    "stem": "train_059",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 38,
+    "dhash": "f468e8d4dcd8e8c4"
+  },
+  {
+    "stem": "train_060",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 38,
+    "dhash": "3e78ecd4dcd8e8c6"
+  },
+  {
+    "stem": "train_061",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 39,
+    "dhash": "1771f8f4cce87078"
+  },
+  {
+    "stem": "train_062",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 40,
+    "dhash": "edb1d8f0f4e470fc"
+  },
+  {
+    "stem": "train_063",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "train",
+    "group": 41,
+    "dhash": "0d73f0f4f0f8f0e2"
+  },
+  {
+    "stem": "train_064",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "train",
+    "group": 41,
+    "dhash": "2d73f0f4f0f8f0e2"
+  },
+  {
+    "stem": "train_065",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "train",
+    "group": 42,
+    "dhash": "73f0f4f4f0f9f0e6"
+  },
+  {
+    "stem": "train_066",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "train",
+    "group": 42,
+    "dhash": "73f0f4f4f0f9f0e6"
+  },
+  {
+    "stem": "train_067",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "train",
+    "group": 41,
+    "dhash": "0d73f0f4f4f0f0e6"
+  },
+  {
+    "stem": "train_068",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 43,
+    "dhash": "dbeff5d8d8f1e666"
+  },
+  {
+    "stem": "train_069",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 44,
+    "dhash": "dbffd4d8d8d1e6ce"
+  },
+  {
+    "stem": "train_070",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 45,
+    "dhash": "dbffd0d8d8d0e6cc"
+  },
+  {
+    "stem": "train_071",
+    "category": "scratch",
+    "view": "face",
+    "split": "train",
+    "group": 46,
+    "dhash": "9c7868f4d0ecec78"
+  },
+  {
+    "stem": "train_072",
+    "category": "scratch",
+    "view": "face",
+    "split": "train",
+    "group": 47,
+    "dhash": "0f51d8dcc4cce478"
+  },
+  {
+    "stem": "train_073",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "train",
+    "group": 48,
+    "dhash": "0671f9e8f8f8f9f3"
+  },
+  {
+    "stem": "train_074",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "train",
+    "group": 48,
+    "dhash": "8f79f8dcd8f8f9e2"
+  },
+  {
+    "stem": "train_075",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "train",
+    "group": 48,
+    "dhash": "8f79f9ccd8f8f9e3"
+  },
+  {
+    "stem": "train_076",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "train",
+    "group": 48,
+    "dhash": "af71f1cccce8f9f3"
+  },
+  {
+    "stem": "train_077",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "train",
+    "group": 48,
+    "dhash": "af71f9ecdcf8f9f3"
+  },
+  {
+    "stem": "train_078",
+    "category": "scratch",
+    "view": "side",
+    "split": "train",
+    "group": 49,
+    "dhash": "bcf8f8e4d0cce4e7"
+  },
+  {
+    "stem": "train_079",
+    "category": "normal",
+    "view": "side",
+    "split": "val",
+    "group": 28,
+    "dhash": "b478e8d4d8d8e8e6"
+  },
+  {
+    "stem": "train_080",
+    "category": "scratch",
+    "view": "side",
+    "split": "val",
+    "group": 28,
+    "dhash": "7c78f8d4d8d8e8c6"
+  },
+  {
+    "stem": "train_081",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 50,
+    "dhash": "9779e8f4cce8f0f8"
+  },
+  {
+    "stem": "train_082",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "train",
+    "group": 41,
+    "dhash": "2d73f0f4f0f0f0e6"
+  },
+  {
+    "stem": "train_083",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "train",
+    "group": 41,
+    "dhash": "a973f0f4f0f0f1e4"
+  },
+  {
+    "stem": "train_084",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "train",
+    "group": 41,
+    "dhash": "2d73f0f4f0f8f0e6"
+  },
+  {
+    "stem": "train_085",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "train",
+    "group": 41,
+    "dhash": "a973f0f4f0f8f1e4"
+  },
+  {
+    "stem": "train_086",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "train",
+    "group": 41,
+    "dhash": "b973f0f4f0f8f1f0"
+  },
+  {
+    "stem": "train_087",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 51,
+    "dhash": "dbdbf0d8d8d0cbcd"
+  },
+  {
+    "stem": "train_088",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 51,
+    "dhash": "dbfbf0d8d8c4d3db"
+  },
+  {
+    "stem": "train_089",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 51,
+    "dhash": "dbdbd0d8d8c4d3db"
+  },
+  {
+    "stem": "train_090",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 52,
+    "dhash": "a471d8f0f0e478ec"
+  },
+  {
+    "stem": "train_091",
+    "category": "scratch",
+    "view": "face",
+    "split": "train",
+    "group": 53,
+    "dhash": "1e7178f4f4e4f878"
+  },
+  {
+    "stem": "train_092",
+    "category": "scratch",
+    "view": "face",
+    "split": "train",
+    "group": 54,
+    "dhash": "0f71e8d4d4c4f0f8"
+  },
+  {
+    "stem": "train_093",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "train",
+    "group": 55,
+    "dhash": "8ff3f1e8d0fcf071"
+  },
+  {
+    "stem": "train_094",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 55,
+    "dhash": "8ef2f1e9d0fcf8f3"
+  },
+  {
+    "stem": "train_095",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "train",
+    "group": 55,
+    "dhash": "0cf2f1e9d8f8f873"
+  },
+  {
+    "stem": "train_096",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "train",
+    "group": 55,
+    "dhash": "8ef2f9e8d0f8f8f3"
+  },
+  {
+    "stem": "train_097",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "train",
+    "group": 56,
+    "dhash": "1ef3f1e4d0fcf0f3"
+  },
+  {
+    "stem": "train_098",
+    "category": "normal",
+    "view": "side",
+    "split": "train",
+    "group": 57,
+    "dhash": "fc7cecd0c0d4e8cc"
+  },
+  {
+    "stem": "train_099",
+    "category": "scratch",
+    "view": "side",
+    "split": "train",
+    "group": 58,
+    "dhash": "fc7cecd0d0c0c8c8"
+  },
+  {
+    "stem": "train_100",
+    "category": "scratch",
+    "view": "side",
+    "split": "train",
+    "group": 58,
+    "dhash": "f87cf4d0c4d0c9c9"
+  },
+  {
+    "stem": "train_101",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 59,
+    "dhash": "a571e8fcc4e4f0f8"
+  },
+  {
+    "stem": "train_102",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 60,
+    "dhash": "4a71d8dcece470f8"
+  },
+  {
+    "stem": "train_103",
+    "category": "normal",
+    "view": "oblique",
+    "split": "val",
+    "group": 61,
+    "dhash": "0d72f1d8d0fcf871"
+  },
+  {
+    "stem": "train_104",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "val",
+    "group": 61,
+    "dhash": "4f73f1c8f8fcf871"
+  },
+  {
+    "stem": "train_105",
+    "category": "normal",
+    "view": "oblique",
+    "split": "val",
+    "group": 61,
+    "dhash": "0d73f1e8f0fcf871"
+  },
+  {
+    "stem": "train_106",
+    "category": "normal",
+    "view": "oblique",
+    "split": "val",
+    "group": 61,
+    "dhash": "8d72f9e8f4fcf871"
+  },
+  {
+    "stem": "train_107",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "val",
+    "group": 61,
+    "dhash": "9ff3f1d8d8fcf873"
+  },
+  {
+    "stem": "train_108",
+    "category": "normal",
+    "view": "side",
+    "split": "train",
+    "group": 62,
+    "dhash": "e9f1f1c0c4e4f4f2"
+  },
+  {
+    "stem": "train_109",
+    "category": "normal",
+    "view": "side",
+    "split": "train",
+    "group": 63,
+    "dhash": "f9f9f9d0c0f4e4e6"
+  },
+  {
+    "stem": "train_110",
+    "category": "normal",
+    "view": "side",
+    "split": "train",
+    "group": 64,
+    "dhash": "f9e9e9d0d4f4e4e4"
+  },
+  {
+    "stem": "train_111",
+    "category": "scratch",
+    "view": "face",
+    "split": "train",
+    "group": 65,
+    "dhash": "ae31d8d4d4e4f078"
+  },
+  {
+    "stem": "train_112",
+    "category": "scratch",
+    "view": "face",
+    "split": "train",
+    "group": 66,
+    "dhash": "1e7178f8f4c4f870"
+  },
+  {
+    "stem": "train_113",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "val",
+    "group": 67,
+    "dhash": "0d62f1d8f0f87879"
+  },
+  {
+    "stem": "train_114",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "val",
+    "group": 67,
+    "dhash": "1c72f1d8c8ec7078"
+  },
+  {
+    "stem": "train_115",
+    "category": "scratch",
+    "view": "face",
+    "split": "val",
+    "group": 67,
+    "dhash": "0d72f1d8d8f8f879"
+  },
+  {
+    "stem": "train_116",
+    "category": "scratch",
+    "view": "face",
+    "split": "val",
+    "group": 67,
+    "dhash": "1d73f9c8d8e8f879"
+  },
+  {
+    "stem": "train_117",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "val",
+    "group": 67,
+    "dhash": "1c72f1c8f8f8f871"
+  },
+  {
+    "stem": "train_118",
+    "category": "normal",
+    "view": "side",
+    "split": "train",
+    "group": 68,
+    "dhash": "b3f3f1d1f86cf0f3"
+  },
+  {
+    "stem": "train_119",
+    "category": "normal",
+    "view": "side",
+    "split": "train",
+    "group": 69,
+    "dhash": "f9f9f9d4ccece0e6"
+  },
+  {
+    "stem": "train_120",
+    "category": "scratch",
+    "view": "side",
+    "split": "train",
+    "group": 70,
+    "dhash": "dde9f9d4d0f8e8e5"
+  },
+  {
+    "stem": "train_121",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 71,
+    "dhash": "df70f8f4ccf870be"
+  },
+  {
+    "stem": "train_122",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 72,
+    "dhash": "9f70f0d4f6f2f4fa"
+  },
+  {
+    "stem": "train_123",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "train",
+    "group": 73,
+    "dhash": "9b61e0f0f0f97130"
+  },
+  {
+    "stem": "train_124",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 73,
+    "dhash": "9361e0f0f0f97171"
+  },
+  {
+    "stem": "train_125",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 73,
+    "dhash": "9971f0f4f0f97160"
+  },
+  {
+    "stem": "train_126",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "train",
+    "group": 73,
+    "dhash": "db61e0f4f0f97171"
+  },
+  {
+    "stem": "train_127",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "train",
+    "group": 73,
+    "dhash": "9b61e0f4f0f97131"
+  },
+  {
+    "stem": "train_128",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 74,
+    "dhash": "9f7171f0ecece87c"
+  },
+  {
+    "stem": "train_129",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 74,
+    "dhash": "f77171f0dcecf87d"
+  },
+  {
+    "stem": "train_130",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 75,
+    "dhash": "df7171f0fcecfc3d"
+  },
+  {
+    "stem": "train_131",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 76,
+    "dhash": "9ff0e0f2f2f8789c"
+  },
+  {
+    "stem": "train_132",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 76,
+    "dhash": "9f70e4f2f6f8781c"
+  },
+  {
+    "stem": "train_133",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 77,
+    "dhash": "9e71ecdcf0e87036"
+  },
+  {
+    "stem": "train_134",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "9e71e8dcf8e8783c"
+  },
+  {
+    "stem": "train_135",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "8e71e8dcf8f8701e"
+  },
+  {
+    "stem": "train_136",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "8e71e8dcf8f0703e"
+  },
+  {
+    "stem": "train_137",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "8e71ecdcf8f8703e"
+  },
+  {
+    "stem": "train_138",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "test",
+    "group": 79,
+    "dhash": "1ff8dcd8fcf8f070"
+  },
+  {
+    "stem": "train_139",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "test",
+    "group": 79,
+    "dhash": "fff8ecd8f4f8f070"
+  },
+  {
+    "stem": "train_140",
+    "category": "normal",
+    "view": "side",
+    "split": "test",
+    "group": 79,
+    "dhash": "fff8c8d0f4f8f070"
+  },
+  {
+    "stem": "train_141",
+    "category": "normal",
+    "view": "face",
+    "split": "test",
+    "group": 80,
+    "dhash": "9970e4f2f478381f"
+  },
+  {
+    "stem": "train_142",
+    "category": "normal",
+    "view": "face",
+    "split": "test",
+    "group": 80,
+    "dhash": "9f70e0d2f4f8781f"
+  },
+  {
+    "stem": "train_143",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "ce71e0dcd8f8701e"
+  },
+  {
+    "stem": "train_144",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "test",
+    "group": 81,
+    "dhash": "ce31e4dcd8e8703f"
+  },
+  {
+    "stem": "train_145",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "test",
+    "group": 81,
+    "dhash": "ce396cdcf8f07037"
+  },
+  {
+    "stem": "train_146",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "test",
+    "group": 81,
+    "dhash": "ce71e4dcd8e87036"
+  },
+  {
+    "stem": "train_147",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "8671ecdcd8f8703e"
+  },
+  {
+    "stem": "train_148",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 82,
+    "dhash": "5ffcecd8e4f8e064"
+  },
+  {
+    "stem": "train_149",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 83,
+    "dhash": "9ff8ccd8f8fcf074"
+  },
+  {
+    "stem": "train_150",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 84,
+    "dhash": "9ff8ccd8e8f8f870"
+  },
+  {
+    "stem": "train_151",
+    "category": "scratch",
+    "view": "face",
+    "split": "test",
+    "group": 80,
+    "dhash": "9f70f8d2f4f8781f"
+  },
+  {
+    "stem": "train_152",
+    "category": "scratch",
+    "view": "face",
+    "split": "train",
+    "group": 85,
+    "dhash": "9974f6f6f2f8781f"
+  },
+  {
+    "stem": "train_153",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "8e71e8dcd8e8703c"
+  },
+  {
+    "stem": "train_154",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 86,
+    "dhash": "8f78e4d8f0e8703a"
+  },
+  {
+    "stem": "train_155",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "train",
+    "group": 87,
+    "dhash": "9e79ecccece87030"
+  },
+  {
+    "stem": "train_156",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "train",
+    "group": 86,
+    "dhash": "8671ecd8c8e8703a"
+  },
+  {
+    "stem": "train_157",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "train",
+    "group": 86,
+    "dhash": "8671ecd8c8e8701f"
+  },
+  {
+    "stem": "train_158",
+    "category": "normal",
+    "view": "side",
+    "split": "val",
+    "group": 88,
+    "dhash": "fe70cccce8f87030"
+  },
+  {
+    "stem": "train_159",
+    "category": "scratch",
+    "view": "side",
+    "split": "train",
+    "group": 89,
+    "dhash": "fff8fcdcfce87070"
+  },
+  {
+    "stem": "train_160",
+    "category": "scratch",
+    "view": "side",
+    "split": "val",
+    "group": 88,
+    "dhash": "ff60c8d8f0e87030"
+  },
+  {
+    "stem": "train_161",
+    "category": "scratch",
+    "view": "face",
+    "split": "test",
+    "group": 80,
+    "dhash": "9f70e0f2f0f8781f"
+  },
+  {
+    "stem": "train_162",
+    "category": "normal",
+    "view": "face",
+    "split": "test",
+    "group": 80,
+    "dhash": "df70f0d2f4f8781f"
+  },
+  {
+    "stem": "train_163",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "test",
+    "group": 90,
+    "dhash": "9671e0dcfcf8789c"
+  },
+  {
+    "stem": "train_164",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "test",
+    "group": 90,
+    "dhash": "9671e0dcdcf87038"
+  },
+  {
+    "stem": "train_165",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "test",
+    "group": 90,
+    "dhash": "9671e0dcdcf8701f"
+  },
+  {
+    "stem": "train_166",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "test",
+    "group": 90,
+    "dhash": "9671e0dcdcf8703c"
+  },
+  {
+    "stem": "train_167",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "test",
+    "group": 90,
+    "dhash": "8e71e0dcdcf87019"
+  },
+  {
+    "stem": "train_168",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "test",
+    "group": 79,
+    "dhash": "fbf8ecd8fcf0f034"
+  },
+  {
+    "stem": "train_169",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "test",
+    "group": 79,
+    "dhash": "fff8ecd8f0f8f070"
+  },
+  {
+    "stem": "train_170",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "test",
+    "group": 79,
+    "dhash": "fff8ecd8ecf8f074"
+  },
+  {
+    "stem": "train_171",
+    "category": "scratch",
+    "view": "face",
+    "split": "train",
+    "group": 91,
+    "dhash": "9974f0d2f4f8701f"
+  },
+  {
+    "stem": "train_172",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 91,
+    "dhash": "dff0f0f2f4f8709f"
+  },
+  {
+    "stem": "train_173",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "8f71e8dcf8f0703a"
+  },
+  {
+    "stem": "train_174",
+    "category": "normal",
+    "view": "oblique",
+    "split": "test",
+    "group": 81,
+    "dhash": "8e31ecdcd8e8703e"
+  },
+  {
+    "stem": "train_175",
+    "category": "normal",
+    "view": "oblique",
+    "split": "test",
+    "group": 81,
+    "dhash": "9e71ecdcd8e87037"
+  },
+  {
+    "stem": "train_176",
+    "category": "normal",
+    "view": "oblique",
+    "split": "test",
+    "group": 81,
+    "dhash": "ce71ecdcd8e8703e"
+  },
+  {
+    "stem": "train_177",
+    "category": "normal",
+    "view": "oblique",
+    "split": "test",
+    "group": 81,
+    "dhash": "ce71ecdcd8f0703f"
+  },
+  {
+    "stem": "train_178",
+    "category": "normal",
+    "view": "side",
+    "split": "train",
+    "group": 92,
+    "dhash": "fff0dcd8e0f8f070"
+  },
+  {
+    "stem": "train_179",
+    "category": "normal",
+    "view": "side",
+    "split": "train",
+    "group": 92,
+    "dhash": "fe70ccd8e0f87034"
+  },
+  {
+    "stem": "train_180",
+    "category": "normal",
+    "view": "side",
+    "split": "train",
+    "group": 92,
+    "dhash": "ff70ccd8f0f8f030"
+  },
+  {
+    "stem": "train_181",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 93,
+    "dhash": "9c70e8f4fcf8701f"
+  },
+  {
+    "stem": "train_182",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 94,
+    "dhash": "ddf1f0f0f0f0f0fe"
+  },
+  {
+    "stem": "train_183",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 95,
+    "dhash": "9f61f0dce8f0f85f"
+  },
+  {
+    "stem": "train_184",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "train",
+    "group": 95,
+    "dhash": "1f70e4dcf8f0f89e"
+  },
+  {
+    "stem": "train_185",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "train",
+    "group": 95,
+    "dhash": "1370f0dce8f8f81e"
+  },
+  {
+    "stem": "train_186",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 95,
+    "dhash": "1b70e4dcecf8f89e"
+  },
+  {
+    "stem": "train_187",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "train",
+    "group": 95,
+    "dhash": "1f70e4dce8f8f09e"
+  },
+  {
+    "stem": "train_188",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "val",
+    "group": 96,
+    "dhash": "fff4fcdcf0f0f07b"
+  },
+  {
+    "stem": "train_189",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 97,
+    "dhash": "2ff4f4fcf070f03c"
+  },
+  {
+    "stem": "train_190",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 98,
+    "dhash": "37fcf4dcf070f03e"
+  },
+  {
+    "stem": "train_191",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 93,
+    "dhash": "9e70ecf4fcf8701f"
+  },
+  {
+    "stem": "train_192",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 99,
+    "dhash": "9e71e0f2f0f8729f"
+  },
+  {
+    "stem": "train_193",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "test",
+    "group": 100,
+    "dhash": "1e70e0d4f8f0b01f"
+  },
+  {
+    "stem": "train_194",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "test",
+    "group": 100,
+    "dhash": "9e71e0d4f8f0f09f"
+  },
+  {
+    "stem": "train_195",
+    "category": "normal",
+    "view": "face",
+    "split": "test",
+    "group": 100,
+    "dhash": "9e71e8d4f8f8f89f"
+  },
+  {
+    "stem": "train_196",
+    "category": "normal",
+    "view": "face",
+    "split": "test",
+    "group": 100,
+    "dhash": "9f71e0d4f8f0b89f"
+  },
+  {
+    "stem": "train_197",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "test",
+    "group": 100,
+    "dhash": "9f71e0d4f8f0f09f"
+  },
+  {
+    "stem": "train_198",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "test",
+    "group": 100,
+    "dhash": "9f70e0d4f8f8f09f"
+  },
+  {
+    "stem": "train_199",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "val",
+    "group": 96,
+    "dhash": "ffe4fcccf0f0f07b"
+  },
+  {
+    "stem": "train_200",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 101,
+    "dhash": "9fecfcdcf0f0f039"
+  },
+  {
+    "stem": "train_201",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "val",
+    "group": 96,
+    "dhash": "ebe4f4dcf0f0f039"
+  },
+  {
+    "stem": "train_202",
+    "category": "scratch",
+    "view": "face",
+    "split": "train",
+    "group": 102,
+    "dhash": "9d70ecf2f0e8701f"
+  },
+  {
+    "stem": "train_203",
+    "category": "scratch",
+    "view": "face",
+    "split": "train",
+    "group": 103,
+    "dhash": "5fb8f0f2f4f0701f"
+  },
+  {
+    "stem": "train_204",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "test",
+    "group": 90,
+    "dhash": "9e71e0d4ccec781e"
+  },
+  {
+    "stem": "train_205",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "test",
+    "group": 90,
+    "dhash": "9e71e0dcc8f0701e"
+  },
+  {
+    "stem": "train_206",
+    "category": "normal",
+    "view": "oblique",
+    "split": "test",
+    "group": 90,
+    "dhash": "9671e0dcdce8701e"
+  },
+  {
+    "stem": "train_207",
+    "category": "scratch",
+    "view": "face",
+    "split": "train",
+    "group": 104,
+    "dhash": "4e3170dcdcec781c"
+  },
+  {
+    "stem": "train_208",
+    "category": "scratch",
+    "view": "face",
+    "split": "test",
+    "group": 90,
+    "dhash": "0671ecdcdcf8701c"
+  },
+  {
+    "stem": "train_209",
+    "category": "scratch",
+    "view": "side",
+    "split": "test",
+    "group": 105,
+    "dhash": "df78ccd8e8f87030"
+  },
+  {
+    "stem": "train_210",
+    "category": "normal",
+    "view": "side",
+    "split": "test",
+    "group": 105,
+    "dhash": "9771ccd8e0f87038"
+  },
+  {
+    "stem": "train_211",
+    "category": "normal",
+    "view": "side",
+    "split": "test",
+    "group": 105,
+    "dhash": "9f71e8d8f0f87038"
+  },
+  {
+    "stem": "train_212",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 106,
+    "dhash": "9170e0f2f4f8781f"
+  },
+  {
+    "stem": "train_213",
+    "category": "scratch",
+    "view": "face",
+    "split": "train",
+    "group": 106,
+    "dhash": "d778f8d0f4f8781f"
+  },
+  {
+    "stem": "train_214",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "8c71e0dcf8f8781e"
+  },
+  {
+    "stem": "train_215",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "8e71e0dcf8f8781e"
+  },
+  {
+    "stem": "train_216",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "9671e8dcf8f8781e"
+  },
+  {
+    "stem": "train_217",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "9e71e8dcf8f0701e"
+  },
+  {
+    "stem": "train_218",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "8e71e8dcd8e0703e"
+  },
+  {
+    "stem": "train_219",
+    "category": "normal",
+    "view": "side",
+    "split": "train",
+    "group": 107,
+    "dhash": "bef8d8e0f0f0f070"
+  },
+  {
+    "stem": "train_220",
+    "category": "scratch",
+    "view": "side",
+    "split": "train",
+    "group": 108,
+    "dhash": "38f8e8f0f8f8f070"
+  },
+  {
+    "stem": "train_221",
+    "category": "scratch",
+    "view": "side",
+    "split": "train",
+    "group": 109,
+    "dhash": "fcf8cce4f8f87070"
+  },
+  {
+    "stem": "train_222",
+    "category": "normal",
+    "view": "face",
+    "split": "val",
+    "group": 110,
+    "dhash": "3d70f4f2f2f8789f"
+  },
+  {
+    "stem": "train_223",
+    "category": "normal",
+    "view": "face",
+    "split": "val",
+    "group": 110,
+    "dhash": "9f70f0f2f2f8709f"
+  },
+  {
+    "stem": "train_224",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "9d71e8dcf8f8781c"
+  },
+  {
+    "stem": "train_225",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 111,
+    "dhash": "9671ecdce8e87038"
+  },
+  {
+    "stem": "train_226",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "9e71ecdcf8f8703e"
+  },
+  {
+    "stem": "train_227",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 111,
+    "dhash": "9e71ecdcf0f0783c"
+  },
+  {
+    "stem": "train_228",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "8771ecdcf8f8703e"
+  },
+  {
+    "stem": "train_229",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 112,
+    "dhash": "fe68ccd8d8f8f074"
+  },
+  {
+    "stem": "train_230",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 113,
+    "dhash": "9fe9c8e0f8f87038"
+  },
+  {
+    "stem": "train_231",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 114,
+    "dhash": "1fe1c8f0fce870f8"
+  },
+  {
+    "stem": "train_232",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 115,
+    "dhash": "1e70e8d4f4f8701c"
+  },
+  {
+    "stem": "train_233",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 116,
+    "dhash": "9ef2f0f1f0f0f3df"
+  },
+  {
+    "stem": "train_234",
+    "category": "normal",
+    "view": "face",
+    "split": "test",
+    "group": 117,
+    "dhash": "1ff070dcf0ec7016"
+  },
+  {
+    "stem": "train_235",
+    "category": "normal",
+    "view": "face",
+    "split": "test",
+    "group": 117,
+    "dhash": "1cf260dcf0f87816"
+  },
+  {
+    "stem": "train_236",
+    "category": "normal",
+    "view": "face",
+    "split": "test",
+    "group": 117,
+    "dhash": "1d7270dcf0ec7016"
+  },
+  {
+    "stem": "train_237",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "test",
+    "group": 117,
+    "dhash": "1ff270dcf0ec7016"
+  },
+  {
+    "stem": "train_238",
+    "category": "normal",
+    "view": "face",
+    "split": "test",
+    "group": 117,
+    "dhash": "1e7270dcf0ec7812"
+  },
+  {
+    "stem": "train_239",
+    "category": "normal",
+    "view": "oblique",
+    "split": "val",
+    "group": 118,
+    "dhash": "9ff331f0fcecf877"
+  },
+  {
+    "stem": "train_240",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "val",
+    "group": 118,
+    "dhash": "9f7171f0fcecf83b"
+  },
+  {
+    "stem": "train_241",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "val",
+    "group": 118,
+    "dhash": "cff131f0dcecf83f"
+  },
+  {
+    "stem": "train_242",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 119,
+    "dhash": "de70f0f3f2f0719e"
+  },
+  {
+    "stem": "train_243",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 119,
+    "dhash": "def0f0f0f0f072de"
+  },
+  {
+    "stem": "train_244",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 120,
+    "dhash": "9f71e4fcf8f8711e"
+  },
+  {
+    "stem": "train_245",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 120,
+    "dhash": "9e71e4fcf8f8791f"
+  },
+  {
+    "stem": "train_246",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "train",
+    "group": 120,
+    "dhash": "9e70e4dce8f8791f"
+  },
+  {
+    "stem": "train_247",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "train",
+    "group": 120,
+    "dhash": "9e70f4fcfcf8711f"
+  },
+  {
+    "stem": "train_248",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "train",
+    "group": 120,
+    "dhash": "9e70e4d8e0e8711e"
+  },
+  {
+    "stem": "train_249",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 121,
+    "dhash": "6becc4f4f4ecf838"
+  },
+  {
+    "stem": "train_250",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 122,
+    "dhash": "b760dcdcfcecf83f"
+  },
+  {
+    "stem": "train_251",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 123,
+    "dhash": "67e1f4fcececf8bd"
+  },
+  {
+    "stem": "train_252",
+    "category": "normal",
+    "view": "face",
+    "split": "val",
+    "group": 124,
+    "dhash": "9f70f0f2f0f8789d"
+  },
+  {
+    "stem": "train_253",
+    "category": "scratch",
+    "view": "face",
+    "split": "val",
+    "group": 124,
+    "dhash": "9f70f0d2f0f8789f"
+  },
+  {
+    "stem": "train_254",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 125,
+    "dhash": "9e61e0cce4f8781c"
+  },
+  {
+    "stem": "train_255",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "9671e8dcf8f8701e"
+  },
+  {
+    "stem": "train_256",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "9661ecdce8f8701e"
+  },
+  {
+    "stem": "train_257",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 126,
+    "dhash": "9679e8d8d8e8703c"
+  },
+  {
+    "stem": "train_258",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "8e71e8dcecf8701e"
+  },
+  {
+    "stem": "train_259",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 127,
+    "dhash": "bef8ccb4f8f87070"
+  },
+  {
+    "stem": "train_260",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 128,
+    "dhash": "bfe1c8ccecf878f8"
+  },
+  {
+    "stem": "train_261",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 128,
+    "dhash": "3fe1d8fcf8f878fc"
+  },
+  {
+    "stem": "train_262",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 129,
+    "dhash": "9d70e4f2f0f8781c"
+  },
+  {
+    "stem": "train_263",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 130,
+    "dhash": "9ff0f0f0f4f0709f"
+  },
+  {
+    "stem": "train_264",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "9e71e0dcf8f8781c"
+  },
+  {
+    "stem": "train_265",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "9671e8dcf8f8701e"
+  },
+  {
+    "stem": "train_266",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "8e71e0dcf8f8701e"
+  },
+  {
+    "stem": "train_267",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "8671e0dcf8f8701e"
+  },
+  {
+    "stem": "train_268",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "8e71e0dcf8e8781e"
+  },
+  {
+    "stem": "train_269",
+    "category": "normal",
+    "view": "side",
+    "split": "train",
+    "group": 131,
+    "dhash": "fee0cce8ecec707c"
+  },
+  {
+    "stem": "train_270",
+    "category": "normal",
+    "view": "side",
+    "split": "train",
+    "group": 132,
+    "dhash": "bfe1c8fcf0e078f8"
+  },
+  {
+    "stem": "train_271",
+    "category": "scratch",
+    "view": "face",
+    "split": "val",
+    "group": 110,
+    "dhash": "9f70e8d6f0f8789f"
+  },
+  {
+    "stem": "train_272",
+    "category": "scratch",
+    "view": "face",
+    "split": "val",
+    "group": 110,
+    "dhash": "9d70f0f2f2f0709f"
+  },
+  {
+    "stem": "train_273",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 133,
+    "dhash": "9661e8dcf0f8781c"
+  },
+  {
+    "stem": "train_274",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "9c71e8dcf8f8781c"
+  },
+  {
+    "stem": "train_275",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "9671e8dcf0f8701e"
+  },
+  {
+    "stem": "train_276",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "9671e8dce8f8701e"
+  },
+  {
+    "stem": "train_277",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "9c71e8dcf8f8781c"
+  },
+  {
+    "stem": "train_278",
+    "category": "normal",
+    "view": "side",
+    "split": "train",
+    "group": 134,
+    "dhash": "2ce0c8fcf8f878fc"
+  },
+  {
+    "stem": "train_279",
+    "category": "normal",
+    "view": "side",
+    "split": "train",
+    "group": 134,
+    "dhash": "26e0d8f4e8e878fc"
+  },
+  {
+    "stem": "train_280",
+    "category": "normal",
+    "view": "side",
+    "split": "train",
+    "group": 134,
+    "dhash": "06e0c8ecf4e878fc"
+  },
+  {
+    "stem": "train_281",
+    "category": "normal",
+    "view": "face",
+    "split": "val",
+    "group": 124,
+    "dhash": "9f70f0f2f4f8781d"
+  },
+  {
+    "stem": "train_282",
+    "category": "normal",
+    "view": "face",
+    "split": "val",
+    "group": 124,
+    "dhash": "9b70e0d2f4f8789d"
+  },
+  {
+    "stem": "train_283",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "test",
+    "group": 90,
+    "dhash": "9671e0d8f0f8783e"
+  },
+  {
+    "stem": "train_284",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "test",
+    "group": 90,
+    "dhash": "9671e0dcece8701e"
+  },
+  {
+    "stem": "train_285",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "test",
+    "group": 90,
+    "dhash": "9671e4dcd8e8703e"
+  },
+  {
+    "stem": "train_286",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "8e71e0dcecf8701e"
+  },
+  {
+    "stem": "train_287",
+    "category": "scratch",
+    "view": "oblique",
+    "split": "train",
+    "group": 135,
+    "dhash": "9669e0fcf4f8781e"
+  },
+  {
+    "stem": "train_288",
+    "category": "scratch",
+    "view": "side",
+    "split": "train",
+    "group": 136,
+    "dhash": "06e0d8ecf8f878fc"
+  },
+  {
+    "stem": "train_289",
+    "category": "normal",
+    "view": "side",
+    "split": "test",
+    "group": 137,
+    "dhash": "36e0c8e4f8f878fc"
+  },
+  {
+    "stem": "train_290",
+    "category": "scratch",
+    "view": "side",
+    "split": "test",
+    "group": 137,
+    "dhash": "26e1d8e4f8f878fc"
+  },
+  {
+    "stem": "train_291",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 138,
+    "dhash": "dff0e8d4dcf8709e"
+  },
+  {
+    "stem": "train_292",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 139,
+    "dhash": "def1f0f0f4f078fe"
+  },
+  {
+    "stem": "train_293",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "train",
+    "group": 140,
+    "dhash": "967270dcf0f07016"
+  },
+  {
+    "stem": "train_294",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 140,
+    "dhash": "1d7370dcf0f87096"
+  },
+  {
+    "stem": "train_295",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 140,
+    "dhash": "967270dcf0e07096"
+  },
+  {
+    "stem": "train_296",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "train",
+    "group": 140,
+    "dhash": "157371dcf0f8709e"
+  },
+  {
+    "stem": "train_297",
+    "category": "missing_tooth",
+    "view": "face",
+    "split": "train",
+    "group": 140,
+    "dhash": "1c7270dcf0e07016"
+  },
+  {
+    "stem": "train_298",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 141,
+    "dhash": "4ff931f0fcfcf030"
+  },
+  {
+    "stem": "train_299",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 142,
+    "dhash": "9ff931f0f4fcf03c"
+  },
+  {
+    "stem": "train_300",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 141,
+    "dhash": "cff131f0f4ecf03c"
+  },
+  {
+    "stem": "train_301",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 143,
+    "dhash": "9d70e4f2f2f8789f"
+  },
+  {
+    "stem": "train_302",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 143,
+    "dhash": "dff0f0f2f6f8789d"
+  },
+  {
+    "stem": "train_303",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 144,
+    "dhash": "9e61c8dcece8781e"
+  },
+  {
+    "stem": "train_304",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "9671e0dcf8f8781e"
+  },
+  {
+    "stem": "train_305",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 144,
+    "dhash": "9e71e0dcd8ec701e"
+  },
+  {
+    "stem": "train_306",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "9e71e0dcf8f8701e"
+  },
+  {
+    "stem": "train_307",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 144,
+    "dhash": "9f71e0dce8f8703e"
+  },
+  {
+    "stem": "train_308",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "test",
+    "group": 79,
+    "dhash": "fff8ccd8f8f8f070"
+  },
+  {
+    "stem": "train_309",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 145,
+    "dhash": "bfe1c8fcfcf870f8"
+  },
+  {
+    "stem": "train_310",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 128,
+    "dhash": "bfe1d8ccecf878fc"
+  },
+  {
+    "stem": "train_311",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 146,
+    "dhash": "9d70e0f274f878bc"
+  },
+  {
+    "stem": "train_312",
+    "category": "normal",
+    "view": "face",
+    "split": "train",
+    "group": 147,
+    "dhash": "9cf0f8f0f4f0709f"
+  },
+  {
+    "stem": "train_313",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "val",
+    "group": 148,
+    "dhash": "36e1c8fcf0f8783c"
+  },
+  {
+    "stem": "train_314",
+    "category": "normal",
+    "view": "side",
+    "split": "val",
+    "group": 148,
+    "dhash": "9671c8dcf4e8703c"
+  },
+  {
+    "stem": "train_315",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 149,
+    "dhash": "37e1c8dcc8e8781e"
+  },
+  {
+    "stem": "train_316",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "val",
+    "group": 148,
+    "dhash": "1671c8dcf0e8703c"
+  },
+  {
+    "stem": "train_317",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "val",
+    "group": 148,
+    "dhash": "9671c8d8f4ec783e"
+  },
+  {
+    "stem": "train_318",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 150,
+    "dhash": "27f8d8e4fcec7878"
+  },
+  {
+    "stem": "train_319",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 151,
+    "dhash": "3fc1d8ccecf878dc"
+  },
+  {
+    "stem": "train_320",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 152,
+    "dhash": "2fc0f8ecece878fc"
+  },
+  {
+    "stem": "train_321",
+    "category": "normal",
+    "view": "face",
+    "split": "val",
+    "group": 124,
+    "dhash": "9f70f0f2f4f8781c"
+  },
+  {
+    "stem": "train_322",
+    "category": "normal",
+    "view": "face",
+    "split": "val",
+    "group": 124,
+    "dhash": "df70e0d2f4f878bc"
+  },
+  {
+    "stem": "train_323",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "9e71e8dcf8f8701e"
+  },
+  {
+    "stem": "train_324",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "9671e8dcf8f8703e"
+  },
+  {
+    "stem": "train_325",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "9e71e8dcf8e8703a"
+  },
+  {
+    "stem": "train_326",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "9e71e8dcf8e8703a"
+  },
+  {
+    "stem": "train_327",
+    "category": "normal",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "9e71e8dcf8f8703a"
+  },
+  {
+    "stem": "train_328",
+    "category": "normal",
+    "view": "side",
+    "split": "train",
+    "group": 153,
+    "dhash": "bfe8c8f8f8e87074"
+  },
+  {
+    "stem": "train_329",
+    "category": "normal",
+    "view": "side",
+    "split": "train",
+    "group": 154,
+    "dhash": "37e1c8f0f0e878fc"
+  },
+  {
+    "stem": "train_330",
+    "category": "normal",
+    "view": "side",
+    "split": "train",
+    "group": 154,
+    "dhash": "3fe1c8e4f0f878fc"
+  },
+  {
+    "stem": "train_331",
+    "category": "scratch",
+    "view": "face",
+    "split": "train",
+    "group": 155,
+    "dhash": "9bf0e8f4f2f270be"
+  },
+  {
+    "stem": "train_332",
+    "category": "normal",
+    "view": "face",
+    "split": "test",
+    "group": 80,
+    "dhash": "9f70e0f2f4f8789f"
+  },
+  {
+    "stem": "train_333",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "9e71e8dcf8e8781e"
+  },
+  {
+    "stem": "train_334",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "9671e8dcf8e0703e"
+  },
+  {
+    "stem": "train_335",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "8e71e8dcf8f87032"
+  },
+  {
+    "stem": "train_336",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "8e71e8dcf8f8783e"
+  },
+  {
+    "stem": "train_337",
+    "category": "missing_tooth",
+    "view": "oblique",
+    "split": "train",
+    "group": 78,
+    "dhash": "9671e8dcf8f8701e"
+  },
+  {
+    "stem": "train_338",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 156,
+    "dhash": "de70c8d0f0f87078"
+  },
+  {
+    "stem": "train_339",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 157,
+    "dhash": "bee1c8d8d8ec787c"
+  },
+  {
+    "stem": "train_340",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 158,
+    "dhash": "3ee1e8fcf8e8783c"
+  },
+  {
+    "stem": "train_341",
+    "category": "missing_tooth",
+    "view": "side",
+    "split": "train",
+    "group": 158,
+    "dhash": "1ee1c8fcecf8783c"
+  },
+  {
+    "stem": "train_342",
+    "category": "normal",
+    "view": "face",
+    "split": "test",
+    "group": 80,
+    "dhash": "9e70f0f0f4f8789d"
+  },
+  {
+    "stem": "train_343",
+    "category": "scratch",
+    "view": "face",
+    "split": "test",
+    "group": 80,
+    "dhash": "9f70f0d2d4f8781f"
+  }
+]

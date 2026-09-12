@@ -1,0 +1,23 @@
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Local environments
+.venv/
+venv/
+env/
+
+# Local tool/cache state
+.ultralytics/
+
+# Generated training and inference outputs
+runs/
+outputs/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

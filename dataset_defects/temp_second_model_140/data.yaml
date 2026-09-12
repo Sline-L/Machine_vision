@@ -1,0 +1,7 @@
+path: F:/Work/VSCode/Projects/DATASET/dataset_defects/temp_second_model_140
+train: images/train
+val: images/val
+
+names:
+  0: scratch
+  1: missing_tooth

@@ -1,0 +1,26 @@
+<annotation>
+	<folder>send</folder>
+	<filename>train_407.jpg</filename>
+	<path>F:\Work\VSCode\Projects\DATASET\DATASET\images\train\train_407.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>2560</width>
+		<height>1440</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>gear</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>1024</xmin>
+			<ymin>370</ymin>
+			<xmax>1503</xmax>
+			<ymax>812</ymax>
+		</bndbox>
+	</object>
+</annotation>

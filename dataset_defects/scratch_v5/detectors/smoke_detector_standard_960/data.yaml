@@ -1,0 +1,5 @@
+path: F:/Work/VSCode/Projects/DATASET/dataset_defects/scratch_v5/detectors/smoke_detector_standard_960
+train: images/train
+val: images/val
+names:
+  0: scratch

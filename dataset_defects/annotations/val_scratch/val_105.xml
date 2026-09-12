@@ -1,0 +1,26 @@
+<annotation>
+	<folder>val</folder>
+	<filename>val_105.jpg</filename>
+	<path>F:\Work\VSCode\Projects\DATASET\dataset_defects\images\val\val_105.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>319</width>
+		<height>259</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>scratch</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>162</xmin>
+			<ymin>139</ymin>
+			<xmax>231</xmax>
+			<ymax>173</ymax>
+		</bndbox>
+	</object>
+</annotation>

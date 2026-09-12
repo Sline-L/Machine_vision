@@ -1,0 +1,7 @@
+path: F:/Work/VSCode/Projects/DATASET/dataset_defects/auto_search_v2/datasets/p_joint_old_light
+train: images/train
+val: images/val
+test: images/test
+names:
+  0: scratch
+  1: missing_tooth

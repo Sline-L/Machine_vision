@@ -1,0 +1,6 @@
+path: F:/Work/VSCode/Projects/DATASET/dataset_defects/auto_search_v3/detectors/p_s_p2_original
+train: images/train
+val: images/val
+test: images/test
+names:
+  0: scratch

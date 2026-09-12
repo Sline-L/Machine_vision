@@ -1,0 +1,26 @@
+<annotation>
+	<folder>test</folder>
+	<filename>test_149.jpg</filename>
+	<path>F:\Work\VSCode\Projects\DATASET\DATASET\images\test\test_149.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>2560</width>
+		<height>1440</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>gear</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>1164</xmin>
+			<ymin>375</ymin>
+			<xmax>1399</xmax>
+			<ymax>561</ymax>
+		</bndbox>
+	</object>
+</annotation>

@@ -1,0 +1,55 @@
+{
+  "images": 343,
+  "unique_stems": 343,
+  "counts": {
+    "train": {
+      "defect": 151,
+      "normal": 92
+    },
+    "val": {
+      "defect": 30,
+      "normal": 20
+    },
+    "test": {
+      "defect": 30,
+      "normal": 20
+    }
+  },
+  "source_categories": {
+    "train": {
+      "scratch": 56,
+      "normal": 92,
+      "missing_tooth": 95
+    },
+    "val": {
+      "missing_tooth": 18,
+      "normal": 20,
+      "scratch": 12
+    },
+    "test": {
+      "missing_tooth": 19,
+      "normal": 20,
+      "scratch": 11
+    }
+  },
+  "views": {
+    "train": {
+      "face": 90,
+      "side": 58,
+      "oblique": 95
+    },
+    "val": {
+      "face": 22,
+      "side": 9,
+      "oblique": 19
+    },
+    "test": {
+      "side": 12,
+      "face": 20,
+      "oblique": 18
+    }
+  },
+  "groups": 159,
+  "largest_group": 41,
+  "dhash_leaks_at_2": []
+}
