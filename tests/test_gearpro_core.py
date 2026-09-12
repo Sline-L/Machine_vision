@@ -4,6 +4,7 @@ import unittest
 from unittest.mock import patch
 
 from gp.config import AppConfig, PROJECT_ROOT
+from gp.launch import EXPORTS, start
 from gp.types import GearObservation, InspectionResult, InspectionStats
 from gp.weights import classifier_family, classifier_outputs
 
@@ -19,6 +20,9 @@ class ConfigTests(unittest.TestCase):
             config = AppConfig.from_environment()
         self.assertEqual(config.camera_index, 4)
         self.assertEqual(config.locator_model, Path("/tmp/one.pt"))
+
+    def test_missing_locator_file_stops_before_qt(self):
+        self.assertEqual(start(locator=EXPORTS / "missing.engine"), 1)
 
 
 class ClassifierCheckpointTests(unittest.TestCase):

@@ -74,7 +74,16 @@ source .venv/bin/activate
 
 ## 启动
 
-两种启动方式等价：
+在 NX 的 VS Code 里可右键下面的文件，选“在终端中运行 Python 文件”（需已选中
+项目 `.venv` 解释器）。摄像头默认索引 `0`，可在设置里改。
+
+| 文件 | 作用 |
+| --- | --- |
+| `run_pt.py` | 当前 `.pt` 基线 |
+| `run_engine.py` | 定位用板上的 `model1.engine`，分类仍是 `.pt` |
+| `run_onnx.py` | 定位用 ONNX（这台 NX 上是 CPU，只做对比） |
+
+也可以命令行启动，两种方式等价：
 
 ```bash
 python gp_main.py
