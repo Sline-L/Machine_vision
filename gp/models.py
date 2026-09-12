@@ -16,8 +16,7 @@ class TwoStageInspector:
         from ultralytics import YOLO
 
         self.config = config
-        # Locator currently expects a Ultralytics checkpoint. .onnx / .engine
-        # can be pointed at via GEARPRO_MODEL1 once exported on the target NX.
+        # Locator is a Ultralytics `.pt` or NX-built `.engine` via GEARPRO_MODEL1.
         self.locator = YOLO(str(config.locator_model), task="detect")
         self.model2 = ScratchV5Runtime(config.model2_config)
 

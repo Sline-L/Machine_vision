@@ -16,7 +16,7 @@ def start(locator=None, model2_config=None, camera_index=0):
         locator = Path(locator)
         if not locator.is_file():
             print(f"找不到定位模型：{locator}", file=sys.stderr)
-            print("engine / onnx 只在 NX 上导出后存在于 .cache/exports/", file=sys.stderr)
+            print("engine 只在 NX 上用 export_engine.py 生成，位于 .cache/exports/", file=sys.stderr)
             return 1
         os.environ["GEARPRO_MODEL1"] = str(locator.resolve())
     if model2_config is not None:

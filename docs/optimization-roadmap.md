@@ -60,7 +60,7 @@ P2。注意力模块成本较高，先在 P4 融合节点测试 C3k2-attn，再�
 
 ## 5. Jetson 部署优化
 
-格式层面的顺序是 `.pt` 基线 → ONNX 数值对照 → 在 NX 本机编译 TensorRT。
+格式层面的顺序是 `.pt` 基线 → 在 NX 本机编译 TensorRT FP16。
 细节见 [模型格式](model-formats.md)。不要跳过 `.pt` 基线直接上 INT8。
 
 1. 先在 NX 上用当前 `.pt` 跑通，再用 `trtexec` 区分模型耗时与预处理、Qt、

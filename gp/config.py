@@ -41,7 +41,7 @@ class AppConfig:
         config.serial_port = os.getenv("GEARPRO_SERIAL_PORT", config.serial_port)
         config.locator_model = Path(os.getenv("GEARPRO_MODEL1", str(config.locator_model)))
         config.model2_config = Path(os.getenv("GEARPRO_MODEL2", str(config.model2_config)))
-        # Model1 may be .pt, .onnx or .engine. Model2 is a Scratch V5 JSON bundle.
+        # Model1 may be .pt or .engine. Model2 is a Scratch V5 JSON bundle.
         if config.model2_config.is_file():
             try:
                 model2 = json.loads(config.model2_config.read_text(encoding="utf-8"))

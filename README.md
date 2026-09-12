@@ -84,8 +84,8 @@ source .venv/bin/activate
 | 文件 | 作用 |
 | --- | --- |
 | `run_pt.py` | 当前 `.pt` 基线 |
-| `run_engine.py` | 定位用板上的 `model1.engine`，Model2 仍使用融合 `.pt` 包 |
-| `run_onnx.py` | 定位用 ONNX（这台 NX 上是 CPU，只做对比） |
+| `export_engine.py` | 仅 NX：把 `model1.pt` 编成 TensorRT engine |
+| `run_engine.py` | 定位用板上的 `model1.engine`，Model2 仍用融合 `.pt` 包 |
 
 也可以命令行启动，两种方式等价：
 
@@ -128,8 +128,8 @@ python gp_main.py --video /path/to/test.mp4
 校准后融合，默认阈值为 `0.300273610279458`；界面仍统一显示为“缺陷概率”。V5 实际
 只识别划痕，不覆盖缺齿等其他缺陷，详细说明见 [Scratch V5 运行说明](docs/scratch-v5.md)。
 
-当前交付格式是 `.pt`。Jetson NX 上可按 `.pt` → `.onnx` → `.engine` 加速，不必先
-改 UI 或串口；说明见 [模型格式](docs/model-formats.md)。
+当前运行格式是 `.pt` 与 NX 本机编译的 `.engine`。定位加速不必改 UI 或串口；
+说明见 [模型格式](docs/model-formats.md)。
 
 ## 部署配置
 

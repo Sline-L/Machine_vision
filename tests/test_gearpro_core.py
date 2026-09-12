@@ -7,6 +7,7 @@ import unittest
 from unittest.mock import patch
 
 from gp.config import AppConfig, PROJECT_ROOT
+from gp.export_engine import DEFAULT_DEST, DEFAULT_SOURCE
 from gp.launch import EXPORTS, start
 from gp.models import TwoStageInspector
 from gp.scratch_v5 import (
@@ -46,6 +47,10 @@ class ConfigTests(unittest.TestCase):
 
     def test_missing_locator_file_stops_before_qt(self):
         self.assertEqual(start(locator=EXPORTS / "missing.engine"), 1)
+
+    def test_engine_export_writes_cache_artifact(self):
+        self.assertEqual(DEFAULT_SOURCE, PROJECT_ROOT / "model" / "model1.pt")
+        self.assertEqual(DEFAULT_DEST, EXPORTS / "model1.engine")
 
 
 class ScratchV5Tests(unittest.TestCase):

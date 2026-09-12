@@ -1,62 +1,43 @@
-# 模型格式：`.pt`、`.onnx`、`.engine`
+# 模型格式：`.pt` 与 `.engine`
 
-本文记录 GearPro 在 Jetson NX 上的权重格式选择。三种格式不是互相替代的
-“升级关系”，而是开发、交换和上板加速三条线。
+GearPro 运行只使用这两种格式。`.pt` 是开发和精度基线；`.engine` 是在
+**当前这块 Jetson NX** 上用 TensorRT 编出来的加速产物。
 
-当前仓库默认仍使用 `.pt`。应用层（相机、UI、串口、计数）不依赖具体格式；
-真正绑定推理后端的只有 `gp/models.py`。
+应用层（相机、UI、串口、计数）不绑格式。定位换成 engine 只改 Model1 路径；
+Scratch V5 的三个分支继续用 `.pt`。
 
-## 1. 各自是什么
+Ultralytics 编 engine 时会在中间写出 ONNX，那只是编译过程，不作为运行格式。
+本机 ONNX Runtime 没有 CUDA，跑 ONNX 会比 `.pt` 更慢，因此不再提供 ONNX 启动入口。
 
-| 格式 | 本质 | 运行时 |
+## 1. 对比
+
+| | `.pt` | `.engine` |
 | --- | --- | --- |
-| `.pt` | PyTorch 权重或 checkpoint | PyTorch + CUDA |
-| `.onnx` | 计算图中间交换格式 | ONNX Runtime、TensorRT 等 |
-| `.engine` | TensorRT 针对**当前 GPU 与 TensorRT 版本**编好的执行计划 | TensorRT Runtime |
+| NX 吞吐 | 基线 | 通常更快（FP16） |
+| 与训练一致性 | 最高 | FP16 一般可接受 |
+| 换电脑 | 能直接用 | 不能，必须在目标板重编 |
+| 适合阶段 | 开发、精度对照、改模型 | 板上加速 |
 
-常见流水线是 `.pt → .onnx → .engine`。`.engine` 不是 ONNX 的更高版本，而是
-某一台机器上的编译产物。
+`.engine` 与 GPU、JetPack、TensorRT 版本绑定。不要在 Windows 上编了再拷到 NX。
 
-## 2. 对比
-
-| | `.pt` | `.onnx` | `.engine` |
-| --- | --- | --- | --- |
-| NX 吞吐 | 基线，适合第一次上板 | 中等，取决于执行提供器 | 通常最快，尤其 FP16 |
-| 与训练一致性 | 最高 | 高，便于和 `.pt` 对数值 | FP16 一般可接受；INT8 必须回归 |
-| 换电脑能否直接用 | 能 | 能 | 不能，必须在目标板重编 |
-| 改模型 / 调参 | 最容易 | 需重导出 | 每次改图都要重编译 |
-| 工程复杂度 | 当前代码已支持 | 需固定 opset、输入尺寸、NMS 是否进图 | 还依赖 JetPack / TensorRT 版本 |
-| 适合阶段 | 开发、精度对照、第一次 NX 测试 | 跨框架交换、转 TRT 的桥 | 节拍不够时的产线加速 |
-
-`.engine` 与 Jetson 架构、JetPack、TensorRT 大版本绑定。不要在 Windows 或
-另一块板上预先编译 NX 使用的 engine。当前 NX 上的 ONNX Runtime 只有 CPU
-Execution Provider，因此 `model1.onnx` 会比 `.pt` 更慢；定位加速应走
-`model1.engine`（在 NX 本机 FP16 编译）。
-
-## 3. 和两阶段流水线的关系
+## 2. 和两阶段流水线的关系
 
 不要两个模型一刀切。
 
-- **定位 YOLO（`model1`）**：结构更深、通常占时更多。开发期继续 `.pt`；
-  上板冲节拍时优先转 TensorRT。Ultralytics 对 `.pt` / `.onnx` / `.engine`
-  均可 `YOLO(path).predict()`，应用层改动很小。
-- **融合模型（`model2`）**：当前由 EfficientNet-B0、ResNet18 和 YOLO26-P2
-  三份 `.pt` 组成，统一由 `model/model2/inference_config.json` 描述。旧对照
-  `model_old.pt` 仍是 ResNet18 / 512。
-  分类器可以继续 `.pt` 或停在 ONNX。分类预处理
-  （BGR→RGB、缩放到 checkpoint 中的尺寸、ImageNet mean/std）应留在
-  Python 侧，以便和训练对齐。
+- **定位 YOLO（`model1`）**：占时更多，优先转 TensorRT。在 NX 右键
+  `export_engine.py`，再用 `run_engine.py`。
+- **融合模型（`model2`）**：EfficientNet-B0、ResNet18、YOLO26-P2 三份 `.pt`，
+  由 `model/model2/inference_config.json` 描述。预处理留在 Python 侧。
 
-微小划痕对量化敏感。顺序固定为：先用 `.pt` 建立延迟与精度基线，再导出
-ONNX 做数值对照，然后在 **NX 本机** 编 FP16 engine。只有 FP16 精度仍可接受
-且速度仍不够时，才评估带校准集的 INT8。
+顺序：先用 `.pt` 确认判定，再编 FP16 engine。INT8 最后做（划痕敏感）。
 
-## 4. 上板步骤
+## 3. 上板
 
-1. 在 NX 上直接跑当前 `.pt`，记录单帧延迟、显存和与 PC 判定是否一致。
-2. 导出 ONNX，用同一批图对比框坐标和缺陷概率。
-3. 在 NX 本机将 ONNX（或 Ultralytics `format=engine`）编成 `.engine`。
-4. 用环境变量切换路径，不必改业务代码：
+1. 右键 `run_pt.py`，确认划痕判定。
+2. 右键 `export_engine.py`（只需在换 `model1.pt` 或升级 JetPack 后重做）。
+3. 右键 `run_engine.py`。
+
+也可以用环境变量：
 
 ```bash
 GEARPRO_MODEL1=/path/to/model1.engine \
@@ -64,17 +45,10 @@ GEARPRO_MODEL2=/path/to/model2/inference_config.json \
 python gp_main.py
 ```
 
-Model1 换成 `.onnx` / `.engine` 后，Ultralytics 仍可能直接加载；Model2 的三个分支
-目前全部保持 `.pt`。后续转换其中任一分支时必须重新验证三路概率、温度校准和最终融合
-结果，不能只验证单模型输出。
+Model2 任一分支以后若也转 engine，必须重新验证三路概率、温度校准和融合结果。
 
-旧版 YOLO 导出示例见 `legacy/zhuanhua.py`，仅作参考。新版导出应固定
-`imgsz`、batch=1，并确认 NMS 是否包含在图内，避免后处理与训练时不一致。
+## 4. 资产约定
 
-## 5. 仓库中的资产约定
-
-- `.pt` 和经过验证的 `.onnx` 可作为可搬运资产保留。
-- `.engine` 视为构建产物：换板或升级 JetPack 后必须重编，不要把它当成
-  跨机器分发的“最终模型”。
-- 当前默认资产是 `model/model1.pt` 与 `model/model2/inference_config.json` 引用的模型包。
-  `model/model_old.pt` 是替换分类器之前的旧权重，只用于对照。
+- `.pt` 可随仓库搬运。
+- `.engine` 是构建产物，放在 `.cache/exports/`，不提交。
+- 默认资产：`model/model1.pt` 与 `model/model2/` 融合包。
