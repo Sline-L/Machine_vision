@@ -225,7 +225,7 @@ onBeforeUnmount(() => {
 
       <aside class="side-stack">
         <article class="panel important-panel">
-          <div class="panel-head"><div><span class="eyebrow">PRIMARY STATUS</span><h2>重要信息</h2></div><b>{{ active ? '检测运行中' : '检测已停止' }}</b></div>
+          <div class="panel-head"><div><span class="eyebrow">INSPECTION STATUS</span><h2>检测判定</h2></div><b>{{ active ? '检测运行中' : '检测已停止' }}</b></div>
           <div :class="['important-verdict', verdictClass]">
             <span>当前判定</span>
             <strong>{{ result?.verdict || (active ? '检测中' : '等待开始') }}</strong>
@@ -238,7 +238,7 @@ onBeforeUnmount(() => {
         </article>
 
         <article class="panel secondary-panel">
-          <div class="panel-head"><div><span class="eyebrow">DETAILS</span><h2>次要信息</h2></div><b>{{ result?.model_version || '模型待加载' }}</b></div>
+          <div class="panel-head"><div><span class="eyebrow">INFERENCE DETAILS</span><h2>推理明细</h2></div><b>{{ result?.model_version || '模型待加载' }}</b></div>
           <div class="probability-list">
             <div><span>分类器均值</span><strong>{{ result?.observations?.length ? (Math.max(...result.observations.map(x => x.classifier_probability))*100).toFixed(2)+'%' : '—' }}</strong></div>
             <div><span>检测器概率</span><strong>{{ result?.observations?.length ? (Math.max(...result.observations.map(x => x.detector_probability))*100).toFixed(2)+'%' : '—' }}</strong></div>
@@ -252,7 +252,7 @@ onBeforeUnmount(() => {
         </article>
 
         <article class="panel stats-panel">
-          <div class="panel-head"><div><span class="eyebrow">QUALITY OVERVIEW</span><h2>统计信息</h2></div></div>
+          <div class="panel-head"><div><span class="eyebrow">QUALITY OVERVIEW</span><h2>检测统计</h2></div></div>
           <div class="stats-summary">
             <div><span>已检测</span><strong>{{ state.stats.total }}</strong></div>
             <div class="good"><span>合格</span><strong>{{ state.stats.good }}</strong></div>
