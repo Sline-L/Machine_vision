@@ -194,13 +194,6 @@ onBeforeUnmount(() => {
 
     <div v-if="error || state.error" class="alert"><strong>运行提示</strong>{{ error || state.error }}</div>
 
-    <section class="metric-grid">
-      <article class="metric"><span>已检测</span><strong>{{ state.stats.total }}</strong><small>件</small></article>
-      <article class="metric success"><span>合格</span><strong>{{ state.stats.good }}</strong><small>正常</small></article>
-      <article class="metric danger"><span>不合格</span><strong>{{ state.stats.defective }}</strong><small>需复核</small></article>
-      <article class="metric rate"><span>合格率</span><strong>{{ goodRate }}</strong><small>本次任务</small></article>
-    </section>
-
     <section class="workspace">
       <article class="panel vision-panel">
         <div class="panel-head">
@@ -231,25 +224,44 @@ onBeforeUnmount(() => {
       </article>
 
       <aside class="side-stack">
-        <article class="panel result-panel">
-          <div class="panel-head"><div><span class="eyebrow">LATEST RESULT</span><h2>最近结果</h2></div><b>{{ result?.model_version || '模型待加载' }}</b></div>
+        <article class="panel important-panel">
+          <div class="panel-head"><div><span class="eyebrow">PRIMARY STATUS</span><h2>重要信息</h2></div><b>{{ active ? '检测运行中' : '检测已停止' }}</b></div>
+          <div :class="['important-verdict', verdictClass]">
+            <span>当前判定</span>
+            <strong>{{ result?.verdict || (active ? '检测中' : '等待开始') }}</strong>
+          </div>
+          <div class="important-values">
+            <div><span>缺陷融合概率</span><strong>{{ result?.observations?.length ? (Math.max(...result.observations.map(x => x.defect_score))*100).toFixed(2)+'%' : '—' }}</strong></div>
+            <div><span>定位数量</span><strong>{{ result?.observations?.length ?? 0 }}<small> 个</small></strong></div>
+          </div>
+          <div class="runtime-status"><i :class="{ running: active }"></i><span>{{ state.status }}</span></div>
+        </article>
+
+        <article class="panel secondary-panel">
+          <div class="panel-head"><div><span class="eyebrow">DETAILS</span><h2>次要信息</h2></div><b>{{ result?.model_version || '模型待加载' }}</b></div>
           <div class="probability-list">
-            <div><span>融合概率</span><strong>{{ result?.observations?.length ? (Math.max(...result.observations.map(x => x.defect_score))*100).toFixed(2)+'%' : '—' }}</strong></div>
             <div><span>分类器均值</span><strong>{{ result?.observations?.length ? (Math.max(...result.observations.map(x => x.classifier_probability))*100).toFixed(2)+'%' : '—' }}</strong></div>
             <div><span>检测器概率</span><strong>{{ result?.observations?.length ? (Math.max(...result.observations.map(x => x.detector_probability))*100).toFixed(2)+'%' : '—' }}</strong></div>
           </div>
           <div class="detail-grid">
-            <span>定位数量<b>{{ result?.observations?.length ?? 0 }}</b></span>
             <span>总耗时<b>{{ result ? result.elapsed_ms.toFixed(1)+' ms' : '—' }}</b></span>
             <span>定位阶段<b>{{ result ? result.locator_latency_ms.toFixed(1)+' ms' : '—' }}</b></span>
+            <span>分类阶段<b>{{ result ? (result.classifier1_latency_ms + result.classifier2_latency_ms).toFixed(1)+' ms' : '—' }}</b></span>
             <span>划痕阶段<b>{{ result ? (result.classifier1_latency_ms + result.classifier2_latency_ms + result.detector_latency_ms).toFixed(1)+' ms' : '—' }}</b></span>
           </div>
         </article>
 
         <article class="panel stats-panel">
-          <div class="panel-head"><div><span class="eyebrow">QUALITY OVERVIEW</span><h2>质量统计</h2></div></div>
-          <div class="donut" :style="{ '--rate': state.stats.good_rate * 360 + 'deg' }"><span>{{ goodRate }}<small>合格率</small></span></div>
-          <div class="legend"><span><i class="good"></i>合格 {{ state.stats.good }}</span><span><i class="bad"></i>不合格 {{ state.stats.defective }}</span></div>
+          <div class="panel-head"><div><span class="eyebrow">QUALITY OVERVIEW</span><h2>统计信息</h2></div></div>
+          <div class="stats-summary">
+            <div><span>已检测</span><strong>{{ state.stats.total }}</strong></div>
+            <div class="good"><span>合格</span><strong>{{ state.stats.good }}</strong></div>
+            <div class="bad"><span>不合格</span><strong>{{ state.stats.defective }}</strong></div>
+          </div>
+          <div class="stats-visual">
+            <div class="donut" :style="{ '--rate': state.stats.good_rate * 360 + 'deg' }"><span>{{ goodRate }}<small>合格率</small></span></div>
+            <div class="legend"><span><i class="good"></i>合格 {{ state.stats.good }}</span><span><i class="bad"></i>不合格 {{ state.stats.defective }}</span></div>
+          </div>
         </article>
       </aside>
     </section>
