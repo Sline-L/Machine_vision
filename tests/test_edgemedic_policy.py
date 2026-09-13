@@ -56,6 +56,14 @@ class ReflexPolicyTests(unittest.TestCase):
         action = decide(_snap(scratch_v5={"total_latency_ms": 240.0}))
         self.assertEqual(action["name"], "set_inference_profile")
         self.assertEqual(action["params"]["profile"], "SPARSE")
+        self.assertEqual(action["rule"], "V5_OVERLOAD")
+
+    def test_locator_overload_is_not_sparse_reflex(self):
+        from edgemedic.policy import classify_fault
+
+        snap = _snap(locator={"latency_ms": 178.0}, scratch_v5={"total_latency_ms": 72.0})
+        self.assertEqual(classify_fault(snap), "LOCATOR_OVERLOAD")
+        self.assertIsNone(decide(snap))
 
     def test_safe_stop_does_not_auto_resume(self):
         action = decide(

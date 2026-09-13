@@ -1,7 +1,6 @@
 """L2 reasoner: Qwen reads SystemSnapshot and may emit one whitelist action."""
 
 import json
-from difflib import get_close_matches
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -34,6 +33,42 @@ class ReasonerError(RuntimeError):
     pass
 
 
+def _edit_distance(left, right):
+    if left == right:
+        return 0
+    if not left:
+        return len(right)
+    if not right:
+        return len(left)
+    previous = list(range(len(right) + 1))
+    for i, char_l in enumerate(left, start=1):
+        current = [i]
+        for j, char_r in enumerate(right, start=1):
+            insert = current[j - 1] + 1
+            delete = previous[j] + 1
+            replace = previous[j - 1] + (char_l != char_r)
+            current.append(min(insert, delete, replace))
+        previous = current
+    return previous[-1]
+
+
+def lexical_tool(name, allowed=ALLOWED_TOOLS):
+    """Correct 1-2 character typos only when one whitelist name is uniquely closer."""
+    if name in allowed:
+        return name
+    ranked = sorted((_edit_distance(name, item), item) for item in allowed)
+    best_dist, best = ranked[0]
+    if best_dist == 0:
+        return best
+    if best_dist > 2:
+        return None
+    if abs(len(name) - len(best)) > 2:
+        return None
+    if len(ranked) > 1 and ranked[1][0] <= best_dist:
+        return None
+    return best
+
+
 def parse_tool_json(text):
     if not text or not str(text).strip():
         return None
@@ -52,10 +87,9 @@ def parse_tool_json(text):
     if not tool or tool in ("null", "none", "None"):
         return None
     if tool not in ALLOWED_TOOLS:
-        matches = get_close_matches(tool, ALLOWED_TOOLS, n=1, cutoff=0.85)
-        if not matches:
+        tool = lexical_tool(str(tool))
+        if tool is None:
             return None
-        tool = matches[0]
     params = payload.get("params") or {}
     if not isinstance(params, dict):
         params = {}

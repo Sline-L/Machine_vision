@@ -3,6 +3,7 @@
 from datetime import datetime, timezone
 from pathlib import Path
 
+from .jetson_telemetry import read_jetson_metrics
 from .profiles import mission_utility
 
 
@@ -87,6 +88,15 @@ def read_system_metrics():
             metrics["temperature_c"] = float(thermal.read_text().strip()) / 1000.0
         except ValueError:
             pass
+    jetson = read_jetson_metrics()
+    if jetson.get("gpu_util") is not None:
+        metrics["gpu_util"] = jetson["gpu_util"]
+    if jetson.get("gpu_mem_mb") is not None:
+        metrics["gpu_mem_mb"] = jetson["gpu_mem_mb"]
+    if jetson.get("power_w") is not None:
+        metrics["power_w"] = jetson["power_w"]
+    if jetson.get("temperature_c") is not None:
+        metrics["temperature_c"] = jetson["temperature_c"]
     return metrics
 
 

@@ -3,7 +3,7 @@
 import time
 import uuid
 
-THERMAL_STOP_C = 80.0
+THERMAL_STOP_C = 80.0  # operational policy threshold, not a hardware absolute limit
 STALE_MS = 1000.0
 SEQ_STUCK_S = 2.0
 COOLDOWN_S = 10.0
@@ -87,11 +87,12 @@ def classify_fault(snapshot, memory=None):
         return "SERIAL_FAIL"
     locator_ms = (snapshot.get("locator") or {}).get("latency_ms")
     v5_ms = (snapshot.get("scratch_v5") or {}).get("total_latency_ms")
-    if _profile(snapshot) == "FULL" and (
-        (locator_ms is not None and locator_ms >= LOCATOR_SLOW_MS)
-        or (v5_ms is not None and v5_ms >= V5_SLOW_MS)
-    ):
-        return "OVERLOAD_SPARSE"
+    locator_slow = locator_ms is not None and locator_ms >= LOCATOR_SLOW_MS
+    v5_slow = v5_ms is not None and v5_ms >= V5_SLOW_MS
+    if _profile(snapshot) == "FULL" and v5_slow:
+        return "V5_OVERLOAD"
+    if _profile(snapshot) == "FULL" and locator_slow:
+        return "LOCATOR_OVERLOAD"
     for node in ("camera", "locator", "scratch_v5", "serial"):
         health = (snapshot.get(node) or {}).get("health")
         if health is not None and float(health) <= 0.2:
@@ -139,13 +140,10 @@ def decide(snapshot, memory=None):
         memory.mark("SERIAL_FAIL")
         return _action("reconnect_serial", {}, "SERIAL_FAIL", "L1")
 
-    locator_ms = (snapshot.get("locator") or {}).get("latency_ms")
     v5_ms = (snapshot.get("scratch_v5") or {}).get("total_latency_ms")
-    slow = (locator_ms is not None and locator_ms >= LOCATOR_SLOW_MS) or (
-        v5_ms is not None and v5_ms >= V5_SLOW_MS
-    )
-    if slow and profile == "FULL" and memory.cooled("OVERLOAD_SPARSE"):
-        memory.mark("OVERLOAD_SPARSE")
-        return _action("set_inference_profile", {"profile": "SPARSE"}, "OVERLOAD_SPARSE", "L1")
+    v5_slow = v5_ms is not None and v5_ms >= V5_SLOW_MS
+    if v5_slow and profile == "FULL" and memory.cooled("V5_OVERLOAD"):
+        memory.mark("V5_OVERLOAD")
+        return _action("set_inference_profile", {"profile": "SPARSE"}, "V5_OVERLOAD", "L1")
 
     return None

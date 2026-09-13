@@ -1,6 +1,12 @@
-"""In-process L0 checks. EdgeMedic still runs as a separate process over HTTP."""
+"""In-process Hard Guardian. EdgeMedic still runs as a separate process over HTTP.
 
-THERMAL_STOP_C = 80.0
+80°C is an EdgeMedic/GearPro operational policy threshold, not a Jetson hardware
+absolute limit. Hard Guardian may only reduce capability (e.g. FULL → SAFE_STOP)
+and never autonomously raise it.
+"""
+
+THERMAL_POLICY_C = 80.0
+THERMAL_STOP_C = THERMAL_POLICY_C
 
 
 def thermal_stop_needed(snapshot, current_profile):

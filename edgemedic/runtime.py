@@ -1,10 +1,12 @@
 """Poll SystemSnapshot at 2 Hz: L0 → L1 → episode memory → L2 (Qwen)."""
 
 import argparse
+import json
 import time
 import uuid
 
 from .client import ControlClient
+from .incident import build_incident
 from .memory import EpisodeStore
 from .policy import Memory, classify_fault, decide
 from .reasoner import ReasonerError, complete
@@ -23,11 +25,35 @@ def _execute(client, action, source):
     )
 
 
-def _log(layer, rule, action, result):
+def _verify_level(result):
+    if not result:
+        return "none"
+    if result.get("verify_level"):
+        return result["verify_level"]
+    if result.get("verified"):
+        return "function"
+    if result.get("config_verified"):
+        return "config"
+    return "none"
+
+
+def _config_ok(result):
+    if result is None:
+        return False
+    if "config_verified" in result:
+        return bool(result["config_verified"])
+    return _verify_level(result) not in ("none", "", None)
+
+
+def _log(layer, rule, action, result, incident=None):
+    level = _verify_level(result)
     print(
         f"EdgeMedic {layer}/{rule}: {action['name']} {action.get('params')} "
-        f"accepted={result.get('accepted')} verified={result.get('verified')} error={result.get('error')}"
+        f"verify_level={level} recovery={result.get('recovery_success')} "
+        f"accepted={result.get('accepted')} error={result.get('error')}"
     )
+    if incident:
+        print("EdgeMedic incident " + json.dumps(incident, ensure_ascii=False))
 
 
 def run_loop(client, interval=0.5, once=False, llm_url=None, store=None):
@@ -50,31 +76,34 @@ def run_loop(client, interval=0.5, once=False, llm_url=None, store=None):
         executed = None
         result = None
         layer = None
+        incident = None
 
         if action is not None:
             layer = action.get("layer") or "L1"
+            incident = build_incident(fault or action.get("rule"), snapshot, action, layer)
             result = _execute(client, action, "reflex")
-            _log(layer, action.get("rule"), action, result)
+            _log(layer, action.get("rule"), action, result, incident)
             executed = action
-            if not result.get("verified") and action.get("rule") == "WORKER_FAIL":
+            if not _config_ok(result) and action.get("rule") == "WORKER_FAIL":
                 loop.last_error_count = int(((snapshot.get("scratch_v5") or {}).get("error_count") or 0))
 
-        l1_failed = executed is not None and not result.get("verified")
+        stuck = executed is not None and not _config_ok(result)
         if executed is None and fault and (time.monotonic() - last_mem) >= MEM_COOLDOWN_S:
             suggested = store.suggest(fault)
             if suggested is not None:
                 suggested["request_id"] = f"MEM-{fault}-{uuid.uuid4().hex[:8]}"
+                incident = build_incident(fault, snapshot, suggested, "MEM", confidence=0.8)
                 result = _execute(client, suggested, "reflex")
-                _log("MEM", fault, suggested, result)
+                _log("MEM", fault, suggested, result, incident)
                 executed = suggested
                 layer = "MEM"
                 last_mem = time.monotonic()
-                l1_failed = not result.get("verified")
+                stuck = not _config_ok(result)
 
-        need_l2 = llm_url and fault and (executed is None or l1_failed)
+        need_l2 = llm_url and fault and (executed is None or stuck)
         if need_l2 and (time.monotonic() - last_l2) >= L2_COOLDOWN_S:
             note = ""
-            if l1_failed:
+            if stuck:
                 note = f"Previous action {executed['name']} failed verify: {result.get('error')}"
             try:
                 proposed = complete(llm_url, snapshot, extra_note=note)
@@ -84,13 +113,19 @@ def run_loop(client, interval=0.5, once=False, llm_url=None, store=None):
             last_l2 = time.monotonic()
             if proposed is not None:
                 proposed["request_id"] = f"L2-{uuid.uuid4().hex[:8]}"
+                incident = build_incident(fault or "UNKNOWN", snapshot, proposed, "L2", confidence=0.5)
                 result = _execute(client, proposed, "reasoner")
-                _log("L2", fault or "UNKNOWN", proposed, result)
+                _log("L2", fault or "UNKNOWN", proposed, result, incident)
                 executed = proposed
                 layer = "L2"
 
         if executed is not None and fault:
-            store.record(fault, executed["name"], executed.get("params") or {}, bool(result.get("verified")))
+            store.record(
+                fault,
+                executed["name"],
+                executed.get("params") or {},
+                verify_level=_verify_level(result),
+            )
 
         if once:
             return 0
