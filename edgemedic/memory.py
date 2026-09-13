@@ -19,6 +19,8 @@ class EpisodeStore:
         self.path = Path(path) if path is not None else DEFAULT_PATH
         self.successes = defaultdict(int)
         self.failures = defaultdict(int)
+        self.suggests = 0
+        self.harms = 0
         self._load()
 
     def _load(self):
@@ -32,10 +34,17 @@ class EpisodeStore:
             self.successes[key] = int(count)
         for key, count in (data.get("failures") or {}).items():
             self.failures[key] = int(count)
+        self.suggests = int(data.get("suggests") or 0)
+        self.harms = int(data.get("harms") or 0)
 
     def _save(self):
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        payload = {"successes": dict(self.successes), "failures": dict(self.failures)}
+        payload = {
+            "successes": dict(self.successes),
+            "failures": dict(self.failures),
+            "suggests": int(self.suggests),
+            "harms": int(self.harms),
+        }
         self.path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
     def record(self, signature, name, params, verified=False, verify_level=None):
@@ -77,3 +86,49 @@ class EpisodeStore:
             return None
         _sig, name, blob = best.split("|", 2)
         return {"name": name, "params": json.loads(blob)}
+
+    def harm_rate(self):
+        if self.suggests <= 0:
+            return 0.0
+        return self.harms / self.suggests
+
+    def mark_suggestion(self, accepted=True, verify_level="none"):
+        """Live MHR: a memory replay that does not stick counts as harm."""
+        self.suggests += 1
+        if not accepted or verify_level == "none":
+            self.harms += 1
+        self._save()
+
+    def evaluate_suggestion(self, suggested, acceptable_actions=None, abstain_allowed=True):
+        """Offline MHR: suggestion must match the labeled acceptable set."""
+        self.suggests += 1
+        harmed = False
+        if suggested is None:
+            harmed = not abstain_allowed
+        elif acceptable_actions:
+            harmed = not any(_action_matches(suggested, spec) for spec in acceptable_actions)
+        else:
+            harmed = True
+        if harmed:
+            self.harms += 1
+        self._save()
+        return harmed
+
+
+def _action_matches(action, spec):
+    if spec is None:
+        return action is None
+    if action is None:
+        return False
+    name = action.get("name")
+    if spec.get("tool") and name != spec.get("tool"):
+        return False
+    if spec.get("name") and name != spec.get("name"):
+        return False
+    params = spec.get("params")
+    if params:
+        actual = action.get("params") or {}
+        for key, value in params.items():
+            if actual.get(key) != value:
+                return False
+    return True

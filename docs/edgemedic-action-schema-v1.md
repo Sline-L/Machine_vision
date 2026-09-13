@@ -25,9 +25,13 @@
 | `pause_inspection` | 2 | low | 已实现 | inspection_active | 5 | 0 | `resume_inspection` | inspection_active=false |
 | `resume_inspection` | 2 | low | 已实现 | 相机可用 | 30 | 0 | pause | inspection_active=true |
 | `reload_config` | 2 | medium | 重读 `var/settings.json` 并必要时重建 inspector | JSON/模型路径合法 | 90 | 0 | `rollback_config` | validate_models 通过且档位匹配 |
-| `rollback_config` | 2 | medium | 恢复最近一次 Control 写配置前的快照 | 存在快照 | 90 | 0 | 无 | 档位与 locator 回到快照 |
+| `rollback_config` | 2 | medium | 恢复内存快照，否则 `var/settings.last_known_good.json` | 存在快照或 last-known-good | 90 | 0 | 无 | 档位与 locator 回到快照 |
+| `apply_settings` | 2 | medium | **仅 human**：校验并写入 UI 设置 | 字段合法 | 90 | 0 | 配置快照 | 设置已生效 |
+| `use_camera` | 2 | low | **仅 human**：切回实时相机 | 无 | 30 | 0 | 无 | 退出视频模式 |
+| `use_video` | 2 | low | **仅 human**：切到指定视频文件 | `params.path` | 30 | 0 | 无 | `video_mode` |
+| `reset_stats` | 1 | none | **仅 human**：清空本次统计 | 无 | 5 | 0 | 无 | 统计清零 |
 
-`set_locator_profile` 的 `pt_safe` = `model/model1.pt`；`trt_fast` = `.cache/exports/model1.engine`。不要做成改 YOLO 对象内部字段。
+`set_locator_profile` 的 `pt_safe` = `model/model1.pt`；`trt_fast` = `.cache/exports/model1.engine`。不要做成改 YOLO 对象内部字段。Web 仪表盘的 start/stop/settings/camera/video/reset 走同一套 `ControlService`（`source=human`），不绕过 Guardian。
 
 ## 请求 / 响应
 

@@ -1,0 +1,25 @@
+{
+  "case": "memory_negative_transfer_01",
+  "family": "memory-harm",
+  "fault": "LOCATOR_OVERLOAD",
+  "expected_layer": "none",
+  "state": {
+    "locator": {"latency_ms": 178, "health": 0.3},
+    "scratch_v5": {"total_latency_ms": 72, "health": 1.0},
+    "camera": {"health": 1.0}
+  },
+  "memory_seed": [
+    {
+      "signature": "LOCATOR_OVERLOAD",
+      "name": "set_inference_profile",
+      "params": {"profile": "SPARSE"},
+      "verify_level": "function"
+    }
+  ],
+  "memory_seed_repeat": 3,
+  "acceptable_actions": [
+    {"tool": "set_locator_profile", "params": {"profile": "trt_fast"}}
+  ],
+  "abstain_allowed": false,
+  "notes": "Historical V5 SPARSE successes must not transfer onto locator overload. MHR counts this suggestion as harm."
+}

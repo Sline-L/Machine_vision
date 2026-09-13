@@ -7,7 +7,7 @@ import time
 from urllib.parse import urlparse
 
 from .actions import SPECS, ActionError, accept, parse_request
-from .verify import assess, can_reach_function, config_verified, recovery_success
+from .verify import assess, can_reach_function, can_reach_mission, config_verified
 
 
 class ControlService:
@@ -34,7 +34,8 @@ class ControlService:
         meta = SPECS[name]
         before = self.snapshot()
         extras = self.extras()
-        allowed, reason = accept(name, params, before, extras)
+        extras["source"] = request["source"]
+        allowed, reason = accept(name, params, before, extras, source=request["source"])
         if not allowed:
             return _response(request, False, False, "none", reason, before, before, started)
         if name == "get_state":
@@ -83,10 +84,12 @@ class ControlService:
             if _better(level, best_level):
                 best_level = level
                 best_reason = reason
-            if recovery_success(level):
+            if level == "mission":
                 return last, extras, level, None
-            if config_verified(level) and not can_reach_function(extras):
+            if config_verified(level) and not can_reach_function(extras) and not can_reach_mission(name, params, extras):
                 return last, extras, level, reason
+            if level == "function" and not can_reach_mission(name, params, extras):
+                return last, extras, level, None
             remaining = deadline - time.monotonic()
             if remaining <= 0:
                 break

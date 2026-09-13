@@ -17,7 +17,11 @@
         "pause_inspection",
         "resume_inspection",
         "reload_config",
-        "rollback_config"
+        "rollback_config",
+        "apply_settings",
+        "use_camera",
+        "use_video",
+        "reset_stats"
       ]
     },
     "params": { "type": "object" },

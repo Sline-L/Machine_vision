@@ -10,6 +10,7 @@ from typing import Optional
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 RUNTIME_ROOT = PROJECT_ROOT / "var"
 SETTINGS_FILE = RUNTIME_ROOT / "settings.json"
+LAST_GOOD_FILE = RUNTIME_ROOT / "settings.last_known_good.json"
 
 PERSISTED_FIELDS = (
     "camera_index",
@@ -65,6 +66,8 @@ class AppConfig:
         """Build settings while allowing deployment-only environment overrides."""
         config = cls()
         persisted = config.load_persisted()
+        if not persisted:
+            persisted = config.load_persisted(LAST_GOOD_FILE)
         config.camera_index = int(os.getenv("GEARPRO_CAMERA_INDEX", config.camera_index))
         config.serial_port = os.getenv("GEARPRO_SERIAL_PORT", config.serial_port)
         config.locator_model = Path(os.getenv("GEARPRO_MODEL1", str(config.locator_model)))
@@ -79,8 +82,8 @@ class AppConfig:
                 pass
         return config
 
-    def load_persisted(self, path=SETTINGS_FILE):
-        path = Path(path)
+    def load_persisted(self, path=None):
+        path = SETTINGS_FILE if path is None else Path(path)
         if not path.is_file():
             return set()
         try:
@@ -100,9 +103,9 @@ class AppConfig:
             filtered["locator_model"] = locator
         return set(filtered)
 
-    def persist(self, path=SETTINGS_FILE):
+    def persist(self, path=None):
         """Atomically save operator-adjustable, non-secret settings."""
-        path = Path(path)
+        path = SETTINGS_FILE if path is None else Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         payload = {name: getattr(self, name) for name in PERSISTED_FIELDS}
         payload["locator_model"] = str(self.locator_model)
@@ -112,6 +115,12 @@ class AppConfig:
             encoding="utf-8",
         )
         temporary.replace(path)
+        if path.resolve() == SETTINGS_FILE.resolve():
+            good = LAST_GOOD_FILE
+            good.parent.mkdir(parents=True, exist_ok=True)
+            good_tmp = good.with_suffix(good.suffix + ".tmp")
+            good_tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            good_tmp.replace(good)
 
     def update(self, values):
         """Validate and apply settings received from the Web UI."""
@@ -170,3 +179,25 @@ class AppConfig:
         missing = [str(path) for path in (self.locator_model, self.model2_config) if not path.is_file()]
         if missing:
             raise FileNotFoundError("找不到模型文件：" + "、".join(missing))
+
+
+def load_last_known_good_snapshot():
+    """Disk fallback used by rollback when no in-memory Control snapshot exists."""
+    if not LAST_GOOD_FILE.is_file():
+        return None
+    try:
+        values = json.loads(LAST_GOOD_FILE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(values, dict):
+        return None
+    locator = values.get("locator_model")
+    if not isinstance(locator, str) or not locator.strip():
+        return None
+    fields = {name: values[name] for name in PERSISTED_FIELDS if name in values}
+    return {
+        "locator_model": locator,
+        "fields": fields,
+        "inference_profile": values.get("inference_profile", "FULL"),
+        "inspection_active": False,
+    }

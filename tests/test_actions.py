@@ -90,5 +90,19 @@ class ActionContractTests(unittest.TestCase):
         self.assertTrue(ok, reason)
 
 
+    def test_human_only_actions_reject_agent_sources(self):
+        snap = _snapshot()
+        ok, reason = accept("apply_settings", {"inference_interval": 0.2}, snap, source="reflex")
+        self.assertFalse(ok)
+        self.assertIn("人工", reason)
+        ok, reason = accept("reset_stats", {}, snap, extras={"source": "human"}, source="human")
+        self.assertTrue(ok, reason)
+
+    def test_pause_is_idempotent_for_human(self):
+        snap = _snapshot(mission={"inspection_active": False, "current_profile": "FULL"})
+        ok, reason = accept("pause_inspection", {}, snap, extras={"source": "human"})
+        self.assertTrue(ok, reason)
+
+
 if __name__ == "__main__":
     unittest.main()

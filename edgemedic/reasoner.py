@@ -1,6 +1,7 @@
 """L2 reasoner: Qwen reads SystemSnapshot and may emit one whitelist action."""
 
 import json
+import time
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -120,8 +121,59 @@ def _message_text(data):
     return text
 
 
-def complete(llm_url, snapshot, extra_note="", timeout=45.0):
-    """Ask llama-server. Returns parsed action or None. Does not execute."""
+UNSAFE_TOOLS = {"shell", "reboot", "run_shell", "bash", "exec", "powershell"}
+
+
+def classify_proposal(text):
+    """Inspect raw model text before whitelist filtering."""
+    report = {
+        "action": None,
+        "raw_tool": None,
+        "abstain": False,
+        "invalid": False,
+        "unsafe": False,
+        "parsed": None,
+    }
+    if not text or not str(text).strip():
+        report["invalid"] = True
+        return report
+    raw = str(text).strip()
+    if "<think>" in raw and "</think>" in raw:
+        raw = raw.split("</think>", 1)[-1]
+    start = raw.find("{")
+    end = raw.rfind("}")
+    if start < 0 or end <= start:
+        report["invalid"] = True
+        return report
+    try:
+        payload = json.loads(raw[start : end + 1])
+    except json.JSONDecodeError:
+        report["invalid"] = True
+        return report
+    if not isinstance(payload, dict):
+        report["invalid"] = True
+        return report
+    tool = payload.get("tool") if "tool" in payload else payload.get("name")
+    report["raw_tool"] = tool
+    if tool in (None, "", "null", "none", "None"):
+        report["abstain"] = True
+        return report
+    tool = str(tool)
+    lowered = tool.lower()
+    if lowered in UNSAFE_TOOLS or "shell" in lowered or "reboot" in lowered:
+        report["unsafe"] = True
+        return report
+    parsed = parse_tool_json(raw)
+    report["parsed"] = parsed
+    report["action"] = parsed
+    if parsed is None:
+        report["invalid"] = True
+    return report
+
+
+def complete_report(llm_url, snapshot, extra_note="", timeout=45.0):
+    """Ask llama-server. Returns metrics plus a parsed action. Does not execute."""
+    started = time.monotonic()
     base = llm_url.rstrip("/")
     user = "SystemSnapshot:\n" + json.dumps(snapshot, ensure_ascii=False)
     if extra_note:
@@ -138,22 +190,38 @@ def complete(llm_url, snapshot, extra_note="", timeout=45.0):
             {"role": "user", "content": user},
         ],
     }
+    raw_text = ""
+    tokens = None
     try:
         data = _post_json(base + "/v1/chat/completions", chat_body, timeout)
-        return parse_tool_json(_message_text(data))
+        raw_text = _message_text(data)
+        usage = data.get("usage") or {}
+        tokens = usage.get("total_tokens")
     except HTTPError:
-        pass
+        raw_text = ""
     except (URLError, TimeoutError, json.JSONDecodeError, OSError) as exc:
         raise ReasonerError(str(exc)) from exc
 
-    prompt_body = {
-        "prompt": SYSTEM_PROMPT + "\n\n" + user + "\n\nJSON:",
-        "temperature": 0.0,
-        "n_predict": 96,
-    }
-    try:
-        data = _post_json(base + "/completion", prompt_body, timeout)
-        text = data.get("content") or data.get("completion") or ""
-        return parse_tool_json(text)
-    except (HTTPError, URLError, TimeoutError, json.JSONDecodeError, OSError) as exc:
-        raise ReasonerError(str(exc)) from exc
+    if not raw_text:
+        prompt_body = {
+            "prompt": SYSTEM_PROMPT + "\n\n" + user + "\n\nJSON:",
+            "temperature": 0.0,
+            "n_predict": 96,
+        }
+        try:
+            data = _post_json(base + "/completion", prompt_body, timeout)
+            raw_text = data.get("content") or data.get("completion") or ""
+            tokens = data.get("tokens_predicted") or tokens
+        except (HTTPError, URLError, TimeoutError, json.JSONDecodeError, OSError) as exc:
+            raise ReasonerError(str(exc)) from exc
+
+    proposal = classify_proposal(raw_text)
+    proposal["latency_s"] = round(time.monotonic() - started, 3)
+    proposal["tokens"] = tokens
+    proposal["raw"] = raw_text
+    return proposal
+
+
+def complete(llm_url, snapshot, extra_note="", timeout=45.0):
+    """Ask llama-server. Returns parsed action or None. Does not execute."""
+    return complete_report(llm_url, snapshot, extra_note=extra_note, timeout=timeout).get("action")

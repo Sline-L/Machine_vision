@@ -42,6 +42,23 @@ class EpisodeMemoryTests(unittest.TestCase):
             self.store.record("SERIAL_FAIL", "reconnect_serial", {}, False)
         self.assertIsNone(self.store.suggest("SERIAL_FAIL"))
 
+    def test_memory_harm_rate_on_wrong_replay(self):
+        for _ in range(MIN_REPEATED_SUCCESS):
+            self.store.record(
+                "LOCATOR_OVERLOAD",
+                "set_inference_profile",
+                {"profile": "SPARSE"},
+                verify_level="function",
+            )
+        suggested = self.store.suggest("LOCATOR_OVERLOAD")
+        harmed = self.store.evaluate_suggestion(
+            suggested,
+            [{"tool": "set_locator_profile", "params": {"profile": "trt_fast"}}],
+            abstain_allowed=False,
+        )
+        self.assertTrue(harmed)
+        self.assertEqual(self.store.harm_rate(), 1.0)
+
 
 class ReasonerParseTests(unittest.TestCase):
     def test_extracts_json_object(self):

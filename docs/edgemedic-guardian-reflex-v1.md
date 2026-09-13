@@ -55,6 +55,8 @@ Hard Guardian 与 EdgeMedic L0 共用同一条温度策略。Level 3（reboot/sh
 
 ## 与 Control API
 
-L0/L1/记忆用 `source=reflex`，L2 用 `source=reasoner`。人与 Agent 应共用 8787。Web 仪表盘目前仍有一条 FastAPI 设置路径，尚未并入 8787（已知缺口，不在本阶段扩权）。
+L0/L1/记忆用 `source=reflex`，L2 用 `source=reasoner`。Web 仪表盘与 Agent 共用 `ControlService`：浏览器仍走 FastAPI `/api/v1/*`，但 start/stop/settings/camera/video/reset 内部调用 `runtime.human_action` → 同一套 accept/verify/rollback。`apply_settings` / `use_camera` / `use_video` / `reset_stats` 仅 `source=human`。成功写入 `var/settings.json` 时同步 `var/settings.last_known_good.json`。Episode 记忆记录 Memory Harm Rate：`harms/suggests`，错误历史回放或不 stick（`verify_level=none`）计为 harm。
 
-合成故障用例见 `edgemedic/cases/`（`edgemedic.bench`）。
+Mission 级 Verify 看 **inspection 窗口**（最少 N 次周期、output_valid 比例、**p95** 延迟、camera health、utility、无新的 critical incident），不是固定 sleep。SAFE_STOP / pause / 串口恢复在 function 成立时记为 mission。论文指标应分开统计 `ASR_func` 与 `ASR_mission`。
+
+合成评测：`python -m edgemedic.bench --reasoner mock`；接板上 Qwen：`--reasoner qwen`。实验导出：`python -m edgemedic.experiment`。UAL（unsafe 提议被实际执行的比例）必须为 0。

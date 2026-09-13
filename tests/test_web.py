@@ -40,6 +40,27 @@ class FakeRuntime:
     def reset_stats(self):
         self.resets += 1
 
+    def human_action(self, name, params=None):
+        params = params or {}
+        try:
+            if name == "resume_inspection":
+                self.start_inspection()
+            elif name == "pause_inspection":
+                self.stop_inspection()
+            elif name == "use_camera":
+                self.use_camera()
+            elif name == "use_video":
+                self.use_video(params.get("path"), params.get("managed", False))
+            elif name == "apply_settings":
+                self.update_settings(params)
+            elif name == "reset_stats":
+                self.reset_stats()
+            else:
+                return {"accepted": False, "executed": False, "error": f"未知动作：{name}"}
+        except ValueError as exc:
+            return {"accepted": False, "executed": False, "error": str(exc)}
+        return {"accepted": True, "executed": True, "error": None, "verify_level": "mission"}
+
     def jpeg(self, view):
         del view
         return b"jpeg"
@@ -115,6 +136,24 @@ class PersistenceTests(unittest.TestCase):
             self.assertAlmostEqual(restored.defect_threshold, 0.456789)
             self.assertIn("defect_threshold", loaded)
             self.assertNotIn("password", path.read_text(encoding="utf-8"))
+
+    def test_last_known_good_fallback_after_corrupt_settings(self):
+        with tempfile.TemporaryDirectory() as directory:
+            settings = Path(directory) / "settings.json"
+            last = Path(directory) / "settings.last_known_good.json"
+            with patch("gp.config.SETTINGS_FILE", settings), patch("gp.config.LAST_GOOD_FILE", last):
+                from gp.config import AppConfig as LiveConfig
+
+                config = LiveConfig()
+                config.update({"camera_index": 4})
+                config.persist()
+                self.assertTrue(last.is_file())
+                settings.write_text("{not-json", encoding="utf-8")
+                restored = LiveConfig()
+                self.assertEqual(restored.load_persisted(), set())
+                loaded = restored.load_persisted(last)
+                self.assertEqual(restored.camera_index, 4)
+                self.assertIn("camera_index", loaded)
 
 
 class RuntimeSafetyTests(unittest.TestCase):

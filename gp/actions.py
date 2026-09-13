@@ -15,7 +15,13 @@ ACTION_NAMES = (
     "resume_inspection",
     "reload_config",
     "rollback_config",
+    "apply_settings",
+    "use_camera",
+    "use_video",
+    "reset_stats",
 )
+
+HUMAN_ONLY = frozenset(("apply_settings", "use_camera", "use_video", "reset_stats"))
 
 SOURCES = ("human", "reflex", "reasoner")
 
@@ -30,6 +36,10 @@ SPECS = {
     "resume_inspection": {"level": 2, "timeout_s": 30, "retry": 0, "implemented": True},
     "reload_config": {"level": 2, "timeout_s": 90, "retry": 0, "implemented": True},
     "rollback_config": {"level": 2, "timeout_s": 90, "retry": 0, "implemented": True},
+    "apply_settings": {"level": 2, "timeout_s": 90, "retry": 0, "implemented": True},
+    "use_camera": {"level": 2, "timeout_s": 30, "retry": 0, "implemented": True},
+    "use_video": {"level": 2, "timeout_s": 30, "retry": 0, "implemented": True},
+    "reset_stats": {"level": 1, "timeout_s": 5, "retry": 0, "implemented": True},
 }
 
 class ActionError(ValueError):
@@ -56,13 +66,16 @@ def parse_request(body):
     return {"name": name, "params": params, "source": source, "request_id": request_id}
 
 
-def accept(name, params, snapshot, extras=None):
+def accept(name, params, snapshot, extras=None, source=None):
     extras = extras or {}
+    source = source or extras.get("source")
     meta = SPECS.get(name)
     if meta is None:
         return False, f"未知动作：{name}"
     if not meta.get("implemented"):
         return False, f"动作 {name} 尚未实现"
+    if name in HUMAN_ONLY and source != "human":
+        return False, f"{name} 仅允许人工操作"
     checker = _PRECONDITIONS.get(name)
     if checker is None:
         return True, None
@@ -155,8 +168,29 @@ def _pre_rollback(params, snapshot, extras):
     return False, "没有可回滚的配置快照"
 
 
+def _pre_apply_settings(params, snapshot, extras):
+    del snapshot, extras
+    from .config import AppConfig
+
+    try:
+        AppConfig().update(params or {})
+    except ValueError as exc:
+        return False, str(exc)
+    return True, None
+
+
+def _pre_use_video(params, snapshot, extras):
+    del snapshot, extras
+    path = params.get("path")
+    if not path:
+        return False, "缺少 params.path"
+    return True, None
+
+
 def _pre_pause(params, snapshot, extras):
-    del params, extras
+    del params
+    if extras.get("source") == "human":
+        return True, None
     if not (snapshot.get("mission") or {}).get("inspection_active"):
         return False, "检测未在运行，拒绝 pause_inspection"
     return True, None
@@ -184,4 +218,6 @@ _PRECONDITIONS = {
     "resume_inspection": _pre_resume,
     "reload_config": _pre_reload,
     "rollback_config": _pre_rollback,
+    "apply_settings": _pre_apply_settings,
+    "use_video": _pre_use_video,
 }

@@ -1,5 +1,6 @@
 """Headless GearPro lifecycle and shared application state."""
 
+from collections import deque
 from dataclasses import asdict
 from pathlib import Path
 import shutil
@@ -9,10 +10,11 @@ import time
 import cv2
 
 from .camera import CameraCapture
-from .config import PERSISTED_FIELDS, RUNTIME_ROOT
+from .config import PERSISTED_FIELDS, RUNTIME_ROOT, load_last_known_good_snapshot
 from .frames import LatestFrame
 from .serial_io import SerialOutput
-from .telemetry import build_snapshot, locator_backend
+from .telemetry import build_snapshot, camera_health, locator_backend
+from .verify import summarize_cycles
 from .types import InspectionStats
 from .worker import InspectionWorker
 
@@ -39,6 +41,7 @@ class GearProRuntime:
         self._guardian_stop = threading.Event()
         self._guardian_thread = None
         self._config_backup = None
+        self._action_cycles = deque(maxlen=64)
         self.worker = InspectionWorker(
             config,
             self.raw_frames,
@@ -208,20 +211,54 @@ class GearProRuntime:
         return self.state()["health"]
 
     def control_extras(self):
-        backup = self._config_backup or {}
+        backup = self._effective_config_backup() or {}
+        packet = self.raw_frames.read()
+        with self._lock:
+            cycles = list(self._action_cycles)
+            failed = self.error is not None
+            profile = self.config.inference_profile
         return {
-            "worker_failed": self.error is not None,
             "serial_enabled": bool(self.config.serial_enabled),
             "serial_open": bool(self.serial.is_open),
             "video_mode": self.config.video_path is not None,
-            "config_backup": bool(self._config_backup),
+            "config_backup": bool(backup),
             "models_ok": True,
-            "config_profile": self.config.inference_profile,
+            "config_profile": profile,
             "backup_profile": backup.get("inference_profile"),
             "backup_backend": locator_backend(backup["locator_model"]) if backup.get("locator_model") else None,
             "inspection_should_run": self.inspection_active,
             "inspection_can_run": self.inspection_active,
+            "window_stats": summarize_cycles(cycles),
+            "camera_health": camera_health(
+                self.camera.opened if self.source == "camera" else True,
+                None if packet is None else packet.age_ms,
+                self.camera.read_failures if self.source == "camera" else 0,
+            ),
+            "critical_incident": failed,
+            "worker_failed": failed,
+            "settings": self.settings(),
         }
+
+    def begin_verify_window(self):
+        self._action_cycles.clear()
+
+    def _effective_config_backup(self):
+        if self._config_backup:
+            return self._config_backup
+        return load_last_known_good_snapshot()
+
+    def human_action(self, name, params=None):
+        from .control import ControlService
+        import uuid
+
+        return ControlService(self).run_action(
+            {
+                "name": name,
+                "params": params or {},
+                "source": "human",
+                "request_id": f"web-{uuid.uuid4().hex}",
+            }
+        )
 
     def _remember_config(self):
         self._config_backup = {
@@ -344,7 +381,9 @@ class GearProRuntime:
         return {"reloaded": True}
 
     def execute_action(self, name, params):
-        if name in ("set_inference_profile", "set_locator_profile", "reload_config"):
+        if name != "get_state":
+            self.begin_verify_window()
+        if name in ("set_inference_profile", "set_locator_profile", "reload_config", "apply_settings"):
             self._remember_config()
         if name == "restart_camera":
             if self.source != "camera":
@@ -374,9 +413,23 @@ class GearProRuntime:
         if name == "reload_config":
             return self.reload_persisted_config()
         if name == "rollback_config":
-            if not self._config_backup:
+            snap = self._effective_config_backup()
+            if not snap:
                 raise RuntimeError("没有可回滚的配置快照")
-            self._restore_config_backup(self._config_backup)
+            self._restore_config_backup(snap)
+            return {}
+        if name == "apply_settings":
+            self.update_settings(params or {})
+            return {"applied": sorted((params or {}).keys())}
+        if name == "use_camera":
+            self.use_camera()
+            return {}
+        if name == "use_video":
+            path = Path(params.get("path"))
+            self.use_video(path, bool(params.get("managed")))
+            return {}
+        if name == "reset_stats":
+            self.reset_stats()
             return {}
         if name == "pause_inspection":
             self.stop_inspection()
@@ -408,9 +461,16 @@ class GearProRuntime:
                 self.config.locator_model = Path(previous)
                 self.rebuild_inspector(resume=self.config.inference_profile != "SAFE_STOP")
             return
-        if name in ("reload_config", "rollback_config"):
-            if self._config_backup:
-                self._restore_config_backup(self._config_backup)
+        if name in ("reload_config", "rollback_config", "apply_settings"):
+            snap = self._effective_config_backup()
+            if snap:
+                self._restore_config_backup(snap)
+            return
+        if name == "use_camera":
+            return
+        if name == "use_video":
+            return
+        if name == "reset_stats":
             return
         if name == "pause_inspection":
             self.start_inspection()
@@ -500,7 +560,14 @@ class GearProRuntime:
     def _on_result(self, result):
         now = time.monotonic()
         self.annotated_frames.publish(result.annotated_frame)
+        sample = {
+            "valid": True,
+            "locator_ms": result.locator_latency_ms,
+            "v5_ms": result.scratch_latency_ms,
+            "elapsed_ms": result.elapsed_ms,
+        }
         with self._lock:
+            self._action_cycles.append(sample)
             self.last_result = result
             self.error = None
             if result.has_gear and now - getattr(self, "_last_counted_at", 0.0) >= self.config.result_cooldown:
@@ -524,6 +591,7 @@ class GearProRuntime:
 
     def _on_error(self, message):
         with self._lock:
+            self._action_cycles.append({"valid": False, "locator_ms": None, "v5_ms": None, "elapsed_ms": None})
             self.error_count += 1
             self.error = message
             self.status = "检测错误"

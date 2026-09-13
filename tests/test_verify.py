@@ -57,10 +57,57 @@ class VerifyLevelTests(unittest.TestCase):
         self.assertEqual(level, "function", reason)
         self.assertTrue(recovery_success(level))
 
-    def test_safe_stop_is_function(self):
+    def test_safe_stop_counts_as_mission(self):
         before = _snapshot(mission={"inspection_active": True, "current_profile": "FULL"})
         after = _snapshot(mission={"inspection_active": False, "current_profile": "SAFE_STOP"})
         level, reason = assess("set_inference_profile", {"profile": "SAFE_STOP"}, before, after, {})
+        self.assertEqual(level, "mission", reason)
+
+    def test_window_promotes_sparse_to_mission(self):
+        before = _snapshot(mission={"inspection_active": True, "current_profile": "FULL", "output_valid": True})
+        after = _snapshot(
+            locator={"backend": "pt", "loaded": True, "latency_ms": 20.0, "health": 1.0},
+            scratch_v5={"error_count": 0, "total_latency_ms": 60.0},
+            camera={"opened": True, "frame_seq": 20, "frame_age_ms": 40, "health": 1.0},
+            mission={"inspection_active": True, "current_profile": "SPARSE", "output_valid": True, "utility": 0.95},
+        )
+        extras = {
+            "inspection_can_run": True,
+            "camera_health": 1.0,
+            "window_stats": {
+                "n": 5,
+                "output_valid_ratio": 1.0,
+                "locator_p95_ms": 24.0,
+                "v5_p95_ms": 70.0,
+                "elapsed_p95_ms": 90.0,
+            },
+        }
+        level, reason = assess("set_inference_profile", {"profile": "SPARSE"}, before, after, extras)
+        self.assertEqual(level, "mission", reason)
+
+    def test_p95_spike_stays_function(self):
+        from gp.verify import percentile
+
+        self.assertEqual(percentile([10, 12, 11, 400, 13], 95), 400.0)
+        before = _snapshot()
+        after = _snapshot(
+            locator={"backend": "pt", "loaded": True, "latency_ms": 20.0, "health": 1.0},
+            scratch_v5={"error_count": 0, "total_latency_ms": 60.0},
+            camera={"health": 1.0},
+            mission={"inspection_active": True, "current_profile": "SPARSE", "output_valid": True, "utility": 0.95},
+        )
+        extras = {
+            "inspection_can_run": True,
+            "camera_health": 1.0,
+            "window_stats": {
+                "n": 5,
+                "output_valid_ratio": 1.0,
+                "locator_p95_ms": 24.0,
+                "v5_p95_ms": 400.0,
+                "elapsed_p95_ms": 430.0,
+            },
+        }
+        level, reason = assess("set_inference_profile", {"profile": "SPARSE"}, before, after, extras)
         self.assertEqual(level, "function", reason)
 
 

@@ -27,7 +27,9 @@ WebSocket 客户端持有控制权时每 10 秒发送：
 ```
 
 `view` 可取 `auto`、`raw` 或 `annotated`。`auto` 在检测运行且已有结果时返回标注图，
-否则返回原图。
+否则返回原图。改变运行状态的接口经过 `ControlService`（`source=human`），与 EdgeMedic
+共用白名单、precondition 和 verify；Agent 不能调用 `apply_settings`、`use_camera`、
+`use_video`、`reset_stats`。
 
 常见响应码：`400` 参数错误、`401` 未登录、`413` 上传超限、`423` 未取得控制权或控制权
 已被其他终端占用。生产网络若不可信，应由反向代理终止 HTTPS，并限制可访问来源。
