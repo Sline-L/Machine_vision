@@ -1,0 +1,14 @@
+{
+  "case": "camera_stale_01",
+  "family": "known-simple",
+  "fault": "CAMERA_STALE",
+  "expected_layer": "L1",
+  "state": {
+    "camera": {"frame_age_ms": 1824, "health": 0.0}
+  },
+  "acceptable_actions": [
+    {"tool": "restart_camera", "params": {}}
+  ],
+  "abstain_allowed": false,
+  "notes": "L1 must catch this. L2 should not be required."
+}

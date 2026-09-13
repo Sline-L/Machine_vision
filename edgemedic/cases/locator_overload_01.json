@@ -1,0 +1,17 @@
+{
+  "case": "locator_overload_01",
+  "family": "known-composite",
+  "fault": "LOCATOR_OVERLOAD",
+  "expected_layer": "none",
+  "state": {
+    "locator": {"latency_ms": 178, "health": 0.3},
+    "scratch_v5": {"total_latency_ms": 72, "health": 1.0},
+    "camera": {"health": 1.0}
+  },
+  "acceptable_actions": [
+    {"tool": "set_locator_profile", "params": {"profile": "trt_fast"}}
+  ],
+  "abstain_allowed": false,
+  "llm_output": "{\"tool\": \"set_locator_profile\", \"params\": {\"profile\": \"trt_fast\"}}",
+  "notes": "L1 must not fire SPARSE. L2 may choose TRT locator profile."
+}

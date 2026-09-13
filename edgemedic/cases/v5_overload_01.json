@@ -1,0 +1,14 @@
+{
+  "case": "v5_overload_01",
+  "family": "known-simple",
+  "fault": "V5_OVERLOAD",
+  "expected_layer": "L1",
+  "state": {
+    "locator": {"latency_ms": 31, "health": 1.0},
+    "scratch_v5": {"total_latency_ms": 231, "health": 0.3}
+  },
+  "acceptable_actions": [
+    {"tool": "set_inference_profile", "params": {"profile": "SPARSE"}}
+  ],
+  "abstain_allowed": false
+}

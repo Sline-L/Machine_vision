@@ -6,7 +6,7 @@
 
 约束、等级、RQ 与原则见 Cursor 规则 `.cursor/rules/edgemedic.mdc`。
 
-当前状态：浏览器仪表盘与 EdgeMedic Control API 在 `srtp-web`。A2/A3 动作白名单已接齐（含 TRT_FAST 重建 inspector、reload/rollback）。L0/L1、episode memory、L2 钩子走本机 `127.0.0.1:8787`，不 import `gp`。CLASSIFY_ONLY / LOCATE_ONLY 仍未实现。
+当前状态：`srtp-web` 上 **A2+A3 机制闭环已实现**；研究意义上的 A2/A3 **尚未用实验验证**。下一阶段做证据（三级 Verify、GPU 遥测、EdgeMedicBench），不堆 A4。CLASSIFY_ONLY / LOCATE_ONLY 仍未实现。Web 副作用路径尚未全部并入 8787。
 
 | 协议 | 文档 | JSON Schema |
 | --- | --- | --- |

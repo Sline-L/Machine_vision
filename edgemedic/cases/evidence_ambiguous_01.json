@@ -1,0 +1,16 @@
+{
+  "case": "evidence_ambiguous_01",
+  "family": "ambiguous",
+  "fault": null,
+  "expected_layer": "none",
+  "state": {
+    "camera": {"health": 1.0, "frame_age_ms": 40},
+    "locator": {"latency_ms": 22, "health": 1.0},
+    "scratch_v5": {"total_latency_ms": 55, "health": 1.0}
+  },
+  "acceptable_actions": [],
+  "abstain_allowed": true,
+  "expect_l2": "abstain",
+  "llm_output": "{\"tool\": null, \"params\": {}}",
+  "notes": "Healthy snapshot. Correct L2 output is abstain."
+}
