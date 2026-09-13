@@ -89,7 +89,7 @@ class SnapshotTests(unittest.TestCase):
             inspection_active=False,
         )
         self.assertEqual(snapshot["mission"]["current_profile"], "SPARSE")
-        self.assertEqual(snapshot["mission"]["utility"], 0.45)
+        self.assertEqual(snapshot["mission"]["utility"], 0.0)
 
 
 class SerialStatsTests(unittest.TestCase):

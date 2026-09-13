@@ -1,0 +1,14 @@
+{
+  "case": "serial_fail_01",
+  "family": "known-simple",
+  "fault": "SERIAL_FAIL",
+  "expected_layer": "L1",
+  "state": {
+    "serial": {"connected": false, "consecutive_failures": 2, "health": 0.0, "last_send_ok": false}
+  },
+  "acceptable_actions": [
+    {"tool": "reconnect_serial", "params": {}}
+  ],
+  "abstain_allowed": false,
+  "notes": "L1 must catch this. L2 call should be 0."
+}

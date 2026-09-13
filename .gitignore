@@ -1,6 +1,7 @@
 __pycache__/
 tmp/
 var/
+results/
 web/node_modules/
 *.pyc
 .venv/

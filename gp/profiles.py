@@ -101,11 +101,15 @@ def locator_path_for(name):
     return path
 
 
-def mission_utility(profile_name, locator_ok, serial_ok):
+def mission_utility(profile_name, locator_ok, serial_ok, valid_output_ratio=None, latency_score=None):
     profile = SPECS.get(profile_name)
     if profile is None or not profile.get("implemented"):
         return None
-    quality = float(profile["mission_quality"])
-    locator = 1.0 if locator_ok else 0.0
-    serial = 1.0 if serial_ok else 0.0
-    return round(0.3 * locator + 0.5 * quality + 0.2 * serial, 4)
+    ceiling = float(profile["mission_quality"])
+    q_l = 1.0 if locator_ok else 0.0
+    if latency_score is not None:
+        q_l *= max(0.0, min(1.0, float(latency_score)))
+    ratio = 1.0 if valid_output_ratio is None else max(0.0, min(1.0, float(valid_output_ratio)))
+    q_d = ratio * ceiling
+    q_s = 1.0 if serial_ok else 0.0
+    return round(0.3 * q_l + 0.5 * q_d + 0.2 * q_s, 4)

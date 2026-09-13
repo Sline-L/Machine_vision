@@ -21,6 +21,11 @@ class EpisodeStore:
         self.failures = defaultdict(int)
         self.suggests = 0
         self.harms = 0
+        self.misguided = 0
+        self.executed = 0
+        self.executed_harms = 0
+        self.harmful = 0
+        self.caught = 0
         self._load()
 
     def _load(self):
@@ -36,6 +41,11 @@ class EpisodeStore:
             self.failures[key] = int(count)
         self.suggests = int(data.get("suggests") or 0)
         self.harms = int(data.get("harms") or 0)
+        self.misguided = int(data.get("misguided") or 0)
+        self.executed = int(data.get("executed") or 0)
+        self.executed_harms = int(data.get("executed_harms") or 0)
+        self.harmful = int(data.get("harmful") or 0)
+        self.caught = int(data.get("caught") or 0)
 
     def _save(self):
         self.path.parent.mkdir(parents=True, exist_ok=True)
@@ -44,6 +54,11 @@ class EpisodeStore:
             "failures": dict(self.failures),
             "suggests": int(self.suggests),
             "harms": int(self.harms),
+            "misguided": int(self.misguided),
+            "executed": int(self.executed),
+            "executed_harms": int(self.executed_harms),
+            "harmful": int(self.harmful),
+            "caught": int(self.caught),
         }
         self.path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
@@ -88,31 +103,58 @@ class EpisodeStore:
         return {"name": name, "params": json.loads(blob)}
 
     def harm_rate(self):
+        """Deprecated alias of executed-harm rate when only live stickiness is tracked."""
+        if self.executed <= 0:
+            if self.suggests <= 0:
+                return 0.0
+            return self.harms / self.suggests
+        return self.executed_harms / self.executed
+
+    def misguidance_rate(self):
         if self.suggests <= 0:
             return 0.0
-        return self.harms / self.suggests
+        return self.misguided / self.suggests
+
+    def catch_rate(self):
+        if self.harmful <= 0:
+            return None
+        return self.caught / self.harmful
 
     def mark_suggestion(self, accepted=True, verify_level="none"):
-        """Live MHR: a memory replay that does not stick counts as harm."""
+        """Live path: blocked vs executed harm."""
         self.suggests += 1
-        if not accepted or verify_level == "none":
-            self.harms += 1
+        blocked = not accepted
+        if blocked:
+            self.harmful += 1
+            self.caught += 1
+            self.misguided += 1
+        else:
+            self.executed += 1
+            if verify_level == "none":
+                self.executed_harms += 1
+                self.harms += 1
+                self.harmful += 1
+                self.misguided += 1
         self._save()
 
-    def evaluate_suggestion(self, suggested, acceptable_actions=None, abstain_allowed=True):
-        """Offline MHR: suggestion must match the labeled acceptable set."""
+    def evaluate_suggestion(self, suggested, acceptable_actions=None, abstain_allowed=True, blocked=False):
+        from .metrics import classify_memory_proposal
+
+        outcome = classify_memory_proposal(suggested, acceptable_actions, abstain_allowed, blocked=blocked)
         self.suggests += 1
-        harmed = False
-        if suggested is None:
-            harmed = not abstain_allowed
-        elif acceptable_actions:
-            harmed = not any(_action_matches(suggested, spec) for spec in acceptable_actions)
-        else:
-            harmed = True
-        if harmed:
+        if outcome["incorrect"]:
+            self.misguided += 1
+        if outcome["harmful"]:
+            self.harmful += 1
+        if outcome["caught"]:
+            self.caught += 1
+        if outcome["executed"]:
+            self.executed += 1
+        if outcome["harm"]:
+            self.executed_harms += 1
             self.harms += 1
         self._save()
-        return harmed
+        return outcome["harm"] if not blocked else outcome["incorrect"]
 
 
 def _action_matches(action, spec):

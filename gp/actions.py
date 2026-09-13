@@ -23,7 +23,12 @@ ACTION_NAMES = (
 
 HUMAN_ONLY = frozenset(("apply_settings", "use_camera", "use_video", "reset_stats"))
 
-SOURCES = ("human", "reflex", "reasoner")
+SOURCES = ("human", "reflex", "memory", "reasoner")
+AGENT_SOURCES = ("reflex", "memory", "reasoner")
+AUTHORITIES = ("human", "agent")
+LKG_ACTIONS = frozenset(
+    ("set_inference_profile", "set_locator_profile", "reload_config", "rollback_config", "apply_settings")
+)
 
 SPECS = {
     "get_state": {"level": 1, "timeout_s": 1, "retry": 0, "implemented": True},
@@ -57,13 +62,26 @@ def parse_request(body):
         params = {}
     if not isinstance(params, dict):
         raise ActionError("params 必须是对象")
-    source = body.get("source")
-    if source not in SOURCES:
-        raise ActionError("source 必须是 human、reflex 或 reasoner")
     request_id = body.get("request_id")
     if not request_id or not isinstance(request_id, str):
         raise ActionError("缺少 request_id")
-    return {"name": name, "params": params, "source": source, "request_id": request_id}
+    return {
+        "name": name,
+        "params": params,
+        "declared_source": body.get("source"),
+        "request_id": request_id,
+    }
+
+
+def bind_source(declared, authority):
+    """Authority is assigned by the server. HTTP callers cannot become human."""
+    if authority not in AUTHORITIES:
+        raise ActionError("authority 必须由服务器赋值")
+    if authority == "human":
+        return "human"
+    if declared in AGENT_SOURCES:
+        return declared
+    return "reflex"
 
 
 def accept(name, params, snapshot, extras=None, source=None):
@@ -74,8 +92,9 @@ def accept(name, params, snapshot, extras=None, source=None):
         return False, f"未知动作：{name}"
     if not meta.get("implemented"):
         return False, f"动作 {name} 尚未实现"
-    if name in HUMAN_ONLY and source != "human":
-        return False, f"{name} 仅允许人工操作"
+    if name in HUMAN_ONLY:
+        if extras.get("authority") == "agent" or source != "human":
+            return False, f"{name} 仅允许人工操作"
     checker = _PRECONDITIONS.get(name)
     if checker is None:
         return True, None

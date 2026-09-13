@@ -46,7 +46,7 @@
 }
 ```
 
-`source` 为 `human` | `reflex` | `reasoner`。Guardian 不区分执行路径，只区分 level。
+`source` 由服务器绑定：HTTP 上最多是 `reflex`/`memory`/`reasoner`。客户端写 `"source":"human"` 不能升级权限。Guardian 不靠客户端标签放行 human-only 动作。
 
 响应：
 

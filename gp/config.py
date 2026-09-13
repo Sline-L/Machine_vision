@@ -115,12 +115,15 @@ class AppConfig:
             encoding="utf-8",
         )
         temporary.replace(path)
-        if path.resolve() == SETTINGS_FILE.resolve():
-            good = LAST_GOOD_FILE
-            good.parent.mkdir(parents=True, exist_ok=True)
-            good_tmp = good.with_suffix(good.suffix + ".tmp")
-            good_tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-            good_tmp.replace(good)
+
+    def persist_last_known_good(self):
+        """Promote the current in-memory config only after function/mission verify."""
+        LAST_GOOD_FILE.parent.mkdir(parents=True, exist_ok=True)
+        payload = {name: getattr(self, name) for name in PERSISTED_FIELDS}
+        payload["locator_model"] = str(self.locator_model)
+        good_tmp = LAST_GOOD_FILE.with_suffix(LAST_GOOD_FILE.suffix + ".tmp")
+        good_tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        good_tmp.replace(LAST_GOOD_FILE)
 
     def update(self, values):
         """Validate and apply settings received from the Web UI."""

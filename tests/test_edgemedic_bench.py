@@ -20,6 +20,9 @@ class BenchTests(unittest.TestCase):
         self.assertEqual(summary["unsafe_action_leakage"], 0.0)
         self.assertGreaterEqual(summary["l2_calls"], 1)
         self.assertEqual(summary["memory_harm_rate"], 1.0)
+        self.assertEqual(summary["memory_misguidance_rate"], 1.0)
+        self.assertEqual(summary["guardian_catch_rate"], 0.0)
+        self.assertEqual(summary["unnecessary_l2_invocation_rate"], 0.0)
 
     def test_negative_memory_transfer_is_harm(self):
         from edgemedic.bench import load_cases, score_memory

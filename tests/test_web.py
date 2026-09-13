@@ -147,6 +147,8 @@ class PersistenceTests(unittest.TestCase):
                 config = LiveConfig()
                 config.update({"camera_index": 4})
                 config.persist()
+                self.assertFalse(last.is_file())
+                config.persist_last_known_good()
                 self.assertTrue(last.is_file())
                 settings.write_text("{not-json", encoding="utf-8")
                 restored = LiveConfig()

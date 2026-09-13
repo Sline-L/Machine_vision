@@ -103,6 +103,32 @@ class ActionContractTests(unittest.TestCase):
         ok, reason = accept("pause_inspection", {}, snap, extras={"source": "human"})
         self.assertTrue(ok, reason)
 
+    def test_http_cannot_self_assign_human(self):
+        from gp.actions import bind_source
+        from gp.control import ControlService
+
+        self.assertEqual(bind_source("human", "agent"), "reflex")
+        self.assertEqual(bind_source("memory", "agent"), "memory")
+
+        class _Runtime:
+            def current_snapshot(self):
+                return _snapshot()
+
+            def control_extras(self):
+                return {"source": "agent"}
+
+            def execute_action(self, name, params):
+                del name, params
+                raise AssertionError("human-only action must not execute")
+
+        result = ControlService(_Runtime()).run_action(
+            {"name": "reset_stats", "params": {}, "source": "human", "request_id": "spoof"},
+            authority="agent",
+        )
+        self.assertFalse(result["accepted"])
+        self.assertEqual(result["authority"], "agent")
+        self.assertEqual(result["source"], "reflex")
+
 
 if __name__ == "__main__":
     unittest.main()

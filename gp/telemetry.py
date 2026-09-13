@@ -187,6 +187,7 @@ def build_snapshot(
                 getattr(config, "inference_profile", "FULL"),
                 last_result is not None,
                 (not serial_required) or last_ok is True,
+                valid_output_ratio=1.0 if last_result is not None else 0.0,
             ),
         },
     }

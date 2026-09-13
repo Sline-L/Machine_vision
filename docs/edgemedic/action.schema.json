@@ -25,7 +25,7 @@
       ]
     },
     "params": { "type": "object" },
-    "source": { "enum": ["human", "reflex", "reasoner"] },
+    "source": { "enum": ["human", "reflex", "memory", "reasoner"] },
     "request_id": { "type": "string", "minLength": 1 }
   }
 }

@@ -8,7 +8,8 @@ alwaysApply: true
 Research problem: embed an unreliable small LLM in a bounded edge runtime around **GearPro**, not “Qwen controls Jetson”.
 
 - No ROS, LiDAR, PX4, or invented sensors. Degrade only Camera, Locator (`.pt`/`.engine`), Scratch V5, Serial, UI, interval.
-- Target **A2 + A3**. Shadow Agent, 9B, predictive maintenance are A4.
+- Target **A2 + A3 mechanism**. Research-level A2/A3 validation is separate. Shadow Agent, 9B, predictive maintenance are A4.
+- Write “mechanism implemented, research-level effectiveness not yet validated”. Do not equate APIs with proven ASR/MTTR.
 - EdgeMedic and GearPro stay **separate processes**. Agent talks Control API only, never imports `gp` internals, never runs arbitrary shell.
 - L0 Guardian and L1 Reflex are deterministic. L2 (Qwen3-4B) only after L1/memory fail; it reads SystemSnapshot, not raw logs, and emits `{tool, params}`.
 - Every action: whitelist, timeout, retry limit, **Verify**, rollback when possible. No Verify means not SUCCESS.

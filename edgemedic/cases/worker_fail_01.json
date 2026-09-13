@@ -1,0 +1,14 @@
+{
+  "case": "worker_fail_01",
+  "family": "known-simple",
+  "fault": "WORKER_FAIL",
+  "expected_layer": "L1",
+  "state": {
+    "scratch_v5": {"error_count": 2, "health": 0.0}
+  },
+  "acceptable_actions": [
+    {"tool": "restart_worker", "params": {}}
+  ],
+  "abstain_allowed": false,
+  "notes": "L1 must catch worker exception. L2 call should be 0."
+}

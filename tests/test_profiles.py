@@ -60,3 +60,4 @@ class ProfileTests(unittest.TestCase):
         self.assertEqual(mission_utility("SPARSE", True, True), 0.95)
         self.assertEqual(mission_utility("SAFE_STOP", False, True), 0.2)
         self.assertEqual(mission_utility("TRT_FAST", True, True), 1.0)
+        self.assertEqual(mission_utility("SPARSE", True, True, valid_output_ratio=0.5), 0.725)

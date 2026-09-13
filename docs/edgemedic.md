@@ -6,7 +6,11 @@
 
 约束、等级、RQ 与原则见 Cursor 规则 `.cursor/rules/edgemedic.mdc`。
 
-当前状态：`srtp-web` 上 **A2+A3 机制闭环已实现**；研究意义上的 A2/A3 **尚未用实验验证**。Web 副作用已并入同一套 Control API。CLASSIFY_ONLY / LOCATE_ONLY 仍未实现。不堆 A4。
+当前研究状态（机制 ≠ 能力验证）：
+
+> A2+A3 mechanism implemented, research-level effectiveness not yet validated.
+
+Baseline tag：`edgemedic-a2a3-mechanism-baseline`。A4、CLASSIFY_ONLY / LOCATE_ONLY 仍不在范围。测量文档：[architecture](edgemedic-architecture.md)、[verification](edgemedic-verification.md)、[benchmark](edgemedic-benchmark.md)、[experiments](edgemedic-experiments.md)。
 
 | 协议 | 文档 | JSON Schema |
 | --- | --- | --- |
@@ -14,5 +18,9 @@
 | InferenceProfile v1 | [edgemedic-inference-profile-v1.md](edgemedic-inference-profile-v1.md) | [edgemedic/inference-profile.schema.json](edgemedic/inference-profile.schema.json) |
 | Action Schema v1 | [edgemedic-action-schema-v1.md](edgemedic-action-schema-v1.md) | [edgemedic/action.schema.json](edgemedic/action.schema.json) |
 | Guardian / Reflex v1 | [edgemedic-guardian-reflex-v1.md](edgemedic-guardian-reflex-v1.md) | 确定性规则，无独立 schema |
+| Architecture / RQ status | [edgemedic-architecture.md](edgemedic-architecture.md) | 机制 vs 实验验证 |
+| Verification | [edgemedic-verification.md](edgemedic-verification.md) | config/function/mission、LKG |
+| Bench | [edgemedic-benchmark.md](edgemedic-benchmark.md) | EdgeMedicBench |
+| Experiments | [edgemedic-experiments.md](edgemedic-experiments.md) | runner、ASR/MTTR 口径 |
 
 实现顺序：帧时间戳与阶段耗时 → Camera 与 Qt 解耦 → Snapshot → Profile → Control API → Guardian/Reflex → 再接 Qwen。第一里程碑是 **不跑 LLM 也能观察、降级、验证动作**。

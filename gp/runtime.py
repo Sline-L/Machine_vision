@@ -42,6 +42,7 @@ class GearProRuntime:
         self._guardian_thread = None
         self._config_backup = None
         self._action_cycles = deque(maxlen=64)
+        self._window_started = None
         self.worker = InspectionWorker(
             config,
             self.raw_frames,
@@ -229,6 +230,7 @@ class GearProRuntime:
             "inspection_should_run": self.inspection_active,
             "inspection_can_run": self.inspection_active,
             "window_stats": summarize_cycles(cycles),
+            "window_elapsed_s": 0.0 if self._window_started is None else max(0.0, time.monotonic() - self._window_started),
             "camera_health": camera_health(
                 self.camera.opened if self.source == "camera" else True,
                 None if packet is None else packet.age_ms,
@@ -241,6 +243,10 @@ class GearProRuntime:
 
     def begin_verify_window(self):
         self._action_cycles.clear()
+        self._window_started = time.monotonic()
+
+    def promote_last_known_good(self):
+        self.config.persist_last_known_good()
 
     def _effective_config_backup(self):
         if self._config_backup:
@@ -257,7 +263,8 @@ class GearProRuntime:
                 "params": params or {},
                 "source": "human",
                 "request_id": f"web-{uuid.uuid4().hex}",
-            }
+            },
+            authority="human",
         )
 
     def _remember_config(self):

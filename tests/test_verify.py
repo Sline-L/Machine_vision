@@ -74,8 +74,9 @@ class VerifyLevelTests(unittest.TestCase):
         extras = {
             "inspection_can_run": True,
             "camera_health": 1.0,
+            "window_elapsed_s": 10.0,
             "window_stats": {
-                "n": 5,
+                "n": 8,
                 "output_valid_ratio": 1.0,
                 "locator_p95_ms": 24.0,
                 "v5_p95_ms": 70.0,
@@ -99,8 +100,9 @@ class VerifyLevelTests(unittest.TestCase):
         extras = {
             "inspection_can_run": True,
             "camera_health": 1.0,
+            "window_elapsed_s": 10.0,
             "window_stats": {
-                "n": 5,
+                "n": 8,
                 "output_valid_ratio": 1.0,
                 "locator_p95_ms": 24.0,
                 "v5_p95_ms": 400.0,
@@ -109,6 +111,31 @@ class VerifyLevelTests(unittest.TestCase):
         }
         level, reason = assess("set_inference_profile", {"profile": "SPARSE"}, before, after, extras)
         self.assertEqual(level, "function", reason)
+
+
+    def test_short_window_stays_function(self):
+        before = _snapshot()
+        after = _snapshot(
+            locator={"backend": "pt", "loaded": True, "latency_ms": 20.0, "health": 1.0},
+            scratch_v5={"error_count": 0, "total_latency_ms": 60.0},
+            camera={"health": 1.0},
+            mission={"inspection_active": True, "current_profile": "SPARSE", "output_valid": True, "utility": 0.95},
+        )
+        extras = {
+            "inspection_can_run": True,
+            "camera_health": 1.0,
+            "window_elapsed_s": 1.0,
+            "window_stats": {
+                "n": 8,
+                "output_valid_ratio": 1.0,
+                "locator_p95_ms": 24.0,
+                "v5_p95_ms": 70.0,
+                "elapsed_p95_ms": 90.0,
+            },
+        }
+        level, reason = assess("set_inference_profile", {"profile": "SPARSE"}, before, after, extras)
+        self.assertEqual(level, "function", reason)
+        self.assertIn("观察窗口", reason)
 
 
 if __name__ == "__main__":

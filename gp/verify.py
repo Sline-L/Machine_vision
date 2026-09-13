@@ -1,23 +1,44 @@
 """Three-level verify: config, function, mission.
 
-Config means the action stuck (do not rollback).
-Function means one real infer/IO recovery succeeded (Repair Memory may learn).
-Mission means a measured inspection window after that, not a fixed sleep.
+config: target state written (profile/backend/settings). Not recovery.
+function: the module completed one valid functional execution.
+mission: a measured observation window still meets the task, not sleep(N).
+recovery_success is true only for function and mission.
 """
 
+from dataclasses import dataclass
 from math import ceil
 
 LEVELS = ("none", "config", "function", "mission")
 
-DEFAULT_WINDOW = {
-    "min_cycles": 5,
-    "output_valid_ratio": 0.8,
-    "locator_p95_ms": 120.0,
-    "v5_p95_ms": 200.0,
-    "elapsed_p95_ms": 320.0,
-    "camera_health_min": 0.5,
-    "utility_min": 0.7,
-}
+
+@dataclass(frozen=True)
+class MissionVerificationPolicy:
+    window_seconds: float = 2.0
+    min_cycles: int = 5
+    min_valid_output_ratio: float = 0.80
+    max_locator_p95_ms: float = 120.0
+    max_v5_p95_ms: float = 200.0
+    max_elapsed_p95_ms: float = 320.0
+    min_mission_utility: float = 0.70
+    min_health_score: float = 0.50
+    reject_on_critical_incident: bool = True
+
+    def as_dict(self):
+        return {
+            "window_seconds": self.window_seconds,
+            "min_cycles": self.min_cycles,
+            "output_valid_ratio": self.min_valid_output_ratio,
+            "locator_p95_ms": self.max_locator_p95_ms,
+            "v5_p95_ms": self.max_v5_p95_ms,
+            "elapsed_p95_ms": self.max_elapsed_p95_ms,
+            "camera_health_min": self.min_health_score,
+            "utility_min": self.min_mission_utility,
+            "reject_on_critical_incident": self.reject_on_critical_incident,
+        }
+
+
+DEFAULT_WINDOW = MissionVerificationPolicy().as_dict()
 
 
 def rank(level):
@@ -47,27 +68,37 @@ def percentile(values, p):
     return ordered[index]
 
 
+def latency_stats(values):
+    values = [float(item) for item in values if item is not None]
+    if not values:
+        return {"mean": None, "p50": None, "p95": None, "max": None}
+    return {
+        "mean": round(sum(values) / len(values), 3),
+        "p50": percentile(values, 50),
+        "p95": percentile(values, 95),
+        "max": max(values),
+    }
+
+
 def summarize_cycles(samples):
     samples = list(samples or [])
     n = len(samples)
-    if n == 0:
-        return {
-            "n": 0,
-            "output_valid_ratio": 0.0,
-            "locator_p95_ms": None,
-            "v5_p95_ms": None,
-            "elapsed_p95_ms": None,
-        }
     valid = [item for item in samples if item.get("valid")]
-    locator = [item["locator_ms"] for item in valid if item.get("locator_ms") is not None]
-    v5 = [item["v5_ms"] for item in valid if item.get("v5_ms") is not None]
-    elapsed = [item["elapsed_ms"] for item in valid if item.get("elapsed_ms") is not None]
+    locator = latency_stats([item.get("locator_ms") for item in valid])
+    v5 = latency_stats([item.get("v5_ms") for item in valid])
+    elapsed = latency_stats([item.get("elapsed_ms") for item in valid])
     return {
         "n": n,
-        "output_valid_ratio": len(valid) / n,
-        "locator_p95_ms": percentile(locator, 95),
-        "v5_p95_ms": percentile(v5, 95),
-        "elapsed_p95_ms": percentile(elapsed, 95),
+        "output_valid_ratio": 0.0 if n == 0 else len(valid) / n,
+        "locator": locator,
+        "scratch_v5": v5,
+        "elapsed": elapsed,
+        "locator_p95_ms": locator["p95"],
+        "v5_p95_ms": v5["p95"],
+        "elapsed_p95_ms": elapsed["p95"],
+        "locator_mean_ms": locator["mean"],
+        "v5_mean_ms": v5["mean"],
+        "elapsed_max_ms": elapsed["max"],
     }
 
 
@@ -134,23 +165,36 @@ def can_reach_mission(name, params, extras):
 
 
 def mission_spec(name, params, after):
-    spec = dict(DEFAULT_WINDOW)
+    policy = MissionVerificationPolicy()
     profile = params.get("profile") or _mission(after).get("current_profile")
     if name == "set_inference_profile" and profile == "SPARSE":
-        spec["utility_min"] = 0.85
-        spec["v5_p95_ms"] = 220.0
+        policy = MissionVerificationPolicy(
+            window_seconds=10.0,
+            min_cycles=8,
+            min_valid_output_ratio=0.95,
+            max_locator_p95_ms=120.0,
+            max_v5_p95_ms=220.0,
+            max_elapsed_p95_ms=320.0,
+            min_mission_utility=0.85,
+            min_health_score=0.5,
+        )
     if name == "set_locator_profile" and params.get("profile") == "trt_fast":
-        spec["locator_p95_ms"] = 80.0
-    return spec
+        policy = MissionVerificationPolicy(max_locator_p95_ms=80.0)
+    return policy.as_dict()
 
 
 def evaluate_mission_window(name, params, after, extras):
     extras = extras or {}
-    if extras.get("worker_failed") or extras.get("critical_incident"):
+    spec = mission_spec(name, params, after)
+    if spec.get("reject_on_critical_incident") and (extras.get("worker_failed") or extras.get("critical_incident")):
         return False, "窗口内出现新的 critical incident"
     if mission_kind(name, params) != "window":
         return False, None
-    spec = mission_spec(name, params, after)
+    elapsed_s = extras.get("window_elapsed_s")
+    if elapsed_s is None:
+        elapsed_s = 0.0
+    if float(elapsed_s) < float(spec["window_seconds"]):
+        return False, f"观察窗口 {elapsed_s:.2f}s < {spec['window_seconds']}s"
     stats = extras.get("window_stats") or {}
     n = int(stats.get("n") or 0)
     if n < int(spec["min_cycles"]):
@@ -337,7 +381,7 @@ def assess_apply_settings(params, before, after, extras):
     wanted_profile = (params or {}).get("inference_profile")
     if wanted_profile and extras.get("config_profile") != wanted_profile:
         return "none", f"档位仍为 {extras.get('config_profile')}，期望 {wanted_profile}"
-    return "mission", None
+    return "function", None
 
 
 def assess_use_camera(params, before, after, extras):

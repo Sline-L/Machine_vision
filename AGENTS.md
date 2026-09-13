@@ -91,7 +91,7 @@ git diff --check
 For Python code changes:
 
 ```bash
-python -m py_compile gp_main.py run_pt.py run_engine.py export_engine.py gp/app.py gp/actions.py gp/auth.py gp/camera.py gp/config.py gp/control.py gp/export_engine.py gp/frames.py gp/guardian.py gp/jetson_telemetry.py gp/launch.py gp/models.py gp/profiles.py gp/runtime.py gp/serial_io.py gp/telemetry.py gp/types.py gp/verify.py gp/web.py gp/worker.py gp/weights.py edgemedic/__init__.py edgemedic/__main__.py edgemedic/bench.py edgemedic/client.py edgemedic/experiment.py edgemedic/incident.py edgemedic/memory.py edgemedic/policy.py edgemedic/reasoner.py edgemedic/runtime.py
+python -m py_compile gp_main.py run_pt.py run_engine.py export_engine.py gp/app.py gp/actions.py gp/auth.py gp/camera.py gp/config.py gp/control.py gp/export_engine.py gp/frames.py gp/guardian.py gp/jetson_telemetry.py gp/launch.py gp/models.py gp/profiles.py gp/runtime.py gp/serial_io.py gp/telemetry.py gp/types.py gp/verify.py gp/web.py gp/worker.py gp/weights.py edgemedic/__init__.py edgemedic/__main__.py edgemedic/bench.py edgemedic/candidate.py edgemedic/client.py edgemedic/experiment.py edgemedic/incident.py edgemedic/inject.py edgemedic/memory.py edgemedic/metrics.py edgemedic/policy.py edgemedic/reasoner.py edgemedic/runtime.py
 python -m unittest discover -s tests -v
 cd web && npm run build
 ```

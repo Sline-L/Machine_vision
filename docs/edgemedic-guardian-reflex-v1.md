@@ -55,7 +55,11 @@ Hard Guardian 与 EdgeMedic L0 共用同一条温度策略。Level 3（reboot/sh
 
 ## 与 Control API
 
-L0/L1/记忆用 `source=reflex`，L2 用 `source=reasoner`。Web 仪表盘与 Agent 共用 `ControlService`：浏览器仍走 FastAPI `/api/v1/*`，但 start/stop/settings/camera/video/reset 内部调用 `runtime.human_action` → 同一套 accept/verify/rollback。`apply_settings` / `use_camera` / `use_video` / `reset_stats` 仅 `source=human`。成功写入 `var/settings.json` 时同步 `var/settings.last_known_good.json`。Episode 记忆记录 Memory Harm Rate：`harms/suggests`，错误历史回放或不 stick（`verify_level=none`）计为 harm。
+L0/L1/记忆/L2 的 **authority** 由服务器赋值：Web 进程内 `authority=human`，Control HTTP `authority=agent`。请求 JSON 里的 `source` 不能把调用方升级成 human。Agent 可声明 `reflex` / `memory` / `reasoner` 仅作标签。`apply_settings` 等 human-only 动作在 HTTP 上即使写 `"source":"human"` 也会被拒。
+
+`settings.json` 是 active config。`settings.last_known_good.json` 只在 function/mission verify 之后晋升，不是 last-written。
+
+Episode 指标拆开：MMR（错误建议）、MHR（已执行且造成 function/mission 伤害）、GCR（伤害性建议在执行前被拦住）。合成负迁移用例当前 **Guardian 不会拦截 SPARSE-on-locator-overload**，因此 MMR=1、MHR=1、GCR=0 是对现状的测量，不是已经“抓住了负迁移”。
 
 Mission 级 Verify 看 **inspection 窗口**（最少 N 次周期、output_valid 比例、**p95** 延迟、camera health、utility、无新的 critical incident），不是固定 sleep。SAFE_STOP / pause / 串口恢复在 function 成立时记为 mission。论文指标应分开统计 `ASR_func` 与 `ASR_mission`。
 

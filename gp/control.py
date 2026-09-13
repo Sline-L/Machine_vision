@@ -6,8 +6,8 @@ import threading
 import time
 from urllib.parse import urlparse
 
-from .actions import SPECS, ActionError, accept, parse_request
-from .verify import assess, can_reach_function, can_reach_mission, config_verified
+from .actions import LKG_ACTIONS, SPECS, ActionError, accept, bind_source, parse_request
+from .verify import assess, can_reach_function, can_reach_mission, config_verified, recovery_success
 
 
 class ControlService:
@@ -26,15 +26,18 @@ class ControlService:
     def rollback(self, name, token):
         return self.runtime.rollback_action(name, token)
 
-    def run_action(self, body):
+    def run_action(self, body, authority="agent"):
         started = time.monotonic()
         request = parse_request(body)
+        request["authority"] = authority
+        request["source"] = bind_source(request.get("declared_source"), authority)
         name = request["name"]
         params = request["params"]
         meta = SPECS[name]
         before = self.snapshot()
         extras = self.extras()
         extras["source"] = request["source"]
+        extras["authority"] = authority
         allowed, reason = accept(name, params, before, extras, source=request["source"])
         if not allowed:
             return _response(request, False, False, "none", reason, before, before, started)
@@ -62,6 +65,7 @@ class ControlService:
                 continue
             after, extras, level, last_error = self._poll_verify(name, params, before, deadline)
             if config_verified(level):
+                self._maybe_promote_lkg(name, level)
                 return _response(request, True, True, level, last_error, before, after, started)
             if token is not None:
                 try:
@@ -97,6 +101,18 @@ class ControlService:
         note = None if config_verified(best_level) else (best_reason or reason)
         return last, extras, best_level, note
 
+    def _maybe_promote_lkg(self, name, level):
+        if name not in LKG_ACTIONS:
+            return
+        if not recovery_success(level):
+            return
+        promote = getattr(self.runtime, "promote_last_known_good", None)
+        if callable(promote):
+            try:
+                promote()
+            except OSError:
+                pass
+
 
 def _better(left, right):
     order = {"none": 0, "config": 1, "function": 2, "mission": 3}
@@ -114,6 +130,8 @@ def _response(request, accepted, executed, verify_level, error, before, after, s
         "config_verified": configured,
         "recovery_success": recovered,
         "verify_level": verify_level,
+        "authority": request.get("authority"),
+        "source": request.get("source"),
         "error": error,
         "snapshot_before": before,
         "snapshot_after": after,
@@ -157,7 +175,7 @@ def _make_handler(service):
                 self._write(400, {"error": "invalid json"})
                 return
             try:
-                self._write(200, service.run_action(payload))
+                self._write(200, service.run_action(payload, authority="agent"))
             except ActionError as exc:
                 self._write(400, {"error": str(exc)})
             except Exception as exc:

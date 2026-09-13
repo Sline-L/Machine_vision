@@ -58,6 +58,27 @@ class EpisodeMemoryTests(unittest.TestCase):
         )
         self.assertTrue(harmed)
         self.assertEqual(self.store.harm_rate(), 1.0)
+        self.assertEqual(self.store.misguidance_rate(), 1.0)
+        self.assertEqual(self.store.catch_rate(), 0.0)
+
+    def test_guardian_block_is_misguidance_not_harm(self):
+        for _ in range(MIN_REPEATED_SUCCESS):
+            self.store.record(
+                "LOCATOR_OVERLOAD",
+                "set_inference_profile",
+                {"profile": "SPARSE"},
+                verify_level="function",
+            )
+        suggested = self.store.suggest("LOCATOR_OVERLOAD")
+        self.store.evaluate_suggestion(
+            suggested,
+            [{"tool": "set_locator_profile", "params": {"profile": "trt_fast"}}],
+            abstain_allowed=False,
+            blocked=True,
+        )
+        self.assertEqual(self.store.misguidance_rate(), 1.0)
+        self.assertEqual(self.store.harm_rate(), 0.0)
+        self.assertEqual(self.store.catch_rate(), 1.0)
 
 
 class ReasonerParseTests(unittest.TestCase):

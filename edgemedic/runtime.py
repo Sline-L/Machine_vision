@@ -93,7 +93,7 @@ def run_loop(client, interval=0.5, once=False, llm_url=None, store=None):
             if suggested is not None:
                 suggested["request_id"] = f"MEM-{fault}-{uuid.uuid4().hex[:8]}"
                 incident = build_incident(fault, snapshot, suggested, "MEM", confidence=0.8)
-                result = _execute(client, suggested, "reflex")
+                result = _execute(client, suggested, "memory")
                 store.mark_suggestion(accepted=bool(result.get("accepted")), verify_level=_verify_level(result))
                 _log("MEM", fault, suggested, result, incident)
                 executed = suggested
