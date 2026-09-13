@@ -1,6 +1,6 @@
 """Whitelist, preconditions, and verify rules for Control API v1."""
 
-from .profiles import ProfileError, spec as profile_spec
+from .profiles import ProfileError, locator_path_for, spec as profile_spec
 
 ACTION_NAMES = (
     "get_state",
@@ -22,12 +22,12 @@ SPECS = {
     "restart_camera": {"level": 2, "timeout_s": 8, "retry": 2, "implemented": True},
     "restart_worker": {"level": 2, "timeout_s": 30, "retry": 1, "implemented": True},
     "reconnect_serial": {"level": 2, "timeout_s": 3, "retry": 3, "implemented": True},
-    "set_inference_profile": {"level": 2, "timeout_s": 60, "retry": 0, "implemented": True},
-    "set_locator_profile": {"level": 2, "timeout_s": 90, "retry": 0, "implemented": False},
+    "set_inference_profile": {"level": 2, "timeout_s": 90, "retry": 0, "implemented": True},
+    "set_locator_profile": {"level": 2, "timeout_s": 90, "retry": 0, "implemented": True},
     "pause_inspection": {"level": 2, "timeout_s": 5, "retry": 0, "implemented": True},
     "resume_inspection": {"level": 2, "timeout_s": 30, "retry": 0, "implemented": True},
-    "reload_config": {"level": 2, "timeout_s": 90, "retry": 0, "implemented": False},
-    "rollback_config": {"level": 2, "timeout_s": 90, "retry": 0, "implemented": False},
+    "reload_config": {"level": 2, "timeout_s": 90, "retry": 0, "implemented": True},
+    "rollback_config": {"level": 2, "timeout_s": 90, "retry": 0, "implemented": True},
 }
 
 SNAPSHOT_KEYS = ("schema_version", "system", "camera", "locator", "scratch_v5", "serial", "mission")
@@ -130,7 +130,36 @@ def _pre_set_profile(params, snapshot, extras):
         return False, str(exc)
     if not profile.get("implemented"):
         return False, f"档位 {name} 尚未实现"
+    if name == "TRT_FAST":
+        from .profiles import ENGINE_LOCATOR
+
+        if not ENGINE_LOCATOR.is_file():
+            return False, "找不到 model1.engine，无法进入 TRT_FAST"
     return True, None
+
+
+def _pre_set_locator(params, snapshot, extras):
+    del snapshot, extras
+    name = params.get("profile")
+    if not name:
+        return False, "缺少 params.profile"
+    try:
+        locator_path_for(name)
+    except ProfileError as exc:
+        return False, str(exc)
+    return True, None
+
+
+def _pre_reload(params, snapshot, extras):
+    del params, snapshot, extras
+    return True, None
+
+
+def _pre_rollback(params, snapshot, extras):
+    del params, snapshot
+    if extras.get("config_backup"):
+        return True, None
+    return False, "没有可回滚的配置快照"
 
 
 def _pre_pause(params, snapshot, extras):
@@ -203,6 +232,48 @@ def _ver_set_profile(params, before, after, extras):
     previous = (before.get("mission") or {}).get("current_profile")
     if previous == "SAFE_STOP" and not (after.get("mission") or {}).get("inspection_active"):
         return False, "档位恢复后检测未运行"
+    if wanted == "TRT_FAST" and (after.get("locator") or {}).get("backend") != "engine":
+        return False, "TRT_FAST 后 locator 不是 engine"
+    if wanted == "FULL" and previous == "TRT_FAST" and (after.get("locator") or {}).get("backend") != "pt":
+        return False, "回 FULL 后 locator 不是 pt"
+    return True, None
+
+
+def _ver_set_locator(params, before, after, extras):
+    del before
+    wanted = params.get("profile")
+    backend = (after.get("locator") or {}).get("backend")
+    expected = {"pt_safe": "pt", "trt_fast": "engine"}.get(wanted)
+    if expected is None:
+        return False, f"未知定位档位：{wanted}"
+    if backend != expected:
+        return False, f"locator.backend={backend}，期望 {expected}"
+    if extras.get("inspection_should_run") and not (after.get("locator") or {}).get("loaded"):
+        return False, "locator 未加载"
+    return True, None
+
+
+def _ver_reload(params, before, after, extras):
+    del params, before
+    if extras.get("models_ok") is False:
+        return False, "模型路径校验失败"
+    current = (after.get("mission") or {}).get("current_profile")
+    expected = extras.get("config_profile")
+    if expected and current != expected:
+        return False, f"档位仍为 {current}，期望 {expected}"
+    return True, None
+
+
+def _ver_rollback(params, before, after, extras):
+    del params, before
+    expected_profile = extras.get("backup_profile")
+    expected_backend = extras.get("backup_backend")
+    current = (after.get("mission") or {}).get("current_profile")
+    backend = (after.get("locator") or {}).get("backend")
+    if expected_profile and current != expected_profile:
+        return False, f"回滚后档位为 {current}，期望 {expected_profile}"
+    if expected_backend and backend != expected_backend:
+        return False, f"回滚后 locator 为 {backend}，期望 {expected_backend}"
     return True, None
 
 
@@ -226,8 +297,11 @@ _PRECONDITIONS = {
     "restart_worker": _pre_restart_worker,
     "reconnect_serial": _pre_reconnect_serial,
     "set_inference_profile": _pre_set_profile,
+    "set_locator_profile": _pre_set_locator,
     "pause_inspection": _pre_pause,
     "resume_inspection": _pre_resume,
+    "reload_config": _pre_reload,
+    "rollback_config": _pre_rollback,
 }
 
 _VERIFIERS = {
@@ -236,6 +310,9 @@ _VERIFIERS = {
     "restart_worker": _ver_restart_worker,
     "reconnect_serial": _ver_reconnect_serial,
     "set_inference_profile": _ver_set_profile,
+    "set_locator_profile": _ver_set_locator,
     "pause_inspection": _ver_pause,
     "resume_inspection": _ver_resume,
+    "reload_config": _ver_reload,
+    "rollback_config": _ver_rollback,
 }

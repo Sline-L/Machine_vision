@@ -10,18 +10,21 @@ ALLOWED_TOOLS = (
     "restart_worker",
     "reconnect_serial",
     "set_inference_profile",
+    "set_locator_profile",
     "pause_inspection",
     "resume_inspection",
 )
 
-ALLOWED_PROFILES = ("FULL", "SPARSE", "SAFE_STOP")
+ALLOWED_PROFILES = ("FULL", "SPARSE", "SAFE_STOP", "TRT_FAST")
+ALLOWED_LOCATORS = ("pt_safe", "trt_fast")
 
 SYSTEM_PROMPT = """You are EdgeMedic L2 on GearPro. Output ONE JSON object only:
 {"tool": "<name or null>", "params": {}}
-Allowed tools: restart_camera, restart_worker, reconnect_serial, set_inference_profile, pause_inspection, resume_inspection.
-set_inference_profile params.profile must be FULL, SPARSE, or SAFE_STOP.
+Allowed tools: restart_camera, restart_worker, reconnect_serial, set_inference_profile, set_locator_profile, pause_inspection, resume_inspection.
+set_inference_profile params.profile: FULL, SPARSE, SAFE_STOP, or TRT_FAST (TRT_FAST needs model1.engine).
+set_locator_profile params.profile: pt_safe or trt_fast. That rebuilds inspector; never assign backend fields.
 Never invent tools. Never shell, reboot, or edit files.
-If the snapshot is healthy or you are unsure, output {"tool": null, "params": {}}.
+If healthy or unsure, {"tool": null, "params": {}}.
 Do not repeat an action that just failed verify.
 /no_think
 """
@@ -60,6 +63,10 @@ def parse_tool_json(text):
         profile = params.get("profile")
         if profile not in ALLOWED_PROFILES:
             return None
+    if tool == "set_locator_profile":
+        profile = params.get("profile")
+        if profile not in ALLOWED_LOCATORS:
+            return None
     return {"name": tool, "params": params}
 
 
@@ -87,10 +94,11 @@ def complete(llm_url, snapshot, extra_note="", timeout=45.0):
         user += "\n\nNote: " + extra_note
     chat_body = {
         "model": "qwen3-4b",
-        "temperature": 0.1,
-        "max_tokens": 1024,
+        "temperature": 0.0,
+        "max_tokens": 160,
         "enable_thinking": False,
         "chat_template_kwargs": {"enable_thinking": False},
+        "response_format": {"type": "json_object"},
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": user},
@@ -106,8 +114,8 @@ def complete(llm_url, snapshot, extra_note="", timeout=45.0):
 
     prompt_body = {
         "prompt": SYSTEM_PROMPT + "\n\n" + user + "\n\nJSON:",
-        "temperature": 0.1,
-        "n_predict": 256,
+        "temperature": 0.0,
+        "n_predict": 96,
     }
     try:
         data = _post_json(base + "/completion", prompt_body, timeout)

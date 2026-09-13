@@ -94,6 +94,10 @@ class AppConfig:
             self.update(filtered)
         except ValueError:
             return set()
+        locator = values.get("locator_model")
+        if isinstance(locator, str) and locator.strip():
+            self.locator_model = Path(locator)
+            filtered["locator_model"] = locator
         return set(filtered)
 
     def persist(self, path=SETTINGS_FILE):
@@ -101,6 +105,7 @@ class AppConfig:
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         payload = {name: getattr(self, name) for name in PERSISTED_FIELDS}
+        payload["locator_model"] = str(self.locator_model)
         temporary = path.with_suffix(path.suffix + ".tmp")
         temporary.write_text(
             json.dumps(payload, ensure_ascii=False, indent=2) + "\n",

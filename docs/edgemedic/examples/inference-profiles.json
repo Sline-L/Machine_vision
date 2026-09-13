@@ -14,7 +14,7 @@
   },
   {
     "name": "TRT_FAST",
-    "implemented": false,
+    "implemented": true,
     "locator": "engine",
     "classifiers_enabled": true,
     "detector_enabled": true,
@@ -23,7 +23,7 @@
     "ui_refresh_hz": null,
     "mission_quality": 1.0,
     "rollback_target": "FULL",
-    "notes": "Requires inspector rebuild when engine file exists. Not a field assignment."
+    "notes": "Rebuilds TwoStageInspector when .cache/exports/model1.engine exists."
   },
   {
     "name": "SPARSE",

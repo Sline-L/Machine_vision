@@ -9,10 +9,10 @@ import time
 import cv2
 
 from .camera import CameraCapture
-from .config import RUNTIME_ROOT
+from .config import PERSISTED_FIELDS, RUNTIME_ROOT
 from .frames import LatestFrame
 from .serial_io import SerialOutput
-from .telemetry import build_snapshot
+from .telemetry import build_snapshot, locator_backend
 from .types import InspectionStats
 from .worker import InspectionWorker
 
@@ -38,6 +38,7 @@ class GearProRuntime:
         self.control_server = None
         self._guardian_stop = threading.Event()
         self._guardian_thread = None
+        self._config_backup = None
         self.worker = InspectionWorker(
             config,
             self.raw_frames,
@@ -139,14 +140,15 @@ class GearProRuntime:
             self.annotated_frames.clear()
 
     def update_settings(self, values):
+        values = dict(values)
+        profile = values.pop("inference_profile", None)
         camera_fields = {"camera_index", "camera_width", "camera_height", "camera_fps"}
         serial_fields = {"serial_port", "serial_baudrate"}
         old_camera = tuple(getattr(self.config, name) for name in sorted(camera_fields))
         old_serial = (self.config.serial_port, self.config.serial_baudrate)
-        previous_profile = self.config.inference_profile
-        profile = values.get("inference_profile")
-        self.config.update(values)
-        self.config.persist()
+        if values:
+            self.config.update(values)
+            self.config.persist()
         new_camera = tuple(getattr(self.config, name) for name in sorted(camera_fields))
         if self.source == "camera" and old_camera != new_camera:
             if not self.camera.restart():
@@ -156,10 +158,10 @@ class GearProRuntime:
             self.config.serial_baudrate,
         ):
             self.serial.reconfigure(self.config.serial_port, self.config.serial_baudrate)
-        if profile == "SAFE_STOP":
-            self.stop_inspection("已进入 SAFE_STOP")
-        elif previous_profile == "SAFE_STOP" and profile is not None:
-            self.start_inspection()
+        if profile is not None:
+            ok, message = self.set_inference_profile(profile)
+            if not ok:
+                raise RuntimeError(message)
 
     def state(self, control=None):
         with self._lock:
@@ -179,6 +181,7 @@ class GearProRuntime:
             last_result=result,
             inspection_active=self.inspection_active,
             scratch_errors=self.error_count,
+            model_loaded=self.worker.model_loaded,
         )
         stats["good_rate"] = 0.0 if not stats["total"] else stats["good"] / stats["total"]
         return {
@@ -205,16 +208,69 @@ class GearProRuntime:
         return self.state()["health"]
 
     def control_extras(self):
+        backup = self._config_backup or {}
         return {
             "worker_failed": self.error is not None,
             "serial_enabled": bool(self.config.serial_enabled),
             "serial_open": bool(self.serial.is_open),
             "video_mode": self.config.video_path is not None,
+            "config_backup": bool(self._config_backup),
+            "models_ok": True,
+            "config_profile": self.config.inference_profile,
+            "backup_profile": backup.get("inference_profile"),
+            "backup_backend": locator_backend(backup["locator_model"]) if backup.get("locator_model") else None,
+            "inspection_should_run": self.inspection_active,
         }
+
+    def _remember_config(self):
+        self._config_backup = {
+            "locator_model": str(self.config.locator_model),
+            "fields": {name: getattr(self.config, name) for name in PERSISTED_FIELDS},
+            "inference_profile": self.config.inference_profile,
+            "inspection_active": self.inspection_active,
+        }
+
+    def rebuild_inspector(self, resume=True):
+        self.stop_inspection("正在重建定位模型…")
+        self.worker.drop_inspector()
+        self.config.validate_models()
+        if not resume or self.config.inference_profile == "SAFE_STOP":
+            return
+        with self._lock:
+            self.error = None
+        self.start_inspection()
+        deadline = time.monotonic() + 75
+        while time.monotonic() < deadline:
+            if self.worker.model_loaded and self.error is None:
+                return
+            if self.error:
+                raise RuntimeError(self.error)
+            time.sleep(0.2)
+        raise RuntimeError("inspector 重建超时")
+
+    def _restore_config_backup(self, snap):
+        previous_locator = Path(self.config.locator_model)
+        self.config.update(snap["fields"])
+        self.config.locator_model = Path(snap["locator_model"])
+        rebuild = previous_locator.resolve() != Path(self.config.locator_model).resolve()
+        want_run = bool(snap.get("inspection_active")) and self.config.inference_profile != "SAFE_STOP"
+        if rebuild:
+            self.rebuild_inspector(resume=want_run)
+        elif self.config.inference_profile == "SAFE_STOP":
+            self.stop_inspection("已进入 SAFE_STOP")
+        elif want_run and not self.inspection_active:
+            self.start_inspection()
+        try:
+            self.config.persist()
+        except OSError:
+            pass
 
     def set_inference_profile(self, name):
         from .profiles import ProfileError, apply_to_config
 
+        previous = self.config.inference_profile
+        previous_locator = Path(self.config.locator_model)
+        was_active = self.inspection_active
         try:
             plan = apply_to_config(self.config, name)
         except ProfileError as exc:
@@ -223,13 +279,72 @@ class GearProRuntime:
             self.config.persist()
         except OSError:
             pass
-        if plan["stop_worker"]:
+        resume = (not plan["stop_worker"]) and (was_active or plan["start_worker"])
+        try:
+            if plan["rebuild_inspector"]:
+                self.rebuild_inspector(resume=resume)
+            elif plan["stop_worker"]:
+                self.stop_inspection("已进入 SAFE_STOP")
+            elif plan["start_worker"]:
+                self.start_inspection()
+        except Exception:
+            self.config.locator_model = previous_locator
+            try:
+                apply_to_config(self.config, previous)
+                if plan["rebuild_inspector"]:
+                    self.rebuild_inspector(resume=was_active and previous != "SAFE_STOP")
+            except Exception:
+                pass
+            raise
+        return True, f"已切换到 {name}"
+
+    def set_locator_profile(self, name):
+        from .profiles import locator_path_for
+
+        path = locator_path_for(name)
+        previous = str(self.config.locator_model)
+        was_active = self.inspection_active
+        self.config.locator_model = path
+        if name == "trt_fast" and self.config.inference_profile != "SAFE_STOP":
+            self.config.inference_profile = "TRT_FAST"
+        elif name == "pt_safe" and self.config.inference_profile == "TRT_FAST":
+            self.config.inference_profile = "FULL"
+        try:
+            self.config.persist()
+        except OSError:
+            pass
+        resume = was_active and self.config.inference_profile != "SAFE_STOP"
+        self.rebuild_inspector(resume=resume)
+        return {"previous_locator": previous}
+
+    def reload_persisted_config(self):
+        from .profiles import ProfileError, apply_to_config
+
+        was_active = self.inspection_active
+        previous_locator = Path(self.config.locator_model)
+        self.config.load_persisted()
+        try:
+            plan = apply_to_config(self.config, self.config.inference_profile)
+        except ProfileError as exc:
+            raise RuntimeError(str(exc)) from exc
+        self.config.validate_models()
+        rebuild = previous_locator.resolve() != Path(self.config.locator_model).resolve() or plan["rebuild_inspector"]
+        resume = (not plan["stop_worker"]) and (was_active or plan["start_worker"])
+        if rebuild:
+            self.rebuild_inspector(resume=resume)
+        elif plan["stop_worker"]:
             self.stop_inspection("已进入 SAFE_STOP")
         elif plan["start_worker"]:
             self.start_inspection()
-        return True, f"已切换到 {name}"
+        try:
+            self.config.persist()
+        except OSError:
+            pass
+        return {"reloaded": True}
 
     def execute_action(self, name, params):
+        if name in ("set_inference_profile", "set_locator_profile", "reload_config"):
+            self._remember_config()
         if name == "restart_camera":
             if self.source != "camera":
                 raise RuntimeError("视频模式下不能重启摄像头")
@@ -253,6 +368,15 @@ class GearProRuntime:
             if not ok:
                 raise RuntimeError(message)
             return {"previous": previous}
+        if name == "set_locator_profile":
+            return self.set_locator_profile(params.get("profile"))
+        if name == "reload_config":
+            return self.reload_persisted_config()
+        if name == "rollback_config":
+            if not self._config_backup:
+                raise RuntimeError("没有可回滚的配置快照")
+            self._restore_config_backup(self._config_backup)
+            return {}
         if name == "pause_inspection":
             self.stop_inspection()
             return {}
@@ -276,6 +400,16 @@ class GearProRuntime:
             previous = token.get("previous")
             if previous:
                 self.set_inference_profile(previous)
+            return
+        if name == "set_locator_profile":
+            previous = token.get("previous_locator")
+            if previous:
+                self.config.locator_model = Path(previous)
+                self.rebuild_inspector(resume=self.config.inference_profile != "SAFE_STOP")
+            return
+        if name in ("reload_config", "rollback_config"):
+            if self._config_backup:
+                self._restore_config_backup(self._config_backup)
             return
         if name == "pause_inspection":
             self.start_inspection()

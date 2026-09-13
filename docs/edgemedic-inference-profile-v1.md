@@ -22,8 +22,8 @@ Agent 与人工只切换**命名档位**，不直接拧几十个内部旋钮。�
 
 | name | locator | classifiers | P2 detector | interval_s | 实现状态 | mission_quality \(Q_D\) |
 | --- | --- | --- | --- | --- | --- | --- |
-| `FULL` | 启动时的 pt 或 engine | 开 | 开 960 | 0.10 | 即当前默认 | 1.00 |
-| `TRT_FAST` | `model1.engine` | 开 | 开 960 | 0.10 | 需重建 inspector；缺文件则拒绝 | 1.00 |
+| `FULL` | 启动时的 pt，离开 TRT_FAST 时回到 `model1.pt` | 开 | 开 960 | 0.10 | 已实现 | 1.00 |
+| `TRT_FAST` | `model1.engine` | 开 | 开 960 | 0.10 | 重建 inspector；缺文件则拒绝 | 1.00 |
 | `SPARSE` | 保持当前 locator | 开 | 开 960 | 0.20 | 已实现：改 interval | 0.90 |
 | `CLASSIFY_ONLY` | 保持当前 locator | 开 | **跳过前向**；`defect_score` = 分类均值（融合 \(\alpha=1\)） | 0.20 | **未实现** | 0.65 |
 | `LOCATE_ONLY` | 保持当前 locator | 关 | 关 | 0.30 | **未实现** | 0.20 |

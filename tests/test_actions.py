@@ -1,4 +1,6 @@
 import unittest
+from pathlib import Path
+from unittest.mock import patch
 
 from gp.actions import ActionError, accept, parse_request, verify
 
@@ -27,12 +29,36 @@ class ActionContractTests(unittest.TestCase):
         with self.assertRaises(ActionError):
             parse_request({"name": "reboot", "params": {}, "source": "human", "request_id": "1"})
 
-    def test_unimplemented_is_not_accepted(self):
-        ok, reason = accept("set_locator_profile", {"profile": "trt_fast"}, _snapshot())
+    def test_locator_profile_needs_engine_file(self):
+        with patch("gp.profiles.ENGINE_LOCATOR", Path("/no/such/model1.engine")):
+            ok, reason = accept("set_locator_profile", {"profile": "trt_fast"}, _snapshot())
         self.assertFalse(ok)
-        self.assertIn("尚未实现", reason)
+        self.assertIn("找不到", reason)
 
-    def test_classify_only_profile_rejected(self):
+    def test_rollback_needs_backup(self):
+        ok, reason = accept("rollback_config", {}, _snapshot(), extras={})
+        self.assertFalse(ok)
+        self.assertIn("回滚", reason)
+        ok, reason = accept("rollback_config", {}, _snapshot(), extras={"config_backup": True})
+        self.assertTrue(ok, reason)
+
+    def test_verify_locator_backend(self):
+        before = _snapshot()
+        after = _snapshot(locator={"backend": "engine", "loaded": True})
+        ok, reason = verify(
+            "set_locator_profile",
+            {"profile": "trt_fast"},
+            before,
+            after,
+            extras={"inspection_should_run": True},
+        )
+        self.assertTrue(ok, reason)
+
+    def test_trt_fast_rejected_without_engine(self):
+        with patch("gp.profiles.ENGINE_LOCATOR", Path("/no/such/model1.engine")):
+            ok, reason = accept("set_inference_profile", {"profile": "TRT_FAST"}, _snapshot())
+        self.assertFalse(ok)
+        self.assertIn("engine", reason)
         ok, reason = accept("set_inference_profile", {"profile": "CLASSIFY_ONLY"}, _snapshot())
         self.assertFalse(ok)
         self.assertIn("尚未实现", reason)

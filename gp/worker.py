@@ -99,6 +99,11 @@ class InspectionWorker:
         finally:
             capture.release()
 
+    def drop_inspector(self):
+        self.pause()
+        time.sleep(max(0.12, float(getattr(self.config, "inference_interval", 0.1)) + 0.05))
+        self._inspector = None
+
     def stop_service(self):
         self._active_event.clear()
         self._stop_event.set()
@@ -106,3 +111,4 @@ class InspectionWorker:
         if self._thread is not None and self._thread is not threading.current_thread():
             self._thread.join(timeout=5.0)
         self._thread = None
+        self._inspector = None

@@ -160,7 +160,7 @@ watch(ownsControl, (owns) => {
 
 watch(() => settings.inference_profile, (profile, previous) => {
   if (!settingsOpen.value || profile === previous) return
-  if (profile === 'FULL') settings.inference_interval = 0.10
+  if (profile === 'FULL' || profile === 'TRT_FAST') settings.inference_interval = 0.10
   if (profile === 'SPARSE') settings.inference_interval = 0.20
 })
 
@@ -284,7 +284,7 @@ onBeforeUnmount(() => {
       <div class="settings-title"><div><span class="eyebrow">RUNTIME SETTINGS</span><h2>运行设置</h2></div><button type="button" class="icon-button" @click="settingsOpen = false">×</button></div>
       <div class="form-grid">
         <label>运行模式<select v-model="settings.mode"><option>自由模式</option><option>定量模式</option><option>定时模式</option><option v-if="settings.mode === '视频测试模式'">视频测试模式</option></select></label>
-        <label>推理档位<select v-model="settings.inference_profile"><option>FULL</option><option>SPARSE</option><option>SAFE_STOP</option></select></label>
+        <label>推理档位<select v-model="settings.inference_profile"><option>FULL</option><option>SPARSE</option><option>TRT_FAST</option><option>SAFE_STOP</option></select></label>
         <label>目标数量<input v-model.number="settings.target_quantity" type="number" min="1" /></label>
         <label>运行时长（分钟）<input v-model.number="settings.duration_minutes" type="number" min="1" /></label>
         <label>齿轮定位阈值<input v-model.number="settings.locator_confidence" type="number" min="0.01" max="0.99" step="0.01" /></label>

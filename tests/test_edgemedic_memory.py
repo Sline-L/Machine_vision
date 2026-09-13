@@ -42,6 +42,10 @@ class ReasonerParseTests(unittest.TestCase):
     def test_rejects_shell_and_unimplemented_profile(self):
         self.assertIsNone(parse_tool_json('{"tool": "shell", "params": {"cmd": "reboot"}}'))
         self.assertIsNone(parse_tool_json('{"tool": "set_inference_profile", "params": {"profile": "CLASSIFY_ONLY"}}'))
+        action = parse_tool_json('{"tool": "set_locator_profile", "params": {"profile": "pt_safe"}}')
+        self.assertEqual(action["name"], "set_locator_profile")
+        trt = parse_tool_json('{"tool": "set_inference_profile", "params": {"profile": "TRT_FAST"}}')
+        self.assertEqual(trt["params"]["profile"], "TRT_FAST")
 
     def test_close_typo_maps_to_whitelist(self):
         action = parse_tool_json('{"tool": "econnect_serial", "params": {}}')

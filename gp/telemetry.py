@@ -101,12 +101,16 @@ def build_snapshot(
     last_result=None,
     inspection_active=False,
     scratch_errors=0,
+    model_loaded=None,
 ):
     packet = frame_store.read() if frame_store is not None else None
     sequence = 0 if packet is None else packet.sequence
     age_ms = None if packet is None else packet.age_ms
     backend = locator_backend(config.locator_model)
-    locator_loaded = last_result is not None or inspection_active
+    if model_loaded is None:
+        locator_loaded = last_result is not None or inspection_active
+    else:
+        locator_loaded = bool(model_loaded)
     locator_ms = None if last_result is None else last_result.locator_latency_ms
     v5_total = None if last_result is None else last_result.scratch_latency_ms
     gears = 0 if last_result is None else len(last_result.observations)

@@ -20,12 +20,12 @@
 | `restart_camera` | 2 | low | 已实现 | camera 打开失败或 STALE | 8 | 2 | 再 start 原 index | `frame_seq` 增加且 `frame_age_ms < 500` |
 | `restart_worker` | 2 | low | 已实现 | worker 异常或连续 inspect 失败 | 30 | 1 | stop | worker running 且一次 inspect 无 exception |
 | `reconnect_serial` | 2 | low | 已实现 | `consecutive_failures >= 1` 或未连接 | 3 | 3 | close | `send` 探针成功或端口可打开 |
-| `set_inference_profile` | 2 | medium | **仅 `FULL`/`SPARSE`/`SAFE_STOP`** | 目标档位已实现；TRT_FAST 须 engine 文件存在 | 60 | 0 | 上一档位 | snapshot.profile 匹配；若非 SAFE_STOP 则一次成功 inspect |
-| `set_locator_profile` | 2 | medium | **未实现**（须重建 inspector） | `pt_safe` 或 `trt_fast` 且对应权重存在 | 90 | 0 | 原 locator 路径 | locator.loaded 且 warmup 无异常 |
+| `set_inference_profile` | 2 | medium | `FULL`/`SPARSE`/`SAFE_STOP`/`TRT_FAST`（缺 engine 则拒绝） | 目标档位已实现；TRT_FAST 须 engine 文件存在 | 90 | 0 | 上一档位 | snapshot.profile 匹配；TRT_FAST 后 backend=engine |
+| `set_locator_profile` | 2 | medium | 停 worker → 丢 inspector → 换权重 → warmup | `pt_safe` 或 `trt_fast` 且对应权重存在 | 90 | 0 | 原 locator 路径 | locator.backend 匹配且已加载（若当时在跑检测） |
 | `pause_inspection` | 2 | low | 已实现 | inspection_active | 5 | 0 | `resume_inspection` | inspection_active=false |
 | `resume_inspection` | 2 | low | 已实现 | 相机可用 | 30 | 0 | pause | inspection_active=true |
-| `reload_config` | 2 | medium | **未实现** | JSON/模型路径合法 | 90 | 0 | `rollback_config` | validate_models 通过 |
-| `rollback_config` | 2 | medium | **未实现** | 存在快照 | 90 | 0 | 无 | 配置哈希回到快照 |
+| `reload_config` | 2 | medium | 重读 `var/settings.json` 并必要时重建 inspector | JSON/模型路径合法 | 90 | 0 | `rollback_config` | validate_models 通过且档位匹配 |
+| `rollback_config` | 2 | medium | 恢复最近一次 Control 写配置前的快照 | 存在快照 | 90 | 0 | 无 | 档位与 locator 回到快照 |
 
 `set_locator_profile` 的 `pt_safe` = `model/model1.pt`；`trt_fast` = `.cache/exports/model1.engine`。不要做成改 YOLO 对象内部字段。
 
