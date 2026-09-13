@@ -59,7 +59,7 @@
 }
 ```
 
-`accepted=false`：precondition 或未实现档位。`executed=true` 且 `verified=false`：必须 rollback 或标 FAILURE，**不得**写入 Repair Memory 成功病例。
+`accepted=false`：precondition 或未实现档位。`verify_level` 为 `none`/`config`/`function`/`mission`。`verified` 与 `recovery_success` 仅在 function/mission 为 true。仅 `config` 时不 rollback，但也 **不得**写入 Repair Memory 成功病例。
 
 GearPro 默认在本机 `127.0.0.1:8787` 提供接口（可用 `--no-control` 或 `GEARPRO_CONTROL_PORT=0` 关闭）：
 

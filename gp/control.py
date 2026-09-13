@@ -1,4 +1,4 @@
-"""Localhost Control API for EdgeMedic. No Qt; talks to GearProRuntime."""
+"""Control API: accept / execute / three-level verify / rollback."""
 
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
@@ -6,7 +6,8 @@ import threading
 import time
 from urllib.parse import urlparse
 
-from .actions import SPECS, ActionError, accept, parse_request, verify
+from .actions import SPECS, ActionError, accept, parse_request
+from .verify import assess, can_reach_function, config_verified, recovery_success
 
 
 class ControlService:
@@ -35,11 +36,11 @@ class ControlService:
         extras = self.extras()
         allowed, reason = accept(name, params, before, extras)
         if not allowed:
-            return _response(request, False, False, False, reason, before, before, started)
+            return _response(request, False, False, "none", reason, before, before, started)
         if name == "get_state":
             after = before
-            ok, verify_reason = verify(name, params, before, after, extras)
-            return _response(request, True, True, ok, None if ok else verify_reason, before, after, started)
+            level, verify_reason = assess(name, params, before, after, extras)
+            return _response(request, True, True, level, None if config_verified(level) else verify_reason, before, after, started)
 
         timeout_s = float(meta["timeout_s"])
         attempts = int(meta["retry"]) + 1
@@ -48,6 +49,7 @@ class ControlService:
         after = before
         token = None
         executed = False
+        level = "none"
         for _attempt in range(attempts):
             if time.monotonic() >= deadline:
                 break
@@ -57,40 +59,58 @@ class ControlService:
             except Exception as exc:
                 last_error = str(exc)
                 continue
-            after, extras, ok, last_error = self._poll_verify(name, params, before, deadline)
-            if ok:
-                return _response(request, True, True, True, None, before, after, started)
+            after, extras, level, last_error = self._poll_verify(name, params, before, deadline)
+            if config_verified(level):
+                return _response(request, True, True, level, last_error, before, after, started)
             if token is not None:
                 try:
                     self.rollback(name, token)
                 except Exception as exc:
                     last_error = f"verify 失败且 rollback 失败：{exc}"
         error = last_error or "动作未通过 verify"
-        return _response(request, True, executed, False, error, before, after, started)
+        return _response(request, True, executed, level, error, before, after, started)
 
     def _poll_verify(self, name, params, before, deadline):
         last = before
         extras = self.extras()
         reason = "verify 超时"
+        best_level = "none"
+        best_reason = reason
         while time.monotonic() < deadline:
             last = self.snapshot()
             extras = self.extras()
-            ok, reason = verify(name, params, before, last, extras)
-            if ok:
-                return last, extras, True, None
+            level, reason = assess(name, params, before, last, extras)
+            if _better(level, best_level):
+                best_level = level
+                best_reason = reason
+            if recovery_success(level):
+                return last, extras, level, None
+            if config_verified(level) and not can_reach_function(extras):
+                return last, extras, level, reason
             remaining = deadline - time.monotonic()
             if remaining <= 0:
                 break
             time.sleep(min(0.15, remaining))
-        return last, extras, False, reason
+        note = None if config_verified(best_level) else (best_reason or reason)
+        return last, extras, best_level, note
 
 
-def _response(request, accepted, executed, verified, error, before, after, started):
+def _better(left, right):
+    order = {"none": 0, "config": 1, "function": 2, "mission": 3}
+    return order.get(left, 0) > order.get(right, 0)
+
+
+def _response(request, accepted, executed, verify_level, error, before, after, started):
+    recovered = recovery_success(verify_level)
+    configured = config_verified(verify_level)
     return {
         "request_id": request["request_id"],
         "accepted": accepted,
         "executed": executed,
-        "verified": verified,
+        "verified": recovered,
+        "config_verified": configured,
+        "recovery_success": recovered,
+        "verify_level": verify_level,
         "error": error,
         "snapshot_before": before,
         "snapshot_after": after,

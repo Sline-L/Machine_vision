@@ -38,9 +38,16 @@ class EpisodeStore:
         payload = {"successes": dict(self.successes), "failures": dict(self.failures)}
         self.path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    def record(self, signature, name, params, verified):
+    def record(self, signature, name, params, verified=False, verify_level=None):
+        """Learn only function/mission recovery. Config-only must not enter the store."""
         if not signature or not name:
             return
+        if verify_level == "config":
+            return
+        if verify_level == "none":
+            verified = False
+        elif verify_level in ("function", "mission"):
+            verified = True
         key = _key(signature, name, params)
         if verified:
             self.successes[key] += 1

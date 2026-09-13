@@ -220,6 +220,7 @@ class GearProRuntime:
             "backup_profile": backup.get("inference_profile"),
             "backup_backend": locator_backend(backup["locator_model"]) if backup.get("locator_model") else None,
             "inspection_should_run": self.inspection_active,
+            "inspection_can_run": self.inspection_active,
         }
 
     def _remember_config(self):
