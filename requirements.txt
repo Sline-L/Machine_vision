@@ -1,4 +1,8 @@
-PyQt5>=5.15,<6
+fastapi>=0.115,<0.120
+uvicorn>=0.30,<1
+websockets>=13,<17
+python-multipart>=0.0.9,<1
+httpx>=0.27,<1
 opencv-python>=4.8
 numpy>=1.24
 Pillow>=9.5

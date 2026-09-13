@@ -1,5 +1,7 @@
 __pycache__/
 tmp/
+var/
+web/node_modules/
 *.pyc
 .venv/
 .env

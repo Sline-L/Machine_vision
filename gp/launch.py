@@ -9,7 +9,7 @@ EXPORTS = PROJECT_ROOT / ".cache" / "exports"
 
 
 def start(locator=None, model2_config=None, camera_index=0):
-    """Set deployment env vars, then open the normal GearPro window."""
+    """Set deployment env vars, then start the normal GearPro Web service."""
     os.chdir(PROJECT_ROOT)
     os.environ["GEARPRO_CAMERA_INDEX"] = str(camera_index)
     if locator is not None:

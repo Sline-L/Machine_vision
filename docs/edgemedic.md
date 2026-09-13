@@ -6,7 +6,7 @@
 
 约束、等级、RQ 与原则见 Cursor 规则 `.cursor/rules/edgemedic.mdc`。
 
-当前状态：SystemSnapshot、InferenceProfile、Control API、L0/L1、episode memory、L2 钩子已落地。L2 默认连 `127.0.0.1:8080` 的 Qwen；健康状态不调用。
+当前状态：浏览器仪表盘（`main-web`）与 EdgeMedic Control API 已合到 `srtp-web`。L0/L1、episode memory、L2 钩子仍走本机 `127.0.0.1:8787`，不 import `gp`。
 
 | 协议 | 文档 | JSON Schema |
 | --- | --- | --- |

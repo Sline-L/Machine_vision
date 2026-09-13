@@ -1,4 +1,4 @@
-"""Local Control API. EdgeMedic talks HTTP only; handlers hop onto the Qt thread."""
+"""Localhost Control API for EdgeMedic. No Qt; talks to GearProRuntime."""
 
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
@@ -6,51 +6,24 @@ import threading
 import time
 from urllib.parse import urlparse
 
-from PyQt5.QtCore import QObject, Qt, pyqtSignal
-
 from .actions import SPECS, ActionError, accept, parse_request, verify
 
 
-class _QtBridge(QObject):
-    _call = pyqtSignal(object)
-
-    def __init__(self, parent):
-        super().__init__(parent)
-        self._call.connect(self._on_call, Qt.BlockingQueuedConnection)
-
-    def _on_call(self, payload):
-        fn, box = payload
-        try:
-            box["value"] = fn()
-            box["ok"] = True
-        except Exception as exc:
-            box["ok"] = False
-            box["error"] = str(exc)
-
-    def invoke(self, fn):
-        box = {}
-        self._call.emit((fn, box))
-        if not box.get("ok"):
-            raise RuntimeError(box.get("error") or "Qt invoke failed")
-        return box.get("value")
-
-
 class ControlService:
-    def __init__(self, window):
-        self.window = window
-        self.bridge = _QtBridge(window)
+    def __init__(self, runtime):
+        self.runtime = runtime
 
     def snapshot(self):
-        return self.bridge.invoke(self.window.current_snapshot)
+        return self.runtime.current_snapshot()
 
     def extras(self):
-        return self.bridge.invoke(self.window.control_extras)
+        return self.runtime.control_extras()
 
     def execute(self, name, params):
-        return self.bridge.invoke(lambda: self.window.execute_action(name, params))
+        return self.runtime.execute_action(name, params)
 
     def rollback(self, name, token):
-        return self.bridge.invoke(lambda: self.window.rollback_action(name, token))
+        return self.runtime.rollback_action(name, token)
 
     def run_action(self, body):
         started = time.monotonic()
@@ -175,10 +148,10 @@ class _Server(ThreadingHTTPServer):
     allow_reuse_address = True
 
 
-def start_control_api(window, host="127.0.0.1", port=8787):
+def start_control_api(runtime, host="127.0.0.1", port=8787):
     if not port:
         return None
-    service = ControlService(window)
+    service = ControlService(runtime)
     server = _Server((host, int(port)), _make_handler(service))
     thread = threading.Thread(target=server.serve_forever, name="gearpro-control", daemon=True)
     thread.start()
