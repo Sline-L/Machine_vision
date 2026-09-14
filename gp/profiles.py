@@ -1,11 +1,14 @@
 """Named inference profiles that humans and EdgeMedic both use."""
 
 from pathlib import Path
+import hashlib
+import json
 
 from .config import PROJECT_ROOT
 
 PT_LOCATOR = PROJECT_ROOT / "model" / "model1.pt"
-ENGINE_LOCATOR = PROJECT_ROOT / ".cache" / "exports" / "model1.engine"
+ENGINE_LOCATOR = PROJECT_ROOT / "model" / "model1" / "model1.engine"
+ENGINE_MANIFEST = PROJECT_ROOT / "model" / "model1" / "manifest.json"
 
 IMPLEMENTED = ("FULL", "SPARSE", "SAFE_STOP", "TRT_FAST")
 
@@ -52,6 +55,28 @@ class ProfileError(ValueError):
     pass
 
 
+def load_engine_manifest():
+    if not ENGINE_MANIFEST.is_file():
+        return None
+    payload = json.loads(ENGINE_MANIFEST.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ProfileError("locator engine manifest 必须是对象")
+    return payload
+
+
+def verify_engine_artifact():
+    if not ENGINE_LOCATOR.is_file():
+        raise ProfileError(f"找不到 model1.engine：{ENGINE_LOCATOR}")
+    manifest = load_engine_manifest()
+    if manifest is None:
+        raise ProfileError(f"缺少 engine provenance：{ENGINE_MANIFEST}")
+    listed = str((manifest.get("engine") or {}).get("sha256") or "").lower()
+    actual = hashlib.sha256(ENGINE_LOCATOR.read_bytes()).hexdigest()
+    if listed and listed != actual:
+        raise ProfileError("model1.engine SHA256 与 manifest 不一致")
+    return manifest
+
+
 def spec(name):
     profile = SPECS.get(name)
     if profile is None:
@@ -72,8 +97,7 @@ def apply_to_config(config, name):
     rebuild = False
     locator_kind = profile.get("locator")
     if locator_kind == "engine":
-        if not ENGINE_LOCATOR.is_file():
-            raise ProfileError("找不到 model1.engine，无法进入 TRT_FAST")
+        verify_engine_artifact()
         config.locator_model = ENGINE_LOCATOR
         rebuild = not _same_path(previous_locator, ENGINE_LOCATOR)
     elif locator_kind == "pt":
@@ -96,6 +120,8 @@ def locator_path_for(name):
     path = LOCATOR_PROFILES.get(name)
     if path is None:
         raise ProfileError(f"未知定位档位：{name}")
+    if name == "trt_fast":
+        verify_engine_artifact()
     if not path.is_file():
         raise ProfileError(f"找不到定位权重：{path}")
     return path

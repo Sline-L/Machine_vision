@@ -24,8 +24,9 @@ Ultralytics 编 engine 时会在中间写出 ONNX，那只是编译过程，不�
 
 不要两个模型一刀切。
 
-- **定位 YOLO（`model1`）**：占时更多，优先转 TensorRT。在 NX 右键
-  `export_engine.py`，再用 `run_engine.py`。
+- **定位 YOLO（`model1`）**：占时更多，优先转 TensorRT。在 NX 运行
+  `export_engine.py`，产物为 `model/model1/model1.engine`（须带 `manifest.json` SHA）。
+  再用 `run_engine.py` 或 `TRT_FAST`。
 - **融合模型（`model2`）**：EfficientNet-B0、ResNet18、YOLO26-P2 三份 `.pt`，
   由 `model/model2/inference_config.json` 描述。预处理留在 Python 侧。
 
@@ -49,6 +50,8 @@ Model2 任一分支以后若也转 engine，必须重新验证三路概率、温
 
 ## 4. 资产约定
 
-- `.pt` 可随仓库搬运。
-- `.engine` 是构建产物，放在 `.cache/exports/`，不提交。
-- 默认资产：`model/model1.pt` 与 `model/model2/` 融合包。
+- `.pt` 可随仓库搬运：`model/model1.pt` 与 `model/model2/` 融合包。
+- `.engine` 是板上 TensorRT 产物，**不提交**（`*.engine` gitignore），但必须放在稳定路径
+  `model/model1/model1.engine`，并由 `model/model1/manifest.json` 记录 SHA256、源 `.pt` SHA
+  和 TensorRT 版本。不要把正式 TRT_FAST 实验绑在匿名的 `.cache/exports/` 文件上。
+- 重新导出后先更新 manifest SHA，再跑 TRT_FAST。

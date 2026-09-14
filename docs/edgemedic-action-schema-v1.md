@@ -31,7 +31,7 @@
 | `use_video` | 2 | low | **仅 human**：切到指定视频文件 | `params.path` | 30 | 0 | 无 | `video_mode` |
 | `reset_stats` | 1 | none | **仅 human**：清空本次统计 | 无 | 5 | 0 | 无 | 统计清零 |
 
-`set_locator_profile` 的 `pt_safe` = `model/model1.pt`；`trt_fast` = `.cache/exports/model1.engine`。不要做成改 YOLO 对象内部字段。Web 仪表盘的 start/stop/settings/camera/video/reset 走同一套 `ControlService`（`source=human`），不绕过 Guardian。
+`set_locator_profile` 的 `pt_safe` = `model/model1.pt`；`trt_fast` = `model/model1/model1.engine`（须通过 manifest SHA）。不要做成改 YOLO 对象内部字段。Web 仪表盘的 start/stop/settings/camera/video/reset 走同一套 `ControlService`（`source=human`），不绕过 Guardian。
 
 ## 请求 / 响应
 

@@ -1,0 +1,22 @@
+{
+  "schema_version": "locator-engine.v1",
+  "artifact_id": "model1-engine-nx-2026-09-12",
+  "task": "gear_locator",
+  "source_pt": {
+    "path": "model/model1.pt",
+    "sha256": "d79912510810fdfe1b0fb6d4080e669dc14acad0cdb37db9c851f2b1fe7371f2"
+  },
+  "engine": {
+    "path": "model/model1/model1.engine",
+    "sha256": "aec2d9b56a522683b109428fdd8f95cc7600b617d18787f6c4a6838b58a5d892",
+    "promoted_from": ".cache/exports/model1.engine",
+    "format": "tensorrt",
+    "precision": "fp16",
+    "imgsz": 640
+  },
+  "device": {
+    "board": "jetson-nx",
+    "tensorrt": "10.7.0"
+  },
+  "notes": "Board-local TensorRT artifact. Not committed (*.engine gitignored). TRT_FAST must resolve this path and SHA, not an anonymous cache file."
+}

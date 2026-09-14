@@ -10,6 +10,7 @@ class ProvenanceTests(unittest.TestCase):
         payload = collect_provenance(reasoner="qwen", runtime_mode="synthetic")
         self.assertEqual(payload["reasoner"], "qwen3-4b")
         self.assertEqual(payload["bundle_id"], "scratch-v5-2026-09-14")
+        self.assertEqual(payload["locator_engine_sha256"], "aec2d9b56a522683b109428fdd8f95cc7600b617d18787f6c4a6838b58a5d892")
         self.assertEqual(payload["runtime_commit"], payload["agent_commit"])
         self.assertEqual(payload["fault_mode"], "none")
         self.assertIn("experiment_config_hash", payload)

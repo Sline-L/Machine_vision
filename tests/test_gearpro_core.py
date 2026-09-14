@@ -50,7 +50,7 @@ class ConfigTests(unittest.TestCase):
 
     def test_engine_export_writes_cache_artifact(self):
         self.assertEqual(DEFAULT_SOURCE, PROJECT_ROOT / "model" / "model1.pt")
-        self.assertEqual(DEFAULT_DEST, EXPORTS / "model1.engine")
+        self.assertEqual(DEFAULT_DEST, PROJECT_ROOT / "model" / "model1" / "model1.engine")
 
 
 class ScratchV5Tests(unittest.TestCase):

@@ -151,7 +151,7 @@ def main(argv=None):
     parser.add_argument("--live-action", default=None, help="optional Control API action after sampling, e.g. set_inference_profile")
     parser.add_argument("--live-params", default="{}", help="JSON params for --live-action")
     parser.add_argument("--l2-always", action="store_true")
-    parser.add_argument("--out", type=Path, default=None)
+    parser.add_argument("--replay-pack", type=Path, default=None, help="replay pack dir with replay_manifest.json")
     parser.add_argument(
         "--fault-mode",
         choices=FAULT_MODES,
@@ -185,6 +185,7 @@ def main(argv=None):
         "l2_always": bool(args.l2_always),
         "fault_mode": fault_mode,
         "control_url": args.control_url,
+        "replay_pack_dir": None if args.replay_pack is None else str(args.replay_pack),
     }
     out_dir = args.out or (RESULTS_ROOT / f"experiment_{_now()}")
     live = None

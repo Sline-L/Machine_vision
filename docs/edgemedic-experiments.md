@@ -13,8 +13,9 @@ Every `summary.json` now records provenance so later model/runtime updates stay 
   "reasoner": "qwen3-4b",
   "runtime_mode": "dataset_replay",
   "fault_mode": "none",
-  "experiment_config_hash": "…"
-}
+  "replay_pack_id": "gearpro-replay-v1",
+  "replay_pack_hash": "…",
+  "locator_engine_sha256": "…",
 ```
 
 `fault_mode` is one of `none` (healthy baseline), `synthetic_snapshot` (including `inject_v5_latency` — **not** a GPU fault), or `real_resource_pressure` (operator-induced Jetson load). Do not put the last two in the same results table. This monorepo uses the same git HEAD for `runtime_commit` and `agent_commit`.
@@ -31,15 +32,16 @@ Writes `results/experiment_*/{runs.jsonl,summary.json,metrics.csv}`. Those direc
 
 ## Stage C on NX (operator, not claimed here)
 
-Need a **non-locked** image directory. Do not use `test_scratch` to retune.
-
-1. Replay four profiles long enough to fill cycles (serial off):
+Need a **non-locked** replay pack (`tests/replay/replay_manifest.json` + `frames/`). Never `test_scratch`.
 
 ```bash
-python -m gp --host 127.0.0.1 --replay /path/to/non_locked_frames
-# then from another shell, after inspection is running:
-python -m edgemedic.experiment --executor live --sample-s 30 --out results/replay_full_pt
+python -m gp.replay --source /path/to/Machine_vision_dataset/dataset_gear/images/train \
+  --dest tests/replay --source-commit <dataset SHA> --limit 40
+python -m gp --host 127.0.0.1 --replay tests/replay
+python -m edgemedic.experiment --executor live --sample-s 45 --replay-pack tests/replay --out results/replay_full_pt
 ```
+
+TRT_FAST uses `model/model1/model1.engine` with `model/model1/manifest.json`. Promote the engine off `.cache/exports/` before any TRT baseline.
 
 Switch locator / inference through Control (mission verify is the action response `verify_level`, not a backend string check):
 

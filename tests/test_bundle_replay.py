@@ -11,7 +11,7 @@ from gp.app import build_parser
 from gp.bundle import BundleError, load_runtime_bundle
 from gp.config import AppConfig
 from gp.frames import LatestFrame
-from gp.replay import ReplayCapture, list_replay_images
+from gp.replay import ReplayCapture, ReplayPackError, build_replay_pack, list_replay_images, load_replay_pack
 from gp.scratch_v5 import load_model2_config
 
 
@@ -146,6 +146,35 @@ class ReplayCaptureTests(unittest.TestCase):
         self.assertTrue(args.replay_once)
         with self.assertRaises(SystemExit):
             build_parser().parse_args(["--replay", "tests/replay", "--video", "x.mp4"])
+
+    def test_replay_pack_records_hashes_and_rejects_locked_set(self):
+        import cv2
+
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "train"
+            dest = Path(directory) / "pack"
+            source.mkdir()
+            for index in range(2):
+                path = source / f"ok_{index}.png"
+                self.assertTrue(cv2.imwrite(str(path), np.full((6, 6, 3), 10, dtype=np.uint8)))
+            pack = build_replay_pack(
+                source,
+                dest,
+                "gearpro-replay-v1",
+                "Sline-L/Machine_vision_dataset",
+                "abc123",
+                limit=2,
+            )
+            self.assertEqual(pack["replay_pack_id"], "gearpro-replay-v1")
+            self.assertEqual(len(pack["paths"]), 2)
+            self.assertFalse(pack["manifest"]["locked_test"])
+            loaded = load_replay_pack(dest)
+            self.assertEqual(loaded["replay_pack_hash"], pack["replay_pack_hash"])
+            locked = Path(directory) / "test_scratch"
+            locked.mkdir()
+            self.assertTrue(cv2.imwrite(str(locked / "x.png"), np.zeros((4, 4, 3), dtype=np.uint8)))
+            with self.assertRaises(ReplayPackError):
+                build_replay_pack(locked, Path(directory) / "bad", "x", "repo", "c", limit=1)
 
 
 if __name__ == "__main__":

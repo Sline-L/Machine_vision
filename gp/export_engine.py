@@ -3,10 +3,10 @@
 from pathlib import Path
 import shutil
 
-from .launch import EXPORTS, PROJECT_ROOT
+from .config import PROJECT_ROOT
 
 DEFAULT_SOURCE = PROJECT_ROOT / "model" / "model1.pt"
-DEFAULT_DEST = EXPORTS / "model1.engine"
+DEFAULT_DEST = PROJECT_ROOT / "model" / "model1" / "model1.engine"
 
 
 def export_locator_engine(source=DEFAULT_SOURCE, dest=DEFAULT_DEST, imgsz=640):

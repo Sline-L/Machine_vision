@@ -9,6 +9,7 @@ import time
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 MANIFEST_PATH = REPO_ROOT / "model" / "model2" / "manifest.json"
+LOCATOR_ENGINE_MANIFEST = REPO_ROOT / "model" / "model1" / "manifest.json"
 
 # Do not mix these in one results table.
 FAULT_NONE = "none"
@@ -50,12 +51,55 @@ def _manifest():
     return payload.get("bundle_id"), digest, payload
 
 
+def _locator_engine_fields():
+    if not LOCATOR_ENGINE_MANIFEST.is_file():
+        return {"locator_engine_id": None, "locator_engine_sha256": None}
+    try:
+        payload = json.loads(LOCATOR_ENGINE_MANIFEST.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {"locator_engine_id": None, "locator_engine_sha256": None}
+    engine = payload.get("engine") or {}
+    return {
+        "locator_engine_id": payload.get("artifact_id"),
+        "locator_engine_sha256": engine.get("sha256"),
+        "locator_engine_path": engine.get("path"),
+    }
+
+
+def _replay_pack_fields(pack_dir):
+    if not pack_dir:
+        return {"replay_pack_id": None, "replay_pack_hash": None}
+    path = Path(pack_dir)
+    manifest_path = path / "replay_manifest.json"
+    if not manifest_path.is_file():
+        return {"replay_pack_id": None, "replay_pack_hash": None}
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {"replay_pack_id": None, "replay_pack_hash": None}
+    body = {
+        "replay_pack_id": manifest.get("replay_pack_id"),
+        "source_repo": manifest.get("source_repo"),
+        "source_commit": manifest.get("source_commit"),
+        "locked_test": manifest.get("locked_test"),
+        "files": manifest.get("files") or [],
+    }
+    raw = json.dumps(body, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+    return {
+        "replay_pack_id": manifest.get("replay_pack_id"),
+        "replay_pack_hash": hashlib.sha256(raw.encode("utf-8")).hexdigest(),
+        "replay_locked_test": manifest.get("locked_test"),
+        "replay_sample_count": manifest.get("sample_count"),
+    }
+
+
 def collect_provenance(
     reasoner="mock",
     runtime_mode="synthetic",
     snapshot=None,
     fault_mode=FAULT_NONE,
     experiment_config=None,
+    replay_pack_dir=None,
 ):
     """Monorepo: runtime_commit and agent_commit are the same HEAD until split."""
     if fault_mode not in FAULT_MODES:
@@ -70,7 +114,8 @@ def collect_provenance(
         elif snapshot.get("source_type") == "replay":
             mode = "dataset_replay"
     config = dict(experiment_config or {})
-    return {
+    replay_dir = replay_pack_dir or config.get("replay_pack_dir")
+    payload = {
         "runtime_commit": commit,
         "agent_commit": commit,
         "bundle_id": bundle_id,
@@ -83,6 +128,9 @@ def collect_provenance(
         "manifest_path": None if not MANIFEST_PATH.is_file() else str(MANIFEST_PATH),
         "model_family": None if not manifest else manifest.get("model_family"),
     }
+    payload.update(_locator_engine_fields())
+    payload.update(_replay_pack_fields(replay_dir))
+    return payload
 
 
 def _percentile(values, pct):

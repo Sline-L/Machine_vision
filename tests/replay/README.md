@@ -1,7 +1,20 @@
-# Replay smoke images
+# Replay smoke pack
 
-Place **non-locked** JPEG/PNG frames here (or pass any directory to `--replay`).
+Place a **non-locked** pack here (or pass any pack directory to `--replay`).
 
-Do **not** copy `test_scratch`. That set is locked: it must not be used to retrain, retune thresholds, or as a dirty smoke set that later masquerades as evaluation.
+```text
+tests/replay/
+├── replay_manifest.json
+└── frames/
+    ├── 000001.jpg
+    └── ...
+```
 
-Suggested smoke mix: a handful of ordinary production-like frames from non-test splits, plus a few locator-friendly gear images. Replay only manufactures real inference cycles; it is not a substitute for the locked test protocol.
+Build from `Machine_vision_dataset` **train/val gear frames**, never `test_scratch`:
+
+```bash
+python -m gp.replay --source /path/to/Machine_vision_dataset/dataset_gear/images/train \
+  --dest tests/replay --source-commit <dataset SHA> --limit 40
+```
+
+Frames are gitignored. The manifest is committed after a pack is built so experiments can record `replay_pack_id` and `replay_pack_hash`.

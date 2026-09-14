@@ -45,11 +45,19 @@ class ProfileTests(unittest.TestCase):
         self.assertEqual(config.inference_profile, "FULL")
 
     def test_trt_fast_rebuilds_when_engine_exists(self):
+        import hashlib
+        import json
+
         config = AppConfig()
         with tempfile.TemporaryDirectory() as tmp:
             engine = Path(tmp) / "model1.engine"
             engine.write_bytes(b"x")
-            with patch("gp.profiles.ENGINE_LOCATOR", engine):
+            manifest = Path(tmp) / "manifest.json"
+            manifest.write_text(
+                json.dumps({"engine": {"sha256": hashlib.sha256(b"x").hexdigest()}}),
+                encoding="utf-8",
+            )
+            with patch("gp.profiles.ENGINE_LOCATOR", engine), patch("gp.profiles.ENGINE_MANIFEST", manifest):
                 plan = apply_to_config(config, "TRT_FAST")
             self.assertTrue(plan["rebuild_inspector"])
             self.assertEqual(Path(config.locator_model), engine)

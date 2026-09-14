@@ -3,7 +3,8 @@
 
 import sys
 
-from gp.launch import EXPORTS, start
+from gp.launch import start
+from gp.profiles import ENGINE_LOCATOR
 
 if __name__ == "__main__":
-    sys.exit(start(locator=EXPORTS / "model1.engine"))
+    sys.exit(start(locator=ENGINE_LOCATOR))
