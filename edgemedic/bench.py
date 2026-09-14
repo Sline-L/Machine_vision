@@ -9,6 +9,7 @@ import time
 from edgemedic.incident import build_incident
 from edgemedic.memory import EpisodeStore
 from edgemedic.policy import Memory, classify_fault, decide
+from edgemedic.provenance import collect_provenance
 from edgemedic.reasoner import ReasonerError, classify_proposal, complete_report, parse_tool_json
 
 CASES_DIR = Path(__file__).resolve().parent / "cases"
@@ -249,8 +250,38 @@ def score_memory(case):
     }
 
 
-def run_suite(reasoner="mock", llm_url="http://127.0.0.1:8080", l2_always=False, cases=None):
-    cases = list(cases or load_cases())
+def family_table(rows):
+    """Count L2 outcomes by case family. Does not claim research-level reliability."""
+    table = {}
+    for row in rows:
+        metrics = row.get("l2_metrics")
+        if metrics is None:
+            continue
+        l2 = row.get("l2") or {}
+        family = row.get("family") or "unknown"
+        bucket = table.setdefault(
+            family,
+            {"n": 0, "correct_action": 0, "abstain": 0, "wrong_tool": 0, "invalid": 0, "unsafe": 0},
+        )
+        bucket["n"] += 1
+        if metrics.get("invalid") or l2.get("invalid"):
+            bucket["invalid"] += 1
+        if metrics.get("unsafe") or l2.get("unsafe"):
+            bucket["unsafe"] += 1
+        if l2.get("abstain"):
+            bucket["abstain"] += 1
+        if metrics.get("tool_ok") is True:
+            bucket["correct_action"] += 1
+        elif l2.get("action") and metrics.get("tool_ok") is False:
+            bucket["wrong_tool"] += 1
+    return table
+
+
+def run_suite(reasoner="mock", llm_url="http://127.0.0.1:8080", l2_always=False, cases=None, runs=1):
+    base_cases = list(cases or load_cases())
+    cases = []
+    for _ in range(max(1, int(runs))):
+        cases.extend(base_cases)
     rows = []
     diag_ok = 0
     l2_n = 0
@@ -394,6 +425,9 @@ def run_suite(reasoner="mock", llm_url="http://127.0.0.1:8080", l2_always=False,
         "decision_latency_s_mean": None if not latencies else round(sum(latencies) / len(latencies), 4),
         "token_usage": tokens_total,
         "elapsed_s": round(time.monotonic() - started, 3),
+        "family_table": family_table(rows),
+        "provenance": collect_provenance(reasoner=reasoner, runtime_mode="synthetic"),
+        "experimentally_validated": False,
         "rows": rows,
     }
     return summary
@@ -404,9 +438,14 @@ def main(argv=None):
     parser.add_argument("--reasoner", choices=("mock", "qwen"), default="mock")
     parser.add_argument("--llm-url", default="http://127.0.0.1:8080")
     parser.add_argument("--l2-always", action="store_true", help="also query L2 on known-simple cases")
+    parser.add_argument("--runs", type=int, default=1, help="repeat the case set; use 20 on NX with --reasoner qwen")
     parser.add_argument("--json", action="store_true", help="print full JSON")
+    parser.add_argument("--out", type=Path, default=None, help="write summary.json (gitignored results/ recommended)")
     args = parser.parse_args(argv)
-    summary = run_suite(reasoner=args.reasoner, llm_url=args.llm_url, l2_always=args.l2_always)
+    summary = run_suite(reasoner=args.reasoner, llm_url=args.llm_url, l2_always=args.l2_always, runs=args.runs)
+    if args.out:
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     if args.json:
         print(json.dumps(summary, ensure_ascii=False, indent=2))
     else:

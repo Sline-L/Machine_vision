@@ -10,6 +10,8 @@
 
 > A2+A3 mechanism implemented, research-level effectiveness not yet validated.
 
+当前软件线：机制基线、测量基础设施、模型产物契约、Stage C Dataset Replay **接口**已落地。下一阶段是 NX 上真实 inference cycle 与真实 4B 决策数据；**研究有效性仍未验证**。
+
 Baseline tag：`edgemedic-a2a3-mechanism-baseline`。A4、CLASSIFY_ONLY / LOCATE_ONLY 仍不在范围。测量文档：[architecture](edgemedic-architecture.md)、[verification](edgemedic-verification.md)、[benchmark](edgemedic-benchmark.md)、[experiments](edgemedic-experiments.md)、[model bundle](model-bundle.md)。
 
 | 协议 | 文档 | JSON Schema |
