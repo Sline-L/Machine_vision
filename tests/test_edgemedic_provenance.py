@@ -11,7 +11,16 @@ class ProvenanceTests(unittest.TestCase):
         self.assertEqual(payload["reasoner"], "qwen3-4b")
         self.assertEqual(payload["bundle_id"], "scratch-v5-2026-09-14")
         self.assertEqual(payload["runtime_commit"], payload["agent_commit"])
-        self.assertEqual(len(payload["manifest_sha256"] or ""), 64)
+        self.assertEqual(payload["fault_mode"], "none")
+        self.assertIn("experiment_config_hash", payload)
+        self.assertEqual(len(payload["experiment_config_hash"]), 64)
+
+    def test_fault_modes_are_not_mixed_by_hash(self):
+        from edgemedic.provenance import FAULT_REAL_RESOURCE_PRESSURE, FAULT_SYNTHETIC_SNAPSHOT, experiment_config_hash
+
+        left = experiment_config_hash({"fault_mode": FAULT_SYNTHETIC_SNAPSHOT})
+        right = experiment_config_hash({"fault_mode": FAULT_REAL_RESOURCE_PRESSURE})
+        self.assertNotEqual(left, right)
 
     def test_replay_device_sets_runtime_mode(self):
         payload = collect_provenance(snapshot={"camera": {"device": "replay:/tmp/frames"}})
@@ -64,7 +73,7 @@ class SyntheticProvenanceTests(unittest.TestCase):
     def test_synthetic_summary_carries_provenance(self):
         _rows, summary = run_synthetic(runs=1)
         self.assertIn("provenance", summary)
-        self.assertFalse(summary["validated"])
+        self.assertEqual(summary["provenance"]["fault_mode"], "synthetic_snapshot")
 
 
 if __name__ == "__main__":

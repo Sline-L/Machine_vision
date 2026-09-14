@@ -8,9 +8,9 @@
 
 当前研究状态（机制 ≠ 能力验证）：
 
-> A2+A3 mechanism implemented, research-level effectiveness not yet validated.
+> Software implementation baseline complete; next step is NX software-in-the-loop measurement, not new feature development.
 
-当前软件线：机制基线、测量基础设施、模型产物契约、Stage C Dataset Replay **接口**已落地。下一阶段是 NX 上真实 inference cycle 与真实 4B 决策数据；**研究有效性仍未验证**。
+> A2+A3 mechanism implemented, research-level effectiveness not yet validated.
 
 Baseline tag：`edgemedic-a2a3-mechanism-baseline`。A4、CLASSIFY_ONLY / LOCATE_ONLY 仍不在范围。测量文档：[architecture](edgemedic-architecture.md)、[verification](edgemedic-verification.md)、[benchmark](edgemedic-benchmark.md)、[experiments](edgemedic-experiments.md)、[model bundle](model-bundle.md)。
 

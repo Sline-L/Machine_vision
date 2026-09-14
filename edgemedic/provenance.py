@@ -1,4 +1,4 @@
-"""Record which runtime, bundle, and reasoner produced an experiment file."""
+"""Record which runtime, bundle, reasoner, and fault evidence class produced a run."""
 
 from pathlib import Path
 import hashlib
@@ -9,6 +9,17 @@ import time
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 MANIFEST_PATH = REPO_ROOT / "model" / "model2" / "manifest.json"
+
+# Do not mix these in one results table.
+FAULT_NONE = "none"
+FAULT_SYNTHETIC_SNAPSHOT = "synthetic_snapshot"
+FAULT_REAL_RESOURCE_PRESSURE = "real_resource_pressure"
+FAULT_MODES = (FAULT_NONE, FAULT_SYNTHETIC_SNAPSHOT, FAULT_REAL_RESOURCE_PRESSURE)
+
+
+def experiment_config_hash(config):
+    raw = json.dumps(config or {}, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
 def git_head(cwd=None):
@@ -39,8 +50,16 @@ def _manifest():
     return payload.get("bundle_id"), digest, payload
 
 
-def collect_provenance(reasoner="mock", runtime_mode="synthetic", snapshot=None):
+def collect_provenance(
+    reasoner="mock",
+    runtime_mode="synthetic",
+    snapshot=None,
+    fault_mode=FAULT_NONE,
+    experiment_config=None,
+):
     """Monorepo: runtime_commit and agent_commit are the same HEAD until split."""
+    if fault_mode not in FAULT_MODES:
+        raise ValueError(f"未知 fault_mode：{fault_mode}")
     commit = git_head()
     bundle_id, manifest_sha256, manifest = _manifest()
     mode = runtime_mode
@@ -50,6 +69,7 @@ def collect_provenance(reasoner="mock", runtime_mode="synthetic", snapshot=None)
             mode = "dataset_replay"
         elif snapshot.get("source_type") == "replay":
             mode = "dataset_replay"
+    config = dict(experiment_config or {})
     return {
         "runtime_commit": commit,
         "agent_commit": commit,
@@ -57,6 +77,9 @@ def collect_provenance(reasoner="mock", runtime_mode="synthetic", snapshot=None)
         "manifest_sha256": manifest_sha256,
         "reasoner": "qwen3-4b" if reasoner == "qwen" else reasoner,
         "runtime_mode": mode,
+        "fault_mode": fault_mode,
+        "experiment_config": config,
+        "experiment_config_hash": experiment_config_hash(config),
         "manifest_path": None if not MANIFEST_PATH.is_file() else str(MANIFEST_PATH),
         "model_family": None if not manifest else manifest.get("model_family"),
     }
@@ -106,7 +129,7 @@ def summarize_samples(samples):
     }
 
 
-def sample_live(url, duration_s=20.0, interval=0.5):
+def sample_live(url, duration_s=20.0, interval=0.5, fault_mode=FAULT_NONE, experiment_config=None, reasoner="mock"):
     from edgemedic.client import ControlClient
 
     client = ControlClient(url)
@@ -124,7 +147,13 @@ def sample_live(url, duration_s=20.0, interval=0.5):
         "control_url": url,
         "samples": samples,
         "summary": summarize_samples(samples),
-        "provenance": collect_provenance(runtime_mode="dataset_replay", snapshot=snapshot),
+        "provenance": collect_provenance(
+            reasoner=reasoner,
+            runtime_mode="dataset_replay",
+            snapshot=snapshot,
+            fault_mode=fault_mode,
+            experiment_config=experiment_config,
+        ),
     }
 
 

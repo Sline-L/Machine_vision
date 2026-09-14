@@ -49,6 +49,7 @@ class ExperimentTests(unittest.TestCase):
         rows = run_software_inject()
         self.assertGreaterEqual(len(rows), 6)
         self.assertTrue(all(item["reset"] == "ok" for item in rows))
+        self.assertTrue(all(item["fault_mode"] == "synthetic_snapshot" for item in rows))
 
     def test_policy_candidate_is_not_deployed(self):
         store = EpisodeStore(Path(tempfile.mkdtemp()) / "episodes.json")

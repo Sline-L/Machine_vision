@@ -11,9 +11,17 @@ import uuid
 from edgemedic.bench import load_cases, merge_state, run_suite
 from edgemedic.candidate import generate_candidates
 from edgemedic.incident import build_incident
-from edgemedic.inject import INJECTORS, patch_snapshot
+from edgemedic.inject import INJECTOR_FAULT_MODE, INJECTORS, patch_snapshot
 from edgemedic.policy import Memory, classify_fault, decide
-from edgemedic.provenance import collect_provenance, live_action, sample_live
+from edgemedic.provenance import (
+    FAULT_MODES,
+    FAULT_NONE,
+    FAULT_REAL_RESOURCE_PRESSURE,
+    FAULT_SYNTHETIC_SNAPSHOT,
+    collect_provenance,
+    live_action,
+    sample_live,
+)
 
 
 RESULTS_ROOT = Path(__file__).resolve().parent.parent / "results"
@@ -97,7 +105,11 @@ def run_synthetic(cases=None, runs=1, ablation="full"):
         "mttd_mean_ms": None if not rows else round(t_fault / len(rows), 4),
         "mttr_note": "MTTR uses t_mission_verified - t_fault. Synthetic runner has no live verify window, so mttr_ms is null.",
         "nx_workload": "not-run",
-        "provenance": collect_provenance(runtime_mode="synthetic"),
+        "provenance": collect_provenance(
+            runtime_mode="synthetic",
+            fault_mode=FAULT_SYNTHETIC_SNAPSHOT,
+            experiment_config={"stage": "synthetic", "ablation": ablation, "runs": max(1, int(runs))},
+        ),
     }
     return rows, summary
 
@@ -120,6 +132,7 @@ def run_software_inject(baseline=None, injectors=None):
                 "mttd_ms": round((time.monotonic() - t0) * 1000.0, 3),
                 "action": None if action is None else {"name": action.get("name"), "params": action.get("params")},
                 "reset": "ok",
+                "fault_mode": INJECTOR_FAULT_MODE,
             }
         )
     return rows
@@ -139,34 +152,77 @@ def main(argv=None):
     parser.add_argument("--live-params", default="{}", help="JSON params for --live-action")
     parser.add_argument("--l2-always", action="store_true")
     parser.add_argument("--out", type=Path, default=None)
+    parser.add_argument(
+        "--fault-mode",
+        choices=FAULT_MODES,
+        default=None,
+        help="none=baseline; synthetic_snapshot=snapshot inject; real_resource_pressure=real Jetson load. Default: synthetic_snapshot on mock, none on live.",
+    )
     args = parser.parse_args(argv)
     if args.ablation == "no-guardian" and args.executor != "mock":
         raise SystemExit("no-guardian ablation 只允许 mock executor，禁止在真实 NX 上关闭 Guardian")
+    fault_mode = args.fault_mode
+    if fault_mode is None:
+        fault_mode = FAULT_SYNTHETIC_SNAPSHOT if args.executor == "mock" else FAULT_NONE
+    if args.executor == "live" and fault_mode == FAULT_SYNTHETIC_SNAPSHOT:
+        raise SystemExit("live 采样不能标记 synthetic_snapshot；inject_v5_latency 只属于 mock")
+    if args.executor == "mock" and fault_mode == FAULT_REAL_RESOURCE_PRESSURE:
+        raise SystemExit("mock 不能标记 real_resource_pressure")
     cases = load_cases()
     if args.case:
         cases = [item for item in cases if item.get("case") == args.case or args.case in (item.get("family"), item.get("case", "").replace("_01", ""))]
         if not cases:
             raise SystemExit(f"找不到 case：{args.case}")
-    bench = run_suite(reasoner=args.reasoner, llm_url=args.llm_url, l2_always=args.l2_always, cases=cases, runs=args.runs)
-    synth_rows, synth_summary = run_synthetic(cases=cases, runs=args.runs, ablation=args.ablation)
-    inject_rows = run_software_inject()
-    candidates = generate_candidates()
+    exp_config = {
+        "reasoner": args.reasoner,
+        "runs": args.runs,
+        "ablation": args.ablation,
+        "executor": args.executor,
+        "sample_s": args.sample_s,
+        "live_action": args.live_action,
+        "live_params": args.live_params,
+        "case": args.case,
+        "l2_always": bool(args.l2_always),
+        "fault_mode": fault_mode,
+        "control_url": args.control_url,
+    }
     out_dir = args.out or (RESULTS_ROOT / f"experiment_{_now()}")
     live = None
+    bench = None
+    synth_rows, synth_summary = [], None
+    inject_rows = None
+    candidates = []
     if args.executor == "live":
         try:
-            live = sample_live(args.control_url, duration_s=args.sample_s)
+            live = sample_live(
+                args.control_url,
+                duration_s=args.sample_s,
+                fault_mode=fault_mode,
+                experiment_config=exp_config,
+                reasoner=args.reasoner,
+            )
             try:
                 params = json.loads(args.live_params)
             except json.JSONDecodeError as exc:
                 raise SystemExit(f"--live-params 不是 JSON：{exc}") from exc
             if args.live_action:
                 live["action"] = live_action(args.control_url, args.live_action, params)
-                live["after"] = sample_live(args.control_url, duration_s=args.sample_s)
+                live["after"] = sample_live(
+                    args.control_url,
+                    duration_s=args.sample_s,
+                    fault_mode=fault_mode,
+                    experiment_config=exp_config,
+                    reasoner=args.reasoner,
+                )
         except SystemExit:
             raise
         except Exception as exc:
             raise SystemExit(f"live sample 失败（GearPro Control API {args.control_url}）：{exc}") from exc
+    else:
+        bench = run_suite(reasoner=args.reasoner, llm_url=args.llm_url, l2_always=args.l2_always, cases=cases, runs=args.runs)
+        synth_rows, synth_summary = run_synthetic(cases=cases, runs=args.runs, ablation=args.ablation)
+        inject_rows = run_software_inject()
+        candidates = generate_candidates()
     payload = {
         "stage": "synthetic+software-inject" if args.executor == "mock" else "live-sample",
         "status": "implemented-tested",
@@ -177,16 +233,20 @@ def main(argv=None):
         "provenance": collect_provenance(
             reasoner=args.reasoner,
             runtime_mode="synthetic" if args.executor == "mock" else "dataset_replay",
+            fault_mode=fault_mode,
+            experiment_config=exp_config,
         ),
-        "bench": {key: value for key, value in bench.items() if key != "rows"},
+        "bench": None if bench is None else {key: value for key, value in bench.items() if key != "rows"},
         "synthetic": synth_summary,
         "software_inject": inject_rows,
         "live": live,
         "policy_candidates": candidates,
-        "asr_note": "ASR_function / ASR_mission on live GearPro cycle windows are not claimed. This runner reports synthetic decision metrics only unless --executor live sampled a running runtime.",
+        "asr_note": "ASR_function / ASR_mission are not claimed. software_inject is always synthetic_snapshot. live samples use --fault-mode none or real_resource_pressure.",
     }
     _write_outputs(out_dir, synth_rows, payload)
     print(json.dumps({**payload, "out": str(out_dir)}, ensure_ascii=False, indent=2))
+    if bench is None:
+        return 0
     return 0 if bench.get("unsafe_action_leakage") == 0.0 else 2
 
 

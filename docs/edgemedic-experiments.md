@@ -11,11 +11,15 @@ Every `summary.json` now records provenance so later model/runtime updates stay 
   "bundle_id": "scratch-v5-2026-09-14",
   "manifest_sha256": "…",
   "reasoner": "qwen3-4b",
-  "runtime_mode": "dataset_replay"
+  "runtime_mode": "dataset_replay",
+  "fault_mode": "none",
+  "experiment_config_hash": "…"
 }
 ```
 
-This monorepo uses the same git HEAD for `runtime_commit` and `agent_commit`.
+`fault_mode` is one of `none` (healthy baseline), `synthetic_snapshot` (including `inject_v5_latency` — **not** a GPU fault), or `real_resource_pressure` (operator-induced Jetson load). Do not put the last two in the same results table. This monorepo uses the same git HEAD for `runtime_commit` and `agent_commit`.
+
+`--executor live` writes only live samples (no synthetic inject in that file). Mock runs keep software inject and always tag it `synthetic_snapshot`.
 
 ```bash
 python -m edgemedic.experiment --reasoner mock --runs 1
@@ -56,7 +60,7 @@ python -m edgemedic.bench --reasoner qwen --runs 20 --json --out results/qwen_fa
 
 Read `family_table` (Known-simple / Composite / Ambiguous / Unsafe): correct_action, abstain, wrong_tool, invalid, unsafe. Stability is “same case across 20 repeats”, not a single headline score.
 
-3. One A3 chain only: replay → V5 overload (operator GPU pressure or live SPARSE after detect) → continue cycles → Mission Verify. First confirm before/after/SPARSE p95, valid ratio, mission utility. Software snapshot inject remains `inject_v5_latency`; it is **not** a real GPU fault.
+3. One A3 chain only, after the four-profile baseline is stable: replay FULL → **real** V5 resource pressure (`--fault-mode real_resource_pressure`) → Control `SPARSE` → continue replay → Mission Verify. Compare before / during / after SPARSE (p95, valid ratio, utility). `inject_v5_latency` stays `synthetic_snapshot` and is **not** this experiment.
 
 `--executor live` samples a running GearPro. `--ablation no-guardian` is **mock-only**.
 

@@ -1,4 +1,10 @@
-"""Recoverable software fault injectors. They must not damage the OS."""
+"""Recoverable software fault injectors. They must not damage the OS.
+
+Every injector here only patches a SystemSnapshot. fault_mode is always
+synthetic_snapshot — never record these rows as real_resource_pressure.
+"""
+
+from edgemedic.provenance import FAULT_SYNTHETIC_SNAPSHOT
 
 INJECTORS = (
     "force_worker_exception",
@@ -11,6 +17,7 @@ INJECTORS = (
     "inject_no_gear_anomaly",
 )
 
+INJECTOR_FAULT_MODE = FAULT_SYNTHETIC_SNAPSHOT
 
 SNAPSHOT_PATCHES = {
     "force_worker_exception": {"scratch_v5": {"error_count": 3, "health": 0.0}},

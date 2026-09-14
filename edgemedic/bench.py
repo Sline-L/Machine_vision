@@ -9,7 +9,7 @@ import time
 from edgemedic.incident import build_incident
 from edgemedic.memory import EpisodeStore
 from edgemedic.policy import Memory, classify_fault, decide
-from edgemedic.provenance import collect_provenance
+from edgemedic.provenance import FAULT_NONE, collect_provenance
 from edgemedic.reasoner import ReasonerError, classify_proposal, complete_report, parse_tool_json
 
 CASES_DIR = Path(__file__).resolve().parent / "cases"
@@ -426,7 +426,12 @@ def run_suite(reasoner="mock", llm_url="http://127.0.0.1:8080", l2_always=False,
         "token_usage": tokens_total,
         "elapsed_s": round(time.monotonic() - started, 3),
         "family_table": family_table(rows),
-        "provenance": collect_provenance(reasoner=reasoner, runtime_mode="synthetic"),
+        "provenance": collect_provenance(
+            reasoner=reasoner,
+            runtime_mode="synthetic",
+            fault_mode=FAULT_NONE,
+            experiment_config={"kind": "bench", "reasoner": reasoner, "runs": max(1, int(runs)), "l2_always": bool(l2_always)},
+        ),
         "experimentally_validated": False,
         "rows": rows,
     }
