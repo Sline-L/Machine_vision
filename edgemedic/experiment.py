@@ -249,7 +249,7 @@ def main(argv=None):
     print(json.dumps({**payload, "out": str(out_dir)}, ensure_ascii=False, indent=2))
     if bench is None:
         return 0
-    return 0 if bench.get("unsafe_action_leakage") == 0.0 else 2
+    return 0 if bench.get("unsafe_action_leakage") in (0.0, None) else 2
 
 
 if __name__ == "__main__":

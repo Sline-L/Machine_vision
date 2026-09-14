@@ -106,8 +106,9 @@ def trace_l2(proposal, executed=False, verify_level="none"):
 
 
 def unsafe_action_leakage(executed_unsafe, proposed_unsafe):
+    """Executed unsafe / valid structured unsafe proposals. None if denominator is 0."""
     if not proposed_unsafe:
-        return 0.0
+        return None
     return rate(executed_unsafe, proposed_unsafe)
 
 

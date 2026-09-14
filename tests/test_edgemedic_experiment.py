@@ -24,6 +24,7 @@ class MetricsTests(unittest.TestCase):
 
     def test_ual_zero_when_unsafe_not_executed(self):
         self.assertEqual(unsafe_action_leakage(0, 3), 0.0)
+        self.assertIsNone(unsafe_action_leakage(0, 0))
         table = trace_l2({"unsafe": True, "invalid": False, "action": None}, executed=False)
         self.assertEqual(table["guardian"]["blocked_count"], 1)
         self.assertEqual(table["executor"]["executed_count"], 0)

@@ -12,21 +12,22 @@
 Software implementation baseline: COMPLETE
 Measurement infrastructure: COMPLETE
 NX software-in-the-loop: ACTIVE
-Stage C bring-up:
-  FULL + PT_SAFE COMPLETE
-  FULL + TRT_FAST COMPLETE (engine held; Control verify was function, sample ran)
-  SPARSE + PT_SAFE COMPLETE
-  SPARSE + TRT_FAST COMPLETE
-  all four: bring-up only, not controlled comparison
-Qwen reliability measurement: FIRST DATASET COMPLETE
-L2 EFFECTIVENESS CURRENTLY POOR
-Research evidence: EARLY BEHAVIORAL EVIDENCE AVAILABLE
-NO A2/A3 EFFECTIVENESS CLAIM YET
+Stage C bring-up: 4/4 COMPLETE (not controlled comparison)
+
+Qwen protocol baseline:
+  RAW REPLAY SCORED
+  FRESH RERUN COMPLETE (same prompt, T=0, new scorer)
+  PCR = 0%
+  DTA = N/A
+  UAL = N/A (0 valid unsafe structured proposals)
+
+L2 effectiveness: NOT ESTABLISHED
+A2/A3 effectiveness: NOT ESTABLISHED
 ```
 
 > A2+A3 mechanism implemented, research-level effectiveness not yet validated.
 
-Qwen3-4B on NX: **L2 transport is integrated; decision effectiveness is currently poor.** The first-pass PCR of 25% is **not** a protocol baseline (prompt-echo contamination). Rescore/rerun with final-answer extraction before grammar constraints or model swap. `UAL=0` with zero valid unsafe proposals is fail-closed on protocol, not Guardian-block proof.
+Qwen3-4B 的首要问题是 **final structured protocol**，不是 tool-selection accuracy：80 次 L2 调用在修正后的 scorer 下 PCR=0（20 prompt_echo / 40 truncated_reasoning / 20 prose_refusal）。DTA 尚不可估。`UAL` 在分母为 0 时为 **null**，不能写成 0%。Stage C 冻结，直到 Q0 prompt-only vs Q1 constrained JSON 对照完成。Grammar 只约束输出形式与 action vocabulary，不按 case 泄题。不改 prompt、不换模型。
 
 Baseline tag：`edgemedic-a2a3-mechanism-baseline`。A4、CLASSIFY_ONLY / LOCATE_ONLY 仍不在范围。测量文档：[architecture](edgemedic-architecture.md)、[verification](edgemedic-verification.md)、[benchmark](edgemedic-benchmark.md)、[experiments](edgemedic-experiments.md)、[model bundle](model-bundle.md)。
 

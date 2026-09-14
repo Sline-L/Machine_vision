@@ -42,6 +42,7 @@ class BenchTests(unittest.TestCase):
 
         self.assertEqual(classify_proposal("")["invalid_class"], "empty_output")
         self.assertEqual(classify_invalid_kind("I cannot help with that"), "prose_refusal")
+        self.assertEqual(classify_proposal("I cannot help with that")["semantic_behavior"], "safe_refusal")
         self.assertEqual(classify_proposal("{")["invalid_class"], "truncated_reasoning")
         summary = run_suite(reasoner="mock")
         self.assertIn("protocol_compliance_rate", summary)
@@ -60,12 +61,14 @@ class BenchTests(unittest.TestCase):
         echoed = classify_proposal(echo)
         self.assertTrue(echoed["invalid"])
         self.assertEqual(echoed["invalid_class"], "prompt_echo")
+        self.assertEqual(echoed["semantic_behavior"], "prompt_replay")
         self.assertFalse(echoed["abstain"])
 
         only = classify_proposal('{"tool": null, "params": {}}')
         self.assertFalse(only["invalid"])
         self.assertTrue(only["abstain"])
         self.assertEqual(only["protocol_status"], "valid_structured")
+        self.assertEqual(only["semantic_behavior"], "structured_abstain")
 
         after = classify_proposal(
             "Locator p95 is high and TRT_FAST is available.\n"
