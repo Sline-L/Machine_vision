@@ -151,6 +151,7 @@ def main(argv=None):
     parser.add_argument("--live-action", default=None, help="optional Control API action after sampling, e.g. set_inference_profile")
     parser.add_argument("--live-params", default="{}", help="JSON params for --live-action")
     parser.add_argument("--l2-always", action="store_true")
+    parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--replay-pack", type=Path, default=None, help="replay pack dir with replay_manifest.json")
     parser.add_argument(
         "--fault-mode",
