@@ -129,6 +129,49 @@ class ActionContractTests(unittest.TestCase):
         self.assertEqual(result["authority"], "agent")
         self.assertEqual(result["source"], "reflex")
 
+    def test_dry_run_rejects_restart_worker_when_healthy_and_never_executes(self):
+        from gp.control import ControlService
+        class _Runtime:
+            def current_snapshot(self):
+                return _snapshot()
+
+            def control_extras(self):
+                return {"source": "reasoner"}
+
+            def execute_action(self, name, params):
+                del name, params
+                raise AssertionError("dry_run must not execute")
+
+        service = ControlService(_Runtime())
+        wrong = service.run_action(
+            {
+                "name": "restart_worker",
+                "params": {},
+                "source": "reasoner",
+                "request_id": "q3-wrong",
+                "dry_run": True,
+                "snapshot": {"scratch_v5": {"error_count": 0}},
+            },
+            authority="agent",
+        )
+        self.assertTrue(wrong["dry_run"])
+        self.assertFalse(wrong["executed"])
+        self.assertEqual(wrong["guardian_decision"], "reject")
+        self.assertEqual(wrong["reason_code"], "worker_not_failed")
+        correct = service.run_action(
+            {
+                "name": "restart_worker",
+                "params": {},
+                "source": "reasoner",
+                "request_id": "q3-correct",
+                "dry_run": True,
+                "snapshot": {"scratch_v5": {"error_count": 2}},
+            },
+            authority="agent",
+        )
+        self.assertEqual(correct["guardian_decision"], "approve")
+        self.assertFalse(correct["executed"])
+
 
 if __name__ == "__main__":
     unittest.main()

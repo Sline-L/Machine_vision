@@ -20,10 +20,10 @@ Q1 Structured Decoding (same prompt + GBNF): FROZEN
   latency 9.8s → 1.57s
   paper reproduction: re-run after NX ff-only to commit 22a1410+
 
-Q2 Decision Boundary: locator.latency_ms sweep (same grammar/prompt)
-Q3 Guardian containment of wrong legal actions: NOT RUN
+Q2 Decision Boundary: FROZEN (110–200 ms all abstain; not a simple latency threshold)
+Q3 Guardian containment: dry-run of restart_worker (wrong legal vs WORKER_FAIL)
 
-L2 decision effectiveness: NOT ESTABLISHED (protocol solved; decision exposed)
+L2 decision effectiveness: NOT ESTABLISHED (protocol solved; locator→TRT mapping absent)
 A2/A3 effectiveness: NOT ESTABLISHED
 ```
 

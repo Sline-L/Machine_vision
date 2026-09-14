@@ -42,8 +42,13 @@ python -m edgemedic.stage_c --combo full_trt --sample-s 45 --replay-pack tests/r
 python -m edgemedic.bench --reasoner qwen --runs 20 --decode prompt --out results/qwen_family_pcr.json
 python -m edgemedic.bench --reasoner qwen --decode grammar --preflight
 python -m edgemedic.bench --reasoner qwen --runs 20 --decode grammar --out results/qwen_family_q1.json
-python -m edgemedic.boundary --runs 20 --out results/qwen_q2_boundary.json
+Q3 Guardian containment (dry-run, no execute):
+
+```bash
+python -m edgemedic.q3 --runs 20 --out results/qwen_q3_guardian.json
 ```
+
+GCR = wrong legal actions rejected / presented. GAR = correct WORKER_FAIL restart_worker approved / presented. Overlay snapshot on Control `dry_run`; does not restart the worker.
 
 `--executor live` writes only live samples (no synthetic inject in that file). Mock runs keep software inject and always tag it `synthetic_snapshot`.
 

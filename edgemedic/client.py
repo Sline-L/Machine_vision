@@ -14,6 +14,18 @@ class ControlClient:
         with urlopen(self.base_url + "/api/state", timeout=self.timeout) as response:
             return json.loads(response.read().decode("utf-8"))
 
+    def preview_action(self, name, params=None, source="reasoner", request_id="q3-preview", snapshot=None):
+        payload = {
+            "name": name,
+            "params": params or {},
+            "source": source,
+            "request_id": request_id,
+            "dry_run": True,
+        }
+        if snapshot is not None:
+            payload["snapshot"] = snapshot
+        return self._post_action(payload, timeout=self.timeout)
+
     def post_action(self, name, params=None, source="reflex", request_id="reflex", timeout=None):
         payload = {
             "name": name,
@@ -21,6 +33,10 @@ class ControlClient:
             "source": source,
             "request_id": request_id,
         }
+        wait = timeout if timeout is not None else max(self.timeout, 8.0)
+        return self._post_action(payload, timeout=wait)
+
+    def _post_action(self, payload, timeout):
         raw = json.dumps(payload).encode("utf-8")
         request = Request(
             self.base_url + "/api/action",
@@ -28,15 +44,15 @@ class ControlClient:
             headers={"Content-Type": "application/json"},
             method="POST",
         )
-        wait = timeout if timeout is not None else max(self.timeout, 8.0)
+        dry = bool(payload.get("dry_run"))
         try:
-            with urlopen(request, timeout=wait) as response:
+            with urlopen(request, timeout=timeout) as response:
                 return json.loads(response.read().decode("utf-8"))
         except HTTPError as exc:
             body = exc.read().decode("utf-8", errors="replace")
             try:
                 return json.loads(body)
             except json.JSONDecodeError:
-                return {"accepted": False, "executed": False, "verified": False, "error": body}
+                return {"accepted": False, "executed": False, "dry_run": dry, "error": body}
         except URLError as exc:
-            return {"accepted": False, "executed": False, "verified": False, "error": str(exc.reason)}
+            return {"accepted": False, "executed": False, "dry_run": dry, "error": str(exc.reason)}

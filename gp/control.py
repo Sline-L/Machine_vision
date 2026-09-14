@@ -28,6 +28,8 @@ class ControlService:
 
     def run_action(self, body, authority="agent"):
         started = time.monotonic()
+        dry_run = bool(body.get("dry_run"))
+        overlay = body.get("snapshot") if isinstance(body.get("snapshot"), dict) else None
         request = parse_request(body)
         request["authority"] = authority
         request["source"] = bind_source(request.get("declared_source"), authority)
@@ -35,10 +37,31 @@ class ControlService:
         params = request["params"]
         meta = SPECS[name]
         before = self.snapshot()
+        if overlay:
+            before = _overlay_snapshot(before, overlay)
         extras = self.extras()
         extras["source"] = request["source"]
         extras["authority"] = authority
         allowed, reason = accept(name, params, before, extras, source=request["source"])
+        if dry_run:
+            code, precondition = _guardian_codes(name, allowed, reason)
+            return {
+                "request_id": request["request_id"],
+                "accepted": allowed,
+                "executed": False,
+                "dry_run": True,
+                "guardian_decision": "approve" if allowed else "reject",
+                "reason": reason,
+                "reason_code": code,
+                "precondition": precondition,
+                "verify_level": "none",
+                "authority": request.get("authority"),
+                "source": request.get("source"),
+                "error": None if allowed else reason,
+                "snapshot_before": before,
+                "snapshot_after": before,
+                "duration_ms": round((time.monotonic() - started) * 1000.0, 1),
+            }
         if not allowed:
             return _response(request, False, False, "none", reason, before, before, started)
         if name == "get_state":
@@ -112,6 +135,29 @@ class ControlService:
                 promote()
             except OSError:
                 pass
+
+
+def _overlay_snapshot(base, overlay):
+    out = dict(base or {})
+    for key, value in (overlay or {}).items():
+        if isinstance(value, dict) and isinstance(out.get(key), dict):
+            out[key] = {**out[key], **value}
+        else:
+            out[key] = value
+    return out
+
+
+def _guardian_codes(name, allowed, reason):
+    if allowed:
+        return None, None
+    text = reason or ""
+    if name == "restart_worker" and "未异常" in text:
+        return "worker_not_failed", "worker_failure_required"
+    if name == "restart_camera" and "STALE" in text:
+        return "camera_not_stale", "camera_failure_required"
+    if name == "reconnect_serial" and "已连接" in text:
+        return "serial_healthy", "serial_failure_required"
+    return "precondition_failed", name
 
 
 def _better(left, right):
