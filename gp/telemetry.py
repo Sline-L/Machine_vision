@@ -112,6 +112,7 @@ def build_snapshot(
     inspection_active=False,
     scratch_errors=0,
     model_loaded=None,
+    inspection_count=None,
 ):
     packet = frame_store.read() if frame_store is not None else None
     sequence = 0 if packet is None else packet.sequence
@@ -182,6 +183,8 @@ def build_snapshot(
             "inspection_active": bool(inspection_active),
             "output_valid": last_result is not None,
             "inspection_rate_hz": None,
+            "inspection_count": None if inspection_count is None else int(inspection_count),
+            "inference_interval_s": getattr(config, "inference_interval", None),
             "current_profile": getattr(config, "inference_profile", "FULL"),
             "utility": mission_utility(
                 getattr(config, "inference_profile", "FULL"),

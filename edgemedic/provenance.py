@@ -271,6 +271,7 @@ def snapshot_telem(snapshot):
     locator = snapshot.get("locator") or {}
     v5 = snapshot.get("scratch_v5") or {}
     mission = snapshot.get("mission") or {}
+    camera = snapshot.get("camera") or {}
     return {
         "gpu_util": system.get("gpu_util"),
         "gpu_mem_mb": system.get("gpu_mem_mb"),
@@ -284,4 +285,8 @@ def snapshot_telem(snapshot):
         "output_valid": mission.get("output_valid"),
         "utility": mission.get("utility"),
         "inspection_active": mission.get("inspection_active"),
+        "frame_seq": camera.get("frame_seq"),
+        "actual_fps": camera.get("actual_fps"),
+        "inference_interval_s": mission.get("inference_interval_s"),
+        "inspection_count": mission.get("inspection_count"),
     }

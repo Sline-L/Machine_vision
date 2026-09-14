@@ -18,7 +18,7 @@ Baseline tag: `edgemedic-a2a3-mechanism-baseline`.
 | A2 Diagnosis mechanism | implemented, tested |
 | A3 Degradation mechanism | implemented, tested |
 | A2 experimental validation | future work |
-| A3 experimental validation | paused: injector not qualified; first 3+3 invalid |
+| A3 experimental validation | not established; severe pilot Mission 0/3 vs 0/3; current SPARSE is cadence-only (Case B) |
 | A4 | out of scope |
 
 One-line research status:
@@ -62,7 +62,7 @@ Related: [verification](edgemedic-verification.md), [benchmark](edgemedic-benchm
 | --- | --- | --- | --- |
 | A Synthetic bench | Guardian / Memory / tool choice | no models | implemented, tested |
 | B Simulated runtime | verify / MTTR plumbing | cycle numbers | implemented, tested |
-| C Dataset replay | locator + Scratch V5 + CUDA/Jetson telemetry on NX | frames from disk, not `/dev/video0` | Healthy 4-combo window recorded. Compute-heavy injector **disqualified**; contention calibration v4 next. First A3 3+3 invalid. `gpu_mem_mb` still null. |
+| C Dataset replay | locator + Scratch V5 + CUDA/Jetson telemetry on NX | frames from disk, not `/dev/video0` | Healthy window recorded. Injector **qualified** (`multi_bandwidth×3`). SPARSE **Case B** (cadence only). Severe A3 pilot Mission 0/3 both arms. `gpu_mem_mb` still null. |
 | D Real camera / line | sensors, serial, conveyor | — | future work |
 
 Replay: `python -m gp --replay <dir>` (`GEARPRO_REPLAY_DIR`). EdgeMedic still talks Control API only; it does not know whether frames came from a camera or disk. Do not replay locked `test_scratch` to retune. Do not merge the dataset repo. Missing Hole stays out of this baseline.

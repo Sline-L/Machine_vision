@@ -9,37 +9,50 @@
 当前研究状态（机制 ≠ 能力验证）：
 
 ```text
-Line 1: FROZEN / REPRODUCED
-Controlled healthy baseline: COMPLETE
+Line 1 — Reasoner Reliability & Containment
+FROZEN / REPRODUCED
 
-Healthy thermal/drift characterization: COMPLETE
+Real-resource-pressure injector
+QUALIFIED
+  mechanism: multi_bandwidth × replicas=3
+  (compute-heavy GEMM/conv: DISQUALIFIED)
+
+Current SPARSE strategy
+CHARACTERIZED
+  type: cadence degradation (interval 0.10 → 0.20)
+  per-inference V5 path: unchanged
+
+Latency-defined V5_OVERLOAD recovery
+NOT SUPPORTED by current SPARSE mechanism
+
+A3 severe-pressure pilot
+  Restart-only: Mission 0/3
+  SPARSE:       Mission 0/3
+  FUNCTION:     3/3 both arms
+  pressure ON throughout
+
+A3 effectiveness
+NOT ESTABLISHED
+
+Next design decision (not implemented yet)
+  A) redesign latency-targeted degradation action, OR
+  B) open a separate throughput/capacity-shedding study for SPARSE
+```
+
+> Line 2 mechanism finding: under sustained memory-bandwidth pressure, SPARSE reduces inspection cadence but leaves the per-inference V5 computation path unchanged; it therefore does not restore a latency-gated Mission under persistent overload.
+
+Do **not** retune Mission V5 bars or rename current SPARSE to claim latency recovery. Details: [a3-strategy-capability](a3-strategy-capability.md), [session-2 status](autonomous-session-2-status.md), [integration plan](integration-plan.md).
+
+Healthy envelope / admission (unchanged):
+
+```text
 Expected steady-state V5 p95: ~178–186 ms
-Experiment admission gate: <190 ms, unchanged
-
-Injector ON/HOLD/OFF qualification: NOT QUALIFIED
-  compute-heavy GEMM/conv: DISQUALIFIED (GPU util is not a V5 proxy)
-  alternative contention calibration: NEXT (memory bandwidth, then SM occupancy)
-  triggerability / margin / sustainability: fail on v3 sweep
-  reversibility: pass on v3 sweep (OFF back under 190 / into 178–186)
-A3 pilot: PAUSED
-A3 effectiveness: NOT ESTABLISHED
+Admission: V5 p95 <190 + FULL + PT + injector OFF + worker healthy + temp in band
 ```
 
 > A2+A3 mechanism implemented, research-level effectiveness not yet validated.
 
-Q0–Q3 are frozen. The first A3 3+3 is **invalid for ASR/MTTR**: the injector was not qualified (GPU util ≈99% with V5 145–168 ms; Restart “success” was a 202/221 ms spike). Do not compare Restart vs SPARSE until:
-
-```bash
-python -m edgemedic.injector_qual --mode healthy-drift --duration-s 180
-python -m edgemedic.injector_qual --mode sweep
-python -m edgemedic.injector_qual --mode qualify --repeats 5 --kind bandwidth --bytes-mb 512 --load-ms 100 --idle-ms 0
-```
-
-Compute-heavy GEMM/conv is **disqualified** for V5 fault injection. Calibration v4 uses memory-bandwidth and SM-occupancy contention. **Selectivity** (V5 worsens, locator stable, valid_ratio high) is reported but not hard-gated until data exist. Do not use `jetson_clocks` as the official A3 environment.
-
-Expected healthy envelope is last-60 s V5 p95 **~178–186 ms** (FULL+PT, T&lt;60 °C). Experiment **admission** stays **recent V5 p95 &lt;190 ms** plus FULL, PT, injector OFF, worker healthy, temperature in band. A 15 s window at 189.7 ms is jitter, not a failed health definition.
-
-Injector qualification (no Restart/SPARSE) has four gates: **triggerability** (sustained ≥2 s `V5_OVERLOAD`), **margin** (HOLD V5 p95 ≥220 ms, not 201–205), **sustainability** (HOLD stays in overload, not spikes), **reversibility** (OFF returns under the 190 ms admission gate; typical band 178–186 is reported separately). **Selectivity** is observational: target `V5_OVERLOAD`, not `SYSTEM_OVERLOAD`. Sweep then 5× qualify. `python -m edgemedic.a3` stays blocked until `fault_injector_qualified=true`. If OFF stays at 190+, debug injector cleanup — do not start 3+3.
+Q0–Q3 are frozen. Injector qualification gates and A3 Mission definitions stay frozen. Integration of measurement infrastructure: branch `integration/injector-a3-measurement` (do not bulk-merge the whole exploration branch).
 
 Baseline tag：`edgemedic-a2a3-mechanism-baseline`。A4、CLASSIFY_ONLY / LOCATE_ONLY 仍不在范围。测量文档：[architecture](edgemedic-architecture.md)、[verification](edgemedic-verification.md)、[benchmark](edgemedic-benchmark.md)、[experiments](edgemedic-experiments.md)、[model bundle](model-bundle.md)。
 

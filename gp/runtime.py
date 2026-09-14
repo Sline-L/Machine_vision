@@ -216,6 +216,7 @@ class GearProRuntime:
             inspection_active=self.inspection_active,
             scratch_errors=self.error_count,
             model_loaded=self.worker.model_loaded,
+            inspection_count=self.worker.inspect_count,
         )
         stats["good_rate"] = 0.0 if not stats["total"] else stats["good"] / stats["total"]
         return {

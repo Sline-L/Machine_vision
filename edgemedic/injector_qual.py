@@ -24,7 +24,9 @@ from edgemedic.gpu_pressure import (
     read_emc_mhz,
     read_gpu_clock_mhz,
     read_power_mode,
+    read_tegrastats,
 )
+from edgemedic.multi_pressure import MultiGpuContention
 from edgemedic.policy import classify_fault
 from edgemedic.provenance import FAULT_NONE, FAULT_REAL_RESOURCE_PRESSURE, collect_provenance, live_action, snapshot_telem, summarize_samples
 
@@ -189,6 +191,9 @@ def _sample(client, duration_s, interval=0.25):
         telem["t"] = time.monotonic()
         telem["gpu_clock_mhz"] = read_gpu_clock_mhz()
         telem["emc_mhz"] = read_emc_mhz()
+        tegra = read_tegrastats()
+        telem["gr3d_pct"] = tegra.get("gr3d_pct")
+        telem["vdd_in_mw"] = tegra.get("vdd_in_mw")
         telem["overload"] = classify_fault(snapshot) == "V5_OVERLOAD"
         rows.append(telem)
         remaining = deadline - time.monotonic()
@@ -203,6 +208,7 @@ def _phase_stats(rows):
     v5 = [item.get("v5_latency_ms") for item in rows]
     clocks = [item.get("gpu_clock_mhz") for item in rows]
     emc = [item.get("emc_mhz") for item in rows]
+    gr3d = [item.get("gr3d_pct") for item in rows]
     utils = [item.get("gpu_util") for item in rows]
     temps = [item.get("temperature_c") for item in rows]
     powers = [item.get("power_w") for item in rows]
@@ -215,6 +221,7 @@ def _phase_stats(rows):
     summary["gpu_clock_mhz_p50"] = _percentile(clocks, 50)
     summary["gpu_clock_mhz_max"] = None if not [c for c in clocks if c is not None] else max(c for c in clocks if c is not None)
     summary["emc_mhz_p50"] = _percentile(emc, 50)
+    summary["gr3d_pct_p50"] = _percentile(gr3d, 50)
     summary["gpu_util_p50"] = _percentile(utils, 50)
     summary["temperature_c_p50"] = _percentile(temps, 50)
     summary["power_w_p50"] = _percentile(powers, 50)
@@ -297,7 +304,7 @@ def run_cycle(client, url, pressure, args):
 
 
 def _pressure_from_args(args):
-    return GpuContention(
+    kwargs = dict(
         kind=args.kind,
         matrix=args.matrix,
         load_ms=args.load_ms,
@@ -310,6 +317,10 @@ def _pressure_from_args(args):
         streams=args.streams,
         buffers=args.buffers,
     )
+    replicas = int(getattr(args, "replicas", 1) or 1)
+    if replicas > 1:
+        return MultiGpuContention(replicas=replicas, **kwargs)
+    return GpuContention(**kwargs)
 
 
 def _write(out, payload):
@@ -330,7 +341,11 @@ def main(argv=None):
     parser.add_argument("--sample-interval-s", type=float, default=0.25)
     parser.add_argument("--repeats", type=int, default=5)
     parser.add_argument("--target-v5-p95", type=float, default=TARGET_FAULT_P95_MS)
-    parser.add_argument("--kind", choices=("bandwidth", "sm", "mixed", "gemm", "conv"), default="bandwidth")
+    parser.add_argument(
+        "--kind",
+        choices=("bandwidth", "mem_async", "mem_host", "mem_elementwise", "mem_reserve", "sm", "mixed", "gemm", "conv"),
+        default="bandwidth",
+    )
     parser.add_argument("--matrix", type=int, default=128)
     parser.add_argument("--load-ms", type=float, default=100.0)
     parser.add_argument("--idle-ms", type=float, default=0.0)
@@ -340,6 +355,7 @@ def main(argv=None):
     parser.add_argument("--channels", type=int, default=16)
     parser.add_argument("--streams", type=int, default=4)
     parser.add_argument("--buffers", type=int, default=3)
+    parser.add_argument("--replicas", type=int, default=1)
     parser.add_argument("--nice", type=int, default=None)
     parser.add_argument("--duration-s", type=float, default=180.0, help="healthy-drift duration")
     parser.add_argument("--out", type=Path, default=None)
@@ -516,8 +532,9 @@ def main(argv=None):
         "note": "A3 remains paused unless fault_injector_qualified is true. Do not treat this file as ASR/MTTR.",
     }
     _write(out, payload)
-    latest = RESULTS_ROOT / "injector_qual"
-    _write(latest, payload)
+    if verdict.get("fault_injector_qualified"):
+        latest = RESULTS_ROOT / "injector_qual"
+        _write(latest, payload)
     print(json.dumps({"mode": "qualify", "out": str(out), "verdict": verdict, "cycles": [{"repeat": c.get("repeat"), "pass": c.get("pass"), "fault_v5_p95": (c.get("fault") or {}).get("v5_p95"), "hold_s": (c.get("fault") or {}).get("overload_hold_s")} for c in cycles]}, ensure_ascii=False, indent=2))
     return 0 if verdict.get("fault_injector_qualified") else 2
 

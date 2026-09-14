@@ -5,6 +5,9 @@ fault_mode is always real_resource_pressure. Do not confuse with inject_v5_laten
 v4 rejects compute-heavy GEMM/conv as V5 injectors (they raise DVFS
 and often *lower* V5 latency). Calibration uses memory-bandwidth and
 SM-occupancy contention. GPU util is not a proxy for V5_OVERLOAD.
+
+v5 adds async multi-stream memory flood, host↔device unified-memory
+pressure, and elementwise memory-bound kernels.
 """
 
 from pathlib import Path
@@ -13,14 +16,15 @@ import glob
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 import time
 
 INJECTOR_TYPE = "gpu_contention"
-INJECTOR_VERSION = "4"
+INJECTOR_VERSION = "5"
 THIS_FILE = Path(__file__).resolve()
-KINDS = ("bandwidth", "sm", "mixed", "gemm", "conv")
+KINDS = ("bandwidth", "mem_async", "mem_host", "mem_elementwise", "mem_reserve", "sm", "mixed", "gemm", "conv")
 
 
 def injector_config(
@@ -35,6 +39,7 @@ def injector_config(
     nice=None,
     streams=4,
     buffers=3,
+    reserve_free_mb=512,
 ):
     return {
         "type": INJECTOR_TYPE,
@@ -44,6 +49,7 @@ def injector_config(
         "load_ms": float(load_ms),
         "idle_ms": float(idle_ms),
         "bytes_mb": int(bytes_mb),
+        "reserve_free_mb": int(reserve_free_mb),
         "size": int(size),
         "batch": int(batch),
         "channels": int(channels),
@@ -124,6 +130,31 @@ def read_power_mode():
     return text or None
 
 
+def read_tegrastats():
+    """One-shot tegrastats sample. Returns GR3D % and power when available."""
+    try:
+        completed = subprocess.run(
+            ["tegrastats", "--interval", "200", "--stop"],
+            capture_output=True,
+            text=True,
+            timeout=2,
+        )
+    except (OSError, subprocess.TimeoutExpired, FileNotFoundError):
+        return {}
+    text = ((completed.stdout or "") + (completed.stderr or "")).strip()
+    if not text:
+        return {}
+    line = text.splitlines()[-1]
+    out = {}
+    gr3d = re.search(r"GR3D_FREQ\s+(\d+)%", line)
+    if gr3d:
+        out["gr3d_pct"] = int(gr3d.group(1))
+    vin = re.search(r"VDD_IN\s+(\d+)mW", line)
+    if vin:
+        out["vdd_in_mw"] = int(vin.group(1))
+    return out
+
+
 def _duty_loop(load_ms, idle_ms, work):
     load_s = max(0.0, float(load_ms) / 1000.0)
     idle_s = max(0.0, float(idle_ms) / 1000.0)
@@ -138,7 +169,7 @@ def _duty_loop(load_ms, idle_ms, work):
             time.sleep(idle_s)
 
 
-def _burn(kind, matrix, load_ms, idle_ms, bytes_mb, size, batch, channels, streams=4, buffers=3):
+def _burn(kind, matrix, load_ms, idle_ms, bytes_mb, size, batch, channels, streams=4, buffers=3, reserve_free_mb=512):
     try:
         import torch
         import torch.nn as nn
@@ -159,6 +190,15 @@ def _burn(kind, matrix, load_ms, idle_ms, bytes_mb, size, batch, channels, strea
         torch.cuda.synchronize()
         return dst
 
+    def mem_async_once(stream_objs, bufs):
+        for i, stream in enumerate(stream_objs):
+            src = i % len(bufs)
+            dst = (i + 1) % len(bufs)
+            with torch.cuda.stream(stream):
+                bufs[dst].copy_(bufs[src], non_blocking=True)
+                bufs[src].mul_(1.0001)
+        torch.cuda.synchronize()
+
     def sm_once(stream_objs, lefts, rights):
         for i, stream in enumerate(stream_objs):
             with torch.cuda.stream(stream):
@@ -171,6 +211,62 @@ def _burn(kind, matrix, load_ms, idle_ms, bytes_mb, size, batch, channels, strea
 
         def work():
             idx["i"] = mem_once(bufs, idx["i"])
+
+        _duty_loop(load_ms, idle_ms, work)
+        return
+    if kind == "mem_async":
+        bufs = [torch.randn(elems, device=device) for _ in range(nbuf)]
+        stream_objs = [torch.cuda.Stream() for _ in range(nstream)]
+        _duty_loop(load_ms, idle_ms, lambda: mem_async_once(stream_objs, bufs))
+        return
+    if kind == "mem_host":
+        pin = torch.randn(elems, pin_memory=True)
+        gpu_bufs = [torch.randn(elems, device=device) for _ in range(max(2, nbuf))]
+        stream_objs = [torch.cuda.Stream() for _ in range(nstream)]
+
+        def host_once():
+            for i, stream in enumerate(stream_objs):
+                gb = gpu_bufs[i % len(gpu_bufs)]
+                with torch.cuda.stream(stream):
+                    gb.copy_(pin, non_blocking=True)
+                    pin.copy_(gb, non_blocking=True)
+            torch.cuda.synchronize()
+
+        _duty_loop(load_ms, idle_ms, host_once)
+        return
+    if kind == "mem_elementwise":
+        bufs = [torch.randn(elems, device=device) for _ in range(nbuf)]
+        stream_objs = [torch.cuda.Stream() for _ in range(nstream)]
+
+        def elem_once():
+            for i, stream in enumerate(stream_objs):
+                with torch.cuda.stream(stream):
+                    bufs[i % len(bufs)].mul_(1.00001)
+                    bufs[i % len(bufs)].add_(0.00001)
+            torch.cuda.synchronize()
+
+        _duty_loop(load_ms, idle_ms, elem_once)
+        return
+    if kind == "mem_reserve":
+        blocks = []
+        target_free = max(64, int(reserve_free_mb)) * 1024 * 1024
+
+        def reserve_once():
+            nonlocal blocks
+            free_bytes, _total = torch.cuda.mem_get_info()
+            if free_bytes <= target_free:
+                return
+            chunk = min(free_bytes - target_free, 256 * 1024 * 1024)
+            elems_chunk = max(1024, chunk // 4)
+            try:
+                blocks.append(torch.empty(elems_chunk, device=device))
+            except RuntimeError:
+                pass
+
+        def work():
+            reserve_once()
+            if blocks:
+                blocks[-1].add_(0.0)
 
         _duty_loop(load_ms, idle_ms, work)
         return
@@ -235,6 +331,7 @@ class GpuContention:
         sleep_ms=None,
         streams=4,
         buffers=3,
+        reserve_free_mb=512,
     ):
         self.python = python or sys.executable
         self.kind = str(kind)
@@ -249,6 +346,7 @@ class GpuContention:
         self.channels = int(channels)
         self.streams = int(streams)
         self.buffers = int(buffers)
+        self.reserve_free_mb = int(reserve_free_mb)
         self.nice = nice
         self.proc = None
         self._err_handle = None
@@ -266,6 +364,7 @@ class GpuContention:
             self.nice,
             self.streams,
             self.buffers,
+            self.reserve_free_mb,
         )
 
     def hash(self):
@@ -303,6 +402,8 @@ class GpuContention:
             str(self.streams),
             "--buffers",
             str(self.buffers),
+            "--reserve-free-mb",
+            str(self.reserve_free_mb),
         ]
         if self.nice is not None:
             cmd.extend(["--nice", str(int(self.nice))])
@@ -365,6 +466,7 @@ def main(argv=None):
     parser.add_argument("--channels", type=int, default=16)
     parser.add_argument("--streams", type=int, default=4)
     parser.add_argument("--buffers", type=int, default=3)
+    parser.add_argument("--reserve-free-mb", type=int, default=512)
     parser.add_argument("--nice", type=int, default=None)
     args = parser.parse_args(argv)
     idle = args.idle_ms if args.sleep_ms is None else args.sleep_ms
@@ -385,6 +487,7 @@ def main(argv=None):
             args.channels,
             args.streams,
             args.buffers,
+            args.reserve_free_mb,
         )
         return 0
     cfg = injector_config(
@@ -399,6 +502,7 @@ def main(argv=None):
         args.nice,
         args.streams,
         args.buffers,
+        args.reserve_free_mb,
     )
     print(
         json.dumps(
@@ -410,6 +514,7 @@ def main(argv=None):
                 "gpu_clock_mhz": read_gpu_clock_mhz(),
                 "emc_mhz": read_emc_mhz(),
                 "power_mode": read_power_mode(),
+                "tegrastats": read_tegrastats(),
             }
         )
     )

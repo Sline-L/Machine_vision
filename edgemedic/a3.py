@@ -15,6 +15,7 @@ import uuid
 
 from edgemedic.client import ControlClient
 from edgemedic.gpu_pressure import GpuContention, INJECTOR_TYPE, INJECTOR_VERSION
+from edgemedic.multi_pressure import MultiGpuContention
 from edgemedic.policy import V5_SLOW_MS, classify_fault
 from edgemedic.provenance import (
     FAULT_REAL_RESOURCE_PRESSURE,
@@ -364,6 +365,40 @@ def run_trial(arm, args, pressure, client, ref_temp):
     }
 
 
+def _summarize_arm(rows):
+    rows = list(rows or [])
+    n = len(rows)
+    successes = [row for row in rows if row.get("recovery_success")]
+    mttrs = [float(row["mttr_s"]) for row in successes if row.get("mttr_s") is not None]
+    losses = [float(row.get("mission_loss") or 0.0) for row in rows]
+    downtimes = [float(row.get("downtime_s") or 0.0) for row in rows]
+    after_v5 = [((row.get("after") or {}).get("scratch_v5") or {}).get("p95") for row in rows]
+    after_valid = [(row.get("after") or {}).get("valid_ratio") for row in rows]
+    return {
+        "n": n,
+        "asr_mission": None if n == 0 else round(len(successes) / n, 4),
+        "asr_function": None if n == 0 else round(
+            sum(1 for row in rows if (row.get("action") or {}).get("verify_level") in ("function", "mission")) / n,
+            4,
+        ),
+        "mttr_s_mean": None if not mttrs else round(sum(mttrs) / len(mttrs), 4),
+        "mttr_s_p50": _percentile(mttrs, 50),
+        "mttr_censored_n": sum(1 for row in rows if row.get("mttr_censored")),
+        "mission_loss_mean": None if not losses else round(sum(losses) / len(losses), 4),
+        "downtime_s_mean": None if not downtimes else round(sum(downtimes) / len(downtimes), 4),
+        "after_v5_p95_mean": None if not [v for v in after_v5 if v is not None] else round(
+            sum(float(v) for v in after_v5 if v is not None) / len([v for v in after_v5 if v is not None]),
+            3,
+        ),
+        "after_valid_ratio_mean": None if not [v for v in after_valid if v is not None] else round(
+            sum(float(v) for v in after_valid if v is not None) / len([v for v in after_valid if v is not None]),
+            4,
+        ),
+        "injector_alive_n": sum(1 for row in rows if row.get("injector_alive_through_recovery")),
+        "pilot_only": True,
+    }
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="A3 Restart-only vs SPARSE under real GPU pressure")
     parser.add_argument("--control-url", default="http://127.0.0.1:8787")
@@ -383,9 +418,19 @@ def main(argv=None):
     parser.add_argument("--baseline-v5-p95-max", type=float, default=190.0)
     parser.add_argument("--temp-max-c", type=float, default=72.0)
     parser.add_argument("--temp-delta-c", type=float, default=6.0)
-    parser.add_argument("--kind", choices=("conv", "gemm"), default="conv")
-    parser.add_argument("--matrix", type=int, default=1024)
-    parser.add_argument("--sleep-ms", type=float, default=0.0)
+    parser.add_argument(
+        "--kind",
+        choices=("bandwidth", "mem_async", "mem_host", "mem_elementwise", "sm", "mixed", "gemm", "conv"),
+        default="bandwidth",
+    )
+    parser.add_argument("--matrix", type=int, default=128)
+    parser.add_argument("--load-ms", type=float, default=100.0)
+    parser.add_argument("--idle-ms", type=float, default=0.0)
+    parser.add_argument("--bytes-mb", type=int, default=512)
+    parser.add_argument("--streams", type=int, default=4)
+    parser.add_argument("--buffers", type=int, default=3)
+    parser.add_argument("--replicas", type=int, default=3)
+    parser.add_argument("--sleep-ms", type=float, default=None, help="legacy alias for --idle-ms")
     parser.add_argument("--size", type=int, default=640)
     parser.add_argument("--batch", type=int, default=1)
     parser.add_argument("--out", type=Path, default=None)
@@ -400,14 +445,22 @@ def main(argv=None):
             raise SystemExit(f"A3 paused: {blocked}. Qualify the injector first (python -m edgemedic.injector_qual).")
     client = ControlClient(args.control_url, timeout=5.0)
     client.get_state()
-    pressure = GpuContention(
+    pressure_kwargs = dict(
         kind=args.kind,
         matrix=args.matrix,
-        sleep_ms=args.sleep_ms,
+        load_ms=args.load_ms,
+        idle_ms=args.idle_ms if args.sleep_ms is None else args.sleep_ms,
+        bytes_mb=args.bytes_mb,
+        streams=args.streams,
+        buffers=args.buffers,
         size=args.size,
         batch=args.batch,
         channels=args.channels,
     )
+    if int(args.replicas) > 1:
+        pressure = MultiGpuContention(replicas=args.replicas, **pressure_kwargs)
+    else:
+        pressure = GpuContention(**pressure_kwargs)
     schedule = interleave_schedule(args.runs_per_arm, order=args.order, seed=args.seed)
     injector_cfg = pressure.config()
     exp_config = {
@@ -443,12 +496,18 @@ def main(argv=None):
     }
     rows = []
     ref_temp = None
+    out = args.out or (RESULTS_ROOT / f"a3_{args.phase}_{_now_stamp()}")
+    out.mkdir(parents=True, exist_ok=True)
     try:
-        for arm in schedule:
+        for index, arm in enumerate(schedule):
             row = run_trial(arm, args, pressure, client, ref_temp)
             if not row.get("aborted") and ref_temp is None:
                 ref_temp = ((row.get("healthy") or {}).get("temperature_c"))
             rows.append(row)
+            (out / f"trial_{index:02d}_{arm}.json").write_text(
+                json.dumps(row, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
             time.sleep(2.0)
     finally:
         pressure.stop()
@@ -476,10 +535,12 @@ def main(argv=None):
             experiment_config=exp_config,
             replay_pack_dir=args.replay_pack,
         ),
-        "note": "Pressure stays on through recovery/timeout. MTTR uses independent mission window, not action HTTP return. Do not retune SPARSE or mission bars from this run.",
+        "note": (
+            "PILOT ONLY. NO FINAL A3 EFFECTIVENESS CLAIM. "
+            "Pressure stays on through recovery/timeout. MTTR uses independent mission window, "
+            "not action HTTP return. Do not retune SPARSE or mission bars from this run."
+        ),
     }
-    out = args.out or (RESULTS_ROOT / f"a3_{args.phase}_{_now_stamp()}")
-    out.mkdir(parents=True, exist_ok=True)
     (out / "summary.json").write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     brief = {key: value for key, value in payload.items() if key != "runs"}
     brief["out"] = str(out)

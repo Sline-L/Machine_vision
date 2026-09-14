@@ -37,21 +37,25 @@ raw response → final-answer extraction → schema/whitelist → decision scori
 
 Q0–Q3 (**Line 1**, frozen). Paper tables use clean-checkout `results/repro_2c79075/` on HEAD `2c79075e6ccd19de0e6d49967bd195ad3d98be8f`. SCP-era JSON stays development evidence only.
 
-Q4 state/affordance is **not** next. Line 1 and the healthy Stage C window are frozen. A3 is **paused**.
+Q4 state/affordance is **not** next. Line 1 is frozen. Injector is **qualified** (`multi_bandwidth×3`). Current SPARSE is **characterized as cadence degradation** and does **not** support latency-gated Mission recovery under persistent bandwidth pressure. A3 effectiveness remains **not established**. Next is a **design decision** (new latency-targeted action vs separate capacity-shedding study) — not SPARSE parameter tuning.
 
-The first Restart vs SPARSE 3+3 (`results/a3_pilot`) is **invalid for effectiveness**: injector not qualified. GPU util ≈99% with V5 145–168 ms; two Restart “successes” were 202/221 ms spikes that fell back to ~180 ms. That is not ASR/MTTR.
+**Frozen Line 2 mechanism finding:** under sustained memory-bandwidth pressure, SPARSE reduces inspection cadence but leaves the per-inference V5 path unchanged; it lowers service rate without materially reducing V5 latency, so it does not restore a latency-gated Mission under persistent overload. See [a3-strategy-capability](a3-strategy-capability.md).
 
-**Next:** contention-dimension injector calibration only (no recovery, no L2). Compute-heavy GEMM/conv is **disqualified** — GPU util is not a V5_OVERLOAD proxy.
+Qualified injector (do not retune gates):
 
 ```bash
-python -m edgemedic.injector_qual --mode healthy-drift --duration-s 180 --out results/injector_healthy_drift
-python -m edgemedic.injector_qual --mode sweep --out results/injector_sweep_v4
-python -m edgemedic.injector_qual --mode qualify --repeats 5 --kind bandwidth --bytes-mb 512 --load-ms 100 --idle-ms 0 --out results/injector_qual
+python -m edgemedic.injector_qual --mode qualify --repeats 5 \
+  --kind bandwidth --bytes-mb 512 --buffers 3 --streams 4 \
+  --load-ms 100 --idle-ms 0 --matrix 128 --replicas 3
 ```
 
-Gates: **triggerability** (sustained ≥2 s `V5_OVERLOAD`); **margin** (HOLD V5 p95 ≥220 ms); **sustainability** (HOLD stays overloaded, not 201 ms graze); **reversibility** (OFF → admission V5 p95 &lt;190 ms). Expected envelope 178–186 ms is descriptive, not the refuse/admit cut. Also record duty cycle, GPU clock, **EMC/memory clock**, locator p95, power, temperature, nvpmodel. **Selectivity** (V5 degrades, locator stable) is reported, not hard-gated yet. Do not use `jetson_clocks` for the official A3 environment. `python -m edgemedic.a3` exits until `fault_injector_qualified=true`.
+Capability characterization (no recovery):
 
-When (and only when) the injector is qualified, Restart vs SPARSE uses the same Mission window as before. Do not run `python -m edgemedic` during that experiment.
+```bash
+python -m edgemedic.a3_capability --out results/a3_capability/severity_response
+```
+
+Gates: **triggerability** (sustained ≥2 s `V5_OVERLOAD`); **margin** (HOLD V5 p95 ≥220 ms); **sustainability** (HOLD stays overloaded, not 201 ms graze); **reversibility** (OFF → admission V5 p95 &lt;190 ms). Expected envelope 178–186 ms is descriptive. **Selectivity** is reported, not hard-gated. Do not use `jetson_clocks` for official A3. Do not change SPARSE interval / Mission V5 bars to manufacture success.
 
 Official Line 1 provenance (same GGUF / llama.cpp for Q0–Q2; Q3 does not call the LLM):
 
