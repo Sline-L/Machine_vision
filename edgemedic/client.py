@@ -14,7 +14,7 @@ class ControlClient:
         with urlopen(self.base_url + "/api/state", timeout=self.timeout) as response:
             return json.loads(response.read().decode("utf-8"))
 
-    def post_action(self, name, params=None, source="reflex", request_id="reflex"):
+    def post_action(self, name, params=None, source="reflex", request_id="reflex", timeout=None):
         payload = {
             "name": name,
             "params": params or {},
@@ -28,8 +28,9 @@ class ControlClient:
             headers={"Content-Type": "application/json"},
             method="POST",
         )
+        wait = timeout if timeout is not None else max(self.timeout, 8.0)
         try:
-            with urlopen(request, timeout=max(self.timeout, 8.0)) as response:
+            with urlopen(request, timeout=wait) as response:
                 return json.loads(response.read().decode("utf-8"))
         except HTTPError as exc:
             body = exc.read().decode("utf-8", errors="replace")

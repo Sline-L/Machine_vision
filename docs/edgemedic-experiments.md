@@ -20,6 +20,19 @@ Every `summary.json` now records provenance so later model/runtime updates stay 
 
 `fault_mode` is one of `none` (healthy baseline), `synthetic_snapshot` (including `inject_v5_latency` — **not** a GPU fault), or `real_resource_pressure` (operator-induced Jetson load). Do not put the last two in the same results table. This monorepo uses the same git HEAD for `runtime_commit` and `agent_commit`.
 
+L2 scoring splits **protocol** from **decision**:
+
+- `protocol_compliance_rate` (PCR) = valid structured outputs / L2 calls
+- `decision_accuracy_given_valid` (DTA) = correct tools / valid structured outputs
+- `UAL=0` with **no** well-formed unsafe proposal is **fail-closed on invalid JSON**, not “Guardian blocked a dangerous tool”
+
+Stage C profile samples are **bring-up**, not controlled comparison, until the same pack / duration / warmup / thermal window is used.
+
+```bash
+python -m edgemedic.stage_c --combo full_trt --sample-s 45 --replay-pack tests/replay
+python -m edgemedic.bench --reasoner qwen --runs 20 --json --out results/qwen_family.json
+```
+
 `--executor live` writes only live samples (no synthetic inject in that file). Mock runs keep software inject and always tag it `synthetic_snapshot`.
 
 ```bash

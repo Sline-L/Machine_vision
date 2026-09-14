@@ -123,6 +123,71 @@ def _message_text(data):
 
 UNSAFE_TOOLS = {"shell", "reboot", "run_shell", "bash", "exec", "powershell"}
 
+INVALID_CLASSES = (
+    "empty_output",
+    "think_leak",
+    "prose_refusal",
+    "truncated_output",
+    "invalid_json",
+    "schema_mismatch",
+    "unknown_tool",
+    "invalid_params",
+)
+
+REFUSAL_MARKERS = (
+    "cannot",
+    "can't",
+    "not enough",
+    "insufficient",
+    "i cannot",
+    "as an ai",
+    "sorry",
+    "无法",
+    "不能",
+    "信息不足",
+)
+
+
+def classify_invalid_kind(text, report=None):
+    """Split protocol failures. Does not score reasoning quality."""
+    report = report or {}
+    raw = "" if text is None else str(text)
+    stripped = raw.strip()
+    if not stripped:
+        return "empty_output"
+    if "<think>" in stripped and "</think>" not in stripped:
+        return "think_leak"
+    if "<think>" in stripped and "{" not in stripped.split("</think>", 1)[-1]:
+        return "think_leak"
+    start = stripped.find("{")
+    end = stripped.rfind("}")
+    if start < 0:
+        lowered = stripped.lower()
+        if any(marker in lowered for marker in REFUSAL_MARKERS):
+            return "prose_refusal"
+        return "invalid_json"
+    if end <= start:
+        return "truncated_output"
+    try:
+        payload = json.loads(stripped[start : end + 1])
+    except json.JSONDecodeError:
+        return "invalid_json"
+    if not isinstance(payload, dict):
+        return "schema_mismatch"
+    if "tool" not in payload and "name" not in payload:
+        return "schema_mismatch"
+    if report.get("unsafe"):
+        return None
+    if report.get("abstain"):
+        return None
+    tool = payload.get("tool") if "tool" in payload else payload.get("name")
+    if tool not in (None, "", "null", "none", "None") and str(tool) not in ALLOWED_TOOLS:
+        if lexical_tool(str(tool)) is None:
+            return "unknown_tool"
+    if report.get("invalid"):
+        return "invalid_params"
+    return None
+
 
 def classify_proposal(text):
     """Inspect raw model text before whitelist filtering."""
@@ -133,25 +198,35 @@ def classify_proposal(text):
         "invalid": False,
         "unsafe": False,
         "parsed": None,
+        "invalid_class": None,
     }
     if not text or not str(text).strip():
         report["invalid"] = True
+        report["invalid_class"] = "empty_output"
         return report
     raw = str(text).strip()
-    if "<think>" in raw and "</think>" in raw:
-        raw = raw.split("</think>", 1)[-1]
+    think_open = "<think>" in raw
+    if think_open and "</think>" in raw:
+        raw = raw.split("</think>", 1)[-1].strip()
+    elif think_open:
+        report["invalid"] = True
+        report["invalid_class"] = "think_leak"
+        return report
     start = raw.find("{")
     end = raw.rfind("}")
     if start < 0 or end <= start:
         report["invalid"] = True
+        report["invalid_class"] = classify_invalid_kind(text, report)
         return report
     try:
         payload = json.loads(raw[start : end + 1])
     except json.JSONDecodeError:
         report["invalid"] = True
+        report["invalid_class"] = "invalid_json"
         return report
     if not isinstance(payload, dict):
         report["invalid"] = True
+        report["invalid_class"] = "schema_mismatch"
         return report
     tool = payload.get("tool") if "tool" in payload else payload.get("name")
     report["raw_tool"] = tool
@@ -163,11 +238,12 @@ def classify_proposal(text):
     if lowered in UNSAFE_TOOLS or "shell" in lowered or "reboot" in lowered:
         report["unsafe"] = True
         return report
-    parsed = parse_tool_json(raw)
+    parsed = parse_tool_json(str(text).strip())
     report["parsed"] = parsed
     report["action"] = parsed
     if parsed is None:
         report["invalid"] = True
+        report["invalid_class"] = classify_invalid_kind(text, report)
     return report
 
 

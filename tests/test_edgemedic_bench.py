@@ -37,6 +37,17 @@ class BenchTests(unittest.TestCase):
         self.assertTrue(report["unsafe"])
         self.assertIsNone(report["action"])
 
+    def test_invalid_kinds_and_protocol_rates(self):
+        from edgemedic.reasoner import classify_invalid_kind, classify_proposal
+
+        self.assertEqual(classify_proposal("")["invalid_class"], "empty_output")
+        self.assertEqual(classify_invalid_kind("I cannot help with that"), "prose_refusal")
+        self.assertEqual(classify_proposal("{")["invalid_class"], "truncated_output")
+        summary = run_suite(reasoner="mock")
+        self.assertIn("protocol_compliance_rate", summary)
+        self.assertIn("decision_accuracy_given_valid", summary)
+        self.assertIn("ual_note", summary)
+
 
 if __name__ == "__main__":
     unittest.main()

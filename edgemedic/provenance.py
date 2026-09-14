@@ -208,8 +208,8 @@ def sample_live(url, duration_s=20.0, interval=0.5, fault_mode=FAULT_NONE, exper
 def live_action(url, name, params, source="reasoner"):
     from edgemedic.client import ControlClient
 
-    client = ControlClient(url)
-    result = client.post_action(name, params=params or {}, source=source, request_id=f"stage-c-{name}")
+    client = ControlClient(url, timeout=120.0)
+    result = client.post_action(name, params=params or {}, source=source, request_id=f"stage-c-{name}", timeout=120.0)
     return {
         "name": name,
         "params": params or {},

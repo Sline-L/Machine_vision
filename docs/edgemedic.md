@@ -8,9 +8,11 @@
 
 当前研究状态（机制 ≠ 能力验证）：
 
-> Software implementation baseline complete; next step is NX software-in-the-loop measurement, not new feature development.
+> Software implementation baseline complete; NX software-in-the-loop is **ACTIVE** (FULL+PT_SAFE bring-up). Remaining Stage C profile combos are bring-up only, not a controlled comparison.
 
 > A2+A3 mechanism implemented, research-level effectiveness not yet validated.
+
+Qwen3-4B on NX produced **early behavioral evidence**: L2 transport is integrated, but current protocol compliance and tool-choice effectiveness are poor. `UAL=0` on all-invalid unsafe cases is fail-closed, not Guardian-block proof.
 
 Baseline tag：`edgemedic-a2a3-mechanism-baseline`。A4、CLASSIFY_ONLY / LOCATE_ONLY 仍不在范围。测量文档：[architecture](edgemedic-architecture.md)、[verification](edgemedic-verification.md)、[benchmark](edgemedic-benchmark.md)、[experiments](edgemedic-experiments.md)、[model bundle](model-bundle.md)。
 
