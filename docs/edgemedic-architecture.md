@@ -62,7 +62,7 @@ Related: [verification](edgemedic-verification.md), [benchmark](edgemedic-benchm
 | --- | --- | --- | --- |
 | A Synthetic bench | Guardian / Memory / tool choice | no models | implemented, tested |
 | B Simulated runtime | verify / MTTR plumbing | cycle numbers | implemented, tested |
-| C Dataset replay | locator + Scratch V5 + CUDA/Jetson telemetry on NX | frames from disk, not `/dev/video0` | software implemented; **NX SIL not run on current HEAD** |
+| C Dataset replay | locator + Scratch V5 + CUDA/Jetson telemetry on NX | frames from disk, not `/dev/video0` | **NX SIL ACTIVE**. Four profile bring-ups ran (not a controlled comparison). `gpu_mem_mb` still null. |
 | D Real camera / line | sensors, serial, conveyor | — | future work |
 
 Replay: `python -m gp --replay <dir>` (`GEARPRO_REPLAY_DIR`). EdgeMedic still talks Control API only; it does not know whether frames came from a camera or disk. Do not replay locked `test_scratch` to retune. Do not merge the dataset repo. Missing Hole stays out of this baseline.

@@ -159,7 +159,7 @@ def build_snapshot(
             "health": round(loc_h, 4),
         },
         "scratch_v5": {
-            "profile": "FULL",
+            "profile": getattr(config, "inference_profile", "FULL"),
             "classifier1_latency_ms": None if last_result is None else last_result.classifier1_latency_ms,
             "classifier2_latency_ms": None if last_result is None else last_result.classifier2_latency_ms,
             "detector_latency_ms": None if last_result is None else last_result.detector_latency_ms,

@@ -236,7 +236,7 @@ def snapshot_telem(snapshot):
         "locator_backend": locator.get("backend"),
         "locator_latency_ms": locator.get("latency_ms"),
         "v5_latency_ms": v5.get("total_latency_ms"),
-        "profile": v5.get("profile") or mission.get("current_profile"),
+        "profile": mission.get("current_profile") or v5.get("profile"),
         "output_valid": mission.get("output_valid"),
         "utility": mission.get("utility"),
         "inspection_active": mission.get("inspection_active"),

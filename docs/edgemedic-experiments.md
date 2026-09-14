@@ -103,9 +103,36 @@ Full / no-L2 / no-Memory / no-Reflex / no-Guardian (mock executor). Raw-log vs S
 
 `edgemedic/candidate.py` aggregates episodes to JSON `status=candidate`. Never auto-deployed into L1. TRT_FAST stays off L1 until real PT/TRT p50/p95 exist.
 
+## NX SIL status (bring-up, not paper comparison)
+
+Replay → Locator → Scratch V5 runs continuously; Mission Verify can reach `mission`; Jetson latency / RAM / temperature / power are sampled; provenance is bound.
+
+Bring-up samples (`fault_mode=none`, ~45s, same replay pack). **Not a controlled comparison.**
+
+| combo | profile | backend | valid_ratio | locator p95 | V5 p95 | total p95 | Control verify | notes |
+| --- | --- | --- | ---: | ---: | ---: | ---: | --- | --- |
+| FULL + PT_SAFE | FULL | pt | 1.0 | ~67 ms | ~179 ms | ~241 ms | mission | first SIL sample |
+| FULL + TRT_FAST | TRT_FAST | engine | 1.0 | ~27 ms | ~201 ms | ~224 ms | function | do not follow TRT with `set FULL` (that restores PT). Mission window uses default V5 p95≤200 ms and missed by ~1 ms on this pass |
+| SPARSE + PT_SAFE | SPARSE | pt | 1.0 | ~69 ms | ~184 ms | ~243 ms | mission | utility 0.95 |
+| SPARSE + TRT_FAST | SPARSE | engine | 1.0 | ~28 ms | ~204 ms | ~229 ms | mission | SPARSE keeps locator |
+
+`gpu_mem_mb` remains null. `gpu_util` last-sample is noisy; do not rank backends from it.
+
+Qwen 20× family (80 L2 calls) is the first research dataset. Follow-up `results/qwen_family_raw.json` stores `l2.raw`. Headline rates:
+
+- PCR = 20/80 = 25%, DTA = 0/20
+- `invalid_classes`: `invalid_json` 40, `prose_refusal` 20
+- ambiguous 20/20 `invalid_json` (CoT, truncated, no closing JSON)
+- unsafe 20 `prose_refusal` (adversarial ignore) + 20 `invalid_json`; **0** well-formed unsafe tools → UAL=0 is fail-closed, not Guardian-block
+- known-composite 20/20 scored abstain: raw text is still CoT; the scorer matched the **prompt example** `{"tool": null, "params": {}}` inside the analysis, not a finished decision. Do **not** read this as “4B is too conservative on TRT_FAST” until JSON-only / last-object scoring is separated from instruction echo.
+
+Conclusion still: L2 interface exists; decision effectiveness is not supported. Next is output constraint (grammar/JSON schema) after this protocol diagnosis, not a model swap.
+
+Fair PT vs TRT vs SPARSE baselines wait until all four combos stay up under the same pack / warmup / duration / thermal window.
+
 ## Still future work
 
-- Stage C NX numbers for FULL/SPARSE × PT_SAFE/TRT_FAST (commands exist; results not in this tree)
+- Controlled Stage C baseline after four bring-ups are stable (same pack, warmup, duration, environment)
 - live Camera / Serial / line (Stage D)
 - Restart-only vs SPARSE A3 comparison
 - plots/tables from those runs

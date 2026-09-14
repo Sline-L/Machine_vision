@@ -9,9 +9,11 @@ from edgemedic.provenance import FAULT_NONE, live_action, sample_live
 
 RESULTS_ROOT = Path(__file__).resolve().parent.parent / "results"
 
+# FULL+TRT is inference profile TRT_FAST (FULL-quality interval + engine).
+# Do not follow trt_fast with set_inference_profile FULL: that restores PT.
 COMBOS = {
     "full_pt": (("set_inference_profile", {"profile": "FULL"}), ("set_locator_profile", {"profile": "pt_safe"})),
-    "full_trt": (("set_locator_profile", {"profile": "trt_fast"}), ("set_inference_profile", {"profile": "FULL"})),
+    "full_trt": (("set_locator_profile", {"profile": "trt_fast"}),),
     "sparse_pt": (("set_locator_profile", {"profile": "pt_safe"}), ("set_inference_profile", {"profile": "SPARSE"})),
     "sparse_trt": (("set_locator_profile", {"profile": "trt_fast"}), ("set_inference_profile", {"profile": "SPARSE"})),
 }

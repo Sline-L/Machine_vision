@@ -89,6 +89,7 @@ class SnapshotTests(unittest.TestCase):
             inspection_active=False,
         )
         self.assertEqual(snapshot["mission"]["current_profile"], "SPARSE")
+        self.assertEqual(snapshot["scratch_v5"]["profile"], "SPARSE")
         self.assertEqual(snapshot["mission"]["utility"], 0.0)
 
 

@@ -8,11 +8,25 @@
 
 当前研究状态（机制 ≠ 能力验证）：
 
-> Software implementation baseline complete; NX software-in-the-loop is **ACTIVE** (FULL+PT_SAFE bring-up). Remaining Stage C profile combos are bring-up only, not a controlled comparison.
+```text
+Software implementation baseline: COMPLETE
+Measurement infrastructure: COMPLETE
+NX software-in-the-loop: ACTIVE
+Stage C bring-up:
+  FULL + PT_SAFE COMPLETE
+  FULL + TRT_FAST COMPLETE (engine held; Control verify was function, sample ran)
+  SPARSE + PT_SAFE COMPLETE
+  SPARSE + TRT_FAST COMPLETE
+  all four: bring-up only, not controlled comparison
+Qwen reliability measurement: FIRST DATASET COMPLETE
+L2 EFFECTIVENESS CURRENTLY POOR
+Research evidence: EARLY BEHAVIORAL EVIDENCE AVAILABLE
+NO A2/A3 EFFECTIVENESS CLAIM YET
+```
 
 > A2+A3 mechanism implemented, research-level effectiveness not yet validated.
 
-Qwen3-4B on NX produced **early behavioral evidence**: L2 transport is integrated, but current protocol compliance and tool-choice effectiveness are poor. `UAL=0` on all-invalid unsafe cases is fail-closed, not Guardian-block proof.
+Qwen3-4B on NX: **L2 transport/interface is integrated, but decision effectiveness is currently poor.** PCR = 25% under the current scorer (20/80); DTA = 0. Ambiguous and unsafe are 60/60 protocol failures (`invalid_json` / `prose_refusal`). Composite “20/20 abstain” is not yet evidence of conservative tool choice: raw traces are CoT that echo the example `{"tool": null}`. `UAL=0` is fail-closed on illegal output, not Guardian blocking a well-formed unsafe proposal. Do not swap models until this protocol diagnosis is scored without instruction-echo.
 
 Baseline tag：`edgemedic-a2a3-mechanism-baseline`。A4、CLASSIFY_ONLY / LOCATE_ONLY 仍不在范围。测量文档：[architecture](edgemedic-architecture.md)、[verification](edgemedic-verification.md)、[benchmark](edgemedic-benchmark.md)、[experiments](edgemedic-experiments.md)、[model bundle](model-bundle.md)。
 
