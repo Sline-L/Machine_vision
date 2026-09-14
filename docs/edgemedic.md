@@ -9,27 +9,22 @@
 当前研究状态（机制 ≠ 能力验证）：
 
 ```text
-Software implementation baseline: COMPLETE
-Measurement infrastructure: COMPLETE
-NX software-in-the-loop: ACTIVE
-Stage C bring-up: 4/4 COMPLETE (frozen; not controlled comparison)
+Line 1  Reasoner Reliability & Containment   FROZEN (dev evidence; paper tables need clean-checkout repro)
+  Q0 prompt-only            PCR=0%
+  Q1 GBNF                   PCR=100%  DTA=50%  WLAR=25%
+  Q2 locator 110–200 ms     100% abstain (not a latency threshold)
+  Q3 Guardian dry-run       GCR=100%  GAR=100%  leakage=0  (restart_worker)
 
-Q0 Protocol Baseline (prompt only): FROZEN  PCR=0%  DTA=N/A  UAL=N/A
-Q1 Structured Decoding (same prompt + GBNF): FROZEN
-  PCR=100%  DTA=50%  WLAR=20/80 (restart_worker on unsafe_request)
-  latency 9.8s → 1.57s
-  paper reproduction: re-run after NX ff-only to commit 22a1410+
-
-Q2 Decision Boundary: FROZEN (110–200 ms all abstain; not a simple latency threshold)
-Q3 Guardian containment: dry-run of restart_worker (wrong legal vs WORKER_FAIL)
-
-L2 decision effectiveness: NOT ESTABLISHED (protocol solved; locator→TRT mapping absent)
-A2/A3 effectiveness: NOT ESTABLISHED
+Line 2  Runtime Recovery Effectiveness       NEXT
+  Stage C bring-up 4/4      COMPLETE (not a comparison)
+  Stage C controlled        PENDING  (same pack / warmup / duration)
+  Restart-only vs SPARSE    NOT RUN
+  A3 effectiveness          NOT ESTABLISHED
 ```
 
 > A2+A3 mechanism implemented, research-level effectiveness not yet validated.
 
-Structured decoding eliminated the protocol-compliance bottleneck under the tested configuration, exposing decision-quality limits. It did **not** by itself improve reasoning. Q1: composite 20/20 abstain; ambiguous 20/20 abstain; unsafe 20/20 abstain on adversarial and 20/20 `restart_worker` on `unsafe_request_01` (legal tool, wrong context). Stage C frozen. Do not change prompt or model. Next is snapshot evidence sweeps, then Guardian dry-run of wrong legal actions.
+Guardian rejected contextually invalid but syntactically valid, whitelisted `restart_worker` on a healthy worker, and approved the same tool under `WORKER_FAIL`. Q0–Q3 are frozen; no Q4 / no prompt change / no model swap. Next is a **controlled** Stage C baseline, then Restart-only vs SPARSE under real V5 pressure — recovery usefulness, not more L2 behavior.
 
 Baseline tag：`edgemedic-a2a3-mechanism-baseline`。A4、CLASSIFY_ONLY / LOCATE_ONLY 仍不在范围。测量文档：[architecture](edgemedic-architecture.md)、[verification](edgemedic-verification.md)、[benchmark](edgemedic-benchmark.md)、[experiments](edgemedic-experiments.md)、[model bundle](model-bundle.md)。
 

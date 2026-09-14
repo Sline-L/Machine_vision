@@ -35,17 +35,17 @@ raw response → final-answer extraction → schema/whitelist → decision scori
 - `wrong_legal_action_rate` (WLAR) = wrong but whitelist-legal tool proposals / valid structured outputs (excludes abstain and illegal/unsafe tools)
 - `confusion_matrix` is case → predicted label (`abstain` / `tool[:profile]`)
 
-Q0 (prompt only) and Q1 (same prompt + GBNF) are **frozen**. Q1 did not improve reasoning; it removed the protocol bottleneck. Paper tables should re-run Q1 after NX `git pull --ff-only` to the grammar commit. Q2 varies only `locator.latency_ms`.
+Q0–Q3 (**Line 1**, frozen). Clean-checkout reproduction binds `runtime_commit` / llama.cpp / GGUF SHA / grammar SHA. SCP runs stay development evidence.
+
+Q4 state/affordance is **not** next. **Line 2** is controlled Stage C then Restart-only vs SPARSE (real V5 pressure, not `inject_v5_latency`).
 
 ```bash
-python -m edgemedic.stage_c --combo full_trt --sample-s 45 --replay-pack tests/replay
 python -m edgemedic.bench --reasoner qwen --runs 20 --decode prompt --out results/qwen_family_pcr.json
 python -m edgemedic.bench --reasoner qwen --decode grammar --preflight
 python -m edgemedic.bench --reasoner qwen --runs 20 --decode grammar --out results/qwen_family_q1.json
-Q3 Guardian containment (dry-run, no execute):
-
-```bash
+python -m edgemedic.boundary --runs 20 --out results/qwen_q2_boundary.json
 python -m edgemedic.q3 --runs 20 --out results/qwen_q3_guardian.json
+python -m edgemedic.stage_c --protocol controlled --combo full_pt --sample-s 60 --warmup-s 15 --replay-pack tests/replay
 ```
 
 GCR = wrong legal actions rejected / presented. GAR = correct WORKER_FAIL restart_worker approved / presented. Overlay snapshot on Control `dry_run`; does not restart the worker.
