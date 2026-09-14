@@ -37,17 +37,21 @@ raw response → final-answer extraction → schema/whitelist → decision scori
 
 Q0–Q3 (**Line 1**, frozen). Paper tables use clean-checkout `results/repro_2c79075/` on HEAD `2c79075e6ccd19de0e6d49967bd195ad3d98be8f`. SCP-era JSON stays development evidence only.
 
-Q4 state/affordance is **not** next. Line 1 and the healthy Stage C window are frozen.
+Q4 state/affordance is **not** next. Line 1 and the healthy Stage C window are frozen. A3 is **paused**.
 
-**Line 2 A3 question:** under persistent *real* V5 GPU pressure, does scripted `FULL → SPARSE` restore Mission with less interruption than Restart-only? Not “SPARSE vs FULL speed”. Not L2. Not `inject_v5_latency`.
+The first Restart vs SPARSE 3+3 (`results/a3_pilot`) is **invalid for effectiveness**: injector not qualified. GPU util ≈99% with V5 145–168 ms; two Restart “successes” were 202/221 ms spikes that fell back to ~180 ms. That is not ASR/MTTR.
+
+**Next:** injector calibration only (no recovery, no L2):
 
 ```bash
-# Do not run `python -m edgemedic` during this experiment (it would fire L1 SPARSE on both arms).
-python -m edgemedic.a3 --phase pilot --runs-per-arm 3 --order alternate \
-  --kind conv --size 640 --replay-pack tests/replay --out results/a3_pilot
+python -m edgemedic.injector_qual --mode healthy-drift --duration-s 180 --out results/injector_healthy_drift
+python -m edgemedic.injector_qual --mode sweep --out results/injector_sweep
+python -m edgemedic.injector_qual --mode qualify --repeats 5 --kind gemm --load-ms 80 --idle-ms 20 --out results/injector_qual
 ```
 
-Fault injector: `edgemedic/gpu_pressure.py` (`fault_injector_type=gpu_contention`). It stays alive through recovery/timeout. Locator is `PT_SAFE` on both arms. Same 10 s mission window; FULL V5 bar 200 ms, SPARSE 220 ms (existing `gp/verify.py` profile spec). MTTR = `t_MISSION_VERIFIED - t_fault`; timeout → `recovery_success=false`, `mttr_censored=true`. Also record ASR_mission, p95, valid ratio, downtime, utility, Mission Loss \(L_M=\sum(1-U_k)\Delta t\). Pilot checks: pressure repeats overload; reset returns to the healthy band; Mission does not flap from thermal drift. Then 10–20 interleaved formal runs. Do not retune thresholds to chase a winner.
+Gates: 5 consecutive cycles; sustained overload ≥2 s **and** fault V5 p95 ≥230 ms (margin, not a 200 ms graze); reversible to that cycle’s healthy p95 + 8 ms. Record duty cycle, GPU clock, power, temperature, nvpmodel. Do not raise the 190 ms reset bar until healthy-drift produces an envelope. `python -m edgemedic.a3` exits until `fault_injector_qualified=true`.
+
+When (and only when) the injector is qualified, Restart vs SPARSE uses the same Mission window as before. Do not run `python -m edgemedic` during that experiment.
 
 Official Line 1 provenance (same GGUF / llama.cpp for Q0–Q2; Q3 does not call the LLM):
 
@@ -115,7 +119,7 @@ python -m edgemedic.bench --reasoner qwen --runs 20 --json --out results/qwen_fa
 
 Read `family_table` (Known-simple / Composite / Ambiguous / Unsafe): correct_action, abstain, wrong_tool, invalid, unsafe. Stability is “same case across 20 repeats”, not a single headline score.
 
-3. One A3 chain: `python -m edgemedic.a3 --phase pilot` (real GPU contention, Restart-only vs SPARSE). `inject_v5_latency` stays `synthetic_snapshot` and is **not** this experiment.
+3. Injector qualification (`python -m edgemedic.injector_qual`). A3 Restart vs SPARSE stays paused until `fault_injector_qualified=true`. `inject_v5_latency` is **not** this experiment.
 
 `--executor live` samples a running GearPro. `--ablation no-guardian` is **mock-only**.
 
@@ -175,7 +179,8 @@ FULL+TRT reached `mission` here (V5 p95 196.5 ms under the 200 ms bar). Bring-up
 
 ## Still future work
 
-- Formal 10–20 run A3 after the 3+3 GPU-pressure pilot
+- Injector qualification (repeatable / sustained / reversible), then 3+3 A3 pilot
+- Formal Restart-only vs SPARSE only after a passing pilot
 - live Camera / Serial / line (Stage D)
 - A4
 - Missing Hole as workload expansion (not this baseline)

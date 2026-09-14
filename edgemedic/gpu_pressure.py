@@ -1,14 +1,15 @@
-"""Real GPU contention injector for A3. Not a SystemSnapshot patch.
+"""Real GPU contention injector. Experiment harness only — not a Control action.
 
-This is an experiment harness, not an EdgeMedic Control action. It must stay
-on until recovery/timeout. fault_mode is always real_resource_pressure.
+fault_mode is always real_resource_pressure. Do not confuse with inject_v5_latency.
 
-GEMM alone did not push Scratch V5 p95 over 200 ms on NX. The default
-workload is a persistent Conv2d (imgsz-like) that shares the GPU with V5.
+v3 prefers duty-cycled GEMM / bandwidth / mixed over “bigger conv”. GPU util
+alone does not mean V5 is contended; qualification must show sustained V5
+latency margin.
 """
 
 from pathlib import Path
 import argparse
+import glob
 import hashlib
 import json
 import os
@@ -17,20 +18,34 @@ import sys
 import time
 
 INJECTOR_TYPE = "gpu_contention"
-INJECTOR_VERSION = "2"
+INJECTOR_VERSION = "3"
 THIS_FILE = Path(__file__).resolve()
+KINDS = ("gemm", "bandwidth", "mixed", "conv")
 
 
-def injector_config(kind="conv", matrix=1024, sleep_ms=0, size=640, batch=1, channels=16):
+def injector_config(
+    kind="gemm",
+    matrix=1024,
+    load_ms=80,
+    idle_ms=20,
+    bytes_mb=256,
+    size=640,
+    batch=1,
+    channels=16,
+    nice=None,
+):
     return {
         "type": INJECTOR_TYPE,
         "version": INJECTOR_VERSION,
         "kind": str(kind),
         "matrix": int(matrix),
-        "sleep_ms": float(sleep_ms),
+        "load_ms": float(load_ms),
+        "idle_ms": float(idle_ms),
+        "bytes_mb": int(bytes_mb),
         "size": int(size),
         "batch": int(batch),
         "channels": int(channels),
+        "nice": nice,
         "script": str(THIS_FILE),
     }
 
@@ -41,7 +56,58 @@ def injector_hash(config=None):
     return hashlib.sha256(body).hexdigest()
 
 
-def _burn(kind, matrix, sleep_ms, size, batch, channels):
+def read_gpu_clock_mhz():
+    """Best-effort sysfs GPU clock. None on hosts that do not expose it."""
+    patterns = (
+        "/sys/devices/gpu.*/devfreq/*/cur_freq",
+        "/sys/class/devfreq/*gpu*/cur_freq",
+        "/sys/class/devfreq/*/cur_freq",
+        "/sys/kernel/debug/bpmp/debug/clk/gpcclk/rate",
+        "/sys/kernel/debug/clk/gpcclk/clk_rate",
+    )
+    paths = []
+    for pattern in patterns:
+        paths.extend(sorted(glob.glob(pattern)))
+    for path in paths:
+        try:
+            raw = Path(path).read_text(encoding="utf-8").strip().split()[0]
+            value = float(raw)
+        except (OSError, ValueError, IndexError):
+            continue
+        if value <= 0:
+            continue
+        if value > 10000:
+            value = value / 1_000_000.0
+        elif value > 20:
+            value = value / 1000.0
+        return round(value, 3)
+    return None
+
+
+def read_power_mode():
+    try:
+        completed = subprocess.run(["nvpmodel", "-q"], capture_output=True, text=True, timeout=3)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    text = ((completed.stdout or "") + (completed.stderr or "")).strip()
+    return text or None
+
+
+def _duty_loop(load_ms, idle_ms, work):
+    load_s = max(0.0, float(load_ms) / 1000.0)
+    idle_s = max(0.0, float(idle_ms) / 1000.0)
+    while True:
+        started = time.perf_counter()
+        if load_s <= 0:
+            work()
+        else:
+            while (time.perf_counter() - started) < load_s:
+                work()
+        if idle_s > 0:
+            time.sleep(idle_s)
+
+
+def _burn(kind, matrix, load_ms, idle_ms, bytes_mb, size, batch, channels):
     try:
         import torch
         import torch.nn as nn
@@ -50,16 +116,38 @@ def _burn(kind, matrix, sleep_ms, size, batch, channels):
     if not torch.cuda.is_available():
         raise SystemExit("gpu_contention 需要 CUDA")
     device = torch.device("cuda:0")
-    pause = max(0.0, float(sleep_ms) / 1000.0)
+    n = max(64, int(matrix))
+    elems = max(1024, int(bytes_mb) * 1024 * 1024 // 4)
+
+    def gemm_once(left, right):
+        torch.mm(left, right)
+        torch.cuda.synchronize()
+
+    def copy_once(src, dst):
+        dst.copy_(src)
+        torch.cuda.synchronize()
+
     if kind == "gemm":
-        n = max(64, int(matrix))
         left = torch.randn(n, n, device=device)
         right = torch.randn(n, n, device=device)
-        while True:
-            torch.mm(left, right)
-            torch.cuda.synchronize()
-            if pause:
-                time.sleep(pause)
+        _duty_loop(load_ms, idle_ms, lambda: gemm_once(left, right))
+        return
+    if kind == "bandwidth":
+        src = torch.randn(elems, device=device)
+        dst = torch.empty_like(src)
+        _duty_loop(load_ms, idle_ms, lambda: copy_once(src, dst))
+        return
+    if kind == "mixed":
+        left = torch.randn(n, n, device=device)
+        right = torch.randn(n, n, device=device)
+        src = torch.randn(max(1024, elems // 4), device=device)
+        dst = torch.empty_like(src)
+
+        def mixed_once():
+            gemm_once(left, right)
+            copy_once(src, dst)
+
+        _duty_loop(load_ms, idle_ms, mixed_once)
         return
     ch = max(4, int(channels))
     net = nn.Sequential(
@@ -69,26 +157,56 @@ def _burn(kind, matrix, sleep_ms, size, batch, channels):
     ).to(device)
     spatial = max(64, int(size))
     x = torch.randn(max(1, int(batch)), 3, spatial, spatial, device=device)
-    while True:
+
+    def conv_once():
         net(x)
         torch.cuda.synchronize()
-        if pause:
-            time.sleep(pause)
+
+    _duty_loop(load_ms, idle_ms, conv_once)
 
 
 class GpuContention:
-    def __init__(self, python=None, kind="conv", matrix=1024, sleep_ms=0, size=640, batch=1, channels=16):
+    def __init__(
+        self,
+        python=None,
+        kind="gemm",
+        matrix=1024,
+        load_ms=80,
+        idle_ms=20,
+        bytes_mb=256,
+        size=640,
+        batch=1,
+        channels=16,
+        nice=None,
+        sleep_ms=None,
+    ):
         self.python = python or sys.executable
         self.kind = str(kind)
         self.matrix = int(matrix)
-        self.sleep_ms = float(sleep_ms)
+        if sleep_ms is not None and float(sleep_ms) > 0 and idle_ms == 20:
+            idle_ms = float(sleep_ms)
+        self.load_ms = float(load_ms)
+        self.idle_ms = float(idle_ms)
+        self.bytes_mb = int(bytes_mb)
         self.size = int(size)
         self.batch = int(batch)
         self.channels = int(channels)
+        self.nice = nice
         self.proc = None
+        self._err_handle = None
 
     def config(self):
-        return injector_config(self.kind, self.matrix, self.sleep_ms, self.size, self.batch, self.channels)
+        return injector_config(
+            self.kind,
+            self.matrix,
+            self.load_ms,
+            self.idle_ms,
+            self.bytes_mb,
+            self.size,
+            self.batch,
+            self.channels,
+            self.nice,
+        )
 
     def hash(self):
         return injector_hash(self.config())
@@ -100,25 +218,32 @@ class GpuContention:
         err_path = THIS_FILE.parent.parent / "results" / "gpu_contention.err"
         err_path.parent.mkdir(parents=True, exist_ok=True)
         handle = err_path.open("w", encoding="utf-8")
+        cmd = [
+            self.python,
+            "-m",
+            "edgemedic.gpu_pressure",
+            "--burn",
+            "--kind",
+            self.kind,
+            "--matrix",
+            str(self.matrix),
+            "--load-ms",
+            str(self.load_ms),
+            "--idle-ms",
+            str(self.idle_ms),
+            "--bytes-mb",
+            str(self.bytes_mb),
+            "--size",
+            str(self.size),
+            "--batch",
+            str(self.batch),
+            "--channels",
+            str(self.channels),
+        ]
+        if self.nice is not None:
+            cmd.extend(["--nice", str(int(self.nice))])
         self.proc = subprocess.Popen(
-            [
-                self.python,
-                "-m",
-                "edgemedic.gpu_pressure",
-                "--burn",
-                "--kind",
-                self.kind,
-                "--matrix",
-                str(self.matrix),
-                "--sleep-ms",
-                str(self.sleep_ms),
-                "--size",
-                str(self.size),
-                "--batch",
-                str(self.batch),
-                "--channels",
-                str(self.channels),
-            ],
+            cmd,
             cwd=str(THIS_FILE.parent.parent),
             env=env,
             stdout=handle,
@@ -137,6 +262,13 @@ class GpuContention:
 
     def stop(self):
         if self.proc is None:
+            handle = self._err_handle
+            if handle is not None:
+                try:
+                    handle.close()
+                except OSError:
+                    pass
+                self._err_handle = None
             return
         if self.proc.poll() is None:
             self.proc.terminate()
@@ -146,7 +278,7 @@ class GpuContention:
                 self.proc.kill()
                 self.proc.wait(timeout=3)
         self.proc = None
-        handle = getattr(self, "_err_handle", None)
+        handle = self._err_handle
         if handle is not None:
             try:
                 handle.close()
@@ -156,20 +288,30 @@ class GpuContention:
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="A3 GPU contention injector")
+    parser = argparse.ArgumentParser(description="GPU contention injector")
     parser.add_argument("--burn", action="store_true")
-    parser.add_argument("--kind", choices=("conv", "gemm"), default="conv")
+    parser.add_argument("--kind", choices=KINDS, default="gemm")
     parser.add_argument("--matrix", type=int, default=1024)
-    parser.add_argument("--sleep-ms", type=float, default=0.0)
+    parser.add_argument("--load-ms", type=float, default=80.0)
+    parser.add_argument("--idle-ms", type=float, default=20.0)
+    parser.add_argument("--sleep-ms", type=float, default=None, help="legacy alias for --idle-ms")
+    parser.add_argument("--bytes-mb", type=int, default=256)
     parser.add_argument("--size", type=int, default=640)
     parser.add_argument("--batch", type=int, default=1)
     parser.add_argument("--channels", type=int, default=16)
+    parser.add_argument("--nice", type=int, default=None)
     args = parser.parse_args(argv)
+    idle = args.idle_ms if args.sleep_ms is None else args.sleep_ms
     if args.burn:
-        _burn(args.kind, args.matrix, args.sleep_ms, args.size, args.batch, args.channels)
+        if args.nice is not None:
+            try:
+                os.nice(int(args.nice))
+            except OSError:
+                pass
+        _burn(args.kind, args.matrix, args.load_ms, idle, args.bytes_mb, args.size, args.batch, args.channels)
         return 0
-    cfg = injector_config(args.kind, args.matrix, args.sleep_ms, args.size, args.batch, args.channels)
-    print(json.dumps({"type": INJECTOR_TYPE, "version": INJECTOR_VERSION, "hash": injector_hash(cfg), "config": cfg}))
+    cfg = injector_config(args.kind, args.matrix, args.load_ms, idle, args.bytes_mb, args.size, args.batch, args.channels, args.nice)
+    print(json.dumps({"type": INJECTOR_TYPE, "version": INJECTOR_VERSION, "hash": injector_hash(cfg), "config": cfg, "gpu_clock_mhz": read_gpu_clock_mhz(), "power_mode": read_power_mode()}))
     return 0
 
 

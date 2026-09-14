@@ -389,7 +389,15 @@ def main(argv=None):
     parser.add_argument("--size", type=int, default=640)
     parser.add_argument("--batch", type=int, default=1)
     parser.add_argument("--out", type=Path, default=None)
+    parser.add_argument("--qual-json", type=Path, default=RESULTS_ROOT / "injector_qual" / "summary.json")
+    parser.add_argument("--allow-unqualified", action="store_true", help="debug only; A3 remains invalid without qualification")
     args = parser.parse_args(argv)
+    from edgemedic.injector_qual import a3_blocked_reason, load_qualification
+
+    if not args.allow_unqualified:
+        blocked = a3_blocked_reason(load_qualification(args.qual_json))
+        if blocked:
+            raise SystemExit(f"A3 paused: {blocked}. Qualify the injector first (python -m edgemedic.injector_qual).")
     client = ControlClient(args.control_url, timeout=5.0)
     client.get_state()
     pressure = GpuContention(

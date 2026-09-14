@@ -9,27 +9,28 @@
 当前研究状态（机制 ≠ 能力验证）：
 
 ```text
-Line 1  Reasoner Reliability & Containment   FROZEN
+Line 1  Reasoner Reliability & Containment   FROZEN, REPRODUCED
   clean checkout 2c79075   results/repro_2c79075/{q0,q1,q2,q3}.json
-  Q0 prompt-only            PCR=0%
-  Q1 GBNF                   PCR=100%  DTA=50%  WLAR=25%
-  Q2 locator 110–200 ms     100% abstain (not a latency threshold)
-  Q3 Guardian dry-run       GCR=100%  GAR=100%  leakage=0  (restart_worker)
 
-Line 2  Runtime Recovery Effectiveness       NEXT
-  Stage C bring-up 4/4      COMPLETE (not a comparison)
-  Stage C controlled        HEALTHY WINDOW RECORDED (`results/controlled_*`, not A3)
-  Restart-only vs SPARSE    PILOT HARNESS READY (not run)
-  A3 effectiveness          NOT ESTABLISHED
+Line 2  Runtime Recovery Effectiveness
+  Stage C controlled healthy baseline   COMPLETE
+  Real-resource-pressure injector       NOT QUALIFIED
+  A3 pilot                              FAILED PRECONDITION / INVALID FOR EFFECTIVENESS
+  Restart-only vs SPARSE                PAUSED
+  A3 effectiveness                      NOT ESTABLISHED
 ```
 
 > A2+A3 mechanism implemented, research-level effectiveness not yet validated.
 
-Guardian rejected contextually invalid but syntactically valid, whitelisted `restart_worker` on a healthy worker, and approved the same tool under `WORKER_FAIL`. Q0–Q3 are frozen. Line 2 question (not “SPARSE is faster than FULL”):
+Q0–Q3 are frozen. The first A3 3+3 is **invalid for ASR/MTTR**: the injector was not qualified (GPU util ≈99% with V5 145–168 ms; Restart “success” was a 202/221 ms spike). Do not compare Restart vs SPARSE until:
 
-> Under persistent real V5 resource pressure, can EdgeMedic SPARSE restore a Mission-acceptable state with less mission interruption than Restart-only?
+```bash
+python -m edgemedic.injector_qual --mode healthy-drift --duration-s 180
+python -m edgemedic.injector_qual --mode sweep
+python -m edgemedic.injector_qual --mode qualify --repeats 5 --kind gemm --load-ms 80 --idle-ms 20
+```
 
-Pilot is 3+3 interleaved, L2 off, PT_SAFE+FULL start, GPU contention stays on through recovery/timeout. Do not retune SPARSE or mission bars from the pilot.
+Qualification requires repeatable (5 consecutive), sustained (≥2 s overload and fault V5 p95 ≥230 ms), and reversible (settle back to that cycle’s healthy p95 + 8 ms). Do not raise the 190 ms reset bar from a failed pilot. `python -m edgemedic.a3` stays blocked until `results/injector_qual/summary.json` has `fault_injector_qualified=true`.
 
 Baseline tag：`edgemedic-a2a3-mechanism-baseline`。A4、CLASSIFY_ONLY / LOCATE_ONLY 仍不在范围。测量文档：[architecture](edgemedic-architecture.md)、[verification](edgemedic-verification.md)、[benchmark](edgemedic-benchmark.md)、[experiments](edgemedic-experiments.md)、[model bundle](model-bundle.md)。
 
