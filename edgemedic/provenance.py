@@ -100,6 +100,7 @@ def collect_provenance(
     fault_mode=FAULT_NONE,
     experiment_config=None,
     replay_pack_dir=None,
+    llm_url=None,
 ):
     """Monorepo: runtime_commit and agent_commit are the same HEAD until split."""
     if fault_mode not in FAULT_MODES:
@@ -130,7 +131,29 @@ def collect_provenance(
     }
     payload.update(_locator_engine_fields())
     payload.update(_replay_pack_fields(replay_dir))
+    if llm_url:
+        payload.update(_llm_fields(llm_url, config))
     return payload
+
+
+def _llm_fields(llm_url, config):
+    from edgemedic.reasoner import ACTION_GBNF_SHA256, llama_server_props
+
+    props = llama_server_props(llm_url)
+    health = props.get("/health") or {}
+    models = props.get("/v1/models") or {}
+    server = props.get("/props") or {}
+    model_id = None
+    data = models.get("data") if isinstance(models, dict) else None
+    if isinstance(data, list) and data:
+        model_id = (data[0] or {}).get("id")
+    return {
+        "llm_url": llm_url,
+        "llama_health": health,
+        "llama_props": {key: server.get(key) for key in ("default_generation_settings", "total_slots", "build_info") if key in server} or server,
+        "gguf_model_id": model_id,
+        "grammar_sha256": config.get("grammar_sha256") or (ACTION_GBNF_SHA256 if config.get("decode") == "grammar" else None),
+    }
 
 
 def _percentile(values, pct):

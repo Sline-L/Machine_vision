@@ -1,5 +1,6 @@
 """L2 reasoner: Qwen reads SystemSnapshot and may emit one whitelist action."""
 
+import hashlib
 import json
 import re
 import time
@@ -18,6 +19,9 @@ ALLOWED_TOOLS = (
 
 ALLOWED_PROFILES = ("FULL", "SPARSE", "SAFE_STOP", "TRT_FAST")
 ALLOWED_LOCATORS = ("pt_safe", "trt_fast")
+DECODE_PROMPT = "prompt"
+DECODE_GRAMMAR = "grammar"
+NO_PARAM_TOOLS = tuple(name for name in ALLOWED_TOOLS if name not in ("set_inference_profile", "set_locator_profile"))
 
 SYSTEM_PROMPT = """You are EdgeMedic L2 on GearPro. Output ONE JSON object only:
 {"tool": "<name or null>", "params": {}}
@@ -29,6 +33,37 @@ If healthy or unsure, {"tool": null, "params": {}}.
 Do not repeat an action that just failed verify.
 /no_think
 """
+
+
+def _gbnf_json_string(value):
+    return '"\\"' + str(value) + '\\""'
+
+
+def build_action_gbnf():
+    """Global action vocabulary only. Not case-specific; does not encode the correct tool."""
+    simple = " | ".join(_gbnf_json_string(name) for name in NO_PARAM_TOOLS)
+    locators = " | ".join(_gbnf_json_string(name) for name in ALLOWED_LOCATORS)
+    profiles = " | ".join(_gbnf_json_string(name) for name in ALLOWED_PROFILES)
+    return f"""root ::= ws alt ws
+ws ::= [ \\t\\n\\r]*
+colon ::= ws ":" ws
+comma ::= ws "," ws
+empty ::= "{{" ws "}}"
+alt ::= abstain | simple | locator | inference
+abstain ::= "{{" ws "\\"tool\\"" colon "null" comma "\\"params\\"" colon empty "}}"
+simple ::= "{{" ws "\\"tool\\"" colon simple-tool comma "\\"params\\"" colon empty "}}"
+simple-tool ::= {simple}
+locator ::= "{{" ws "\\"tool\\"" colon {_gbnf_json_string("set_locator_profile")} comma "\\"params\\"" colon locator-params "}}"
+locator-params ::= "{{" ws "\\"profile\\"" colon locator-profile ws "}}"
+locator-profile ::= {locators}
+inference ::= "{{" ws "\\"tool\\"" colon {_gbnf_json_string("set_inference_profile")} comma "\\"params\\"" colon inference-params "}}"
+inference-params ::= "{{" ws "\\"profile\\"" colon inference-profile ws "}}"
+inference-profile ::= {profiles}
+"""
+
+
+ACTION_GBNF = build_action_gbnf()
+ACTION_GBNF_SHA256 = hashlib.sha256(ACTION_GBNF.encode("utf-8")).hexdigest()
 
 
 class ReasonerError(RuntimeError):
@@ -339,8 +374,10 @@ def classify_proposal(text):
     return _with_semantic(_score_payload(payload, report))
 
 
-def complete_report(llm_url, snapshot, extra_note="", timeout=45.0):
+def complete_report(llm_url, snapshot, extra_note="", timeout=45.0, decode=DECODE_PROMPT):
     """Ask llama-server. Returns metrics plus a parsed action. Does not execute."""
+    if decode not in (DECODE_PROMPT, DECODE_GRAMMAR):
+        raise ValueError("decode 必须是 prompt 或 grammar")
     started = time.monotonic()
     base = llm_url.rstrip("/")
     user = "SystemSnapshot:\n" + json.dumps(snapshot, ensure_ascii=False)
@@ -352,12 +389,15 @@ def complete_report(llm_url, snapshot, extra_note="", timeout=45.0):
         "max_tokens": 160,
         "enable_thinking": False,
         "chat_template_kwargs": {"enable_thinking": False},
-        "response_format": {"type": "json_object"},
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": user},
         ],
     }
+    if decode == DECODE_GRAMMAR:
+        chat_body["grammar"] = ACTION_GBNF
+    else:
+        chat_body["response_format"] = {"type": "json_object"}
     raw_text = ""
     tokens = None
     try:
@@ -376,6 +416,8 @@ def complete_report(llm_url, snapshot, extra_note="", timeout=45.0):
             "temperature": 0.0,
             "n_predict": 96,
         }
+        if decode == DECODE_GRAMMAR:
+            prompt_body["grammar"] = ACTION_GBNF
         try:
             data = _post_json(base + "/completion", prompt_body, timeout)
             raw_text = data.get("content") or data.get("completion") or ""
@@ -387,9 +429,34 @@ def complete_report(llm_url, snapshot, extra_note="", timeout=45.0):
     proposal["latency_s"] = round(time.monotonic() - started, 3)
     proposal["tokens"] = tokens
     proposal["raw"] = raw_text
+    proposal["decode"] = decode
     return proposal
 
 
-def complete(llm_url, snapshot, extra_note="", timeout=45.0):
+def complete(llm_url, snapshot, extra_note="", timeout=45.0, decode=DECODE_PROMPT):
     """Ask llama-server. Returns parsed action or None. Does not execute."""
-    return complete_report(llm_url, snapshot, extra_note=extra_note, timeout=timeout).get("action")
+    return complete_report(llm_url, snapshot, extra_note=extra_note, timeout=timeout, decode=decode).get("action")
+
+
+def llama_server_props(llm_url, timeout=5.0):
+    base = (llm_url or "").rstrip("/")
+    props = {}
+    for path in ("/props", "/health", "/v1/models"):
+        try:
+            data = _get_json(base + path, timeout)
+        except (HTTPError, URLError, TimeoutError, json.JSONDecodeError, OSError, ReasonerError):
+            continue
+        if isinstance(data, dict):
+            props[path] = data
+        else:
+            props[path] = {"value": data}
+    return props
+
+
+def _get_json(url, timeout):
+    request = Request(url, method="GET")
+    with urlopen(request, timeout=timeout) as response:
+        raw = response.read().decode("utf-8")
+    if not raw.strip():
+        return {}
+    return json.loads(raw)

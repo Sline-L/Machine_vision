@@ -11,7 +11,16 @@ from edgemedic.metrics import unsafe_action_leakage
 from edgemedic.memory import EpisodeStore
 from edgemedic.policy import Memory, classify_fault, decide
 from edgemedic.provenance import FAULT_NONE, collect_provenance
-from edgemedic.reasoner import ReasonerError, classify_proposal, complete_report, parse_tool_json
+from edgemedic.reasoner import (
+    ACTION_GBNF_SHA256,
+    DECODE_GRAMMAR,
+    DECODE_PROMPT,
+    ReasonerError,
+    classify_proposal,
+    complete_report,
+    llama_server_props,
+    parse_tool_json,
+)
 
 CASES_DIR = Path(__file__).resolve().parent / "cases"
 
@@ -166,7 +175,7 @@ def _should_query_l2(case, l2_always):
     return False
 
 
-def _l2_proposal(case, snapshot, reasoner, llm_url):
+def _l2_proposal(case, snapshot, reasoner, llm_url, decode=DECODE_PROMPT):
     if reasoner == "mock":
         text = case.get("llm_output")
         if text is None:
@@ -175,9 +184,10 @@ def _l2_proposal(case, snapshot, reasoner, llm_url):
         report["latency_s"] = 0.0
         report["tokens"] = 0
         report["raw"] = text
+        report["decode"] = DECODE_PROMPT
         return report
     if reasoner == "qwen":
-        return complete_report(llm_url, snapshot, extra_note=case.get("l2_note") or "")
+        return complete_report(llm_url, snapshot, extra_note=case.get("l2_note") or "", decode=decode)
     raise ValueError("reasoner 必须是 mock 或 qwen")
 
 
@@ -286,7 +296,7 @@ def family_table(rows):
     return table
 
 
-def run_suite(reasoner="mock", llm_url="http://127.0.0.1:8080", l2_always=False, cases=None, runs=1):
+def run_suite(reasoner="mock", llm_url="http://127.0.0.1:8080", l2_always=False, cases=None, runs=1, decode=DECODE_PROMPT):
     base_cases = list(cases or load_cases())
     cases = []
     for _ in range(max(1, int(runs))):
@@ -335,7 +345,7 @@ def run_suite(reasoner="mock", llm_url="http://127.0.0.1:8080", l2_always=False,
             unnecessary_l2 += 1
         if queried:
             try:
-                proposal = _l2_proposal(case, snapshot, reasoner, llm_url)
+                proposal = _l2_proposal(case, snapshot, reasoner, llm_url, decode=decode)
             except ReasonerError as exc:
                 proposal = {
                     "action": None,
@@ -415,6 +425,7 @@ def run_suite(reasoner="mock", llm_url="http://127.0.0.1:8080", l2_always=False,
                     "action": proposal.get("action"),
                     "latency_s": proposal.get("latency_s"),
                     "tokens": proposal.get("tokens"),
+                    "decode": proposal.get("decode"),
                     "raw": proposal.get("raw"),
                 },
                 "l2_metrics": l2_metrics,
@@ -474,7 +485,15 @@ def run_suite(reasoner="mock", llm_url="http://127.0.0.1:8080", l2_always=False,
             reasoner=reasoner,
             runtime_mode="synthetic",
             fault_mode=FAULT_NONE,
-            experiment_config={"kind": "bench", "reasoner": reasoner, "runs": max(1, int(runs)), "l2_always": bool(l2_always)},
+            experiment_config={
+                "kind": "bench",
+                "reasoner": reasoner,
+                "runs": max(1, int(runs)),
+                "l2_always": bool(l2_always),
+                "decode": decode,
+                "grammar_sha256": None if decode != DECODE_GRAMMAR else ACTION_GBNF_SHA256,
+            },
+            llm_url=None if reasoner != "qwen" else llm_url,
         ),
         "experimentally_validated": False,
         "rows": rows,
@@ -488,10 +507,36 @@ def main(argv=None):
     parser.add_argument("--llm-url", default="http://127.0.0.1:8080")
     parser.add_argument("--l2-always", action="store_true", help="also query L2 on known-simple cases")
     parser.add_argument("--runs", type=int, default=1, help="repeat the case set; use 20 on NX with --reasoner qwen")
+    parser.add_argument("--decode", choices=(DECODE_PROMPT, DECODE_GRAMMAR), default=DECODE_PROMPT)
+    parser.add_argument("--preflight", action="store_true", help="one constrained call; check JSON before a 20× run")
     parser.add_argument("--json", action="store_true", help="print full JSON")
     parser.add_argument("--out", type=Path, default=None, help="write summary.json (gitignored results/ recommended)")
     args = parser.parse_args(argv)
-    summary = run_suite(reasoner=args.reasoner, llm_url=args.llm_url, l2_always=args.l2_always, runs=args.runs)
+    if args.preflight:
+        from edgemedic.reasoner import ACTION_GBNF_SHA256, classify_proposal
+
+        report = complete_report(args.llm_url, default_snapshot(), decode=args.decode)
+        parsed = classify_proposal(report.get("raw"))
+        ok = (not parsed.get("invalid")) or parsed.get("protocol_status") == "valid_structured"
+        payload = {
+            "preflight": True,
+            "decode": args.decode,
+            "grammar_sha256": None if args.decode != DECODE_GRAMMAR else ACTION_GBNF_SHA256,
+            "llama": llama_server_props(args.llm_url),
+            "raw": report.get("raw"),
+            "protocol_status": parsed.get("protocol_status"),
+            "invalid_class": parsed.get("invalid_class"),
+            "constrained_ok": bool(ok and parsed.get("protocol_status") == "valid_structured"),
+        }
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        return 0 if payload["constrained_ok"] else 2
+    summary = run_suite(
+        reasoner=args.reasoner,
+        llm_url=args.llm_url,
+        l2_always=args.l2_always,
+        runs=args.runs,
+        decode=args.decode,
+    )
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

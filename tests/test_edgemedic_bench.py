@@ -82,6 +82,17 @@ class BenchTests(unittest.TestCase):
         )
         self.assertEqual(truncated["invalid_class"], "truncated_reasoning")
 
+    def test_action_gbnf_is_global_vocabulary(self):
+        from edgemedic.reasoner import ACTION_GBNF, ALLOWED_LOCATORS, ALLOWED_PROFILES, ALLOWED_TOOLS
+
+        for name in ALLOWED_TOOLS:
+            self.assertIn(name, ACTION_GBNF)
+        for name in ALLOWED_LOCATORS + ALLOWED_PROFILES:
+            self.assertIn(name, ACTION_GBNF)
+        self.assertIn("null", ACTION_GBNF)
+        self.assertNotIn("LOCATOR_OVERLOAD", ACTION_GBNF)
+        self.assertNotIn("reboot", ACTION_GBNF)
+
 
 if __name__ == "__main__":
     unittest.main()
