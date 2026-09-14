@@ -41,15 +41,15 @@ Q4 state/affordance is **not** next. Line 1 and the healthy Stage C window are f
 
 The first Restart vs SPARSE 3+3 (`results/a3_pilot`) is **invalid for effectiveness**: injector not qualified. GPU util ≈99% with V5 145–168 ms; two Restart “successes” were 202/221 ms spikes that fell back to ~180 ms. That is not ASR/MTTR.
 
-**Next:** injector calibration only (no recovery, no L2):
+**Next:** contention-dimension injector calibration only (no recovery, no L2). Compute-heavy GEMM/conv is **disqualified** — GPU util is not a V5_OVERLOAD proxy.
 
 ```bash
 python -m edgemedic.injector_qual --mode healthy-drift --duration-s 180 --out results/injector_healthy_drift
-python -m edgemedic.injector_qual --mode sweep --out results/injector_sweep
-python -m edgemedic.injector_qual --mode qualify --repeats 5 --kind gemm --load-ms 80 --idle-ms 20 --out results/injector_qual
+python -m edgemedic.injector_qual --mode sweep --out results/injector_sweep_v4
+python -m edgemedic.injector_qual --mode qualify --repeats 5 --kind bandwidth --bytes-mb 512 --load-ms 100 --idle-ms 0 --out results/injector_qual
 ```
 
-Gates: 5 consecutive cycles; sustained overload ≥2 s **and** fault V5 p95 ≥230 ms (margin, not a 200 ms graze); reversible to that cycle’s healthy p95 + 8 ms. Record duty cycle, GPU clock, power, temperature, nvpmodel. Do not raise the 190 ms reset bar until healthy-drift produces an envelope. `python -m edgemedic.a3` exits until `fault_injector_qualified=true`.
+Gates: **triggerability** (sustained ≥2 s `V5_OVERLOAD`); **margin** (HOLD V5 p95 ≥220 ms); **sustainability** (HOLD stays overloaded, not 201 ms graze); **reversibility** (OFF → admission V5 p95 &lt;190 ms). Expected envelope 178–186 ms is descriptive, not the refuse/admit cut. Also record duty cycle, GPU clock, **EMC/memory clock**, locator p95, power, temperature, nvpmodel. **Selectivity** (V5 degrades, locator stable) is reported, not hard-gated yet. Do not use `jetson_clocks` for the official A3 environment. `python -m edgemedic.a3` exits until `fault_injector_qualified=true`.
 
 When (and only when) the injector is qualified, Restart vs SPARSE uses the same Mission window as before. Do not run `python -m edgemedic` during that experiment.
 

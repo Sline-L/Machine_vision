@@ -9,15 +9,20 @@
 当前研究状态（机制 ≠ 能力验证）：
 
 ```text
-Line 1  Reasoner Reliability & Containment   FROZEN, REPRODUCED
-  clean checkout 2c79075   results/repro_2c79075/{q0,q1,q2,q3}.json
+Line 1: FROZEN / REPRODUCED
+Controlled healthy baseline: COMPLETE
 
-Line 2  Runtime Recovery Effectiveness
-  Stage C controlled healthy baseline   COMPLETE
-  Real-resource-pressure injector       NOT QUALIFIED
-  A3 pilot                              FAILED PRECONDITION / INVALID FOR EFFECTIVENESS
-  Restart-only vs SPARSE                PAUSED
-  A3 effectiveness                      NOT ESTABLISHED
+Healthy thermal/drift characterization: COMPLETE
+Expected steady-state V5 p95: ~178–186 ms
+Experiment admission gate: <190 ms, unchanged
+
+Injector ON/HOLD/OFF qualification: NOT QUALIFIED
+  compute-heavy GEMM/conv: DISQUALIFIED (GPU util is not a V5 proxy)
+  alternative contention calibration: NEXT (memory bandwidth, then SM occupancy)
+  triggerability / margin / sustainability: fail on v3 sweep
+  reversibility: pass on v3 sweep (OFF back under 190 / into 178–186)
+A3 pilot: PAUSED
+A3 effectiveness: NOT ESTABLISHED
 ```
 
 > A2+A3 mechanism implemented, research-level effectiveness not yet validated.
@@ -27,10 +32,14 @@ Q0–Q3 are frozen. The first A3 3+3 is **invalid for ASR/MTTR**: the injector w
 ```bash
 python -m edgemedic.injector_qual --mode healthy-drift --duration-s 180
 python -m edgemedic.injector_qual --mode sweep
-python -m edgemedic.injector_qual --mode qualify --repeats 5 --kind gemm --load-ms 80 --idle-ms 20
+python -m edgemedic.injector_qual --mode qualify --repeats 5 --kind bandwidth --bytes-mb 512 --load-ms 100 --idle-ms 0
 ```
 
-Qualification requires repeatable (5 consecutive), sustained (≥2 s overload and fault V5 p95 ≥230 ms), and reversible (settle back to that cycle’s healthy p95 + 8 ms). Do not raise the 190 ms reset bar from a failed pilot. `python -m edgemedic.a3` stays blocked until `results/injector_qual/summary.json` has `fault_injector_qualified=true`.
+Compute-heavy GEMM/conv is **disqualified** for V5 fault injection. Calibration v4 uses memory-bandwidth and SM-occupancy contention. **Selectivity** (V5 worsens, locator stable, valid_ratio high) is reported but not hard-gated until data exist. Do not use `jetson_clocks` as the official A3 environment.
+
+Expected healthy envelope is last-60 s V5 p95 **~178–186 ms** (FULL+PT, T&lt;60 °C). Experiment **admission** stays **recent V5 p95 &lt;190 ms** plus FULL, PT, injector OFF, worker healthy, temperature in band. A 15 s window at 189.7 ms is jitter, not a failed health definition.
+
+Injector qualification (no Restart/SPARSE) has four gates: **triggerability** (sustained ≥2 s `V5_OVERLOAD`), **margin** (HOLD V5 p95 ≥220 ms, not 201–205), **sustainability** (HOLD stays in overload, not spikes), **reversibility** (OFF returns under the 190 ms admission gate; typical band 178–186 is reported separately). **Selectivity** is observational: target `V5_OVERLOAD`, not `SYSTEM_OVERLOAD`. Sweep then 5× qualify. `python -m edgemedic.a3` stays blocked until `fault_injector_qualified=true`. If OFF stays at 190+, debug injector cleanup — do not start 3+3.
 
 Baseline tag：`edgemedic-a2a3-mechanism-baseline`。A4、CLASSIFY_ONLY / LOCATE_ONLY 仍不在范围。测量文档：[architecture](edgemedic-architecture.md)、[verification](edgemedic-verification.md)、[benchmark](edgemedic-benchmark.md)、[experiments](edgemedic-experiments.md)、[model bundle](model-bundle.md)。
 

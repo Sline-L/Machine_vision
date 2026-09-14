@@ -131,6 +131,8 @@ def collect_provenance(
     }
     payload.update(_locator_engine_fields())
     payload.update(_replay_pack_fields(replay_dir))
+    if reasoner == "none":
+        payload["llama_server"] = "off"
     for key in (
         "fault_injector_type",
         "fault_injector_config",

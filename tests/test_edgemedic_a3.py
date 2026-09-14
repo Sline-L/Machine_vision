@@ -75,9 +75,9 @@ class InjectorContractTests(unittest.TestCase):
         self.assertNotEqual(INJECTOR_TYPE, "inject_v5_latency")
 
     def test_injector_hash_stable_for_same_config(self):
-        cfg = injector_config(kind="gemm", matrix=1024, load_ms=80, idle_ms=20)
+        cfg = injector_config(kind="bandwidth", bytes_mb=512, load_ms=100, idle_ms=0)
         self.assertEqual(injector_hash(cfg), injector_hash(cfg))
-        self.assertNotEqual(injector_hash(cfg), injector_hash(injector_config(kind="gemm", matrix=2048, load_ms=80, idle_ms=20)))
+        self.assertNotEqual(injector_hash(cfg), injector_hash(injector_config(kind="bandwidth", bytes_mb=768, load_ms=100, idle_ms=0)))
 
     def test_provenance_lifts_injector_fields(self):
         payload = collect_provenance(
