@@ -361,13 +361,24 @@ def main(argv=None):
     parser.add_argument("--baseline-v5-p95-max", type=float, default=190.0)
     parser.add_argument("--temp-max-c", type=float, default=72.0)
     parser.add_argument("--temp-delta-c", type=float, default=6.0)
+    parser.add_argument("--kind", choices=("conv", "gemm"), default="conv")
     parser.add_argument("--matrix", type=int, default=1024)
     parser.add_argument("--sleep-ms", type=float, default=0.0)
+    parser.add_argument("--size", type=int, default=640)
+    parser.add_argument("--batch", type=int, default=1)
+    parser.add_argument("--channels", type=int, default=16)
     parser.add_argument("--out", type=Path, default=None)
     args = parser.parse_args(argv)
     client = ControlClient(args.control_url, timeout=5.0)
     client.get_state()
-    pressure = GpuContention(matrix=args.matrix, sleep_ms=args.sleep_ms)
+    pressure = GpuContention(
+        kind=args.kind,
+        matrix=args.matrix,
+        sleep_ms=args.sleep_ms,
+        size=args.size,
+        batch=args.batch,
+        channels=args.channels,
+    )
     schedule = interleave_schedule(args.runs_per_arm, order=args.order, seed=args.seed)
     injector_cfg = pressure.config()
     exp_config = {
@@ -394,6 +405,10 @@ def main(argv=None):
         "replay_pack_dir": str(args.replay_pack),
         "matrix": args.matrix,
         "sleep_ms": args.sleep_ms,
+        "kind": args.kind,
+        "size": args.size,
+        "batch": args.batch,
+        "channels": args.channels,
     }
     rows = []
     ref_temp = None

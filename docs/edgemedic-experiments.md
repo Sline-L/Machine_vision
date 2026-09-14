@@ -44,7 +44,7 @@ Q4 state/affordance is **not** next. Line 1 and the healthy Stage C window are f
 ```bash
 # Do not run `python -m edgemedic` during this experiment (it would fire L1 SPARSE on both arms).
 python -m edgemedic.a3 --phase pilot --runs-per-arm 3 --order alternate \
-  --replay-pack tests/replay --out results/a3_pilot
+  --kind conv --size 640 --replay-pack tests/replay --out results/a3_pilot
 ```
 
 Fault injector: `edgemedic/gpu_pressure.py` (`fault_injector_type=gpu_contention`). It stays alive through recovery/timeout. Locator is `PT_SAFE` on both arms. Same 10 s mission window; FULL V5 bar 200 ms, SPARSE 220 ms (existing `gp/verify.py` profile spec). MTTR = `t_MISSION_VERIFIED - t_fault`; timeout → `recovery_success=false`, `mttr_censored=true`. Also record ASR_mission, p95, valid ratio, downtime, utility, Mission Loss \(L_M=\sum(1-U_k)\Delta t\). Pilot checks: pressure repeats overload; reset returns to the healthy band; Mission does not flap from thermal drift. Then 10–20 interleaved formal runs. Do not retune thresholds to chase a winner.
