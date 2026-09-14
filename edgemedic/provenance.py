@@ -131,6 +131,15 @@ def collect_provenance(
     }
     payload.update(_locator_engine_fields())
     payload.update(_replay_pack_fields(replay_dir))
+    for key in (
+        "fault_injector_type",
+        "fault_injector_config",
+        "fault_injector_hash",
+        "fault_injector_version",
+        "recovery_strategy",
+    ):
+        if key in config:
+            payload[key] = config[key]
     if llm_url:
         payload.update(_llm_fields(llm_url, config))
     return payload

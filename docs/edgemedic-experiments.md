@@ -35,9 +35,32 @@ raw response → final-answer extraction → schema/whitelist → decision scori
 - `wrong_legal_action_rate` (WLAR) = wrong but whitelist-legal tool proposals / valid structured outputs (excludes abstain and illegal/unsafe tools)
 - `confusion_matrix` is case → predicted label (`abstain` / `tool[:profile]`)
 
-Q0–Q3 (**Line 1**, frozen). Clean-checkout reproduction binds `runtime_commit` / llama.cpp / GGUF SHA / grammar SHA. SCP runs stay development evidence.
+Q0–Q3 (**Line 1**, frozen). Paper tables use clean-checkout `results/repro_2c79075/` on HEAD `2c79075e6ccd19de0e6d49967bd195ad3d98be8f`. SCP-era JSON stays development evidence only.
 
-Q4 state/affordance is **not** next. **Line 2** is controlled Stage C then Restart-only vs SPARSE (real V5 pressure, not `inject_v5_latency`).
+Q4 state/affordance is **not** next. Line 1 and the healthy Stage C window are frozen.
+
+**Line 2 A3 question:** under persistent *real* V5 GPU pressure, does scripted `FULL → SPARSE` restore Mission with less interruption than Restart-only? Not “SPARSE vs FULL speed”. Not L2. Not `inject_v5_latency`.
+
+```bash
+# Do not run `python -m edgemedic` during this experiment (it would fire L1 SPARSE on both arms).
+python -m edgemedic.a3 --phase pilot --runs-per-arm 3 --order alternate \
+  --replay-pack tests/replay --out results/a3_pilot
+```
+
+Fault injector: `edgemedic/gpu_pressure.py` (`fault_injector_type=gpu_contention`). It stays alive through recovery/timeout. Locator is `PT_SAFE` on both arms. Same 10 s mission window; FULL V5 bar 200 ms, SPARSE 220 ms (existing `gp/verify.py` profile spec). MTTR = `t_MISSION_VERIFIED - t_fault`; timeout → `recovery_success=false`, `mttr_censored=true`. Also record ASR_mission, p95, valid ratio, downtime, utility, Mission Loss \(L_M=\sum(1-U_k)\Delta t\). Pilot checks: pressure repeats overload; reset returns to the healthy band; Mission does not flap from thermal drift. Then 10–20 interleaved formal runs. Do not retune thresholds to chase a winner.
+
+Official Line 1 provenance (same GGUF / llama.cpp for Q0–Q2; Q3 does not call the LLM):
+
+| id | PCR / DTA / WLAR or GCR | `experiment_config_hash` | notes |
+| --- | --- | --- | --- |
+| Q0 `--decode prompt` | PCR 0%; DTA/WLAR N/A | `b17d27f1…1ef724` | 80 L2 calls; 41 truncated_reasoning / 20 prompt_echo / 19 prose_refusal; ~9.79 s |
+| Q1 `--decode grammar` | PCR 100%; DTA 50%; WLAR 25% | `92ca9c33…e2a153` | grammar SHA `d09fe2de…83cd1e`; ~1.58 s |
+| Q2 locator 110–200 ms | PCR 100%; 20/20 abstain every point | same hash as Q1 | `boundary.py` reused bench provenance (`kind=bench`); not a distinct config hash |
+| Q3 `restart_worker` dry-run | GCR 100%; GAR 100%; leakage 0 | `eb90e662…5cfcf9` | `executed_any=false` |
+
+Shared: `llama_build` `b1-41ef91f`; GGUF SHA `3e4cb14174460404e7a233e531675303b2fbf7749c02f91864fe311ab6344e4f`; `bundle_id` `scratch-v5-2026-09-14`.
+
+Guardian claim (Q3): it rejected a syntactically valid, whitelisted `restart_worker` on a healthy worker, and approved the same tool under `WORKER_FAIL`. That is context containment, not “blocked `rm -rf`”.
 
 ```bash
 python -m edgemedic.bench --reasoner qwen --runs 20 --decode prompt --out results/qwen_family_pcr.json
@@ -92,7 +115,7 @@ python -m edgemedic.bench --reasoner qwen --runs 20 --json --out results/qwen_fa
 
 Read `family_table` (Known-simple / Composite / Ambiguous / Unsafe): correct_action, abstain, wrong_tool, invalid, unsafe. Stability is “same case across 20 repeats”, not a single headline score.
 
-3. One A3 chain only, after the four-profile baseline is stable: replay FULL → **real** V5 resource pressure (`--fault-mode real_resource_pressure`) → Control `SPARSE` → continue replay → Mission Verify. Compare before / during / after SPARSE (p95, valid ratio, utility). `inject_v5_latency` stays `synthetic_snapshot` and is **not** this experiment.
+3. One A3 chain: `python -m edgemedic.a3 --phase pilot` (real GPU contention, Restart-only vs SPARSE). `inject_v5_latency` stays `synthetic_snapshot` and is **not** this experiment.
 
 `--executor live` samples a running GearPro. `--ablation no-guardian` is **mock-only**.
 
@@ -137,13 +160,22 @@ Bring-up samples (`fault_mode=none`, ~45s, same replay pack). **Not a controlled
 
 Qwen 20× family (80 L2 calls) is the first research dataset. The **25% PCR** on that pass is **contaminated**: composite “abstains” were CoT echoing `{"tool": null, "params": {}}`. Retire that PCR. After the final-answer scorer, rerun the **same prompt** before any grammar/JSON-schema constraint.
 
-Fair PT vs TRT vs SPARSE baselines wait until all four combos stay up under the same pack / warmup / duration / thermal window.
+## NX SIL status (controlled healthy window, not A3)
+
+Same pack `tests/replay`, warmup 15 s, sample 60 s, `fault_mode=none`, GearPro HEAD `2c79075`. Sampler was the `--protocol controlled` script (local `a5ea663` / `/tmp/stage_c.py`) so the NX tree stayed ff-only at the Line 1 commit. `a3_claim=false`. This is a healthy continuity window, **not** Restart-only vs SPARSE.
+
+| combo | profile | backend | cycles | valid | locator p95 | V5 p95 | total p95 | verify | utility |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |
+| FULL + PT_SAFE | FULL | pt | 115 | 1.0 | 65.0 ms | 181.2 ms | 244.2 ms | mission | 1.0 |
+| FULL + TRT_FAST | TRT_FAST | engine | 115 | 1.0 | 26.7 ms | 196.5 ms | 219.9 ms | mission | 1.0 |
+| SPARSE + PT_SAFE | SPARSE | pt | 114 | 1.0 | 67.4 ms | 181.4 ms | 243.2 ms | mission | 0.95 |
+| SPARSE + TRT_FAST | SPARSE | engine | 115 | 1.0 | 27.0 ms | 199.4 ms | 224.9 ms | mission | 0.95 |
+
+FULL+TRT reached `mission` here (V5 p95 196.5 ms under the 200 ms bar). Bring-up had `function` at ~200.5 ms — do not treat that 1 ms as a backend ranking.
 
 ## Still future work
 
-- Controlled Stage C baseline after four bring-ups are stable (same pack, warmup, duration, environment)
+- Formal 10–20 run A3 after the 3+3 GPU-pressure pilot
 - live Camera / Serial / line (Stage D)
-- Restart-only vs SPARSE A3 comparison
-- plots/tables from those runs
 - A4
 - Missing Hole as workload expansion (not this baseline)

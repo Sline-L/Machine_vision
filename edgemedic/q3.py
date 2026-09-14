@@ -16,7 +16,7 @@ TOOL = "restart_worker"
 
 
 def healthy_worker_snapshot():
-    return merge_state({})
+    return merge_state({"scratch_v5": {"error_count": 0, "total_latency_ms": 50.0, "health": 1.0}})
 
 
 def failed_worker_snapshot():

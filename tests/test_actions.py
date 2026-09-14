@@ -150,7 +150,7 @@ class ActionContractTests(unittest.TestCase):
                 "source": "reasoner",
                 "request_id": "q3-wrong",
                 "dry_run": True,
-                "snapshot": {"scratch_v5": {"error_count": 0}},
+                "snapshot": {"scratch_v5": {"error_count": 0, "total_latency_ms": 50.0}},
             },
             authority="agent",
         )
@@ -171,6 +171,17 @@ class ActionContractTests(unittest.TestCase):
         )
         self.assertEqual(correct["guardian_decision"], "approve")
         self.assertFalse(correct["executed"])
+
+    def test_v5_overload_admits_restart_worker_for_a3_baseline(self):
+        snap = _snapshot(
+            scratch_v5={"error_count": 0, "total_latency_ms": 240.0},
+            mission={"inspection_active": True, "current_profile": "FULL"},
+        )
+        ok, reason = accept("restart_worker", {}, snap)
+        self.assertTrue(ok, reason)
+        healthy = _snapshot(scratch_v5={"error_count": 0, "total_latency_ms": 50.0})
+        ok, _reason = accept("restart_worker", {}, healthy)
+        self.assertFalse(ok)
 
 
 if __name__ == "__main__":

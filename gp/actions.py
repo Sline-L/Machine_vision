@@ -131,6 +131,13 @@ def _pre_restart_worker(params, snapshot, extras):
     errors = int((snapshot.get("scratch_v5") or {}).get("error_count") or 0)
     if errors >= 1 or extras.get("worker_failed"):
         return True, None
+    # V5_OVERLOAD is not WORKER_FAIL. Restart-only A3 still needs a legal
+    # baseline attempt while the worker process is up. Healthy low-latency
+    # workers stay rejected (Q3).
+    v5_ms = (snapshot.get("scratch_v5") or {}).get("total_latency_ms")
+    profile = (snapshot.get("mission") or {}).get("current_profile") or "FULL"
+    if profile == "FULL" and v5_ms is not None and float(v5_ms) >= 200.0:
+        return True, None
     return False, "worker 未异常，拒绝 restart_worker"
 
 

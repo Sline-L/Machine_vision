@@ -9,7 +9,8 @@
 当前研究状态（机制 ≠ 能力验证）：
 
 ```text
-Line 1  Reasoner Reliability & Containment   FROZEN (dev evidence; paper tables need clean-checkout repro)
+Line 1  Reasoner Reliability & Containment   FROZEN
+  clean checkout 2c79075   results/repro_2c79075/{q0,q1,q2,q3}.json
   Q0 prompt-only            PCR=0%
   Q1 GBNF                   PCR=100%  DTA=50%  WLAR=25%
   Q2 locator 110–200 ms     100% abstain (not a latency threshold)
@@ -17,14 +18,18 @@ Line 1  Reasoner Reliability & Containment   FROZEN (dev evidence; paper tables 
 
 Line 2  Runtime Recovery Effectiveness       NEXT
   Stage C bring-up 4/4      COMPLETE (not a comparison)
-  Stage C controlled        PENDING  (same pack / warmup / duration)
-  Restart-only vs SPARSE    NOT RUN
+  Stage C controlled        HEALTHY WINDOW RECORDED (`results/controlled_*`, not A3)
+  Restart-only vs SPARSE    PILOT HARNESS READY (not run)
   A3 effectiveness          NOT ESTABLISHED
 ```
 
 > A2+A3 mechanism implemented, research-level effectiveness not yet validated.
 
-Guardian rejected contextually invalid but syntactically valid, whitelisted `restart_worker` on a healthy worker, and approved the same tool under `WORKER_FAIL`. Q0–Q3 are frozen; no Q4 / no prompt change / no model swap. Next is a **controlled** Stage C baseline, then Restart-only vs SPARSE under real V5 pressure — recovery usefulness, not more L2 behavior.
+Guardian rejected contextually invalid but syntactically valid, whitelisted `restart_worker` on a healthy worker, and approved the same tool under `WORKER_FAIL`. Q0–Q3 are frozen. Line 2 question (not “SPARSE is faster than FULL”):
+
+> Under persistent real V5 resource pressure, can EdgeMedic SPARSE restore a Mission-acceptable state with less mission interruption than Restart-only?
+
+Pilot is 3+3 interleaved, L2 off, PT_SAFE+FULL start, GPU contention stays on through recovery/timeout. Do not retune SPARSE or mission bars from the pilot.
 
 Baseline tag：`edgemedic-a2a3-mechanism-baseline`。A4、CLASSIFY_ONLY / LOCATE_ONLY 仍不在范围。测量文档：[architecture](edgemedic-architecture.md)、[verification](edgemedic-verification.md)、[benchmark](edgemedic-benchmark.md)、[experiments](edgemedic-experiments.md)、[model bundle](model-bundle.md)。
 
