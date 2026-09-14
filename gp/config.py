@@ -57,6 +57,8 @@ class AppConfig:
     target_quantity: int = 100
     duration_minutes: int = 10
     video_path: Optional[Path] = None
+    replay_dir: Optional[Path] = None
+    replay_loop: bool = True
     serial_enabled: bool = True
     stream_fps: float = 10.0
     stream_quality: int = 75
@@ -72,6 +74,11 @@ class AppConfig:
         config.serial_port = os.getenv("GEARPRO_SERIAL_PORT", config.serial_port)
         config.locator_model = Path(os.getenv("GEARPRO_MODEL1", str(config.locator_model)))
         config.model2_config = Path(os.getenv("GEARPRO_MODEL2", str(config.model2_config)))
+        replay = os.getenv("GEARPRO_REPLAY_DIR")
+        if replay:
+            config.replay_dir = Path(replay)
+            config.serial_enabled = False
+            config.mode = "数据集回放模式"
         # Model1 may be .pt or .engine. Model2 is a Scratch V5 JSON bundle.
         if config.model2_config.is_file() and "defect_threshold" not in persisted:
             try:
@@ -168,7 +175,7 @@ class AppConfig:
         for name in integer_fields:
             if not isinstance(candidate[name], int):
                 raise ValueError(f"{name} 必须是整数")
-        if candidate["mode"] not in ("自由模式", "定量模式", "定时模式", "视频测试模式"):
+        if candidate["mode"] not in ("自由模式", "定量模式", "定时模式", "视频测试模式", "数据集回放模式"):
             raise ValueError("无效的运行模式")
         from .profiles import IMPLEMENTED
         if candidate["inference_profile"] not in IMPLEMENTED:

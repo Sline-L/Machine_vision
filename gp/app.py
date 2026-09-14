@@ -11,7 +11,14 @@ def build_parser():
     parser = argparse.ArgumentParser(description="GearPro 齿轮视觉检测 Web 系统")
     parser.add_argument("--host", default=os.getenv("GEARPRO_WEB_HOST", "0.0.0.0"))
     parser.add_argument("--port", type=int, default=int(os.getenv("GEARPRO_WEB_PORT", "8000")))
-    parser.add_argument("--video", type=Path, help="使用服务器上的视频文件进入测试模式")
+    source = parser.add_mutually_exclusive_group()
+    source.add_argument("--video", type=Path, help="使用服务器上的视频文件进入测试模式")
+    source.add_argument(
+        "--replay",
+        type=Path,
+        help="从图片目录回放真实推理 cycle（不接摄像头）。不要用锁定的 test_scratch 调阈值。",
+    )
+    parser.add_argument("--replay-once", action="store_true", help="回放到最后一张后停止，不循环")
     parser.add_argument(
         "--control-port",
         type=int,
@@ -40,7 +47,17 @@ def main(argv=None):
         if not video_path.is_file():
             raise SystemExit(f"找不到视频文件：{video_path}")
         config.video_path = video_path
+        config.replay_dir = None
         config.mode = "视频测试模式"
+        config.serial_enabled = False
+    if args.replay is not None:
+        replay_dir = args.replay.expanduser().resolve()
+        if not replay_dir.is_dir():
+            raise SystemExit(f"找不到 replay 目录：{replay_dir}")
+        config.replay_dir = replay_dir
+        config.video_path = None
+        config.replay_loop = not args.replay_once
+        config.mode = "数据集回放模式"
         config.serial_enabled = False
     try:
         import uvicorn

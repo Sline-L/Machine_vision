@@ -17,3 +17,4 @@ Research problem: embed an unreliable small LLM in a bounded edge runtime around
 - Do not invent runtime knobs. P2 `imgsz` is 960 in the current bundle; CLASSIFY_ONLY/LOCATE_ONLY need real code before the API claims them.
 - Qt stays until Runtime + snapshot + API exist. Do not Big Bang rewrite to Vue. Do not start `reasoner.py` before SystemSnapshot, InferenceProfile, and Action Schema are implemented.
 - Prefer `docs/edgemedic-*.md` over guessing. Unknown fault → LLM; repeated success → episode memory → optional Reflex rule (never after one success).
+- Dataset repo produces a runtime bundle (manifest + SHA); GearPro consumes it. Do not git-merge training data/`runs/`. Stage C replay uses disk images through the camera frame interface; do not retune on locked `test_scratch`. Missing Hole is later workload expansion.

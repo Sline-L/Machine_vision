@@ -1,0 +1,46 @@
+{
+  "schema_version": "runtime-bundle.v1",
+  "bundle_id": "scratch-v5-2026-09-14",
+  "task": "scratch_detection",
+  "model_family": "scratch_v5",
+  "input": {
+    "classifier_size": 384,
+    "detector_size": 960
+  },
+  "fusion": {
+    "classifier_weight": 0.25,
+    "detector_weight": 0.75,
+    "threshold": 0.300273610279458
+  },
+  "artifacts": {
+    "classifier_1.pt": {
+      "sha256": "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438"
+    },
+    "classifier_2.pt": {
+      "sha256": "d07678a6da421c4edc00ac24b8c5052b0b8b7f8b1614b9d82563ecefbf59360d"
+    },
+    "detector.pt": {
+      "sha256": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3"
+    }
+  },
+  "evaluation": {
+    "validation": {
+      "recall": 0.9767,
+      "fpr": 0.0841,
+      "blind": false,
+      "notes": "val participated in model and threshold selection"
+    },
+    "locked_test": {
+      "set": "test_scratch",
+      "recall": 0.8065,
+      "fpr": 0.1681,
+      "tp_fp_tn_fn": [25, 20, 99, 6],
+      "locked": true,
+      "notes": "must not be used to retrain or retune threshold"
+    }
+  },
+  "dataset_repo": "https://github.com/Sline-L/Machine_vision_dataset",
+  "compatibility": {
+    "gearpro_runtime": "srtp-web"
+  }
+}

@@ -31,5 +31,6 @@ WebSocket 客户端持有控制权时每 10 秒发送：
 共用白名单、precondition 和 verify；Agent 不能调用 `apply_settings`、`use_camera`、
 `use_video`、`reset_stats`。
 
-常见响应码：`400` 参数错误、`401` 未登录、`413` 上传超限、`423` 未取得控制权或控制权
-已被其他终端占用。生产网络若不可信，应由反向代理终止 HTTPS，并限制可访问来源。
+`GET /state` 的 `source.type` 为 `camera`、`video` 或 `replay`。回放由 CLI `--replay DIR` 或 `GEARPRO_REPLAY_DIR` 启动，不经过上传接口；EdgeMedic 仍只看 Snapshot / Control API。
+
+`POST /source/camera` 会清掉视频路径和 replay 目录并重新打开真实相机。

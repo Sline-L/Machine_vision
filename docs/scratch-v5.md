@@ -15,7 +15,17 @@ REJECT when defect_score >= 0.300273610279458
 ```
 
 最高原始检测置信度达到 0.05 时显示一个辅助框。框仅供人工复核，最终结果始终由融合
-概率决定。配置及三个权重位于 `model/model2/`；加载时会解析相对路径并校验 SHA256。
+概率决定。配置及三个权重位于 `model/model2/`；加载时会解析相对路径、校验 SHA256，并读取同目录 `manifest.json`（[Model Artifact Contract](model-bundle.md)）。validation 与 locked_test 必须分开记录。
+
+## 数据集回放（Stage C）
+
+不接摄像头时，可用同一套 locator + Scratch V5 从磁盘出 cycle：
+
+```bash
+python -m gp --replay /path/to/non_locked_frames
+```
+
+图像经 `ReplayCamera` 进入 `LatestFrame`，工人路径与实时相机相同。不要用锁定的 `test_scratch` 做 smoke 后再拿去调阈值。Dataset 仓不要 merge 进 Runtime 仓。
 
 ## 已知指标与边界
 

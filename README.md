@@ -100,6 +100,12 @@ python gp_main.py --host 127.0.0.1
 python gp_main.py --host 127.0.0.1 --video /path/to/test.mp4
 ```
 
+不接摄像头、用磁盘图片走完整推理（真实 locator / Scratch V5 / GPU；不要用锁定的 `test_scratch` 调阈值）：
+
+```bash
+python gp_main.py --host 127.0.0.1 --replay /path/to/non_locked_frames
+```
+
 网页中也可上传 `mp4/avi/mov/mkv/m4v`。默认上传上限为 2048 MB；测试视频保存在
 Git 忽略的 `var/uploads/`，切换视频、返回相机或关闭服务时自动清理。
 
@@ -124,6 +130,7 @@ Git 忽略的 `var/uploads/`，切换视频、返回相机或关闭服务时自�
 | `GEARPRO_SERIAL_PORT` | `/dev/ttyHS1` | 串口设备 |
 | `GEARPRO_MODEL1` | `model/model1.pt` | 齿轮定位模型 |
 | `GEARPRO_MODEL2` | `model/model2/inference_config.json` | Scratch V5 配置 |
+| `GEARPRO_REPLAY_DIR` | 无 | 数据集回放目录（与 `--replay` 相同；关闭串口） |
 
 内置服务使用 HTTP，适用于可信且隔离的生产局域网。跨网段或公网访问必须放在 HTTPS
 反向代理后，并增加相应的网络访问控制。
@@ -146,6 +153,7 @@ cd web && npm run build
 - [系统架构](docs/architecture.md)
 - [Web API](docs/web-api.md)
 - [Scratch V5](docs/scratch-v5.md)
+- [模型产物契约](docs/model-bundle.md)
 - [模型格式与 Jetson 部署](docs/model-formats.md)
 
 当前 Scratch V5 只识别划痕，独立测试 Recall 为 `0.8065`，仍是可运行基线而不是已经

@@ -4,6 +4,7 @@
 - [Web API](web-api.md)：浏览器登录、控制锁、状态推送、视频流和控制接口。
 - [模型格式](model-formats.md)：`.pt` 与 `.engine` 的取舍和 NX 上板步骤。
 - [Scratch V5 运行说明](scratch-v5.md)：Model2 融合公式、资产校验、指标和兼容边界。
+- [模型产物契约](model-bundle.md)：Dataset 仓发布 bundle，GearPro 只认 manifest / SHA。
 - [EdgeMedic 协议](edgemedic.md)：机制状态、Snapshot/Profile/Action、测量与实验文档。不要把“接口存在”写成“A2/A3 已验证”。
 - [旧版归档说明](../legacy/README.md)：旧程序、旧模型及实验资料的运行方法。
 

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gearpro.local/edgemedic/runtime-bundle.schema.json",
+  "title": "GearPro runtime model bundle v1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schema_version", "bundle_id", "task", "model_family", "artifacts", "evaluation"],
+  "properties": {
+    "schema_version": { "const": "runtime-bundle.v1" },
+    "bundle_id": { "type": "string", "minLength": 1 },
+    "task": { "type": "string", "minLength": 1 },
+    "model_family": { "enum": ["scratch_v5"] },
+    "input": { "type": "object" },
+    "fusion": { "type": "object" },
+    "artifacts": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["sha256"],
+        "properties": {
+          "sha256": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" }
+        }
+      }
+    },
+    "evaluation": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["validation", "locked_test"],
+      "properties": {
+        "validation": {
+          "type": "object",
+          "required": ["recall", "fpr"],
+          "properties": {
+            "recall": { "type": "number" },
+            "fpr": { "type": "number" },
+            "blind": { "type": "boolean" }
+          }
+        },
+        "locked_test": {
+          "type": "object",
+          "required": ["locked"],
+          "properties": {
+            "set": { "type": "string" },
+            "recall": { "type": "number" },
+            "fpr": { "type": "number" },
+            "locked": { "const": true }
+          }
+        }
+      }
+    },
+    "dataset_commit": { "type": "string" },
+    "dataset_repo": { "type": "string" },
+    "compatibility": { "type": "object" }
+  }
+}

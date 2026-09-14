@@ -2,6 +2,14 @@
 
 Status: runner **implemented, tested** on synthetic snapshots and software inject. **Not experimentally validated** on Camera/Serial/NX.
 
+Dataset replay (Stage C) is the next measurement surface: real GearPro inference on disk images, still not a production line.
+
+```bash
+python -m edgemedic.experiment --reasoner mock --runs 1
+python -m edgemedic.experiment --reasoner qwen --case locator_overload --runs 30
+python -m gp --replay /path/to/non_locked_frames --replay-once
+```
+
 ```bash
 python -m edgemedic.experiment --reasoner mock --runs 1
 python -m edgemedic.experiment --reasoner qwen --case locator_overload --runs 30
@@ -37,7 +45,9 @@ Full / no-L2 / no-Memory / no-Reflex / no-Guardian (mock executor). Raw-log vs S
 
 ## Still future work
 
-- live Camera / Serial / TensorRT workload on NX
+- live Camera / Serial / TensorRT workload on NX (Stage D)
+- Stage C NX p50/p95 for FULL / SPARSE / PT_SAFE / TRT_FAST (software replay exists; numbers not claimed)
 - Restart-only vs SPARSE A3 comparison
 - plots/tables from those runs
 - A4
+- Missing Hole as workload expansion (not this baseline)

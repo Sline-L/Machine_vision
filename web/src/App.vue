@@ -27,11 +27,21 @@ const verdictClass = computed(() => {
 })
 const goodRate = computed(() => `${((state.value?.stats?.good_rate || 0) * 100).toFixed(1)}%`)
 const streamUrl = computed(() => `${API}/stream?view=${streamView.value}&v=${streamNonce.value}`)
+const offlineSource = computed(() => {
+  const type = state.value?.source?.type
+  return type === 'video' || type === 'replay'
+})
+const sourceLabel = computed(() => {
+  const source = state.value?.source
+  if (source?.type === 'video') return `测试视频 · ${source.video_name}`
+  if (source?.type === 'replay') return '数据集回放'
+  return `CAM ${state.value?.settings?.camera_index}`
+})
 const healthItems = computed(() => [
   ['服务', true],
-  ['相机', state.value?.source?.type === 'video' || state.value?.health?.camera?.opened],
+  ['相机', offlineSource.value || state.value?.health?.camera?.opened],
   ['模型', state.value?.inspection?.model_loaded],
-  ['串口', state.value?.source?.type === 'video' || state.value?.health?.serial?.connected],
+  ['串口', offlineSource.value || state.value?.health?.serial?.connected],
 ])
 
 async function request(path, options = {}) {
@@ -209,7 +219,7 @@ onBeforeUnmount(() => {
             <span>{{ result?.verdict || (active ? '检测中' : '等待开始') }}</span>
             <strong v-if="result?.observations?.length">{{ (Math.max(...result.observations.map(x => x.defect_score)) * 100).toFixed(1) }}%</strong>
           </div>
-          <div class="source-tag">{{ state.source.type === 'video' ? `测试视频 · ${state.source.video_name}` : `CAM ${state.settings.camera_index}` }}</div>
+          <div class="source-tag">{{ sourceLabel }}</div>
         </div>
         <div class="control-row">
           <button class="button primary large" :disabled="!ownsControl || busy" @click="action(active ? '/inspection/stop' : '/inspection/start')">
@@ -217,7 +227,7 @@ onBeforeUnmount(() => {
           </button>
           <input ref="uploadInput" hidden type="file" accept="video/*,.mkv" @change="chooseVideo" />
           <button class="button" :disabled="!ownsControl || busy" @click="uploadInput.click()">上传测试视频</button>
-          <button v-if="state.source.type === 'video'" class="button" :disabled="!ownsControl || busy" @click="action('/source/camera')">返回实时相机</button>
+          <button v-if="offlineSource" class="button" :disabled="!ownsControl || busy" @click="action('/source/camera')">返回实时相机</button>
           <button class="button ghost" :disabled="!ownsControl || busy" @click="action('/stats/reset')">清空统计</button>
           <span class="status-text"><i :class="{ running: active }"></i>{{ state.status }}</span>
         </div>

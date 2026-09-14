@@ -54,4 +54,15 @@ Rollback or LKG promote
 Mission window
 ```
 
-Related: [verification](edgemedic-verification.md), [benchmark](edgemedic-benchmark.md), [experiments](edgemedic-experiments.md), [Guardian/Reflex](edgemedic-guardian-reflex-v1.md).
+Related: [verification](edgemedic-verification.md), [benchmark](edgemedic-benchmark.md), [experiments](edgemedic-experiments.md), [Guardian/Reflex](edgemedic-guardian-reflex-v1.md), [model bundle](model-bundle.md).
+
+## Validation ladder
+
+| stage | what is real | what is fake | status |
+| --- | --- | --- | --- |
+| A Synthetic bench | Guardian / Memory / tool choice | no models | implemented, tested |
+| B Simulated runtime | verify / MTTR plumbing | cycle numbers | implemented, tested |
+| C Dataset replay | locator + Scratch V5 + CUDA/Jetson telemetry on NX | frames from disk, not `/dev/video0` | **current focus**; software implemented, NX numbers not claimed |
+| D Real camera / line | sensors, serial, conveyor | — | future work |
+
+Replay: `python -m gp --replay <dir>` (`GEARPRO_REPLAY_DIR`). EdgeMedic still talks Control API only; it does not know whether frames came from a camera or disk. Do not replay locked `test_scratch` to retune. Do not merge the dataset repo. Missing Hole stays out of this baseline.

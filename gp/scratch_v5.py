@@ -132,10 +132,12 @@ class ScratchV5Runtime:
 
     def __init__(self, config_path, device=None, warmup=True):
         import torch
+        from .bundle import load_runtime_bundle
         from torchvision import transforms
         from ultralytics import YOLO
 
-        self.config = load_model2_config(config_path)
+        self.bundle = load_runtime_bundle(config_path)
+        self.config = self.bundle["config"]
         self.version = self.config["version"]
         self.torch = torch
         self.device = torch.device(device or ("cuda:0" if torch.cuda.is_available() else "cpu"))

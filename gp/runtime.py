@@ -11,6 +11,7 @@ import cv2
 
 from .camera import CameraCapture
 from .config import PERSISTED_FIELDS, RUNTIME_ROOT, load_last_known_good_snapshot
+from .replay import ReplayCapture
 from .frames import LatestFrame
 from .serial_io import SerialOutput
 from .telemetry import build_snapshot, camera_health, locator_backend
@@ -24,7 +25,7 @@ class GearProRuntime:
         self.config = config
         self.raw_frames = LatestFrame()
         self.annotated_frames = LatestFrame()
-        self.camera = CameraCapture(config, self.raw_frames)
+        self.camera = self._make_capture()
         self.serial = SerialOutput(config.serial_port, config.serial_baudrate)
         self.stats = InspectionStats()
         self.last_result = None
@@ -58,6 +59,13 @@ class GearProRuntime:
             self.config.serial_enabled = False
             self.status = "正在准备视频测试…"
             self.start_inspection()
+        elif self.config.replay_dir is not None:
+            self.config.serial_enabled = False
+            if self.camera.start():
+                self.status = "数据集回放已连接"
+                self.start_inspection()
+            else:
+                self.status = self.camera.error_message or "数据集回放失败"
         elif self.camera.start():
             self.status = "摄像头已连接"
         else:
@@ -83,15 +91,33 @@ class GearProRuntime:
     def inspection_active(self):
         return self.worker.active
 
+    def _make_capture(self):
+        if self.config.replay_dir is not None:
+            return ReplayCapture(self.config, self.raw_frames, on_complete=self._on_replay_complete)
+        return CameraCapture(self.config, self.raw_frames)
+
+    def _bind_capture(self):
+        previous = getattr(self, "camera", None)
+        if previous is not None:
+            previous.stop()
+        self.camera = self._make_capture()
+
+    def _on_replay_complete(self):
+        self.stop_inspection("数据集回放完成")
+
     @property
     def source(self):
-        return "video" if self.config.video_path is not None else "camera"
+        if self.config.video_path is not None:
+            return "video"
+        if self.config.replay_dir is not None:
+            return "replay"
+        return "camera"
 
     def start_inspection(self):
         if self.config.inference_profile == "SAFE_STOP":
             raise RuntimeError("SAFE_STOP 档位下不能开始检测")
         if self.config.video_path is None and not self.camera.opened:
-            raise RuntimeError(self.camera.error_message or "摄像头未连接")
+            raise RuntimeError(self.camera.error_message or "画面源未连接")
         if self.config.video_path is not None and not self.config.video_path.is_file():
             raise RuntimeError(f"找不到视频：{self.config.video_path}")
         with self._lock:
@@ -108,12 +134,14 @@ class GearProRuntime:
     def use_camera(self):
         self.stop_inspection()
         self.config.video_path = None
+        self.config.replay_dir = None
         self.config.mode = "自由模式"
         self.config.serial_enabled = True
         self.raw_frames.clear()
         self.annotated_frames.clear()
         self._cleanup_managed_video()
-        if not self.camera.restart():
+        self._bind_capture()
+        if not self.camera.start():
             raise RuntimeError(self.camera.error_message or "摄像头连接失败")
         self.status = "摄像头已连接"
 
@@ -131,6 +159,7 @@ class GearProRuntime:
         self._cleanup_managed_video()
         self.raw_frames.clear()
         self.annotated_frames.clear()
+        self.config.replay_dir = None
         self.config.video_path = path
         self.config.mode = "视频测试模式"
         self.config.serial_enabled = False
@@ -174,13 +203,14 @@ class GearProRuntime:
             status = self.status
             error = self.error
             started_at = self.started_at
+        live = self.source != "video"
         snapshot = build_snapshot(
             self.config,
             self.raw_frames,
-            self.camera.opened if self.source == "camera" else True,
-            self.camera.device_path if self.source == "camera" else str(self.config.video_path),
-            self.camera.read_failures if self.source == "camera" else 0,
-            self.camera.actual_fps if self.source == "camera" else 0.0,
+            self.camera.opened if live else True,
+            self.camera.device_path if live else str(self.config.video_path),
+            self.camera.read_failures if live else 0,
+            self.camera.actual_fps if live else 0.0,
             self.serial,
             last_result=result,
             inspection_active=self.inspection_active,
@@ -195,6 +225,7 @@ class GearProRuntime:
             "source": {
                 "type": self.source,
                 "video_name": None if self.config.video_path is None else self.config.video_path.name,
+                "replay_dir": None if self.config.replay_dir is None else str(self.config.replay_dir),
             },
             "inspection": {
                 "active": self.inspection_active,
@@ -222,6 +253,7 @@ class GearProRuntime:
             "serial_enabled": bool(self.config.serial_enabled),
             "serial_open": bool(self.serial.is_open),
             "video_mode": self.config.video_path is not None,
+            "replay_mode": self.config.replay_dir is not None,
             "config_backup": bool(backup),
             "models_ok": True,
             "config_profile": profile,
@@ -232,9 +264,9 @@ class GearProRuntime:
             "window_stats": summarize_cycles(cycles),
             "window_elapsed_s": 0.0 if self._window_started is None else max(0.0, time.monotonic() - self._window_started),
             "camera_health": camera_health(
-                self.camera.opened if self.source == "camera" else True,
+                True if self.source == "video" else self.camera.opened,
                 None if packet is None else packet.age_ms,
-                self.camera.read_failures if self.source == "camera" else 0,
+                0 if self.source == "video" else self.camera.read_failures,
             ),
             "critical_incident": failed,
             "worker_failed": failed,
