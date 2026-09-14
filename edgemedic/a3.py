@@ -228,17 +228,35 @@ def _healthy_ok(summary, snapshot, args, ref_temp):
     return True, None
 
 
-def _wait_overload(client, timeout_s):
+def overload_onset(events, hold_s=2.0):
+    """Return t of the first sample that starts a hold_s stretch of overload."""
+    hold_s = float(hold_s)
+    start = None
+    for stamp, overloaded in events:
+        if overloaded:
+            if start is None:
+                start = float(stamp)
+            if float(stamp) - start >= hold_s:
+                return start
+        else:
+            start = None
+    return None
+
+
+def _wait_overload(client, timeout_s, hold_s=2.0):
     deadline = time.monotonic() + float(timeout_s)
+    events = []
+    last = None
     while time.monotonic() < deadline:
         snapshot = client.get_state()
-        if classify_fault(snapshot) == "V5_OVERLOAD":
-            return time.monotonic(), snapshot
+        last = snapshot
+        now = time.monotonic()
+        events.append((now, classify_fault(snapshot) == "V5_OVERLOAD"))
+        onset = overload_onset(events, hold_s=hold_s)
+        if onset is not None:
+            return onset, snapshot
         time.sleep(0.2)
-    return None, client.get_state()
-
-
-def _summarize_arm(rows):
+    return None, last if last is not None else client.get_state()
     n = len(rows)
     mission = sum(1 for row in rows if row.get("recovery_success"))
     mttrs = [row["mttr_s"] for row in rows if row.get("mttr_s") is not None]
@@ -256,6 +274,7 @@ def run_trial(arm, args, pressure, client, ref_temp):
     url = args.control_url
     trial_id = uuid.uuid4().hex[:8]
     pressure.stop()
+    time.sleep(max(0.0, float(args.settle_s)))
     baseline_snap = _reset_healthy(client, url, args.warmup_s)
     healthy = []
     deadline = time.monotonic() + float(args.healthy_sample_s)
@@ -276,7 +295,7 @@ def run_trial(arm, args, pressure, client, ref_temp):
     started = pressure.start()
     if not pressure.alive():
         return {"trial_id": trial_id, "arm": arm, "aborted": True, "abort_reason": "injector died"}
-    t_fault, detect_snap = _wait_overload(client, args.detect_timeout_s)
+    t_fault, detect_snap = _wait_overload(client, args.detect_timeout_s, hold_s=args.hold_s)
     if t_fault is None:
         pressure.stop()
         return {
@@ -355,7 +374,10 @@ def main(argv=None):
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--warmup-s", type=float, default=15.0)
     parser.add_argument("--healthy-sample-s", type=float, default=15.0)
-    parser.add_argument("--detect-timeout-s", type=float, default=45.0)
+    parser.add_argument("--detect-timeout-s", type=float, default=60.0)
+    parser.add_argument("--hold-s", type=float, default=2.0)
+    parser.add_argument("--settle-s", type=float, default=15.0)
+    parser.add_argument("--channels", type=int, default=32)
     parser.add_argument("--recover-timeout-s", type=float, default=90.0)
     parser.add_argument("--sample-interval-s", type=float, default=0.25)
     parser.add_argument("--baseline-v5-p95-max", type=float, default=190.0)
@@ -366,7 +388,6 @@ def main(argv=None):
     parser.add_argument("--sleep-ms", type=float, default=0.0)
     parser.add_argument("--size", type=int, default=640)
     parser.add_argument("--batch", type=int, default=1)
-    parser.add_argument("--channels", type=int, default=16)
     parser.add_argument("--out", type=Path, default=None)
     args = parser.parse_args(argv)
     client = ControlClient(args.control_url, timeout=5.0)
@@ -383,6 +404,7 @@ def main(argv=None):
     injector_cfg = pressure.config()
     exp_config = {
         "kind": "a3_restart_vs_sparse",
+        "injector_kind": args.kind,
         "phase": args.phase,
         "question": "persistent real V5 pressure: restart_only vs SPARSE mission recovery",
         "l2": False,
@@ -405,10 +427,11 @@ def main(argv=None):
         "replay_pack_dir": str(args.replay_pack),
         "matrix": args.matrix,
         "sleep_ms": args.sleep_ms,
-        "kind": args.kind,
         "size": args.size,
         "batch": args.batch,
         "channels": args.channels,
+        "hold_s": args.hold_s,
+        "settle_s": args.settle_s,
     }
     rows = []
     ref_temp = None

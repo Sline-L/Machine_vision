@@ -6,6 +6,7 @@ from edgemedic.a3 import (
     interleave_schedule,
     mission_loss,
     mission_ok,
+    overload_onset,
     window_stats,
 )
 from edgemedic.gpu_pressure import INJECTOR_TYPE, injector_config, injector_hash
@@ -54,6 +55,12 @@ class A3MetricTests(unittest.TestCase):
         t_m = first_mission_time(points, 0.0, "SPARSE")
         self.assertIsNotNone(t_m)
         self.assertIsNone(first_mission_time(points, 0.0, "FULL"))
+
+    def test_overload_onset_requires_hold(self):
+        brief = [(0.0, False), (0.5, True), (1.0, True), (1.5, False), (2.0, True), (3.5, True)]
+        self.assertIsNone(overload_onset(brief, hold_s=2.0))
+        held = [(0.0, True), (1.0, True), (2.0, True)]
+        self.assertEqual(overload_onset(held, hold_s=2.0), 0.0)
 
     def test_window_stats_need_cycles(self):
         points = [_pt(1.0)]
