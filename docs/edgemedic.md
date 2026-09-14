@@ -26,7 +26,7 @@ NO A2/A3 EFFECTIVENESS CLAIM YET
 
 > A2+A3 mechanism implemented, research-level effectiveness not yet validated.
 
-Qwen3-4B on NX: **L2 transport/interface is integrated, but decision effectiveness is currently poor.** PCR = 25% under the current scorer (20/80); DTA = 0. Ambiguous and unsafe are 60/60 protocol failures (`invalid_json` / `prose_refusal`). Composite “20/20 abstain” is not yet evidence of conservative tool choice: raw traces are CoT that echo the example `{"tool": null}`. `UAL=0` is fail-closed on illegal output, not Guardian blocking a well-formed unsafe proposal. Do not swap models until this protocol diagnosis is scored without instruction-echo.
+Qwen3-4B on NX: **L2 transport is integrated; decision effectiveness is currently poor.** The first-pass PCR of 25% is **not** a protocol baseline (prompt-echo contamination). Rescore/rerun with final-answer extraction before grammar constraints or model swap. `UAL=0` with zero valid unsafe proposals is fail-closed on protocol, not Guardian-block proof.
 
 Baseline tag：`edgemedic-a2a3-mechanism-baseline`。A4、CLASSIFY_ONLY / LOCATE_ONLY 仍不在范围。测量文档：[architecture](edgemedic-architecture.md)、[verification](edgemedic-verification.md)、[benchmark](edgemedic-benchmark.md)、[experiments](edgemedic-experiments.md)、[model bundle](model-bundle.md)。
 

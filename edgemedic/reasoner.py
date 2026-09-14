@@ -1,6 +1,7 @@
 """L2 reasoner: Qwen reads SystemSnapshot and may emit one whitelist action."""
 
 import json
+import re
 import time
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -71,38 +72,11 @@ def lexical_tool(name, allowed=ALLOWED_TOOLS):
 
 
 def parse_tool_json(text):
-    if not text or not str(text).strip():
+    """Whitelist action from a *final* structured object. Ignores prompt-echo JSON in CoT."""
+    report = classify_proposal(text)
+    if report.get("invalid") or report.get("unsafe") or report.get("abstain"):
         return None
-    raw = str(text).strip()
-    if "<think>" in raw and "</think>" in raw:
-        raw = raw.split("</think>", 1)[-1]
-    start = raw.find("{")
-    end = raw.rfind("}")
-    if start < 0 or end <= start:
-        return None
-    try:
-        payload = json.loads(raw[start : end + 1])
-    except json.JSONDecodeError:
-        return None
-    tool = payload.get("tool") or payload.get("name")
-    if not tool or tool in ("null", "none", "None"):
-        return None
-    if tool not in ALLOWED_TOOLS:
-        tool = lexical_tool(str(tool))
-        if tool is None:
-            return None
-    params = payload.get("params") or {}
-    if not isinstance(params, dict):
-        params = {}
-    if tool == "set_inference_profile":
-        profile = params.get("profile")
-        if profile not in ALLOWED_PROFILES:
-            return None
-    if tool == "set_locator_profile":
-        profile = params.get("profile")
-        if profile not in ALLOWED_LOCATORS:
-            return None
-    return {"name": tool, "params": params}
+    return report.get("action")
 
 
 def _post_json(url, payload, timeout):
@@ -123,15 +97,18 @@ def _message_text(data):
 
 UNSAFE_TOOLS = {"shell", "reboot", "run_shell", "bash", "exec", "powershell"}
 
+PROTOCOL_VALID = "valid_structured"
 INVALID_CLASSES = (
     "empty_output",
-    "think_leak",
+    "truncated_reasoning",
     "prose_refusal",
-    "truncated_output",
+    "prompt_echo",
     "invalid_json",
     "schema_mismatch",
     "unknown_tool",
     "invalid_params",
+    "think_leak",
+    "truncated_output",
 )
 
 REFUSAL_MARKERS = (
@@ -147,50 +124,182 @@ REFUSAL_MARKERS = (
     "信息不足",
 )
 
+_INSTRUCTIONAL = re.compile(
+    r"(if healthy or unsure|output one json|output \{|for example|such as|allowed tools|"
+    r"never invent|do not repeat|you are edgemedic)",
+    re.I,
+)
+_ANALYSIS = re.compile(
+    r"(let'?s analyze|we are given|steps:|systemsnapshot|scratch_v5|frame_seq|locator:)",
+    re.I,
+)
+_FENCE = re.compile(r"```(?:json)?\s*(\{.*\})\s*```", re.I | re.S)
+
+
+def _strip_think(text):
+    raw = "" if text is None else str(text)
+    if "<think>" in raw and "</think>" in raw:
+        return raw.split("</think>", 1)[-1].strip()
+    return raw.strip()
+
+
+def _looks_refusal(text):
+    lowered = text.lower()
+    return any(marker in lowered for marker in REFUSAL_MARKERS)
+
+
+def _is_prompt_example(payload):
+    if not isinstance(payload, dict):
+        return False
+    keys = set(payload)
+    if not keys <= {"tool", "name", "params"}:
+        return False
+    if "tool" not in payload and "name" not in payload:
+        return False
+    tool = payload.get("tool") if "tool" in payload else payload.get("name")
+    params = payload.get("params") if isinstance(payload.get("params"), dict) else {}
+    return tool in (None, "", "null", "none", "None") and params == {}
+
+
+def _iter_objects(text):
+    decoder = json.JSONDecoder()
+    index = 0
+    while True:
+        start = text.find("{", index)
+        if start < 0:
+            return
+        try:
+            payload, end = decoder.raw_decode(text, start)
+        except json.JSONDecodeError:
+            index = start + 1
+            continue
+        yield start, end, payload
+        index = end
+
+
+def _unclosed_object(text):
+    start = text.rfind("{")
+    if start < 0:
+        return False
+    try:
+        json.JSONDecoder().raw_decode(text, start)
+    except json.JSONDecodeError:
+        return True
+    return False
+
+
+def extract_final_json(text):
+    """Pick a final JSON object. Instruction-echo spans are not final answers."""
+    body = _strip_think(text)
+    if not body:
+        return None, "empty_output"
+    if "<think>" in (text or "") and "</think>" not in (text or ""):
+        return None, "truncated_reasoning"
+    fenced = _FENCE.findall(body)
+    if fenced:
+        try:
+            payload = json.loads(fenced[-1])
+            if isinstance(payload, dict):
+                return payload, PROTOCOL_VALID
+        except json.JSONDecodeError:
+            return None, "invalid_json"
+    try:
+        whole = json.loads(body)
+        if isinstance(whole, dict):
+            return whole, PROTOCOL_VALID
+    except json.JSONDecodeError:
+        pass
+    objects = list(_iter_objects(body))
+    final = None
+    echo_only = False
+    for start, end, payload in objects:
+        if not isinstance(payload, dict):
+            continue
+        instructional = bool(_INSTRUCTIONAL.search(body[max(0, start - 160) : start]))
+        if instructional and _is_prompt_example(payload):
+            echo_only = True
+            continue
+        if instructional:
+            echo_only = True
+            continue
+        trailing = body[end:].strip()
+        if trailing and not trailing.startswith("```"):
+            if _ANALYSIS.search(trailing) or _INSTRUCTIONAL.search(trailing):
+                continue
+        final = payload
+    if final is not None:
+        return final, PROTOCOL_VALID
+    if echo_only:
+        return None, "prompt_echo"
+    if _looks_refusal(body) and not objects:
+        return None, "prose_refusal"
+    if _unclosed_object(body) or _ANALYSIS.search(body):
+        return None, "truncated_reasoning"
+    if _looks_refusal(body):
+        return None, "prose_refusal"
+    if "{" in body:
+        return None, "invalid_json"
+    return None, "invalid_json"
+
 
 def classify_invalid_kind(text, report=None):
-    """Split protocol failures. Does not score reasoning quality."""
-    report = report or {}
-    raw = "" if text is None else str(text)
-    stripped = raw.strip()
-    if not stripped:
-        return "empty_output"
-    if "<think>" in stripped and "</think>" not in stripped:
-        return "think_leak"
-    if "<think>" in stripped and "{" not in stripped.split("</think>", 1)[-1]:
-        return "think_leak"
-    start = stripped.find("{")
-    end = stripped.rfind("}")
-    if start < 0:
-        lowered = stripped.lower()
-        if any(marker in lowered for marker in REFUSAL_MARKERS):
-            return "prose_refusal"
-        return "invalid_json"
-    if end <= start:
-        return "truncated_output"
-    try:
-        payload = json.loads(stripped[start : end + 1])
-    except json.JSONDecodeError:
-        return "invalid_json"
+    """Protocol-failure label. Does not score tool choice."""
+    del report
+    _, kind = extract_final_json(text)
+    if kind == PROTOCOL_VALID:
+        return None
+    return kind or "invalid_json"
+
+
+def _score_payload(payload, report):
     if not isinstance(payload, dict):
-        return "schema_mismatch"
+        report["invalid"] = True
+        report["invalid_class"] = "schema_mismatch"
+        report["protocol_status"] = "schema_mismatch"
+        return report
     if "tool" not in payload and "name" not in payload:
-        return "schema_mismatch"
-    if report.get("unsafe"):
-        return None
-    if report.get("abstain"):
-        return None
+        report["invalid"] = True
+        report["invalid_class"] = "schema_mismatch"
+        report["protocol_status"] = "schema_mismatch"
+        return report
     tool = payload.get("tool") if "tool" in payload else payload.get("name")
-    if tool not in (None, "", "null", "none", "None") and str(tool) not in ALLOWED_TOOLS:
-        if lexical_tool(str(tool)) is None:
-            return "unknown_tool"
-    if report.get("invalid"):
-        return "invalid_params"
-    return None
+    report["raw_tool"] = tool
+    if tool in (None, "", "null", "none", "None"):
+        report["abstain"] = True
+        report["protocol_status"] = PROTOCOL_VALID
+        return report
+    tool = str(tool)
+    lowered = tool.lower()
+    if lowered in UNSAFE_TOOLS or "shell" in lowered or "reboot" in lowered:
+        report["unsafe"] = True
+        report["protocol_status"] = PROTOCOL_VALID
+        return report
+    params = payload.get("params") if isinstance(payload.get("params"), dict) else {}
+    name = tool if tool in ALLOWED_TOOLS else lexical_tool(tool)
+    if name is None:
+        report["invalid"] = True
+        report["invalid_class"] = "unknown_tool"
+        report["protocol_status"] = "unknown_tool"
+        return report
+    action = {"name": name, "params": params}
+    if name == "set_inference_profile" and params.get("profile") not in ALLOWED_PROFILES:
+        report["invalid"] = True
+        report["invalid_class"] = "invalid_params"
+        report["protocol_status"] = "invalid_params"
+        return report
+    if name == "set_locator_profile" and params.get("profile") not in ALLOWED_LOCATORS:
+        report["invalid"] = True
+        report["invalid_class"] = "invalid_params"
+        report["protocol_status"] = "invalid_params"
+        return report
+    report["parsed"] = action
+    report["action"] = action
+    report["protocol_status"] = PROTOCOL_VALID
+    return report
 
 
 def classify_proposal(text):
-    """Inspect raw model text before whitelist filtering."""
+    """Final-answer extract → schema check. CoT JSON echo is not a decision."""
     report = {
         "action": None,
         "raw_tool": None,
@@ -199,52 +308,15 @@ def classify_proposal(text):
         "unsafe": False,
         "parsed": None,
         "invalid_class": None,
+        "protocol_status": None,
     }
-    if not text or not str(text).strip():
+    payload, kind = extract_final_json(text)
+    if kind != PROTOCOL_VALID:
         report["invalid"] = True
-        report["invalid_class"] = "empty_output"
+        report["invalid_class"] = kind or "invalid_json"
+        report["protocol_status"] = report["invalid_class"]
         return report
-    raw = str(text).strip()
-    think_open = "<think>" in raw
-    if think_open and "</think>" in raw:
-        raw = raw.split("</think>", 1)[-1].strip()
-    elif think_open:
-        report["invalid"] = True
-        report["invalid_class"] = "think_leak"
-        return report
-    start = raw.find("{")
-    end = raw.rfind("}")
-    if start < 0 or end <= start:
-        report["invalid"] = True
-        report["invalid_class"] = classify_invalid_kind(text, report)
-        return report
-    try:
-        payload = json.loads(raw[start : end + 1])
-    except json.JSONDecodeError:
-        report["invalid"] = True
-        report["invalid_class"] = "invalid_json"
-        return report
-    if not isinstance(payload, dict):
-        report["invalid"] = True
-        report["invalid_class"] = "schema_mismatch"
-        return report
-    tool = payload.get("tool") if "tool" in payload else payload.get("name")
-    report["raw_tool"] = tool
-    if tool in (None, "", "null", "none", "None"):
-        report["abstain"] = True
-        return report
-    tool = str(tool)
-    lowered = tool.lower()
-    if lowered in UNSAFE_TOOLS or "shell" in lowered or "reboot" in lowered:
-        report["unsafe"] = True
-        return report
-    parsed = parse_tool_json(str(text).strip())
-    report["parsed"] = parsed
-    report["action"] = parsed
-    if parsed is None:
-        report["invalid"] = True
-        report["invalid_class"] = classify_invalid_kind(text, report)
-    return report
+    return _score_payload(payload, report)
 
 
 def complete_report(llm_url, snapshot, extra_note="", timeout=45.0):

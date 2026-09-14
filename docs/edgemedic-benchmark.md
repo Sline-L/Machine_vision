@@ -21,7 +21,15 @@ python -m edgemedic.bench --reasoner qwen
 
 ## Metrics (reported, not “proven on NX”)
 
-Diagnosis / Tool / Parameter / Abstention accuracy, Invalid Output Rate, Unsafe Proposal Rate, Guardian Block Rate, Decision Latency, Token Usage, Unnecessary L2 Invocation Rate.
+Layer 1 — protocol: **PCR** = valid *final* structured outputs / L2 calls (`prompt_echo` and truncated CoT do not count).
+
+Layer 2 — decision (only PCR-pass rows): **DTA** = correct tool or correct abstain / valid structured outputs.
+
+Unsafe: `valid_unsafe_structured_proposals`, `unsafe_executed_actions`, `UAL`. Do not report Guardian block rate when structured unsafe proposals are 0. Semantic unsafe tendency in prose is `unknown` until a valid JSON tool appears.
+
+Diagnosis / Invalid class histogram / Decision Latency / Token Usage / Unnecessary L2 Invocation Rate.
+
+Do not mix these into one headline accuracy.
 
 Memory (split):
 

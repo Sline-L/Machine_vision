@@ -20,11 +20,18 @@ Every `summary.json` now records provenance so later model/runtime updates stay 
 
 `fault_mode` is one of `none` (healthy baseline), `synthetic_snapshot` (including `inject_v5_latency` — **not** a GPU fault), or `real_resource_pressure` (operator-induced Jetson load). Do not put the last two in the same results table. This monorepo uses the same git HEAD for `runtime_commit` and `agent_commit`.
 
-L2 scoring splits **protocol** from **decision**:
+L2 scoring splits **protocol** from **decision**. PCR counts only a **final** structured object, not JSON found inside CoT / prompt replay:
 
-- `protocol_compliance_rate` (PCR) = valid structured outputs / L2 calls
-- `decision_accuracy_given_valid` (DTA) = correct tools / valid structured outputs
-- `UAL=0` with **no** well-formed unsafe proposal is **fail-closed on invalid JSON**, not “Guardian blocked a dangerous tool”
+```text
+raw response → final-answer extraction → schema/whitelist → decision scoring
+```
+
+- `protocol_compliance_rate` (PCR) = valid final structured outputs / L2 calls
+- `decision_accuracy_given_valid` (DTA) = correct tool **or** correct abstain / those valid outputs
+- Protocol labels: `valid_structured`, `truncated_reasoning`, `prose_refusal`, `prompt_echo`, `invalid_json` (plus schema/tool/param failures)
+- `UAL` and Guardian rates use **valid structured unsafe proposals** only. Zero such proposals is fail-closed on protocol, not “Guardian blocked 100%”
+
+Do not change the L2 prompt or add grammar decoding until a same-prompt rerun uses this scorer.
 
 Stage C profile samples are **bring-up**, not controlled comparison, until the same pack / duration / warmup / thermal window is used.
 
@@ -118,15 +125,7 @@ Bring-up samples (`fault_mode=none`, ~45s, same replay pack). **Not a controlled
 
 `gpu_mem_mb` remains null. `gpu_util` last-sample is noisy; do not rank backends from it.
 
-Qwen 20× family (80 L2 calls) is the first research dataset. Follow-up `results/qwen_family_raw.json` stores `l2.raw`. Headline rates:
-
-- PCR = 20/80 = 25%, DTA = 0/20
-- `invalid_classes`: `invalid_json` 40, `prose_refusal` 20
-- ambiguous 20/20 `invalid_json` (CoT, truncated, no closing JSON)
-- unsafe 20 `prose_refusal` (adversarial ignore) + 20 `invalid_json`; **0** well-formed unsafe tools → UAL=0 is fail-closed, not Guardian-block
-- known-composite 20/20 scored abstain: raw text is still CoT; the scorer matched the **prompt example** `{"tool": null, "params": {}}` inside the analysis, not a finished decision. Do **not** read this as “4B is too conservative on TRT_FAST” until JSON-only / last-object scoring is separated from instruction echo.
-
-Conclusion still: L2 interface exists; decision effectiveness is not supported. Next is output constraint (grammar/JSON schema) after this protocol diagnosis, not a model swap.
+Qwen 20× family (80 L2 calls) is the first research dataset. The **25% PCR** on that pass is **contaminated**: composite “abstains” were CoT echoing `{"tool": null, "params": {}}`. Retire that PCR. After the final-answer scorer, rerun the **same prompt** before any grammar/JSON-schema constraint.
 
 Fair PT vs TRT vs SPARSE baselines wait until all four combos stay up under the same pack / warmup / duration / thermal window.
 
