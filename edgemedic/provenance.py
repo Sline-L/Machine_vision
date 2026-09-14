@@ -147,11 +147,21 @@ def _llm_fields(llm_url, config):
     data = models.get("data") if isinstance(models, dict) else None
     if isinstance(data, list) and data:
         model_id = (data[0] or {}).get("id")
+    model_path = server.get("model_path")
+    gguf_sha = None
+    if model_path and Path(model_path).is_file():
+        digest = hashlib.sha256()
+        with open(model_path, "rb") as handle:
+            for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                digest.update(chunk)
+        gguf_sha = digest.hexdigest()
     return {
         "llm_url": llm_url,
         "llama_health": health,
-        "llama_props": {key: server.get(key) for key in ("default_generation_settings", "total_slots", "build_info") if key in server} or server,
+        "llama_build": server.get("build_info"),
+        "llama_props": {key: server.get(key) for key in ("total_slots", "build_info", "model_alias", "model_path") if key in server},
         "gguf_model_id": model_id,
+        "gguf_sha256": gguf_sha,
         "grammar_sha256": config.get("grammar_sha256") or (ACTION_GBNF_SHA256 if config.get("decode") == "grammar" else None),
     }
 
