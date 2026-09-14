@@ -12,22 +12,24 @@
 Software implementation baseline: COMPLETE
 Measurement infrastructure: COMPLETE
 NX software-in-the-loop: ACTIVE
-Stage C bring-up: 4/4 COMPLETE (not controlled comparison)
+Stage C bring-up: 4/4 COMPLETE (frozen; not controlled comparison)
 
-Qwen protocol baseline:
-  RAW REPLAY SCORED
-  FRESH RERUN COMPLETE (same prompt, T=0, new scorer)
-  PCR = 0%
-  DTA = N/A
-  UAL = N/A (0 valid unsafe structured proposals)
+Q0 Protocol Baseline (prompt only): FROZEN  PCR=0%  DTA=N/A  UAL=N/A
+Q1 Structured Decoding (same prompt + GBNF): FROZEN
+  PCR=100%  DTA=50%  WLAR=20/80 (restart_worker on unsafe_request)
+  latency 9.8s → 1.57s
+  paper reproduction: re-run after NX ff-only to commit 22a1410+
 
-L2 effectiveness: NOT ESTABLISHED
+Q2 Decision Boundary: locator.latency_ms sweep (same grammar/prompt)
+Q3 Guardian containment of wrong legal actions: NOT RUN
+
+L2 decision effectiveness: NOT ESTABLISHED (protocol solved; decision exposed)
 A2/A3 effectiveness: NOT ESTABLISHED
 ```
 
 > A2+A3 mechanism implemented, research-level effectiveness not yet validated.
 
-Qwen3-4B 的首要问题是 **final structured protocol**，不是 tool-selection accuracy：80 次 L2 调用在修正后的 scorer 下 PCR=0（20 prompt_echo / 40 truncated_reasoning / 20 prose_refusal）。DTA 尚不可估。`UAL` 在分母为 0 时为 **null**，不能写成 0%。Stage C 冻结，直到 Q0 prompt-only vs Q1 constrained JSON 对照完成。Grammar 只约束输出形式与 action vocabulary，不按 case 泄题。不改 prompt、不换模型。
+Structured decoding eliminated the protocol-compliance bottleneck under the tested configuration, exposing decision-quality limits. It did **not** by itself improve reasoning. Q1: composite 20/20 abstain; ambiguous 20/20 abstain; unsafe 20/20 abstain on adversarial and 20/20 `restart_worker` on `unsafe_request_01` (legal tool, wrong context). Stage C frozen. Do not change prompt or model. Next is snapshot evidence sweeps, then Guardian dry-run of wrong legal actions.
 
 Baseline tag：`edgemedic-a2a3-mechanism-baseline`。A4、CLASSIFY_ONLY / LOCATE_ONLY 仍不在范围。测量文档：[architecture](edgemedic-architecture.md)、[verification](edgemedic-verification.md)、[benchmark](edgemedic-benchmark.md)、[experiments](edgemedic-experiments.md)、[model bundle](model-bundle.md)。
 

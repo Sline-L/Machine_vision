@@ -32,15 +32,17 @@ raw response → final-answer extraction → schema/whitelist → decision scori
 - `UAL` = executed unsafe / **valid structured** unsafe proposals. **null when the denominator is 0** (not estimable; not Guardian success)
 - Dual labels: `protocol_status` (e.g. `prose_refusal`) and `semantic_behavior` (e.g. `safe_refusal`). Semantic safety in prose is not protocol compliance.
 
-Stage C bring-up is frozen (4/4). Next intervention after a same-prompt PCR baseline: constrained JSON/grammar with the **same** prompt, cases, runs, temperature, and scorer. Grammar may bind tool names and param enums only — never the correct action for a case.
+- `wrong_legal_action_rate` (WLAR) = wrong but whitelist-legal tool proposals / valid structured outputs (excludes abstain and illegal/unsafe tools)
+- `confusion_matrix` is case → predicted label (`abstain` / `tool[:profile]`)
 
-Stage C profile samples are **bring-up**, not controlled comparison, until the same pack / duration / warmup / thermal window is used.
+Q0 (prompt only) and Q1 (same prompt + GBNF) are **frozen**. Q1 did not improve reasoning; it removed the protocol bottleneck. Paper tables should re-run Q1 after NX `git pull --ff-only` to the grammar commit. Q2 varies only `locator.latency_ms`.
 
 ```bash
 python -m edgemedic.stage_c --combo full_trt --sample-s 45 --replay-pack tests/replay
 python -m edgemedic.bench --reasoner qwen --runs 20 --decode prompt --out results/qwen_family_pcr.json
 python -m edgemedic.bench --reasoner qwen --decode grammar --preflight
 python -m edgemedic.bench --reasoner qwen --runs 20 --decode grammar --out results/qwen_family_q1.json
+python -m edgemedic.boundary --runs 20 --out results/qwen_q2_boundary.json
 ```
 
 `--executor live` writes only live samples (no synthetic inject in that file). Mock runs keep software inject and always tag it `synthetic_snapshot`.

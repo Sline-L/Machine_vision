@@ -93,6 +93,21 @@ class BenchTests(unittest.TestCase):
         self.assertNotIn("LOCATOR_OVERLOAD", ACTION_GBNF)
         self.assertNotIn("reboot", ACTION_GBNF)
 
+    def test_wlar_and_confusion_on_mock(self):
+        summary = run_suite(reasoner="mock")
+        self.assertIn("wrong_legal_action_rate", summary)
+        self.assertIn("confusion_matrix", summary)
+
+    def test_locator_sweep_only_changes_latency(self):
+        from edgemedic.boundary import locator_overload_state
+
+        low = locator_overload_state(110)
+        high = locator_overload_state(200)
+        self.assertEqual(low["locator"]["health"], high["locator"]["health"])
+        self.assertEqual(low["scratch_v5"]["total_latency_ms"], high["scratch_v5"]["total_latency_ms"])
+        self.assertEqual(low["camera"]["health"], high["camera"]["health"])
+        self.assertLess(low["locator"]["latency_ms"], high["locator"]["latency_ms"])
+
 
 if __name__ == "__main__":
     unittest.main()
