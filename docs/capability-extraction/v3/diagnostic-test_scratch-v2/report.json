@@ -1,0 +1,107 @@
+{
+  "banner": "DIAGNOSTIC ONLY\nTHIS DATASET IS ALREADY CONSUMED.\nTHIS RESULT MUST NOT BE USED FOR FORMAL CAPABILITY ADMISSION.",
+  "mode": "DIAGNOSTIC ONLY",
+  "fresh_holdout": false,
+  "test_scratch": "CONSUMED",
+  "consumption_reasons": [
+    "classifier_only_v1 formal/diagnostic use",
+    "FULL Scratch V5 teammate locked evaluation"
+  ],
+  "mission_approved": false,
+  "admission_proposal": false,
+  "started_at": "2026-09-15T10:57:56.035783+00:00",
+  "identity": {
+    "frozen_config_hash": "5cc1730c0c9cdd83e8909e963184c759f4d29bec5ed4eab1bfe44f0ae13b4588",
+    "frozen_threshold": 0.2653394325872992,
+    "frozen_classifier_sha": "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438",
+    "frozen_detector_sha": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3",
+    "frozen_fusion_alpha": 0.25,
+    "full_config": "/home/jetson/Projects/Machine_vision-ldv2-runtime/model/model2/inference_config.json",
+    "v2_config": "/home/jetson/Projects/Machine_vision-ldv2-runtime/model/model2/profiles/latency_degraded_v2/inference_config.json",
+    "full_cls1_sha_disk": "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438",
+    "full_cls2_sha_disk": "d07678a6da421c4edc00ac24b8c5052b0b8b7f8b1614b9d82563ecefbf59360d",
+    "full_det_sha_disk": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3",
+    "v2_cls1_sha_disk": "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438",
+    "sha_match_effnet": true,
+    "sha_match_detector": true,
+    "threshold_unchanged": true
+  },
+  "FULL": {
+    "tp": 25,
+    "fp": 20,
+    "tn": 99,
+    "fn": 6,
+    "n": 150,
+    "recall": 0.8064516129032258,
+    "fpr": 0.16806722689075632,
+    "specificity": 0.8319327731092436,
+    "precision": 0.5555555555555556,
+    "f1": 0.6578947368421053,
+    "Q_D": 0.8064516129032258,
+    "U": 0.9032258064516129,
+    "dataset_target_recall_0_95": false,
+    "dataset_target_fpr_max_0_20": true,
+    "edgemedic_q_d_floor_0_70": true
+  },
+  "LATENCY_DEGRADED_V2": {
+    "tp": 26,
+    "fp": 46,
+    "tn": 73,
+    "fn": 5,
+    "n": 150,
+    "recall": 0.8387096774193549,
+    "fpr": 0.3865546218487395,
+    "specificity": 0.6134453781512605,
+    "precision": 0.3611111111111111,
+    "f1": 0.5048543689320389,
+    "Q_D": 0.6134453781512605,
+    "U": 0.8067226890756303,
+    "dataset_target_recall_0_95": false,
+    "dataset_target_fpr_max_0_20": false,
+    "edgemedic_q_d_floor_0_70": false
+  },
+  "delta_v2_minus_full": {
+    "recall": 0.032258064516129115,
+    "fpr": 0.2184873949579832,
+    "specificity": -0.21848739495798308,
+    "precision": -0.19444444444444448,
+    "f1": -0.15304036791006637,
+    "Q_D": -0.1930062347519652,
+    "U": -0.0965031173759826
+  },
+  "disagreement_counts": {
+    "both_correct": 98,
+    "full_correct_v2_wrong": 26,
+    "full_wrong_v2_correct": 1,
+    "both_wrong": 25,
+    "pos_full_correct_v2_wrong": 0,
+    "neg_full_correct_v2_wrong": 26,
+    "resnet_changed_verdict": 27,
+    "resnet_rescues_fn": 0,
+    "resnet_suppresses_fp": 26
+  },
+  "full_generalization_gap_note": {
+    "val_Q_D_approx": 0.916,
+    "locked_test_Q_D": 0.8064516129032258,
+    "note": "FULL itself has nontrivial validation \u2192 locked-domain gap; do not retune FULL threshold"
+  },
+  "gates": {
+    "dataset_target": {
+      "scratch_recall_ge_0_95": {
+        "FULL": false,
+        "V2": false
+      },
+      "normal_fpr_le_0_20": {
+        "FULL": true,
+        "V2": false
+      }
+    },
+    "edgemedic_mission_contract": {
+      "Q_D_ge_0_70_assuming_QL_QS_1": {
+        "FULL": true,
+        "V2": false
+      }
+    }
+  },
+  "quality_conclusion": "V2 HAS MATERIAL QUALITY RISK ON CONSUMED DIAGNOSTIC TEST (future V3 design evidence; do not retune V2)."
+}
