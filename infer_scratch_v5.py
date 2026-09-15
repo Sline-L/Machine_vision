@@ -20,6 +20,18 @@ DEFAULT_OUTPUT = ROOT / "outputs" / "scratch_v5" / "inference"
 EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff", ".webp"}
 
 
+def resolve_config_paths(config: dict[str, object], config_path: Path) -> dict[str, object]:
+    """Resolve model paths relative to the inference config file."""
+    for model in [*config.get("classifiers", []), config.get("detector")]:
+        if not model:
+            continue
+        weight = Path(str(model["weights"]))
+        if not weight.is_absolute():
+            weight = config_path.parent / weight
+        model["weights"] = str(weight.resolve())
+    return config
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run Scratch V5 high-recall inference")
     parser.add_argument("source", type=Path)
@@ -139,7 +151,8 @@ def fuse(config: dict[str, object], classifier_scores: dict[str, list[float]], d
 
 def main() -> None:
     args = parse_args()
-    config = json.loads(args.config.read_text(encoding="utf-8"))
+    config_path = args.config.expanduser().resolve()
+    config = resolve_config_paths(json.loads(config_path.read_text(encoding="utf-8")), config_path)
     paths = image_paths(args.source)
     if not paths:
         raise FileNotFoundError(f"No supported images found in {args.source}")

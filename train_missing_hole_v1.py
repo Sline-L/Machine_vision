@@ -19,6 +19,7 @@ from PIL import Image, ImageEnhance, ImageFilter
 from torch.utils.data import DataLoader, Dataset, WeightedRandomSampler
 from torchvision import transforms
 from ultralytics import YOLO
+import ultralytics
 
 from train_scratch_v5 import (
     FocalBCE,
@@ -40,7 +41,7 @@ OUTPUT = ROOT / "outputs" / "missing_hole_v1"
 DOCS = ROOT / "docs" / "missing_hole_v1"
 OFFICIAL_DETECTOR = ROOT / "yolo26n.pt"
 OFFICIAL_CLASSIFIER = ROOT / "yolo26n-cls.pt"
-P2_YAML = ROOT / ".venv" / "Lib" / "site-packages" / "ultralytics" / "cfg" / "models" / "26" / "yolo26-p2.yaml"
+P2_YAML = Path(ultralytics.__file__).resolve().parent / "cfg" / "models" / "26" / "yolo26-p2.yaml"
 SEED = 20260913
 FPR_CAPS = (0.10, 0.20, 0.30, 0.50)
 PRIMARY_FPR = 0.20
@@ -479,7 +480,7 @@ def predict_classifier(weights: Path, experiment: ClassifierExperiment, samples:
         del model
     else:
         checkpoint = torch.load(weights, map_location="cpu", weights_only=False)
-        network = build_network(str(checkpoint["family"]))
+        network = build_network(str(checkpoint["family"]), pretrained=False)
         network.load_state_dict(checkpoint["model"])
         network.cuda().eval()
         with torch.no_grad():
@@ -592,7 +593,7 @@ def finalize(samples: list[Sample], artifacts: list[tuple[dict[str, object], lis
         suffix = "detector" if row["kind"] == "detector" else "classifier"
         destination = final_dir / f"{suffix}_{index}.pt"
         shutil.copy2(row["weights"], destination)
-        models.append({"name": name, "kind": row["kind"], "family": row.get("family", row.get("architecture")), "scheme": row.get("scheme"), "difficult_policy": row.get("difficult_policy"), "weights": str(destination), "imgsz": row["imgsz"], "tta": row.get("tta", "none"), "temperature": row["temperature"], "operating_points": row["operating_points"]})
+        models.append({"name": name, "kind": row["kind"], "family": row.get("family", row.get("architecture")), "scheme": row.get("scheme"), "difficult_policy": row.get("difficult_policy"), "weights": f"final/{destination.name}", "imgsz": row["imgsz"], "tta": row.get("tta", "none"), "temperature": row["temperature"], "operating_points": row["operating_points"]})
     config = {"version": "missing_hole_v1", "models": models, "fusion": best["rule"], "default_threshold": best["primary"]["threshold"], "operating_points": best["operating_points"], "selection": "validation FPR<=0.20 then maximum image recall", "test_used": False}
     (OUTPUT / "inference_config.json").write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
     summary = ["# Missing Hole V1 验证总结", "", "独立 test 尚未读取。", "", "## 最佳融合", "", f"- 方案：`{best['name']}`", f"- Recall：`{best['primary']['recall']:.4f}`", f"- Precision：`{best['primary']['precision']:.4f}`", f"- FPR：`{best['primary']['fpr']:.4f}`", f"- 阈值：`{best['primary']['threshold']:.8f}`", "", "完整实验记录见 `docs/missing_hole_v1/experiments/`。", ""]

@@ -8,6 +8,7 @@ from pathlib import Path
 from infer_scratch_v5 import fuse as fuse_scratch
 from infer_scratch_v5 import predict_classifier as predict_scratch_classifier
 from infer_scratch_v5 import predict_detector as predict_scratch_detector
+from infer_scratch_v5 import resolve_config_paths as resolve_scratch_config_paths
 from missing_hole_runtime import image_paths, predict_config
 
 
@@ -31,7 +32,10 @@ def main() -> None:
     paths = image_paths(args.source.resolve())
     if not paths:
         raise FileNotFoundError(f"No images found: {args.source}")
-    scratch_config = json.loads(args.scratch_config.read_text(encoding="utf-8"))
+    scratch_config_path = args.scratch_config.expanduser().resolve()
+    scratch_config = resolve_scratch_config_paths(
+        json.loads(scratch_config_path.read_text(encoding="utf-8")), scratch_config_path
+    )
     scratch_classifier_scores = {
         str(model["name"]): predict_scratch_classifier(model, paths, args.device)
         for model in scratch_config["classifiers"]

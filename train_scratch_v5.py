@@ -24,6 +24,7 @@ from PIL import Image, ImageDraw, ImageEnhance, ImageFilter
 from torch.utils.data import DataLoader, Dataset, WeightedRandomSampler
 from torchvision import models, transforms
 from ultralytics import YOLO
+import ultralytics
 
 
 ROOT = Path(__file__).resolve().parent
@@ -32,7 +33,7 @@ RUNS = ROOT / "runs" / "scratch_v5"
 OUTPUT = ROOT / "outputs" / "scratch_v5"
 OFFICIAL_DETECTOR = ROOT / "yolo26n.pt"
 OFFICIAL_CLASSIFIER = ROOT / "yolo26n-cls.pt"
-P2_YAML = ROOT / ".venv" / "Lib" / "site-packages" / "ultralytics" / "cfg" / "models" / "26" / "yolo26-p2.yaml"
+P2_YAML = Path(ultralytics.__file__).resolve().parent / "cfg" / "models" / "26" / "yolo26-p2.yaml"
 FPR_CAPS = (0.10, 0.20, 0.30, 0.50)
 PRIMARY_FPR_CAP = 0.20
 SEED = 20260911
@@ -205,12 +206,14 @@ class ScratchDataset(Dataset):
         return self.tensor(square_image(image, self.size)), float(sample.label)
 
 
-def build_network(family: str) -> nn.Module:
+def build_network(family: str, pretrained: bool = True) -> nn.Module:
     if family == "resnet18":
-        network = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
+        weights = models.ResNet18_Weights.DEFAULT if pretrained else None
+        network = models.resnet18(weights=weights)
         network.fc = nn.Linear(network.fc.in_features, 1)
     elif family == "efficientnet_b0":
-        network = models.efficientnet_b0(weights=models.EfficientNet_B0_Weights.DEFAULT)
+        weights = models.EfficientNet_B0_Weights.DEFAULT if pretrained else None
+        network = models.efficientnet_b0(weights=weights)
         network.classifier[1] = nn.Linear(network.classifier[1].in_features, 1)
     else:
         raise ValueError(family)
@@ -219,7 +222,7 @@ def build_network(family: str) -> nn.Module:
 
 def load_custom(path: Path, device: str = "cuda") -> tuple[nn.Module, dict[str, object]]:
     checkpoint = torch.load(path, map_location="cpu", weights_only=False)
-    network = build_network(str(checkpoint["family"]))
+    network = build_network(str(checkpoint["family"]), pretrained=False)
     network.load_state_dict(checkpoint["model"])
     return network.to(device).eval(), checkpoint
 
@@ -755,7 +758,7 @@ def main() -> None:
     print(json.dumps(runtime, indent=2), flush=True)
     if args.dry_run:
         for family in ("resnet18", "efficientnet_b0"):
-            network = build_network(family)
+            network = build_network(family, pretrained=False)
             del network
         detector_model("standard")
         detector_model("p2")
@@ -931,7 +934,7 @@ def main() -> None:
             destination = final / f"classifier_{index}.pt"
             shutil.copy2(item[1], destination)
             model_configs.append({
-                "name": item[0].name, "family": item[0].family, "weights": str(destination),
+                "name": item[0].name, "family": item[0].family, "weights": f"final/{destination.name}",
                 "imgsz": item[0].size, "tta": item[2]["tta"], "temperature": item[2]["temperature"],
             })
         detector_config = None
@@ -939,7 +942,7 @@ def main() -> None:
         if best_detector is not None:
             destination = final / "detector.pt"
             shutil.copy2(best_detector[1], destination)
-            detector_config = {"name": best_detector[0].name, "weights": str(destination), "imgsz": 960, "temperature": best_detector[2]["temperature"], "conf_floor": 0.001, "iou": 0.7}
+            detector_config = {"name": best_detector[0].name, "weights": f"final/{destination.name}", "imgsz": 960, "temperature": best_detector[2]["temperature"], "conf_floor": 0.001, "iou": 0.7}
             detector_boxes = best_detector[4]
         config = {
             "version": "scratch_v5", "classes": {"0": "normal", "1": "scratch"},

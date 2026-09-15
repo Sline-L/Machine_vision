@@ -160,7 +160,7 @@ def main() -> None:
     final.mkdir(parents=True, exist_ok=True)
     destination = final / "unified_classifier.pt"
     shutil.copy2(winner["weights"], destination)
-    config = {"version": "unified_defect_v1", "models": [{"name": winner["name"], "kind": "classifier", "family": winner["family"], "weights": str(destination), "imgsz": winner["imgsz"], "tta": winner["tta"], "temperature": winner["temperature"]}], "fusion": {"type": "classifier", "models": [winner["name"]]}, "default_threshold": winner["primary"]["threshold"], "operating_points": winner["operating_points"], "test_used": False}
+    config = {"version": "unified_defect_v1", "models": [{"name": winner["name"], "kind": "classifier", "family": winner["family"], "weights": f"final/{destination.name}", "imgsz": winner["imgsz"], "tta": winner["tta"], "temperature": winner["temperature"]}], "fusion": {"type": "classifier", "models": [winner["name"]]}, "default_threshold": winner["primary"]["threshold"], "operating_points": winner["operating_points"], "test_used": False}
     OUTPUT.mkdir(parents=True, exist_ok=True)
     (OUTPUT / "inference_config.json").write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
     (OUTPUT / "leaderboard.json").write_text(json.dumps(rows + detector_rows, ensure_ascii=False, indent=2), encoding="utf-8")

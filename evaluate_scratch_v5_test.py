@@ -10,7 +10,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from infer_scratch_v5 import fuse, predict_classifier, predict_detector
+from infer_scratch_v5 import fuse, predict_classifier, predict_detector, resolve_config_paths
 from prepare_scratch_v5 import image_dhash
 from train_scratch_v5 import binary_auc
 
@@ -158,7 +158,8 @@ def main() -> None:
         raise FileExistsError(f"Locked test report already exists: {report_path}; use --force only intentionally")
 
     paths, labels, counts = load_ground_truth(args.images, args.annotations)
-    config = json.loads(args.config.read_text(encoding="utf-8"))
+    config_path = args.config.expanduser().resolve()
+    config = resolve_config_paths(json.loads(config_path.read_text(encoding="utf-8")), config_path)
     threshold = float(config["default_threshold"])
     classifier_scores = {
         str(model["name"]): predict_classifier(model, paths, args.device)

@@ -5,7 +5,7 @@
       "name": "joint_cls_efficientnet_b0_512",
       "kind": "classifier",
       "family": "efficientnet_b0",
-      "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\unified_defect_v1\\final\\unified_classifier.pt",
+      "weights": "final/unified_classifier.pt",
       "imgsz": 512,
       "tta": "none",
       "temperature": 1.125

@@ -8,7 +8,7 @@
     {
       "name": "f_efficientnet_b0_384_w1_s20260911",
       "family": "efficientnet_b0",
-      "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\scratch_v5\\final\\classifier_1.pt",
+      "weights": "final/classifier_1.pt",
       "imgsz": 384,
       "tta": "none",
       "temperature": 0.7
@@ -16,7 +16,7 @@
     {
       "name": "p_resnet18_384_w1",
       "family": "resnet18",
-      "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\scratch_v5\\final\\classifier_2.pt",
+      "weights": "final/classifier_2.pt",
       "imgsz": 384,
       "tta": "none",
       "temperature": 2.05
@@ -24,7 +24,7 @@
   ],
   "detector": {
     "name": "p_detector_p2_960",
-    "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\scratch_v5\\final\\detector.pt",
+    "weights": "final/detector.pt",
     "imgsz": 960,
     "temperature": 2.125,
     "conf_floor": 0.001,

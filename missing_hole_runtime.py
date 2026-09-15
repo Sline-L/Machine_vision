@@ -13,6 +13,16 @@ from ultralytics import YOLO
 from train_scratch_v5 import apply_temperature, build_network, square_image
 
 
+def resolve_config_paths(config: dict[str, object], config_path: Path) -> dict[str, object]:
+    """Resolve model paths relative to the inference config file."""
+    for model in config.get("models", []):
+        weight = Path(str(model["weights"]))
+        if not weight.is_absolute():
+            weight = config_path.parent / weight
+        model["weights"] = str(weight.resolve())
+    return config
+
+
 def image_paths(source: Path) -> list[Path]:
     extensions = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff", ".webp"}
     if source.is_file():
@@ -61,7 +71,7 @@ def predict_model(model_config: dict[str, object], paths: list[Path], device: st
         del model
     else:
         checkpoint = torch.load(str(model_config["weights"]), map_location="cpu", weights_only=False)
-        network = build_network(family)
+        network = build_network(family, pretrained=False)
         network.load_state_dict(checkpoint["model"])
         torch_device = "cuda:0" if str(device) != "cpu" and torch.cuda.is_available() else "cpu"
         network.to(torch_device).eval()
@@ -95,7 +105,8 @@ def apply_rule(rule: dict[str, object], scores: dict[str, list[float]]) -> list[
 
 
 def predict_config(config_path: Path, paths: list[Path], device: str = "0", keep_boxes: bool = False) -> tuple[list[float], dict[str, list[float]], list[list[dict[str, object]]], dict[str, object]]:
-    config = json.loads(config_path.read_text(encoding="utf-8"))
+    config_path = config_path.expanduser().resolve()
+    config = resolve_config_paths(json.loads(config_path.read_text(encoding="utf-8")), config_path)
     scores: dict[str, list[float]] = {}
     detector_boxes: list[list[dict[str, object]]] = [[] for _ in paths]
     for model_config in config["models"]:
