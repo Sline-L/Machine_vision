@@ -1,0 +1,77 @@
+{
+  "profile_id": "LATENCY_DEGRADED_V2",
+  "candidate_id": "latency_degraded_v2_effnet_det",
+  "semantic_scope": "scratch_binary_exact",
+  "Mission_semantics": "Scratch binary verdict preserved (not Scratch OR MissingHole)",
+  "bbox_semantics": "auxiliary_detector_active",
+  "source_commit": "cfdbbe8ffcbfc8c4b4e34431f0eab8b69abfe81e",
+  "freeze_date": "2026-09-15",
+  "classifier": {
+    "architecture": "efficientnet_b0",
+    "name": "f_efficientnet_b0_384_w1_s20260911",
+    "weights_path": "model/model2/classifier_1.pt",
+    "sha256": "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438",
+    "input_size": 384,
+    "temperature": 0.7,
+    "tta": "none"
+  },
+  "detector": {
+    "architecture": "yolo_p2_scratch",
+    "name": "p_detector_p2_960",
+    "weights_path": "model/model2/detector.pt",
+    "sha256": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3",
+    "input_size": 960,
+    "temperature": 2.125,
+    "conf_floor": 0.001,
+    "display_confidence": 0.05,
+    "iou": 0.7
+  },
+  "removed_components": [
+    "classifier_2.pt"
+  ],
+  "fusion": {
+    "type": "weighted",
+    "alpha": 0.25,
+    "classifier": {
+      "type": "classifier_single",
+      "models": [
+        "f_efficientnet_b0_384_w1_s20260911"
+      ]
+    }
+  },
+  "threshold": 0.2653394325872992,
+  "threshold_provenance": "val choose_threshold PRIMARY_FPR_CAP=0.20 (Scratch val only)",
+  "runtime_inference_config": "model/model2/profiles/latency_degraded_v2/inference_config.json",
+  "val_metrics": {
+    "tp": null,
+    "fp": null,
+    "tn": null,
+    "fn": null,
+    "recall": 0.9767,
+    "fpr": 0.1121,
+    "specificity": 0.8879,
+    "precision": null,
+    "f1": null,
+    "Q_D_val": 0.8879,
+    "U_val": 0.9439,
+    "notes": "exploratory val freeze; not a generalization claim"
+  },
+  "nx_latency_experimental": {
+    "p50_ms": 69.059,
+    "p95_ms": 85.891,
+    "full_p95_ms": 246.352,
+    "relative_p95": 0.349,
+    "n_crops": 34,
+    "probe": "vision_v2_latency_v1 experimental evaluator",
+    "notes": "pre-integration probe; integrated runtime must re-measure"
+  },
+  "applicability": [
+    "V5_OVERLOAD"
+  ],
+  "formal_holdout_status": "MISSING",
+  "formal_admission_status": "CLOSED",
+  "mission_approved": false,
+  "runtime_admission": "CLOSED",
+  "engineering_status": "ENGINEERING_IMPLEMENTED",
+  "config_hash": "5cc1730c0c9cdd83e8909e963184c759f4d29bec5ed4eab1bfe44f0ae13b4588"
+}
