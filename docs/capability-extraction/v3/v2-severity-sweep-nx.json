@@ -1,0 +1,2064 @@
+{
+  "mode": "ENGINEERING ONLY",
+  "banner": "ENGINEERING ONLY \u2014 SEVERITY SWEEP \u2014 NOT MISSION APPROVED \u2014 NOT A3",
+  "mission_approved": false,
+  "a3_effectiveness": "NOT ESTABLISHED",
+  "started_at": "2026-09-15T10:34:34.139710+00:00",
+  "preregistered_severities": [
+    {
+      "id": "S0",
+      "label": "healthy",
+      "replicas": 0
+    },
+    {
+      "id": "S1",
+      "label": "low",
+      "replicas": 1
+    },
+    {
+      "id": "S2",
+      "label": "medium",
+      "replicas": 2
+    },
+    {
+      "id": "S3",
+      "label": "qualified_severe",
+      "replicas": 3
+    }
+  ],
+  "injector_base": {
+    "kind": "bandwidth",
+    "bytes_mb": 512,
+    "buffers": 3,
+    "streams": 4,
+    "load_ms": 100,
+    "idle_ms": 0
+  },
+  "admission_p95_ms": 190.0,
+  "v5_slow_ms": 200.0,
+  "hold_s": 2.0,
+  "window_s": 45.0,
+  "repeats": 2,
+  "production_rejected": true,
+  "cells": [
+    {
+      "severity_id": "S0",
+      "label": "healthy",
+      "replicas": 0,
+      "repeat": 1,
+      "order": [
+        "FULL",
+        "LATENCY_DEGRADED_V2"
+      ],
+      "started_at": "2026-09-15T10:34:34.139780+00:00",
+      "role": "severity characterization point",
+      "injector": {
+        "start": {
+          "replicas": 0,
+          "workers": [],
+          "config": {
+            "kind": "multi_bandwidth",
+            "bytes_mb": 512,
+            "buffers": 3,
+            "streams": 4,
+            "load_ms": 100,
+            "idle_ms": 0,
+            "replicas": 0,
+            "null": true
+          },
+          "hash": "null_injector_s0"
+        },
+        "config": {
+          "kind": "multi_bandwidth",
+          "bytes_mb": 512,
+          "buffers": 3,
+          "streams": 4,
+          "load_ms": 100,
+          "idle_ms": 0,
+          "replicas": 0,
+          "null": true
+        },
+        "hash": "null_injector_s0",
+        "alive_at_start": true
+      },
+      "FULL": {
+        "wall_p50": 175.94103200099198,
+        "wall_p95": 180.40007225044974,
+        "wall_max": 199.02181399811525,
+        "stage_p95": 178.09432150170323,
+        "cls2_p95": 48.58831625097082,
+        "gate190": true,
+        "sustained_overload": false,
+        "sustained_overload_onset": null,
+        "valid_ratio": 1.0,
+        "inspect_rate_hz": 5.673454745189079,
+        "n": 256,
+        "exceptions": 0,
+        "identity": {
+          "scratch_version": "scratch_v5",
+          "classifier_count": 2,
+          "classifier_shas": [
+            "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438",
+            "d07678a6da421c4edc00ac24b8c5052b0b8b7f8b1614b9d82563ecefbf59360d"
+          ],
+          "detector_sha": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3",
+          "threshold": 0.300273610279458,
+          "fusion_alpha": 0.25,
+          "cls2_expected_zero": false
+        },
+        "gpu": {
+          "tegrastats": {},
+          "gpu_clock_mhz": 510.0,
+          "emc_mhz": null,
+          "power_mode": "NV Power Mode: MAXN_SUPER\n0"
+        },
+        "process": {
+          "rss_mib": 1881.63671875,
+          "threads": 18,
+          "cpu_pct": 0.0
+        },
+        "injector_alive": true,
+        "raw_label": "S0_FULL_r1"
+      },
+      "LATENCY_DEGRADED_V2": {
+        "wall_p50": 128.123456499452,
+        "wall_p95": 136.2759925006685,
+        "wall_max": 142.10593900133972,
+        "stage_p95": 131.65932959946076,
+        "cls2_p95": 0.0,
+        "gate190": true,
+        "sustained_overload": false,
+        "sustained_overload_onset": null,
+        "valid_ratio": 1.0,
+        "inspect_rate_hz": 7.816452366517002,
+        "n": 352,
+        "exceptions": 0,
+        "identity": {
+          "scratch_version": "scratch_v5_latency_degraded_v2",
+          "classifier_count": 1,
+          "classifier_shas": [
+            "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438"
+          ],
+          "detector_sha": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3",
+          "threshold": 0.2653394325872992,
+          "fusion_alpha": 0.25,
+          "cls2_expected_zero": true
+        },
+        "gpu": {
+          "tegrastats": {},
+          "gpu_clock_mhz": 918.0,
+          "emc_mhz": null,
+          "power_mode": "NV Power Mode: MAXN_SUPER\n0"
+        },
+        "process": {
+          "rss_mib": 1888.33984375,
+          "threads": 18,
+          "cpu_pct": 0.0
+        },
+        "injector_alive": true,
+        "raw_label": "S0_V2_r1"
+      },
+      "ratio_v2_over_full": 0.7554098554432744,
+      "delta_p95": -44.12407974978123,
+      "injector_alive_both": true,
+      "envelope_hit": false,
+      "injector_alive_after_stop": true
+    },
+    {
+      "severity_id": "S0",
+      "label": "healthy",
+      "replicas": 0,
+      "repeat": 2,
+      "order": [
+        "FULL",
+        "LATENCY_DEGRADED_V2"
+      ],
+      "started_at": "2026-09-15T10:37:03.859591+00:00",
+      "role": "severity characterization point",
+      "injector": {
+        "start": {
+          "replicas": 0,
+          "workers": [],
+          "config": {
+            "kind": "multi_bandwidth",
+            "bytes_mb": 512,
+            "buffers": 3,
+            "streams": 4,
+            "load_ms": 100,
+            "idle_ms": 0,
+            "replicas": 0,
+            "null": true
+          },
+          "hash": "null_injector_s0"
+        },
+        "config": {
+          "kind": "multi_bandwidth",
+          "bytes_mb": 512,
+          "buffers": 3,
+          "streams": 4,
+          "load_ms": 100,
+          "idle_ms": 0,
+          "replicas": 0,
+          "null": true
+        },
+        "hash": "null_injector_s0",
+        "alive_at_start": true
+      },
+      "FULL": {
+        "wall_p50": 181.8493490027322,
+        "wall_p95": 193.41359609861684,
+        "wall_max": 198.25633899745299,
+        "stage_p95": 188.82192859746283,
+        "cls2_p95": 48.7977677010349,
+        "gate190": false,
+        "sustained_overload": false,
+        "sustained_overload_onset": null,
+        "valid_ratio": 1.0,
+        "inspect_rate_hz": 5.4844715194146545,
+        "n": 247,
+        "exceptions": 0,
+        "identity": {
+          "scratch_version": "scratch_v5",
+          "classifier_count": 2,
+          "classifier_shas": [
+            "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438",
+            "d07678a6da421c4edc00ac24b8c5052b0b8b7f8b1614b9d82563ecefbf59360d"
+          ],
+          "detector_sha": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3",
+          "threshold": 0.300273610279458,
+          "fusion_alpha": 0.25,
+          "cls2_expected_zero": false
+        },
+        "gpu": {
+          "tegrastats": {},
+          "gpu_clock_mhz": 510.0,
+          "emc_mhz": null,
+          "power_mode": "NV Power Mode: MAXN_SUPER\n0"
+        },
+        "process": {
+          "rss_mib": 1899.66015625,
+          "threads": 18,
+          "cpu_pct": 0.0
+        },
+        "injector_alive": true,
+        "raw_label": "S0_FULL_r2"
+      },
+      "LATENCY_DEGRADED_V2": {
+        "wall_p50": 126.29066000044986,
+        "wall_p95": 135.84143675052474,
+        "wall_max": 141.90212200264796,
+        "stage_p95": 131.24974375023157,
+        "cls2_p95": 0.0,
+        "gate190": true,
+        "sustained_overload": false,
+        "sustained_overload_onset": null,
+        "valid_ratio": 1.0,
+        "inspect_rate_hz": 7.906566207945636,
+        "n": 356,
+        "exceptions": 0,
+        "identity": {
+          "scratch_version": "scratch_v5_latency_degraded_v2",
+          "classifier_count": 1,
+          "classifier_shas": [
+            "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438"
+          ],
+          "detector_sha": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3",
+          "threshold": 0.2653394325872992,
+          "fusion_alpha": 0.25,
+          "cls2_expected_zero": true
+        },
+        "gpu": {
+          "tegrastats": {},
+          "gpu_clock_mhz": 1020.0,
+          "emc_mhz": null,
+          "power_mode": "NV Power Mode: MAXN_SUPER\n0"
+        },
+        "process": {
+          "rss_mib": 1904.234375,
+          "threads": 18,
+          "cpu_pct": 0.0
+        },
+        "injector_alive": true,
+        "raw_label": "S0_V2_r2"
+      },
+      "ratio_v2_over_full": 0.7023365445377611,
+      "delta_p95": -57.5721593480921,
+      "injector_alive_both": true,
+      "envelope_hit": true,
+      "injector_alive_after_stop": true
+    },
+    {
+      "severity_id": "S1",
+      "label": "low",
+      "replicas": 1,
+      "repeat": 1,
+      "order": [
+        "FULL",
+        "LATENCY_DEGRADED_V2"
+      ],
+      "started_at": "2026-09-15T10:39:29.377502+00:00",
+      "role": "severity characterization point",
+      "injector": {
+        "start": {
+          "replicas": 1,
+          "workers": [
+            {
+              "pid": 189212,
+              "config": {
+                "type": "gpu_contention",
+                "version": "5",
+                "kind": "bandwidth",
+                "matrix": 128,
+                "load_ms": 100.0,
+                "idle_ms": 0.0,
+                "bytes_mb": 512,
+                "reserve_free_mb": 512,
+                "size": 640,
+                "batch": 1,
+                "channels": 16,
+                "streams": 4,
+                "buffers": 3,
+                "nice": null,
+                "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py"
+              },
+              "hash": "6f272533ce8c4d0ab1f1570d95857b9625d4dd36b46efe0b5d74929330b2ccc8"
+            }
+          ],
+          "config": {
+            "type": "gpu_contention",
+            "version": "5",
+            "kind": "multi_bandwidth",
+            "matrix": 128,
+            "load_ms": 100.0,
+            "idle_ms": 0.0,
+            "bytes_mb": 512,
+            "reserve_free_mb": 512,
+            "size": 640,
+            "batch": 1,
+            "channels": 16,
+            "streams": 4,
+            "buffers": 3,
+            "nice": null,
+            "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py",
+            "replicas": 1
+          },
+          "hash": "8ae2a4ea0dc897d907723752d99bdcbf5cf43efd887c6d1fed9f133415b7ff31"
+        },
+        "config": {
+          "type": "gpu_contention",
+          "version": "5",
+          "kind": "multi_bandwidth",
+          "matrix": 128,
+          "load_ms": 100.0,
+          "idle_ms": 0.0,
+          "bytes_mb": 512,
+          "reserve_free_mb": 512,
+          "size": 640,
+          "batch": 1,
+          "channels": 16,
+          "streams": 4,
+          "buffers": 3,
+          "nice": null,
+          "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py",
+          "replicas": 1
+        },
+        "hash": "8ae2a4ea0dc897d907723752d99bdcbf5cf43efd887c6d1fed9f133415b7ff31",
+        "alive_at_start": true
+      },
+      "FULL": {
+        "wall_p50": 219.47410400025547,
+        "wall_p95": 225.8150989004207,
+        "wall_max": 229.03700100141577,
+        "stage_p95": 218.37861650456034,
+        "cls2_p95": 52.45646400107944,
+        "gate190": false,
+        "sustained_overload": true,
+        "sustained_overload_onset": 25309.677052756,
+        "valid_ratio": 1.0,
+        "inspect_rate_hz": 4.597197646286353,
+        "n": 207,
+        "exceptions": 0,
+        "identity": {
+          "scratch_version": "scratch_v5",
+          "classifier_count": 2,
+          "classifier_shas": [
+            "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438",
+            "d07678a6da421c4edc00ac24b8c5052b0b8b7f8b1614b9d82563ecefbf59360d"
+          ],
+          "detector_sha": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3",
+          "threshold": 0.300273610279458,
+          "fusion_alpha": 0.25,
+          "cls2_expected_zero": false
+        },
+        "gpu": {
+          "tegrastats": {},
+          "gpu_clock_mhz": 1173.0,
+          "emc_mhz": null,
+          "power_mode": "NV Power Mode: MAXN_SUPER\n0"
+        },
+        "process": {
+          "rss_mib": 1905.95703125,
+          "threads": 18,
+          "cpu_pct": 0.0
+        },
+        "injector_alive": true,
+        "raw_label": "S1_FULL_r1"
+      },
+      "LATENCY_DEGRADED_V2": {
+        "wall_p50": 172.05135699987295,
+        "wall_p95": 177.96333319929545,
+        "wall_max": 180.84497800009558,
+        "stage_p95": 170.3773975976219,
+        "cls2_p95": 0.0,
+        "gate190": true,
+        "sustained_overload": false,
+        "sustained_overload_onset": null,
+        "valid_ratio": 1.0,
+        "inspect_rate_hz": 5.881187246000314,
+        "n": 265,
+        "exceptions": 0,
+        "identity": {
+          "scratch_version": "scratch_v5_latency_degraded_v2",
+          "classifier_count": 1,
+          "classifier_shas": [
+            "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438"
+          ],
+          "detector_sha": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3",
+          "threshold": 0.2653394325872992,
+          "fusion_alpha": 0.25,
+          "cls2_expected_zero": true
+        },
+        "gpu": {
+          "tegrastats": {},
+          "gpu_clock_mhz": 1173.0,
+          "emc_mhz": null,
+          "power_mode": "NV Power Mode: MAXN_SUPER\n0"
+        },
+        "process": {
+          "rss_mib": 1914.9375,
+          "threads": 18,
+          "cpu_pct": 0.0
+        },
+        "injector_alive": true,
+        "raw_label": "S1_V2_r1"
+      },
+      "ratio_v2_over_full": 0.7880931526096632,
+      "delta_p95": -47.85176570112526,
+      "injector_alive_both": true,
+      "envelope_hit": true,
+      "injector_alive_after_stop": false
+    },
+    {
+      "severity_id": "S1",
+      "label": "low",
+      "replicas": 1,
+      "repeat": 2,
+      "order": [
+        "FULL",
+        "LATENCY_DEGRADED_V2"
+      ],
+      "started_at": "2026-09-15T10:41:59.356302+00:00",
+      "role": "severity characterization point",
+      "injector": {
+        "start": {
+          "replicas": 1,
+          "workers": [
+            {
+              "pid": 190324,
+              "config": {
+                "type": "gpu_contention",
+                "version": "5",
+                "kind": "bandwidth",
+                "matrix": 128,
+                "load_ms": 100.0,
+                "idle_ms": 0.0,
+                "bytes_mb": 512,
+                "reserve_free_mb": 512,
+                "size": 640,
+                "batch": 1,
+                "channels": 16,
+                "streams": 4,
+                "buffers": 3,
+                "nice": null,
+                "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py"
+              },
+              "hash": "6f272533ce8c4d0ab1f1570d95857b9625d4dd36b46efe0b5d74929330b2ccc8"
+            }
+          ],
+          "config": {
+            "type": "gpu_contention",
+            "version": "5",
+            "kind": "multi_bandwidth",
+            "matrix": 128,
+            "load_ms": 100.0,
+            "idle_ms": 0.0,
+            "bytes_mb": 512,
+            "reserve_free_mb": 512,
+            "size": 640,
+            "batch": 1,
+            "channels": 16,
+            "streams": 4,
+            "buffers": 3,
+            "nice": null,
+            "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py",
+            "replicas": 1
+          },
+          "hash": "8ae2a4ea0dc897d907723752d99bdcbf5cf43efd887c6d1fed9f133415b7ff31"
+        },
+        "config": {
+          "type": "gpu_contention",
+          "version": "5",
+          "kind": "multi_bandwidth",
+          "matrix": 128,
+          "load_ms": 100.0,
+          "idle_ms": 0.0,
+          "bytes_mb": 512,
+          "reserve_free_mb": 512,
+          "size": 640,
+          "batch": 1,
+          "channels": 16,
+          "streams": 4,
+          "buffers": 3,
+          "nice": null,
+          "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py",
+          "replicas": 1
+        },
+        "hash": "8ae2a4ea0dc897d907723752d99bdcbf5cf43efd887c6d1fed9f133415b7ff31",
+        "alive_at_start": true
+      },
+      "FULL": {
+        "wall_p50": 221.0015429991472,
+        "wall_p95": 226.65533530016546,
+        "wall_max": 230.38659899975755,
+        "stage_p95": 219.10761499748332,
+        "cls2_p95": 52.73641820094781,
+        "gate190": false,
+        "sustained_overload": true,
+        "sustained_overload_onset": 25459.447400365,
+        "valid_ratio": 1.0,
+        "inspect_rate_hz": 4.578982088292759,
+        "n": 207,
+        "exceptions": 0,
+        "identity": {
+          "scratch_version": "scratch_v5",
+          "classifier_count": 2,
+          "classifier_shas": [
+            "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438",
+            "d07678a6da421c4edc00ac24b8c5052b0b8b7f8b1614b9d82563ecefbf59360d"
+          ],
+          "detector_sha": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3",
+          "threshold": 0.300273610279458,
+          "fusion_alpha": 0.25,
+          "cls2_expected_zero": false
+        },
+        "gpu": {
+          "tegrastats": {},
+          "gpu_clock_mhz": 1173.0,
+          "emc_mhz": null,
+          "power_mode": "NV Power Mode: MAXN_SUPER\n0"
+        },
+        "process": {
+          "rss_mib": 1951.46875,
+          "threads": 19,
+          "cpu_pct": 0.0
+        },
+        "injector_alive": true,
+        "raw_label": "S1_FULL_r2"
+      },
+      "LATENCY_DEGRADED_V2": {
+        "wall_p50": 173.40454399891314,
+        "wall_p95": 178.18780279849307,
+        "wall_max": 184.08528699728777,
+        "stage_p95": 170.7924784001079,
+        "cls2_p95": 0.0,
+        "gate190": true,
+        "sustained_overload": false,
+        "sustained_overload_onset": null,
+        "valid_ratio": 1.0,
+        "inspect_rate_hz": 5.872119953189555,
+        "n": 265,
+        "exceptions": 0,
+        "identity": {
+          "scratch_version": "scratch_v5_latency_degraded_v2",
+          "classifier_count": 1,
+          "classifier_shas": [
+            "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438"
+          ],
+          "detector_sha": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3",
+          "threshold": 0.2653394325872992,
+          "fusion_alpha": 0.25,
+          "cls2_expected_zero": true
+        },
+        "gpu": {
+          "tegrastats": {},
+          "gpu_clock_mhz": 1173.0,
+          "emc_mhz": null,
+          "power_mode": "NV Power Mode: MAXN_SUPER\n0"
+        },
+        "process": {
+          "rss_mib": 1985.7890625,
+          "threads": 18,
+          "cpu_pct": 0.0
+        },
+        "injector_alive": true,
+        "raw_label": "S1_V2_r2"
+      },
+      "ratio_v2_over_full": 0.7861619606814655,
+      "delta_p95": -48.467532501672395,
+      "injector_alive_both": true,
+      "envelope_hit": true,
+      "injector_alive_after_stop": false
+    },
+    {
+      "severity_id": "S2",
+      "label": "medium",
+      "replicas": 2,
+      "repeat": 1,
+      "order": [
+        "FULL",
+        "LATENCY_DEGRADED_V2"
+      ],
+      "started_at": "2026-09-15T10:44:29.361295+00:00",
+      "role": "severity characterization point",
+      "injector": {
+        "start": {
+          "replicas": 2,
+          "workers": [
+            {
+              "pid": 191501,
+              "config": {
+                "type": "gpu_contention",
+                "version": "5",
+                "kind": "bandwidth",
+                "matrix": 128,
+                "load_ms": 100.0,
+                "idle_ms": 0.0,
+                "bytes_mb": 512,
+                "reserve_free_mb": 512,
+                "size": 640,
+                "batch": 1,
+                "channels": 16,
+                "streams": 4,
+                "buffers": 3,
+                "nice": null,
+                "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py"
+              },
+              "hash": "6f272533ce8c4d0ab1f1570d95857b9625d4dd36b46efe0b5d74929330b2ccc8"
+            },
+            {
+              "pid": 191508,
+              "config": {
+                "type": "gpu_contention",
+                "version": "5",
+                "kind": "bandwidth",
+                "matrix": 128,
+                "load_ms": 100.0,
+                "idle_ms": 0.0,
+                "bytes_mb": 512,
+                "reserve_free_mb": 512,
+                "size": 640,
+                "batch": 1,
+                "channels": 16,
+                "streams": 4,
+                "buffers": 3,
+                "nice": null,
+                "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py"
+              },
+              "hash": "6f272533ce8c4d0ab1f1570d95857b9625d4dd36b46efe0b5d74929330b2ccc8"
+            }
+          ],
+          "config": {
+            "type": "gpu_contention",
+            "version": "5",
+            "kind": "multi_bandwidth",
+            "matrix": 128,
+            "load_ms": 100.0,
+            "idle_ms": 0.0,
+            "bytes_mb": 512,
+            "reserve_free_mb": 512,
+            "size": 640,
+            "batch": 1,
+            "channels": 16,
+            "streams": 4,
+            "buffers": 3,
+            "nice": null,
+            "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py",
+            "replicas": 2
+          },
+          "hash": "62802a1843dbce1eea43d2486fd1e1875f621022bcb9a1271259971fbe2211df"
+        },
+        "config": {
+          "type": "gpu_contention",
+          "version": "5",
+          "kind": "multi_bandwidth",
+          "matrix": 128,
+          "load_ms": 100.0,
+          "idle_ms": 0.0,
+          "bytes_mb": 512,
+          "reserve_free_mb": 512,
+          "size": 640,
+          "batch": 1,
+          "channels": 16,
+          "streams": 4,
+          "buffers": 3,
+          "nice": null,
+          "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py",
+          "replicas": 2
+        },
+        "hash": "62802a1843dbce1eea43d2486fd1e1875f621022bcb9a1271259971fbe2211df",
+        "alive_at_start": true
+      },
+      "FULL": {
+        "wall_p50": 310.1581320006517,
+        "wall_p95": 319.14446729842894,
+        "wall_max": 323.4060579998186,
+        "stage_p95": 308.46695539839857,
+        "cls2_p95": 68.82940954965308,
+        "gate190": false,
+        "sustained_overload": true,
+        "sustained_overload_onset": 25612.44761247,
+        "valid_ratio": 1.0,
+        "inspect_rate_hz": 3.2738197034808407,
+        "n": 148,
+        "exceptions": 0,
+        "identity": {
+          "scratch_version": "scratch_v5",
+          "classifier_count": 2,
+          "classifier_shas": [
+            "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438",
+            "d07678a6da421c4edc00ac24b8c5052b0b8b7f8b1614b9d82563ecefbf59360d"
+          ],
+          "detector_sha": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3",
+          "threshold": 0.300273610279458,
+          "fusion_alpha": 0.25,
+          "cls2_expected_zero": false
+        },
+        "gpu": {
+          "tegrastats": {},
+          "gpu_clock_mhz": 1173.0,
+          "emc_mhz": null,
+          "power_mode": "NV Power Mode: MAXN_SUPER\n0"
+        },
+        "process": {
+          "rss_mib": 2035.4375,
+          "threads": 18,
+          "cpu_pct": 0.0
+        },
+        "injector_alive": true,
+        "raw_label": "S2_FULL_r1"
+      },
+      "LATENCY_DEGRADED_V2": {
+        "wall_p50": 249.10185350017855,
+        "wall_p95": 257.257005298743,
+        "wall_max": 258.02938700144296,
+        "stage_p95": 247.21029915017425,
+        "cls2_p95": 0.0,
+        "gate190": false,
+        "sustained_overload": true,
+        "sustained_overload_onset": 25668.011791195,
+        "valid_ratio": 1.0,
+        "inspect_rate_hz": 4.087507123819168,
+        "n": 184,
+        "exceptions": 0,
+        "identity": {
+          "scratch_version": "scratch_v5_latency_degraded_v2",
+          "classifier_count": 1,
+          "classifier_shas": [
+            "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438"
+          ],
+          "detector_sha": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3",
+          "threshold": 0.2653394325872992,
+          "fusion_alpha": 0.25,
+          "cls2_expected_zero": true
+        },
+        "gpu": {
+          "tegrastats": {},
+          "gpu_clock_mhz": 1173.0,
+          "emc_mhz": null,
+          "power_mode": "NV Power Mode: MAXN_SUPER\n0"
+        },
+        "process": {
+          "rss_mib": 2041.56640625,
+          "threads": 18,
+          "cpu_pct": 0.0
+        },
+        "injector_alive": true,
+        "raw_label": "S2_V2_r1"
+      },
+      "ratio_v2_over_full": 0.8060832370883135,
+      "delta_p95": -61.88746199968591,
+      "injector_alive_both": true,
+      "envelope_hit": false,
+      "injector_alive_after_stop": false
+    },
+    {
+      "severity_id": "S2",
+      "label": "medium",
+      "replicas": 2,
+      "repeat": 2,
+      "order": [
+        "FULL",
+        "LATENCY_DEGRADED_V2"
+      ],
+      "started_at": "2026-09-15T10:47:03.873021+00:00",
+      "role": "severity characterization point",
+      "injector": {
+        "start": {
+          "replicas": 2,
+          "workers": [
+            {
+              "pid": 192556,
+              "config": {
+                "type": "gpu_contention",
+                "version": "5",
+                "kind": "bandwidth",
+                "matrix": 128,
+                "load_ms": 100.0,
+                "idle_ms": 0.0,
+                "bytes_mb": 512,
+                "reserve_free_mb": 512,
+                "size": 640,
+                "batch": 1,
+                "channels": 16,
+                "streams": 4,
+                "buffers": 3,
+                "nice": null,
+                "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py"
+              },
+              "hash": "6f272533ce8c4d0ab1f1570d95857b9625d4dd36b46efe0b5d74929330b2ccc8"
+            },
+            {
+              "pid": 192563,
+              "config": {
+                "type": "gpu_contention",
+                "version": "5",
+                "kind": "bandwidth",
+                "matrix": 128,
+                "load_ms": 100.0,
+                "idle_ms": 0.0,
+                "bytes_mb": 512,
+                "reserve_free_mb": 512,
+                "size": 640,
+                "batch": 1,
+                "channels": 16,
+                "streams": 4,
+                "buffers": 3,
+                "nice": null,
+                "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py"
+              },
+              "hash": "6f272533ce8c4d0ab1f1570d95857b9625d4dd36b46efe0b5d74929330b2ccc8"
+            }
+          ],
+          "config": {
+            "type": "gpu_contention",
+            "version": "5",
+            "kind": "multi_bandwidth",
+            "matrix": 128,
+            "load_ms": 100.0,
+            "idle_ms": 0.0,
+            "bytes_mb": 512,
+            "reserve_free_mb": 512,
+            "size": 640,
+            "batch": 1,
+            "channels": 16,
+            "streams": 4,
+            "buffers": 3,
+            "nice": null,
+            "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py",
+            "replicas": 2
+          },
+          "hash": "62802a1843dbce1eea43d2486fd1e1875f621022bcb9a1271259971fbe2211df"
+        },
+        "config": {
+          "type": "gpu_contention",
+          "version": "5",
+          "kind": "multi_bandwidth",
+          "matrix": 128,
+          "load_ms": 100.0,
+          "idle_ms": 0.0,
+          "bytes_mb": 512,
+          "reserve_free_mb": 512,
+          "size": 640,
+          "batch": 1,
+          "channels": 16,
+          "streams": 4,
+          "buffers": 3,
+          "nice": null,
+          "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py",
+          "replicas": 2
+        },
+        "hash": "62802a1843dbce1eea43d2486fd1e1875f621022bcb9a1271259971fbe2211df",
+        "alive_at_start": true
+      },
+      "FULL": {
+        "wall_p50": 311.88671400013845,
+        "wall_p95": 322.89010169861285,
+        "wall_max": 323.86102199961897,
+        "stage_p95": 312.1213177986647,
+        "cls2_p95": 70.2449203490687,
+        "gate190": false,
+        "sustained_overload": true,
+        "sustained_overload_onset": 25766.79042362,
+        "valid_ratio": 1.0,
+        "inspect_rate_hz": 3.272844815364739,
+        "n": 148,
+        "exceptions": 0,
+        "identity": {
+          "scratch_version": "scratch_v5",
+          "classifier_count": 2,
+          "classifier_shas": [
+            "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438",
+            "d07678a6da421c4edc00ac24b8c5052b0b8b7f8b1614b9d82563ecefbf59360d"
+          ],
+          "detector_sha": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3",
+          "threshold": 0.300273610279458,
+          "fusion_alpha": 0.25,
+          "cls2_expected_zero": false
+        },
+        "gpu": {
+          "tegrastats": {},
+          "gpu_clock_mhz": 1173.0,
+          "emc_mhz": null,
+          "power_mode": "NV Power Mode: MAXN_SUPER\n0"
+        },
+        "process": {
+          "rss_mib": 2041.578125,
+          "threads": 18,
+          "cpu_pct": 0.0
+        },
+        "injector_alive": true,
+        "raw_label": "S2_FULL_r2"
+      },
+      "LATENCY_DEGRADED_V2": {
+        "wall_p50": 251.95286799862515,
+        "wall_p95": 257.0935454001301,
+        "wall_max": 257.690045000345,
+        "stage_p95": 246.72445179821807,
+        "cls2_p95": 0.0,
+        "gate190": false,
+        "sustained_overload": true,
+        "sustained_overload_onset": 25822.324987488,
+        "valid_ratio": 1.0,
+        "inspect_rate_hz": 4.089951621517371,
+        "n": 185,
+        "exceptions": 0,
+        "identity": {
+          "scratch_version": "scratch_v5_latency_degraded_v2",
+          "classifier_count": 1,
+          "classifier_shas": [
+            "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438"
+          ],
+          "detector_sha": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3",
+          "threshold": 0.2653394325872992,
+          "fusion_alpha": 0.25,
+          "cls2_expected_zero": true
+        },
+        "gpu": {
+          "tegrastats": {},
+          "gpu_clock_mhz": 1173.0,
+          "emc_mhz": null,
+          "power_mode": "NV Power Mode: MAXN_SUPER\n0"
+        },
+        "process": {
+          "rss_mib": 2041.578125,
+          "threads": 18,
+          "cpu_pct": 0.0
+        },
+        "injector_alive": true,
+        "raw_label": "S2_V2_r2"
+      },
+      "ratio_v2_over_full": 0.7962261588312869,
+      "delta_p95": -65.79655629848276,
+      "injector_alive_both": true,
+      "envelope_hit": false,
+      "injector_alive_after_stop": false
+    },
+    {
+      "severity_id": "S3",
+      "label": "qualified_severe",
+      "replicas": 3,
+      "repeat": 1,
+      "order": [
+        "FULL",
+        "LATENCY_DEGRADED_V2"
+      ],
+      "started_at": "2026-09-15T10:49:38.485052+00:00",
+      "role": "qualified severe anchor (characterization in-sweep)",
+      "injector": {
+        "start": {
+          "replicas": 3,
+          "workers": [
+            {
+              "pid": 193614,
+              "config": {
+                "type": "gpu_contention",
+                "version": "5",
+                "kind": "bandwidth",
+                "matrix": 128,
+                "load_ms": 100.0,
+                "idle_ms": 0.0,
+                "bytes_mb": 512,
+                "reserve_free_mb": 512,
+                "size": 640,
+                "batch": 1,
+                "channels": 16,
+                "streams": 4,
+                "buffers": 3,
+                "nice": null,
+                "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py"
+              },
+              "hash": "6f272533ce8c4d0ab1f1570d95857b9625d4dd36b46efe0b5d74929330b2ccc8"
+            },
+            {
+              "pid": 193621,
+              "config": {
+                "type": "gpu_contention",
+                "version": "5",
+                "kind": "bandwidth",
+                "matrix": 128,
+                "load_ms": 100.0,
+                "idle_ms": 0.0,
+                "bytes_mb": 512,
+                "reserve_free_mb": 512,
+                "size": 640,
+                "batch": 1,
+                "channels": 16,
+                "streams": 4,
+                "buffers": 3,
+                "nice": null,
+                "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py"
+              },
+              "hash": "6f272533ce8c4d0ab1f1570d95857b9625d4dd36b46efe0b5d74929330b2ccc8"
+            },
+            {
+              "pid": 193628,
+              "config": {
+                "type": "gpu_contention",
+                "version": "5",
+                "kind": "bandwidth",
+                "matrix": 128,
+                "load_ms": 100.0,
+                "idle_ms": 0.0,
+                "bytes_mb": 512,
+                "reserve_free_mb": 512,
+                "size": 640,
+                "batch": 1,
+                "channels": 16,
+                "streams": 4,
+                "buffers": 3,
+                "nice": null,
+                "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py"
+              },
+              "hash": "6f272533ce8c4d0ab1f1570d95857b9625d4dd36b46efe0b5d74929330b2ccc8"
+            }
+          ],
+          "config": {
+            "type": "gpu_contention",
+            "version": "5",
+            "kind": "multi_bandwidth",
+            "matrix": 128,
+            "load_ms": 100.0,
+            "idle_ms": 0.0,
+            "bytes_mb": 512,
+            "reserve_free_mb": 512,
+            "size": 640,
+            "batch": 1,
+            "channels": 16,
+            "streams": 4,
+            "buffers": 3,
+            "nice": null,
+            "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py",
+            "replicas": 3
+          },
+          "hash": "49da7bb852cb5e733fc505eb3bfe5c89f7992c8e8427840bc4e9d3c3ffbfd70f"
+        },
+        "config": {
+          "type": "gpu_contention",
+          "version": "5",
+          "kind": "multi_bandwidth",
+          "matrix": 128,
+          "load_ms": 100.0,
+          "idle_ms": 0.0,
+          "bytes_mb": 512,
+          "reserve_free_mb": 512,
+          "size": 640,
+          "batch": 1,
+          "channels": 16,
+          "streams": 4,
+          "buffers": 3,
+          "nice": null,
+          "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py",
+          "replicas": 3
+        },
+        "hash": "49da7bb852cb5e733fc505eb3bfe5c89f7992c8e8427840bc4e9d3c3ffbfd70f",
+        "alive_at_start": true
+      },
+      "FULL": {
+        "wall_p50": 385.16909399913857,
+        "wall_p95": 398.7045638490599,
+        "wall_max": 400.39404799972544,
+        "stage_p95": 377.2405702527976,
+        "cls2_p95": 75.59425874842418,
+        "gate190": false,
+        "sustained_overload": true,
+        "sustained_overload_onset": 25924.415299787,
+        "valid_ratio": 1.0,
+        "inspect_rate_hz": 2.6466962992901837,
+        "n": 120,
+        "exceptions": 0,
+        "identity": {
+          "scratch_version": "scratch_v5",
+          "classifier_count": 2,
+          "classifier_shas": [
+            "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438",
+            "d07678a6da421c4edc00ac24b8c5052b0b8b7f8b1614b9d82563ecefbf59360d"
+          ],
+          "detector_sha": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3",
+          "threshold": 0.300273610279458,
+          "fusion_alpha": 0.25,
+          "cls2_expected_zero": false
+        },
+        "gpu": {
+          "tegrastats": {},
+          "gpu_clock_mhz": 1173.0,
+          "emc_mhz": null,
+          "power_mode": "NV Power Mode: MAXN_SUPER\n0"
+        },
+        "process": {
+          "rss_mib": 2039.1015625,
+          "threads": 18,
+          "cpu_pct": 0.0
+        },
+        "injector_alive": true,
+        "raw_label": "S3_FULL_r1"
+      },
+      "LATENCY_DEGRADED_V2": {
+        "wall_p50": 315.64878599965596,
+        "wall_p95": 322.3635470010777,
+        "wall_max": 324.3677540012868,
+        "stage_p95": 307.34666230055154,
+        "cls2_p95": 0.0,
+        "gate190": false,
+        "sustained_overload": true,
+        "sustained_overload_onset": 25981.62307197,
+        "valid_ratio": 1.0,
+        "inspect_rate_hz": 3.253719330844409,
+        "n": 147,
+        "exceptions": 0,
+        "identity": {
+          "scratch_version": "scratch_v5_latency_degraded_v2",
+          "classifier_count": 1,
+          "classifier_shas": [
+            "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438"
+          ],
+          "detector_sha": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3",
+          "threshold": 0.2653394325872992,
+          "fusion_alpha": 0.25,
+          "cls2_expected_zero": true
+        },
+        "gpu": {
+          "tegrastats": {},
+          "gpu_clock_mhz": 1173.0,
+          "emc_mhz": null,
+          "power_mode": "NV Power Mode: MAXN_SUPER\n0"
+        },
+        "process": {
+          "rss_mib": 2039.109375,
+          "threads": 18,
+          "cpu_pct": 0.0
+        },
+        "injector_alive": true,
+        "raw_label": "S3_V2_r1"
+      },
+      "ratio_v2_over_full": 0.8085273564190172,
+      "delta_p95": -76.34101684798225,
+      "injector_alive_both": true,
+      "envelope_hit": false,
+      "injector_alive_after_stop": false
+    },
+    {
+      "severity_id": "S3",
+      "label": "qualified_severe",
+      "replicas": 3,
+      "repeat": 2,
+      "order": [
+        "FULL",
+        "LATENCY_DEGRADED_V2"
+      ],
+      "started_at": "2026-09-15T10:52:17.873047+00:00",
+      "role": "qualified severe anchor (characterization in-sweep)",
+      "injector": {
+        "start": {
+          "replicas": 3,
+          "workers": [
+            {
+              "pid": 194695,
+              "config": {
+                "type": "gpu_contention",
+                "version": "5",
+                "kind": "bandwidth",
+                "matrix": 128,
+                "load_ms": 100.0,
+                "idle_ms": 0.0,
+                "bytes_mb": 512,
+                "reserve_free_mb": 512,
+                "size": 640,
+                "batch": 1,
+                "channels": 16,
+                "streams": 4,
+                "buffers": 3,
+                "nice": null,
+                "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py"
+              },
+              "hash": "6f272533ce8c4d0ab1f1570d95857b9625d4dd36b46efe0b5d74929330b2ccc8"
+            },
+            {
+              "pid": 194703,
+              "config": {
+                "type": "gpu_contention",
+                "version": "5",
+                "kind": "bandwidth",
+                "matrix": 128,
+                "load_ms": 100.0,
+                "idle_ms": 0.0,
+                "bytes_mb": 512,
+                "reserve_free_mb": 512,
+                "size": 640,
+                "batch": 1,
+                "channels": 16,
+                "streams": 4,
+                "buffers": 3,
+                "nice": null,
+                "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py"
+              },
+              "hash": "6f272533ce8c4d0ab1f1570d95857b9625d4dd36b46efe0b5d74929330b2ccc8"
+            },
+            {
+              "pid": 194718,
+              "config": {
+                "type": "gpu_contention",
+                "version": "5",
+                "kind": "bandwidth",
+                "matrix": 128,
+                "load_ms": 100.0,
+                "idle_ms": 0.0,
+                "bytes_mb": 512,
+                "reserve_free_mb": 512,
+                "size": 640,
+                "batch": 1,
+                "channels": 16,
+                "streams": 4,
+                "buffers": 3,
+                "nice": null,
+                "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py"
+              },
+              "hash": "6f272533ce8c4d0ab1f1570d95857b9625d4dd36b46efe0b5d74929330b2ccc8"
+            }
+          ],
+          "config": {
+            "type": "gpu_contention",
+            "version": "5",
+            "kind": "multi_bandwidth",
+            "matrix": 128,
+            "load_ms": 100.0,
+            "idle_ms": 0.0,
+            "bytes_mb": 512,
+            "reserve_free_mb": 512,
+            "size": 640,
+            "batch": 1,
+            "channels": 16,
+            "streams": 4,
+            "buffers": 3,
+            "nice": null,
+            "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py",
+            "replicas": 3
+          },
+          "hash": "49da7bb852cb5e733fc505eb3bfe5c89f7992c8e8427840bc4e9d3c3ffbfd70f"
+        },
+        "config": {
+          "type": "gpu_contention",
+          "version": "5",
+          "kind": "multi_bandwidth",
+          "matrix": 128,
+          "load_ms": 100.0,
+          "idle_ms": 0.0,
+          "bytes_mb": 512,
+          "reserve_free_mb": 512,
+          "size": 640,
+          "batch": 1,
+          "channels": 16,
+          "streams": 4,
+          "buffers": 3,
+          "nice": null,
+          "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py",
+          "replicas": 3
+        },
+        "hash": "49da7bb852cb5e733fc505eb3bfe5c89f7992c8e8427840bc4e9d3c3ffbfd70f",
+        "alive_at_start": true
+      },
+      "FULL": {
+        "wall_p50": 385.60909399893717,
+        "wall_p95": 401.1131713970826,
+        "wall_max": 426.10784499993315,
+        "stage_p95": 377.5492122033029,
+        "cls2_p95": 75.62607229810965,
+        "gate190": false,
+        "sustained_overload": true,
+        "sustained_overload_onset": 26083.771651105,
+        "valid_ratio": 1.0,
+        "inspect_rate_hz": 2.630313372670759,
+        "n": 119,
+        "exceptions": 0,
+        "identity": {
+          "scratch_version": "scratch_v5",
+          "classifier_count": 2,
+          "classifier_shas": [
+            "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438",
+            "d07678a6da421c4edc00ac24b8c5052b0b8b7f8b1614b9d82563ecefbf59360d"
+          ],
+          "detector_sha": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3",
+          "threshold": 0.300273610279458,
+          "fusion_alpha": 0.25,
+          "cls2_expected_zero": false
+        },
+        "gpu": {
+          "tegrastats": {},
+          "gpu_clock_mhz": 1173.0,
+          "emc_mhz": null,
+          "power_mode": "NV Power Mode: MAXN_SUPER\n0"
+        },
+        "process": {
+          "rss_mib": 2037.37890625,
+          "threads": 19,
+          "cpu_pct": 0.0
+        },
+        "injector_alive": true,
+        "raw_label": "S3_FULL_r2"
+      },
+      "LATENCY_DEGRADED_V2": {
+        "wall_p50": 315.32181250076974,
+        "wall_p95": 324.31922699925053,
+        "wall_max": 330.08012500067707,
+        "stage_p95": 308.1990834962198,
+        "cls2_p95": 0.0,
+        "gate190": false,
+        "sustained_overload": true,
+        "sustained_overload_onset": 26140.827378686,
+        "valid_ratio": 1.0,
+        "inspect_rate_hz": 3.243068322775917,
+        "n": 146,
+        "exceptions": 0,
+        "identity": {
+          "scratch_version": "scratch_v5_latency_degraded_v2",
+          "classifier_count": 1,
+          "classifier_shas": [
+            "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438"
+          ],
+          "detector_sha": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3",
+          "threshold": 0.2653394325872992,
+          "fusion_alpha": 0.25,
+          "cls2_expected_zero": true
+        },
+        "gpu": {
+          "tegrastats": {},
+          "gpu_clock_mhz": 1173.0,
+          "emc_mhz": null,
+          "power_mode": "NV Power Mode: MAXN_SUPER\n0"
+        },
+        "process": {
+          "rss_mib": 2037.3828125,
+          "threads": 18,
+          "cpu_pct": 0.0
+        },
+        "injector_alive": true,
+        "raw_label": "S3_V2_r2"
+      },
+      "ratio_v2_over_full": 0.8085479364081769,
+      "delta_p95": -76.79394439783209,
+      "injector_alive_both": true,
+      "envelope_hit": false,
+      "injector_alive_after_stop": false
+    }
+  ],
+  "stages": [
+    {
+      "stage": "load crops",
+      "profile": null,
+      "timeout_s": 60.0,
+      "started_monotonic": 25003.831273495,
+      "started_wall": "2026-09-15T10:34:32.972077+00:00",
+      "status": "PASS",
+      "elapsed_s": 1.131
+    },
+    {
+      "stage": "production reject",
+      "profile": null,
+      "timeout_s": 30.0,
+      "started_monotonic": 25004.997931539,
+      "started_wall": "2026-09-15T10:34:34.138787+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.001
+    },
+    {
+      "stage": "S0 injector start",
+      "profile": null,
+      "timeout_s": 60.0,
+      "started_monotonic": 25004.999041877,
+      "started_wall": "2026-09-15T10:34:34.139823+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.0
+    },
+    {
+      "stage": "load FULL artifacts",
+      "profile": "FULL",
+      "timeout_s": 120.0,
+      "started_monotonic": 25010.024093565,
+      "started_wall": "2026-09-15T10:34:39.165032+00:00",
+      "status": "PASS",
+      "elapsed_s": 4.008
+    },
+    {
+      "stage": "FULL warmup",
+      "profile": "FULL",
+      "timeout_s": 120.0,
+      "started_monotonic": 25014.032091022,
+      "started_wall": "2026-09-15T10:34:43.172958+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.981
+    },
+    {
+      "stage": "FULL first inference",
+      "profile": "FULL",
+      "timeout_s": 60.0,
+      "started_monotonic": 25015.013081367,
+      "started_wall": "2026-09-15T10:34:44.153869+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.21
+    },
+    {
+      "stage": "S0 FULL window",
+      "profile": "FULL",
+      "timeout_s": 75.0,
+      "started_monotonic": 25015.223060571,
+      "started_wall": "2026-09-15T10:34:44.363939+00:00",
+      "status": "PASS",
+      "elapsed_s": 46.712
+    },
+    {
+      "stage": "load LATENCY_DEGRADED_V2 artifacts",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 120.0,
+      "started_monotonic": 25066.960080886,
+      "started_wall": "2026-09-15T10:35:36.100996+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.679
+    },
+    {
+      "stage": "LATENCY_DEGRADED_V2 warmup",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 120.0,
+      "started_monotonic": 25067.639281308,
+      "started_wall": "2026-09-15T10:35:36.780072+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.245
+    },
+    {
+      "stage": "LATENCY_DEGRADED_V2 first inference",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 60.0,
+      "started_monotonic": 25067.884671527,
+      "started_wall": "2026-09-15T10:35:37.025468+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.146
+    },
+    {
+      "stage": "S0 V2 window",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 75.0,
+      "started_monotonic": 25068.030812218,
+      "started_wall": "2026-09-15T10:35:37.171735+00:00",
+      "status": "PASS",
+      "elapsed_s": 46.584
+    },
+    {
+      "stage": "S0 injector start",
+      "profile": null,
+      "timeout_s": 60.0,
+      "started_monotonic": 25154.718930238,
+      "started_wall": "2026-09-15T10:37:03.859757+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.001
+    },
+    {
+      "stage": "load FULL artifacts",
+      "profile": "FULL",
+      "timeout_s": 120.0,
+      "started_monotonic": 25159.734006897,
+      "started_wall": "2026-09-15T10:37:08.874942+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.848
+    },
+    {
+      "stage": "FULL warmup",
+      "profile": "FULL",
+      "timeout_s": 120.0,
+      "started_monotonic": 25160.582730542,
+      "started_wall": "2026-09-15T10:37:09.723524+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.267
+    },
+    {
+      "stage": "FULL first inference",
+      "profile": "FULL",
+      "timeout_s": 60.0,
+      "started_monotonic": 25160.850067623,
+      "started_wall": "2026-09-15T10:37:09.990861+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.218
+    },
+    {
+      "stage": "S0 FULL window",
+      "profile": "FULL",
+      "timeout_s": 75.0,
+      "started_monotonic": 25161.067823569,
+      "started_wall": "2026-09-15T10:37:10.208743+00:00",
+      "status": "PASS",
+      "elapsed_s": 46.59
+    },
+    {
+      "stage": "load LATENCY_DEGRADED_V2 artifacts",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 120.0,
+      "started_monotonic": 25212.684892335,
+      "started_wall": "2026-09-15T10:38:01.825832+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.488
+    },
+    {
+      "stage": "LATENCY_DEGRADED_V2 warmup",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 120.0,
+      "started_monotonic": 25213.173323385,
+      "started_wall": "2026-09-15T10:38:02.314195+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.235
+    },
+    {
+      "stage": "LATENCY_DEGRADED_V2 first inference",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 60.0,
+      "started_monotonic": 25213.40885976,
+      "started_wall": "2026-09-15T10:38:02.549761+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.144
+    },
+    {
+      "stage": "S0 V2 window",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 75.0,
+      "started_monotonic": 25213.552999783,
+      "started_wall": "2026-09-15T10:38:02.694166+00:00",
+      "status": "PASS",
+      "elapsed_s": 46.579
+    },
+    {
+      "stage": "S1 injector start",
+      "profile": null,
+      "timeout_s": 60.0,
+      "started_monotonic": 25300.238330742,
+      "started_wall": "2026-09-15T10:39:29.379189+00:00",
+      "status": "PASS",
+      "elapsed_s": 1.008
+    },
+    {
+      "stage": "load FULL artifacts",
+      "profile": "FULL",
+      "timeout_s": 120.0,
+      "started_monotonic": 25306.248082917,
+      "started_wall": "2026-09-15T10:39:35.389001+00:00",
+      "status": "PASS",
+      "elapsed_s": 2.021
+    },
+    {
+      "stage": "FULL warmup",
+      "profile": "FULL",
+      "timeout_s": 120.0,
+      "started_monotonic": 25308.269642725,
+      "started_wall": "2026-09-15T10:39:37.410503+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.934
+    },
+    {
+      "stage": "FULL first inference",
+      "profile": "FULL",
+      "timeout_s": 60.0,
+      "started_monotonic": 25309.203510091,
+      "started_wall": "2026-09-15T10:39:38.344429+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.244
+    },
+    {
+      "stage": "S1 FULL window",
+      "profile": "FULL",
+      "timeout_s": 75.0,
+      "started_monotonic": 25309.447318673,
+      "started_wall": "2026-09-15T10:39:38.588132+00:00",
+      "status": "PASS",
+      "elapsed_s": 46.585
+    },
+    {
+      "stage": "load LATENCY_DEGRADED_V2 artifacts",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 120.0,
+      "started_monotonic": 25361.060085314,
+      "started_wall": "2026-09-15T10:40:30.201027+00:00",
+      "status": "PASS",
+      "elapsed_s": 1.204
+    },
+    {
+      "stage": "LATENCY_DEGRADED_V2 warmup",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 120.0,
+      "started_monotonic": 25362.264371845,
+      "started_wall": "2026-09-15T10:40:31.405244+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.928
+    },
+    {
+      "stage": "LATENCY_DEGRADED_V2 first inference",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 60.0,
+      "started_monotonic": 25363.19220507,
+      "started_wall": "2026-09-15T10:40:32.333112+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.188
+    },
+    {
+      "stage": "S1 V2 window",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 75.0,
+      "started_monotonic": 25363.380317393,
+      "started_wall": "2026-09-15T10:40:32.521258+00:00",
+      "status": "PASS",
+      "elapsed_s": 46.613
+    },
+    {
+      "stage": "S1 injector start",
+      "profile": null,
+      "timeout_s": 60.0,
+      "started_monotonic": 25450.215765801,
+      "started_wall": "2026-09-15T10:41:59.356594+00:00",
+      "status": "PASS",
+      "elapsed_s": 1.005
+    },
+    {
+      "stage": "load FULL artifacts",
+      "profile": "FULL",
+      "timeout_s": 120.0,
+      "started_monotonic": 25456.238915077,
+      "started_wall": "2026-09-15T10:42:05.379862+00:00",
+      "status": "PASS",
+      "elapsed_s": 1.807
+    },
+    {
+      "stage": "FULL warmup",
+      "profile": "FULL",
+      "timeout_s": 120.0,
+      "started_monotonic": 25458.045940373,
+      "started_wall": "2026-09-15T10:42:07.186800+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.934
+    },
+    {
+      "stage": "FULL first inference",
+      "profile": "FULL",
+      "timeout_s": 60.0,
+      "started_monotonic": 25458.9798869,
+      "started_wall": "2026-09-15T10:42:08.120822+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.242
+    },
+    {
+      "stage": "S1 FULL window",
+      "profile": "FULL",
+      "timeout_s": 75.0,
+      "started_monotonic": 25459.22196829,
+      "started_wall": "2026-09-15T10:42:08.362824+00:00",
+      "status": "PASS",
+      "elapsed_s": 46.754
+    },
+    {
+      "stage": "load LATENCY_DEGRADED_V2 artifacts",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 120.0,
+      "started_monotonic": 25510.992086359,
+      "started_wall": "2026-09-15T10:43:00.133013+00:00",
+      "status": "PASS",
+      "elapsed_s": 1.206
+    },
+    {
+      "stage": "LATENCY_DEGRADED_V2 warmup",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 120.0,
+      "started_monotonic": 25512.198309329,
+      "started_wall": "2026-09-15T10:43:01.339099+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.928
+    },
+    {
+      "stage": "LATENCY_DEGRADED_V2 first inference",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 60.0,
+      "started_monotonic": 25513.126886535,
+      "started_wall": "2026-09-15T10:43:02.267698+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.186
+    },
+    {
+      "stage": "S1 V2 window",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 75.0,
+      "started_monotonic": 25513.313035569,
+      "started_wall": "2026-09-15T10:43:02.453912+00:00",
+      "status": "PASS",
+      "elapsed_s": 46.678
+    },
+    {
+      "stage": "S2 injector start",
+      "profile": null,
+      "timeout_s": 60.0,
+      "started_monotonic": 25600.220741531,
+      "started_wall": "2026-09-15T10:44:29.361577+00:00",
+      "status": "PASS",
+      "elapsed_s": 2.017
+    },
+    {
+      "stage": "load FULL artifacts",
+      "profile": "FULL",
+      "timeout_s": 120.0,
+      "started_monotonic": 25607.263539531,
+      "started_wall": "2026-09-15T10:44:36.404524+00:00",
+      "status": "PASS",
+      "elapsed_s": 2.899
+    },
+    {
+      "stage": "FULL warmup",
+      "profile": "FULL",
+      "timeout_s": 120.0,
+      "started_monotonic": 25610.162376246,
+      "started_wall": "2026-09-15T10:44:39.303232+00:00",
+      "status": "PASS",
+      "elapsed_s": 1.66
+    },
+    {
+      "stage": "FULL first inference",
+      "profile": "FULL",
+      "timeout_s": 60.0,
+      "started_monotonic": 25611.822337264,
+      "started_wall": "2026-09-15T10:44:40.963257+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.324
+    },
+    {
+      "stage": "S2 FULL window",
+      "profile": "FULL",
+      "timeout_s": 75.0,
+      "started_monotonic": 25612.146915747,
+      "started_wall": "2026-09-15T10:44:41.287734+00:00",
+      "status": "PASS",
+      "elapsed_s": 46.756
+    },
+    {
+      "stage": "load LATENCY_DEGRADED_V2 artifacts",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 120.0,
+      "started_monotonic": 25663.932024039,
+      "started_wall": "2026-09-15T10:45:33.072962+00:00",
+      "status": "PASS",
+      "elapsed_s": 1.908
+    },
+    {
+      "stage": "LATENCY_DEGRADED_V2 warmup",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 120.0,
+      "started_monotonic": 25665.840597355,
+      "started_wall": "2026-09-15T10:45:34.981386+00:00",
+      "status": "PASS",
+      "elapsed_s": 1.656
+    },
+    {
+      "stage": "LATENCY_DEGRADED_V2 first inference",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 60.0,
+      "started_monotonic": 25667.496711226,
+      "started_wall": "2026-09-15T10:45:36.637635+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.259
+    },
+    {
+      "stage": "S2 V2 window",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 75.0,
+      "started_monotonic": 25667.756290893,
+      "started_wall": "2026-09-15T10:45:36.897219+00:00",
+      "status": "PASS",
+      "elapsed_s": 46.57
+    },
+    {
+      "stage": "S2 injector start",
+      "profile": null,
+      "timeout_s": 60.0,
+      "started_monotonic": 25754.732477578,
+      "started_wall": "2026-09-15T10:47:03.873317+00:00",
+      "status": "PASS",
+      "elapsed_s": 2.017
+    },
+    {
+      "stage": "load FULL artifacts",
+      "profile": "FULL",
+      "timeout_s": 120.0,
+      "started_monotonic": 25761.775132288,
+      "started_wall": "2026-09-15T10:47:10.916084+00:00",
+      "status": "PASS",
+      "elapsed_s": 2.72
+    },
+    {
+      "stage": "FULL warmup",
+      "profile": "FULL",
+      "timeout_s": 120.0,
+      "started_monotonic": 25764.495842096,
+      "started_wall": "2026-09-15T10:47:13.636776+00:00",
+      "status": "PASS",
+      "elapsed_s": 1.659
+    },
+    {
+      "stage": "FULL first inference",
+      "profile": "FULL",
+      "timeout_s": 60.0,
+      "started_monotonic": 25766.155236157,
+      "started_wall": "2026-09-15T10:47:15.296850+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.325
+    },
+    {
+      "stage": "S2 FULL window",
+      "profile": "FULL",
+      "timeout_s": 75.0,
+      "started_monotonic": 25766.480903438,
+      "started_wall": "2026-09-15T10:47:15.621825+00:00",
+      "status": "PASS",
+      "elapsed_s": 46.768
+    },
+    {
+      "stage": "load LATENCY_DEGRADED_V2 artifacts",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 120.0,
+      "started_monotonic": 25818.269269915,
+      "started_wall": "2026-09-15T10:48:07.410216+00:00",
+      "status": "PASS",
+      "elapsed_s": 1.91
+    },
+    {
+      "stage": "LATENCY_DEGRADED_V2 warmup",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 120.0,
+      "started_monotonic": 25820.179177282,
+      "started_wall": "2026-09-15T10:48:09.320109+00:00",
+      "status": "PASS",
+      "elapsed_s": 1.648
+    },
+    {
+      "stage": "LATENCY_DEGRADED_V2 first inference",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 60.0,
+      "started_monotonic": 25821.827288036,
+      "started_wall": "2026-09-15T10:48:10.968101+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.255
+    },
+    {
+      "stage": "S2 V2 window",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 75.0,
+      "started_monotonic": 25822.082865338,
+      "started_wall": "2026-09-15T10:48:11.223681+00:00",
+      "status": "PASS",
+      "elapsed_s": 46.781
+    },
+    {
+      "stage": "S3 injector start",
+      "profile": null,
+      "timeout_s": 60.0,
+      "started_monotonic": 25909.344516412,
+      "started_wall": "2026-09-15T10:49:38.485355+00:00",
+      "status": "PASS",
+      "elapsed_s": 3.016
+    },
+    {
+      "stage": "load FULL artifacts",
+      "profile": "FULL",
+      "timeout_s": 120.0,
+      "started_monotonic": 25917.364080164,
+      "started_wall": "2026-09-15T10:49:46.532648+00:00",
+      "status": "PASS",
+      "elapsed_s": 3.912
+    },
+    {
+      "stage": "FULL warmup",
+      "profile": "FULL",
+      "timeout_s": 120.0,
+      "started_monotonic": 25921.275954394,
+      "started_wall": "2026-09-15T10:49:50.416835+00:00",
+      "status": "PASS",
+      "elapsed_s": 2.392
+    },
+    {
+      "stage": "FULL first inference",
+      "profile": "FULL",
+      "timeout_s": 60.0,
+      "started_monotonic": 25923.667772352,
+      "started_wall": "2026-09-15T10:49:52.808592+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.389
+    },
+    {
+      "stage": "S3 FULL window",
+      "profile": "FULL",
+      "timeout_s": 75.0,
+      "started_monotonic": 25924.057348816,
+      "started_wall": "2026-09-15T10:49:53.198242+00:00",
+      "status": "PASS",
+      "elapsed_s": 46.921
+    },
+    {
+      "stage": "load LATENCY_DEGRADED_V2 artifacts",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 120.0,
+      "started_monotonic": 25975.992092902,
+      "started_wall": "2026-09-15T10:50:45.133023+00:00",
+      "status": "PASS",
+      "elapsed_s": 2.616
+    },
+    {
+      "stage": "LATENCY_DEGRADED_V2 warmup",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 120.0,
+      "started_monotonic": 25978.607844074,
+      "started_wall": "2026-09-15T10:50:47.748635+00:00",
+      "status": "PASS",
+      "elapsed_s": 2.376
+    },
+    {
+      "stage": "LATENCY_DEGRADED_V2 first inference",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 60.0,
+      "started_monotonic": 25980.984559437,
+      "started_wall": "2026-09-15T10:50:50.125517+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.322
+    },
+    {
+      "stage": "S3 V2 window",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 75.0,
+      "started_monotonic": 25981.306671057,
+      "started_wall": "2026-09-15T10:50:50.447490+00:00",
+      "status": "PASS",
+      "elapsed_s": 46.73
+    },
+    {
+      "stage": "S3 injector start",
+      "profile": null,
+      "timeout_s": 60.0,
+      "started_monotonic": 26068.732531093,
+      "started_wall": "2026-09-15T10:52:17.873419+00:00",
+      "status": "PASS",
+      "elapsed_s": 3.016
+    },
+    {
+      "stage": "load FULL artifacts",
+      "profile": "FULL",
+      "timeout_s": 120.0,
+      "started_monotonic": 26076.77208991,
+      "started_wall": "2026-09-15T10:52:25.913044+00:00",
+      "status": "PASS",
+      "elapsed_s": 3.742
+    },
+    {
+      "stage": "FULL warmup",
+      "profile": "FULL",
+      "timeout_s": 120.0,
+      "started_monotonic": 26080.514553963,
+      "started_wall": "2026-09-15T10:52:29.655436+00:00",
+      "status": "PASS",
+      "elapsed_s": 2.405
+    },
+    {
+      "stage": "FULL first inference",
+      "profile": "FULL",
+      "timeout_s": 60.0,
+      "started_monotonic": 26082.919838921,
+      "started_wall": "2026-09-15T10:52:32.060655+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.425
+    },
+    {
+      "stage": "S3 FULL window",
+      "profile": "FULL",
+      "timeout_s": 75.0,
+      "started_monotonic": 26083.344812509,
+      "started_wall": "2026-09-15T10:52:32.485727+00:00",
+      "status": "PASS",
+      "elapsed_s": 46.84
+    },
+    {
+      "stage": "load LATENCY_DEGRADED_V2 artifacts",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 120.0,
+      "started_monotonic": 26135.212088337,
+      "started_wall": "2026-09-15T10:53:24.353025+00:00",
+      "status": "PASS",
+      "elapsed_s": 2.589
+    },
+    {
+      "stage": "LATENCY_DEGRADED_V2 warmup",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 120.0,
+      "started_monotonic": 26137.801050673,
+      "started_wall": "2026-09-15T10:53:26.941836+00:00",
+      "status": "PASS",
+      "elapsed_s": 2.374
+    },
+    {
+      "stage": "LATENCY_DEGRADED_V2 first inference",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 60.0,
+      "started_monotonic": 26140.175005738,
+      "started_wall": "2026-09-15T10:53:29.315893+00:00",
+      "status": "PASS",
+      "elapsed_s": 0.322
+    },
+    {
+      "stage": "S3 V2 window",
+      "profile": "LATENCY_DEGRADED_V2",
+      "timeout_s": 75.0,
+      "started_monotonic": 26140.497256299,
+      "started_wall": "2026-09-15T10:53:29.638150+00:00",
+      "status": "PASS",
+      "elapsed_s": 46.569
+    }
+  ],
+  "verdict": {
+    "case": "A",
+    "RECOVERY_ENVELOPE_FOUND": true,
+    "envelope_severities": [
+      "S1"
+    ],
+    "MODERATE_PRESSURE_MISSION_LATENCY_RECOVERY": "PRELIMINARY SUPPORTED",
+    "SEVERE_PRESSURE_RECOVERY": "NOT SUPPORTED",
+    "note": "Do not generalize to all overload levels.",
+    "A3_EFFECTIVENESS": "NOT ESTABLISHED",
+    "FORMAL_QUALITY_ADMISSION": "BLOCKED ON FRESH SCRATCH-ONLY HOLDOUT"
+  },
+  "finished_at": "2026-09-15T10:54:56.905006+00:00"
+}
