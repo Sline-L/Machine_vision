@@ -39,56 +39,60 @@ Measurement infrastructure          COMPLETE
 Capability admission framework      ON MAINLINE (fail-closed registry)
 Existing lightweight search         EXHAUSTED
 classifier_only_v1                  REJECTED
-LATENCY_DEGRADED_V2                 ENGINEERING IMPLEMENTED / FORMAL ADMISSION PENDING
-  healthy latency improvement       SUPPORTED
-  pressured latency mitigation      SUPPORTED (S2/S3)
-  moderate-pressure gate recovery   PRELIMINARY SUPPORTED (S1 envelope)
+LATENCY_DEGRADED_V2                 FROZEN AS MECHANISM DEMONSTRATOR
+  mechanism                         PASS
+  moderate-pressure gate recovery   PRELIMINARY SUPPORTED (S1)
+  severe-pressure mitigation        SUPPORTED (S2/S3)
   severe-pressure gate recovery     NOT SUPPORTED
-  consumed-test quality diagnostic  MATERIAL RISK (ΔQ_D≈−0.193; not admission)
-  engineering soak                  PASS
-Fresh formal holdout                MISSING (capability admission blocker)
-A3 Mission-recovery                 PARTIAL — moderate only; severe still open
-Vision redesign / V3                NOT YET NECESSARY for moderate recovery
-                                    (optional later for severe/quality)
+  quality (consumed diagnostic)     MATERIAL RISK (ΔQ_D≈−0.193)
+  Mission admission                 NOT ESTABLISHED — do NOT spend fresh holdout on V2
+  production                        DISABLED (mission_approved=false, available=false)
+Fresh formal holdout                COLLECT/SEAL ONLY — open after V3 primary freeze
+Scratch V3 FP-veto / distill        SPEC READY — RECOMMENDED for Mission-capable A3
+  S1 extra p95 budget               ≲10–12 ms vs V2 (~178→&lt;190); no ~50 ms 2nd backbone
 
 A3 runtime readiness                HIGH
-A3 usable recovery capability       PARTIAL (engineering moderate envelope; not formal)
+A3 usable recovery capability       PARTIAL (V2 moderate demonstrator; quality gap)
 A3 effectiveness                    NOT ESTABLISHED
 ```
 
-`LATENCY_DEGRADED_V2` is effective **latency mitigation**, with a **natural moderate recovery envelope at S1**
-(`replicas=1`: FULL ~226 ms FAIL → V2 ~178 ms PASS, both repeats). Under S2/S3 it remains
-mitigation-only (gate not restored). Evidence branch `srtp-agent/v2-pressure-pilot`.
-Registry: `implemented=true`, `mission_approved=false`, `available=false`.
+`LATENCY_DEGRADED_V2` is frozen as a **moderate-latency recovery mechanism demonstrator**, not a
+final Mission-admissible profile. S1 envelope (FULL ~226 FAIL → V2 ~178 PASS) proves the A3
+workload-reduction thesis; diagnostic FP collapse (ResNet ≈ normal veto) means **do not burn
+fresh holdout on V2**. Next: V3 lightweight FP-veto / distillation under a hard
+≲10–12 ms S1 budget — see
+[v2-frozen-as-mechanism-demonstrator.md](capability-extraction/v3/v2-frozen-as-mechanism-demonstrator.md),
+[v3-lightweight-fp-veto-spec.md](capability-extraction/v3/v3-lightweight-fp-veto-spec.md).
+
+**Dual recommendation (not conflicting):**
+
+```text
+For proving moderate latency recovery:     V3 NOT NECESSARY
+For mission-capable quality-preserving A3: V3 RECOMMENDED / LIKELY NECESSARY
+```
 
 **Independent evidence chains** (do not collapse):
 
-1. Capability admission → **fresh Scratch-only holdout**
-2. Latency recovery mechanism → severity sweep (`v2-severity-sweep-nx.md`)
-3. Relative quality → consumed `test_scratch` diagnostic only (`v2-test_scratch-diagnostic-comparison.md`)
+1. Latency mechanism → severity sweep (`v2-severity-sweep-nx.md`)
+2. Relative quality → consumed `test_scratch` diagnostic only
+3. Formal quality → sealed fresh holdout **after** V3 freeze (not V2)
 
-Holdout PASS alone does not finish Primary A. Moderate recovery ≠ A3 effectiveness.
-V3 recommendation: **NOT YET NECESSARY** for moderate latency recovery; user decides if severe/quality drive a later V3.
+Registry remains `implemented=true`, `mission_approved=false`, `available=false` on
+`srtp-agent/v2-pressure-pilot`.
 
-See
-[v2-severity-sweep-plan.md](capability-extraction/v3/v2-severity-sweep-plan.md),
-[v2-severity-sweep-nx.md](capability-extraction/v3/v2-severity-sweep-nx.md),
-[autonomous-latency-degraded-v2-runtime-status.md](autonomous-latency-degraded-v2-runtime-status.md),
-[teammate-scratch-v5-latest-audit.md](capability-extraction/v3/teammate-scratch-v5-latest-audit.md).
-
-Primary A reopen still requires quality admission **and** scoped recovery claims:
+Primary reopen path:
 
 ```text
-(fresh holdout PASS ∧ mission_approved=true)
-AND
-(declared recovery severity band with evidence
- — currently S1 preliminary only; S3 not supported)
+develop V3 on train/val → freeze primary
+→ one-shot sealed fresh holdout
+→ if Mission PASS → explicit mission_approved=true
+→ NX smoke (preserve S1 envelope) → formal A3
 ```
 
-Then: `admission_proposal → registry → NX smoke → formal A3`.
 Interface for vision: [vision-redesign-interface.md](capability-extraction/v2/vision-redesign-interface.md).
 Registry review: [integration-capability-registry-review.md](integration-capability-registry-review.md).
 V2 runtime review: [integration-latency-degraded-v2-review.md](integration-latency-degraded-v2-review.md).
+Status: [autonomous-latency-degraded-v2-runtime-status.md](autonomous-latency-degraded-v2-runtime-status.md).
 
 Exploration leftovers stay on `experiment/lightweight-capability-v2` /
 `experiment/vision-capability-v2` (Pareto / teammate audit).

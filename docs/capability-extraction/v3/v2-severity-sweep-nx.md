@@ -53,14 +53,18 @@ S2/S3: both FAIL gate; mitigation only (~0.80×)
 - Script: `tools/plot_v2_severity_sweep.py` (matplotlib optional)
 - JSON: `v2-severity-sweep-nx.json`
 
-## Recommendation (latency only)
+## Recommendation
 
 ```text
-V3 NOT YET NECESSARY
+For proving moderate latency recovery:     V3 NOT NECESSARY
+For mission-capable quality-preserving A3: V3 RECOMMENDED / LIKELY NECESSARY
+
+Do NOT spend fresh holdout on V2.
+V3 latency budget under S1: ≲10–12 ms extra vs V2 (~178 → <190).
 ```
 
-for establishing a **moderate-pressure Mission latency recovery** capability (S1 envelope exists).  
-If the product requirement is **severe (S3) gate recovery**, additional workload reduction beyond “drop ResNet” is still required — that is a separate product decision, not auto-started here.
+See [v2-frozen-as-mechanism-demonstrator.md](v2-frozen-as-mechanism-demonstrator.md),
+[v3-lightweight-fp-veto-spec.md](v3-lightweight-fp-veto-spec.md).
 
 ## Separate evidence chains
 

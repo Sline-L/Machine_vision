@@ -1,78 +1,92 @@
 # Autonomous LATENCY_DEGRADED_V2 runtime — status
 
 ```text
-Agent core                         DONE
-Capability registry                DONE
-V2 runtime implementation          DONE
-V2 topology switch                 PASS
-V2 rollback                        PASS
-V2 engineering soak                PASS
+LATENCY_DEGRADED_V2
+FROZEN AS: moderate-latency recovery MECHANISM DEMONSTRATOR
+NOT: final Mission-admissible capability
 
-V2 healthy latency improvement     SUPPORTED
-V2 pressured latency mitigation    SUPPORTED (S2/S3)
-V2 moderate-pressure recovery      PRELIMINARY SUPPORTED (S1 envelope)
-V2 severe-pressure recovery        NOT SUPPORTED (S2/S3)
+Mechanism:                         PASS
+Moderate latency recovery:         PRELIMINARY SUPPORTED (S1)
+Severe-pressure mitigation:        SUPPORTED (S2/S3)
+Severe-pressure recovery:          NOT SUPPORTED
 
-V2 quality vs FULL (consumed test) MATERIAL RISK (diagnostic only; ΔQ_D≈−0.193)
-V2 quality admission               BLOCKED ON FRESH HOLDOUT
-A3 Mission recovery                PARTIAL (moderate only; not end-to-end A3)
-A3 effectiveness                   NOT ESTABLISHED
-
-REGISTRY
+Quality (consumed diagnostic):     MATERIAL RISK (ΔQ_D ≈ −0.193)
+Mission admission:                 NOT ESTABLISHED
+Production:                        DISABLED
   implemented=true
   mission_approved=false
   available=false
+
+Fresh holdout policy:              DO NOT RUN V2 — seal for V3 primary
+A3 effectiveness:                  NOT ESTABLISHED
 ```
 
-## Two independent blockers (+ latency nuance)
+## Engineering decision (2026-09-15)
 
-| blocker | status |
-| --- | --- |
-| Capability admission | `FRESH SCRATCH-ONLY HOLDOUT` |
-| A3 severe Mission-recovery | `V2 DOES NOT RESTORE GATE UNDER S2/S3` |
-| Moderate recovery | S1 envelope **exists** (FULL FAIL / V2 PASS ×2) — not a holdout substitute |
+V2 **should not** consume a future fresh Scratch holdout.  
+Spend that sealed set on a frozen **V3** primary after train/val selection.
 
-## Severity sweep (preregistered)
+Full freeze memo: [v2-frozen-as-mechanism-demonstrator.md](capability-extraction/v3/v2-frozen-as-mechanism-demonstrator.md)
 
-See `docs/capability-extraction/v3/v2-severity-sweep-nx.{json,md,csv}`.
+## Latency evidence (unchanged facts)
 
-| S | replicas | FULL p95 (mean) | V2 p95 (mean) | envelope? |
-| --- | ---: | ---: | ---: | --- |
-| S0 | 0 | ~187 | ~136 | n/a |
-| S1 | 1 | ~226 | ~178 | **YES** |
-| S2 | 2 | ~321 | ~257 | no |
-| S3 | 3 | ~400 | ~323 | no |
+```text
+S0: FULL ~186 → V2 ~136
+S1: FULL ~226 → V2 ~178   FULL FAIL / V2 PASS
+S2: FULL ~321 → V2 ~257
+S3: FULL ~400 → V2 ~323
+```
 
-## Diagnostic quality (consumed `test_scratch`)
+A3 thesis confirmed: degradation must cut real per-inspection workload (SPARSE failed; V2 succeeded at moderate).
 
-See `v2-test_scratch-diagnostic-comparison.md`.  
-**Not admission.** ResNet mainly suppresses FPs (26); V2 Q_D 0.613 vs FULL 0.806.
+## Quality evidence (diagnostic only)
+
+```text
+FULL Q_D 0.806 → V2 Q_D 0.613
+ResNet: 26× FP suppress, 0× FN rescue
+→ ResNet ≈ normal / false-positive veto
+```
+
+## Dual V3 recommendation
+
+```text
+For proving moderate latency recovery:
+  V3 NOT NECESSARY
+
+For mission-capable, quality-preserving A3:
+  V3 RECOMMENDED / LIKELY NECESSARY
+```
+
+## V3 latency budget (from S1)
+
+```text
+S1 V2 p95 ≈ 178 ms
+Mission gate  = 190 ms
+extra budget  ≈ 10–12 ms under S1
+
+MUST NOT restore ~50 ms second backbone (FULL−V2 ≈ 48 ms)
+```
+
+Spec: [v3-lightweight-fp-veto-spec.md](capability-extraction/v3/v3-lightweight-fp-veto-spec.md)
+
+Priority: (1) cheap feature veto (2) distill FP-veto into EffNet (3) ultra-light second model last.
 
 ## Decision matrix
 
 | Dimension | Evidence | Status |
 | --- | --- | --- |
 | Healthy latency | integrated NX | supported |
-| Severe pressure mitigation | S3 | supported |
-| Moderate recovery | severity sweep S1 | **preliminary supported** |
-| Runtime switch | NX engineering | pass |
-| Rollback | pressure | pass |
-| Soak | 30 min | pass |
-| Relative quality vs FULL | consumed test_scratch | diagnostic only — material risk |
-| Formal V2 quality | fresh holdout | blocked |
+| Severe mitigation | S3 | supported |
+| Moderate recovery | S1 sweep | preliminary supported |
+| Runtime switch / rollback / soak | NX | pass |
+| Relative quality vs FULL | consumed test_scratch | material risk (diagnostic) |
+| Formal V2 quality | fresh holdout | **do not spend on V2** |
 | A3 effectiveness | end-to-end | not established |
-
-## V3 recommendation
-
-```text
-V3 NOT YET NECESSARY
-```
-
-(for moderate Mission-latency recovery). Do not auto-train. Revisit if severe gate recovery and/or quality parity are required.
+| Next capability | V3 FP-veto / distill | **recommended for Mission A3** |
 
 ## Git
 
 | item | value |
 | --- | --- |
 | branch | `srtp-agent/v2-pressure-pilot` |
-| teammate dataset tip audited | `dca0306` (unchanged) |
+| teammate dataset tip | `dca0306` |
