@@ -825,6 +825,27 @@ def main():
     report["stages"] = stages.stages
     report["lean_pass"] = lean_pass
 
+    # Preserve prior lean pressure results when this invocation skipped pressure
+    # (e.g. soak-only follow-up after a successful A–F run).
+    prior_path = out_dir / "v2-pressure-pilot-nx.json"
+    if args.skip_pressure and prior_path.is_file():
+        try:
+            prior = json.loads(prior_path.read_text(encoding="utf-8"))
+            if prior.get("lean") and not report.get("lean"):
+                report["lean"] = prior["lean"]
+            elif prior.get("lean") and report.get("lean") and not report["lean"].get("pressure"):
+                if prior["lean"].get("pressure"):
+                    report["lean"]["pressure"] = prior["lean"]["pressure"]
+                if prior["lean"].get("engineering_switch"):
+                    report["lean"]["engineering_switch"] = prior["lean"]["engineering_switch"]
+                if prior["lean"].get("healthy") and not report["lean"].get("healthy"):
+                    report["lean"]["healthy"] = prior["lean"]["healthy"]
+            if prior.get("previous_run_event"):
+                report["previous_run_event"] = prior["previous_run_event"]
+            report["prior_lean_merged"] = True
+        except Exception as exc:  # noqa: BLE001
+            report["prior_lean_merge_error"] = str(exc)
+
     # Verdict from lean pressure if present
     arms = (report.get("lean") or {}).get("pressure", {}).get("arms") or {}
     fp = (arms.get("FULL") or {}).get("wall_ms", {}).get("p95")

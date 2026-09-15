@@ -40,6 +40,9 @@ Capability admission framework      ON MAINLINE (fail-closed registry)
 Existing lightweight search         EXHAUSTED
 classifier_only_v1                  REJECTED
 LATENCY_DEGRADED_V2                 ENGINEERING IMPLEMENTED / FORMAL ADMISSION PENDING
+  healthy integrated latency        PASS (~129.5 vs FULL ~189.1 ms p95)
+  pressure latency mitigation       SUPPORTED (~318 vs FULL ~398 ms p95; gate NOT recovered)
+  engineering soak                  PASS
 Fresh formal holdout                MISSING
 Vision redesign                     REQUIRED IF HOLDOUT FAILS (candidate frozen)
 
@@ -49,10 +52,13 @@ A3 effectiveness                    NOT ESTABLISHED
 ```
 
 `LATENCY_DEGRADED_V2` (EffNet + P2 detector @960, α=0.25): engineering runtime exists on
-`integration/latency-degraded-v2-runtime` with `implemented=true`, `mission_approved=false`,
-`available=false`. Production Control API rejects switches. Only blocker for Primary A formal
-path: **fresh Scratch-only holdout**. See
-[autonomous-latency-degraded-v2-runtime-status.md](autonomous-latency-degraded-v2-runtime-status.md).
+`integration/latency-degraded-v2-runtime` / evidence branch `srtp-agent/v2-pressure-pilot`
+with `implemented=true`, `mission_approved=false`, `available=false`. Production Control API
+rejects switches. NX lean pressure pilot: latency **mitigation** under qualified pressure is
+supported; Mission latency gate recovery is **not** established. Only formal blocker for
+Primary A: **fresh Scratch-only holdout**. See
+[autonomous-latency-degraded-v2-runtime-status.md](autonomous-latency-degraded-v2-runtime-status.md)
+and [v2-pressure-pilot-nx.md](capability-extraction/v3/v2-pressure-pilot-nx.md).
 
 Primary A reopen trigger:
 
