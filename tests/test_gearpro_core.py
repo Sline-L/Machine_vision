@@ -10,6 +10,7 @@ from gp.config import AppConfig, PROJECT_ROOT
 from gp.export_engine import DEFAULT_DEST, DEFAULT_SOURCE
 from gp.launch import EXPORTS, start
 from gp.models import TwoStageInspector
+from gp.missing_hole import MissingHoleRuntime, fuse_probabilities as fuse_missing_hole, load_missing_hole_config
 from gp.scratch_v5 import (
     ScratchV5Runtime,
     apply_temperature,
@@ -25,17 +26,28 @@ class ConfigTests(unittest.TestCase):
         config = AppConfig()
         self.assertEqual(config.locator_model, PROJECT_ROOT / "model" / "model1.pt")
         self.assertEqual(config.model2_config, PROJECT_ROOT / "model" / "model2" / "inference_config.json")
-        self.assertAlmostEqual(config.defect_threshold, 0.300273610279458)
+        self.assertEqual(
+            config.missing_hole_config,
+            PROJECT_ROOT / "model" / "missing_hole_v1" / "inference_config.json",
+        )
+        self.assertAlmostEqual(config.scratch_threshold, 0.300273610279458)
+        self.assertAlmostEqual(config.missing_hole_threshold, 0.3413327979078584)
 
     def test_environment_overrides_deployment_values(self):
         with patch.dict(
             os.environ,
-            {"GEARPRO_CAMERA_INDEX": "4", "GEARPRO_MODEL1": "/tmp/one.pt", "GEARPRO_MODEL2": "/tmp/two.json"},
+            {
+                "GEARPRO_CAMERA_INDEX": "4",
+                "GEARPRO_MODEL1": "/tmp/one.pt",
+                "GEARPRO_MODEL2": "/tmp/two.json",
+                "GEARPRO_MISSING_HOLE_MODEL": "/tmp/three.json",
+            },
         ):
             config = AppConfig.from_environment()
         self.assertEqual(config.camera_index, 4)
         self.assertEqual(config.locator_model, Path("/tmp/one.pt"))
         self.assertEqual(config.model2_config, Path("/tmp/two.json"))
+        self.assertEqual(config.missing_hole_config, Path("/tmp/three.json"))
 
     def test_model2_config_supplies_default_threshold(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -43,7 +55,8 @@ class ConfigTests(unittest.TestCase):
             path.write_text(json.dumps({"default_threshold": 0.412345}), encoding="utf-8")
             with patch.dict(os.environ, {"GEARPRO_MODEL2": str(path)}):
                 config = AppConfig.from_environment()
-        self.assertAlmostEqual(config.defect_threshold, 0.412345)
+        self.assertAlmostEqual(config.scratch_threshold, 0.412345)
+        self.assertAlmostEqual(config.scratch_model_default_threshold, 0.412345)
 
     def test_missing_locator_file_stops_before_qt(self):
         self.assertEqual(start(locator=EXPORTS / "missing.engine"), 1)
@@ -128,6 +141,50 @@ class ScratchV5Tests(unittest.TestCase):
         self.assertIsNone(TwoStageInspector._map_auxiliary_box(None, (0, 0, 10, 10)))
 
 
+class MissingHoleV1Tests(unittest.TestCase):
+    def test_temperature_calibrated_weighted_fusion(self):
+        fused, classifiers = fuse_missing_hole(0.2, 0.4, 0.8, alpha=0.5)
+        self.assertAlmostEqual(classifiers, 0.3)
+        self.assertAlmostEqual(fused, 0.55)
+
+    def test_config_resolves_weights_and_checks_hashes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            files = []
+            for name in ("one.pt", "two.pt", "detector.pt"):
+                path = root / name
+                path.write_bytes(name.encode())
+                files.append((name, hashlib.sha256(name.encode()).hexdigest()))
+            config = {
+                "version": "missing_hole_v1",
+                "models": [
+                    {"name": "one", "kind": "classifier", "family": "efficientnet_b0", "weights": files[0][0], "sha256": files[0][1], "imgsz": 512, "tta": "none", "temperature": 1.0},
+                    {"name": "two", "kind": "classifier", "family": "resnet18", "weights": files[1][0], "sha256": files[1][1], "imgsz": 384, "tta": "none", "temperature": 2.375},
+                    {"name": "det", "kind": "detector", "family": "standard", "scheme": "one_class", "weights": files[2][0], "sha256": files[2][1], "imgsz": 960, "tta": "none", "temperature": 1.85, "conf_floor": 0.001, "iou": 0.7},
+                ],
+                "fusion": {"type": "weighted", "alpha": 0.5, "classifier": {"type": "classifier_mean", "models": ["one", "two"]}, "detector": "det"},
+                "default_threshold": 0.341,
+            }
+            config_path = root / "inference_config.json"
+            config_path.write_text(json.dumps(config), encoding="utf-8")
+            loaded = load_missing_hole_config(config_path)
+            self.assertEqual(loaded["models"][0]["weights"], root / "one.pt")
+            config["models"][2]["sha256"] = "0" * 64
+            config_path.write_text(json.dumps(config), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "权重校验失败"):
+                load_missing_hole_config(config_path)
+
+    def test_real_model_bundle_loads_on_cpu(self):
+        runtime = MissingHoleRuntime(
+            PROJECT_ROOT / "model" / "missing_hole_v1" / "inference_config.json",
+            device="cpu",
+            warmup=False,
+        )
+        self.assertEqual(runtime.version, "missing_hole_v1")
+        self.assertEqual(len(runtime.classifiers), 2)
+        self.assertEqual(set(runtime.detector.names.values()), {"missing_hole"})
+
+
 class ResultTests(unittest.TestCase):
     def test_defect_threshold_controls_verdict(self):
         observation = GearObservation((0, 0, 10, 10), 0.9, 0.6)
@@ -135,6 +192,34 @@ class ResultTests(unittest.TestCase):
         bad = InspectionResult(None, [observation], defect_threshold=0.5)
         self.assertEqual(good.verdict, "合格")
         self.assertEqual(bad.verdict, "不合格")
+
+    def test_specialists_use_or_decision(self):
+        cases = (
+            (False, False, False, []),
+            (True, False, True, ["scratch"]),
+            (False, True, True, ["missing_hole"]),
+            (True, True, True, ["scratch", "missing_hole"]),
+        )
+        for scratch, missing, defective, reasons in cases:
+            with self.subTest(scratch=scratch, missing=missing):
+                observation = GearObservation(
+                    (0, 0, 10, 10), 0.9, 0.6,
+                    scratch_threshold=0.7,
+                    scratch_reject=scratch,
+                    missing_hole_reject=missing,
+                )
+                result = InspectionResult(None, [observation], defect_threshold=0.7)
+                self.assertEqual(result.is_defective, defective)
+                self.assertEqual(result.reject_reasons, reasons)
+
+    def test_legacy_observation_still_honors_missing_hole_reject(self):
+        observation = GearObservation(
+            (0, 0, 10, 10), 0.9, 0.1,
+            scratch_reject=None,
+            missing_hole_reject=True,
+        )
+        result = InspectionResult(None, [observation], defect_threshold=0.7)
+        self.assertTrue(result.is_defective)
 
     def test_stats_count_and_clear(self):
         stats = InspectionStats()

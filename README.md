@@ -2,14 +2,14 @@
 
 GearPro 是运行在 Jetson 或 Linux 工控机上的齿轮在线视觉检测系统。当前 `main-web`
 版本使用 FastAPI 提供后端服务、Vue 3 提供局域网浏览器界面，不再依赖 Qt 桌面环境。
-模型首先定位齿轮，再通过 Scratch V5 三模型融合判断划痕，并把结果显示、统计和发送给
-外部串口设备。
+模型首先定位齿轮，再通过 Scratch V5 与 Missing Hole V1 两个专项模型判断划痕和缺齿/缺口，
+任一专项命中即剔除，并把结果显示、统计和发送给外部串口设备。
 
 ## 主要功能
 
 - 浏览器实时查看相机原图或标注结果，默认最高 10 FPS。
-- Model1 齿轮定位与 Scratch V5 两阶段推理。
-- 显示融合概率、分类概率、检测概率及各阶段耗时。
+- Model1 齿轮定位与 Scratch V5、Missing Hole V1 双专项推理。
+- 显示两项融合概率、命中原因及各阶段耗时。
 - 自由、定量、定时和视频测试模式。
 - 浏览器上传测试视频，测试期间自动禁用串口。
 - 多终端同时查看、单操作员控制锁和共享密码登录。
@@ -22,13 +22,13 @@ GearPro 是运行在 Jetson 或 Linux 工控机上的齿轮在线视觉检测系
 相机或测试视频
   └─ model/model1.pt：YOLO 定位 gear
        └─ 裁剪高分辨率齿轮 ROI
-            └─ model/model2/：Scratch V5
-                 ├─ EfficientNet-B0 分类器
-                 ├─ ResNet18 分类器
-                 ├─ YOLO26-P2 划痕检测器
-                 └─ 0.25 × 分类均值 + 0.75 × 检测概率
-                      ├─ Web 实时显示与统计
-                      └─ 串口输出 01 / 02
+            ├─ model/model2/：Scratch V5
+            │    └─ 0.25 × 分类均值 + 0.75 × 划痕检测概率
+            └─ model/missing_hole_v1/：Missing Hole V1
+                 └─ 0.5 × 分类均值 + 0.5 × 缺口检测概率
+                      └─ 两专项分别过阈值后执行 OR
+                           ├─ Web 实时显示与统计
+                           └─ 串口输出 01 / 02
 ```
 
 ## 项目结构
@@ -44,9 +44,10 @@ GearPro 是运行在 Jetson 或 Linux 工控机上的齿轮在线视觉检测系
 │   ├── worker.py          # 常驻推理线程
 │   ├── models.py          # 两阶段推理流水线
 │   ├── scratch_v5.py      # Model2 融合运行时
+│   ├── missing_hole.py    # Missing Hole V1 融合运行时
 │   └── static/            # 已构建的 Web 页面，可直接部署
 ├── web/                   # Vue 3/Vite 前端源代码
-├── model/                 # Model1 与 Scratch V5 模型包
+├── model/                 # Model1 与两个专项模型包
 ├── docs/                  # 架构、API 和模型文档
 ├── tests/                 # 无硬件测试
 ├── legacy/                # 历史程序和资产
@@ -124,6 +125,7 @@ Git 忽略的 `var/uploads/`，切换视频、返回相机或关闭服务时自�
 | `GEARPRO_SERIAL_PORT` | `/dev/ttyHS1` | 串口设备 |
 | `GEARPRO_MODEL1` | `model/model1.pt` | 齿轮定位模型 |
 | `GEARPRO_MODEL2` | `model/model2/inference_config.json` | Scratch V5 配置 |
+| `GEARPRO_MISSING_HOLE_MODEL` | `model/missing_hole_v1/inference_config.json` | Missing Hole V1 配置 |
 
 内置服务使用 HTTP，适用于可信且隔离的生产局域网。跨网段或公网访问必须放在 HTTPS
 反向代理后，并增加相应的网络访问控制。
@@ -146,10 +148,11 @@ cd web && npm run build
 - [系统架构](docs/architecture.md)
 - [Web API](docs/web-api.md)
 - [Scratch V5](docs/scratch-v5.md)
+- [Missing Hole V1](docs/missing-hole-v1.md)
 - [模型格式与 Jetson 部署](docs/model-formats.md)
 
-当前 Scratch V5 只识别划痕，独立测试 Recall 为 `0.8065`，仍是可运行基线而不是已经
-达到生产目标的最终模型。
+双专项 OR 在锁定 test 上的任意缺陷 Recall 为 `0.8873`、FPR 为 `0.2278`，仍是可运行
+基线，尚未达到 Recall `0.95` 且 FPR 不超过 `0.20` 的生产目标。
 
 ## License
 

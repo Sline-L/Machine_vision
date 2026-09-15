@@ -37,7 +37,7 @@ class SnapshotTests(unittest.TestCase):
         self.assertEqual(camera_health(True, 1500, 0), 0.0)
         self.assertEqual(camera_health(False, 10, 0), 0.0)
 
-    def test_snapshot_has_v1_keys(self):
+    def test_snapshot_has_v2_specialists(self):
         config = AppConfig()
         store = LatestFrame()
         serial = SerialOutput("/dev/null", 9600)
@@ -52,6 +52,11 @@ class SnapshotTests(unittest.TestCase):
             detector_latency_ms=40.0,
             fusion_latency_ms=0.2,
             scratch_latency_ms=53.2,
+            missing_hole_classifier1_latency_ms=8.0,
+            missing_hole_classifier2_latency_ms=7.0,
+            missing_hole_detector_latency_ms=45.0,
+            missing_hole_fusion_latency_ms=0.3,
+            missing_hole_latency_ms=60.3,
         )
         snapshot = build_snapshot(
             config,
@@ -64,14 +69,30 @@ class SnapshotTests(unittest.TestCase):
             last_result=result,
             inspection_active=True,
         )
-        self.assertEqual(snapshot["schema_version"], "system-snapshot.v1")
-        for key in ("system", "camera", "locator", "scratch_v5", "serial", "mission"):
+        self.assertEqual(snapshot["schema_version"], "system-snapshot.v2")
+        for key in ("system", "camera", "locator", "specialists", "inference", "serial", "mission"):
             self.assertIn(key, snapshot)
         self.assertEqual(snapshot["locator"]["backend"], "pt")
-        self.assertEqual(snapshot["scratch_v5"]["profile"], "FULL")
+        self.assertEqual(snapshot["specialists"]["scratch_v5"]["profile"], "FULL")
+        self.assertEqual(snapshot["specialists"]["missing_hole_v1"]["total_latency_ms"], 60.3)
         self.assertEqual(snapshot["mission"]["current_profile"], "FULL")
         self.assertEqual(snapshot["mission"]["utility"], 0.8)
         self.assertEqual(snapshot["serial"]["consecutive_failures"], 2)
+
+    def test_v1_snapshot_remains_available(self):
+        snapshot = build_snapshot(
+            AppConfig(),
+            LatestFrame(),
+            camera_opened=False,
+            camera_device="/dev/video0",
+            read_failures=0,
+            actual_fps=0.0,
+            serial=None,
+            schema_version="system-snapshot.v1",
+        )
+        self.assertEqual(snapshot["schema_version"], "system-snapshot.v1")
+        self.assertIn("scratch_v5", snapshot)
+        self.assertNotIn("specialists", snapshot)
 
     def test_snapshot_tracks_named_profile(self):
         config = AppConfig()

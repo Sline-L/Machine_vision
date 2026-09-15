@@ -29,26 +29,30 @@ GearPro Web 是单设备、单检测流水线的局域网服务。FastAPI 负责
 ## 2. 线程与数据流
 
 - 相机线程通过 OpenCV V4L2 采集，只保存最新帧，不建立积压队列。
-- 推理线程在第一次启动检测时加载 Model1 和 Scratch V5，之后暂停和恢复都复用模型。
+- 推理线程在第一次启动检测时加载 Model1、Scratch V5 和 Missing Hole V1，之后暂停和恢复都复用模型。
 - 相机模式按推理间隔获取最新未处理帧；视频模式按原视频顺序和帧率处理。
 - 推理结果写入最新标注帧和共享状态，再执行冷却计数与串口输出。
 - Web 事件循环不运行 OpenCV 或模型推理；慢客户端不会阻塞采集和检测。
 - 原图与标注图分别缓存一次 JPEG，多客户端共享编码结果。
 
-模型异常、空 ROI、NaN/Inf 和 CUDA OOM 会停止当前检测并进入错误状态。错误结果不参与
-统计，也不会发送串口 `01`。
+任一专项模型异常、空 ROI、NaN/Inf 和 CUDA OOM 会停止当前检测并进入错误状态。错误
+结果不参与统计，也不会发送串口结果；系统不会静默降级为单专项。
 
 ## 3. 模型与业务行为
 
-Model1 对整帧定位齿轮，Scratch V5 对每个 ROI 执行两个分类器和一个划痕检测器：
+Model1 对整帧定位齿轮，两个专项对同一个 ROI 串行推理：
 
 ```text
 defect_score = 0.25 × ((classifier_1 + classifier_2) / 2)
              + 0.75 × detector_probability
+missing_hole_score = 0.5 × ((classifier_1 + classifier_2) / 2)
+                   + 0.5 × detector_probability
+reject = scratch_score >= scratch_threshold
+      OR missing_hole_score >= missing_hole_threshold
 ```
 
-同一帧多个齿轮中任一超过缺陷阈值即为“不合格”。默认阈值来自
-`model/model2/inference_config.json`。辅助划痕框只用于复核，不单独决定结果。
+同一帧多个齿轮中任一专项过自身阈值即为“不合格”。默认阈值分别来自两个模型包。
+辅助划痕框和缺口框只用于复核，不单独决定结果。
 
 合格发送 ASCII `01`，不合格发送 ASCII `02`。未定位到齿轮不计数、不发送串口；默认
 5 秒冷却时间避免连续帧重复计数。视频测试模式始终禁用串口。

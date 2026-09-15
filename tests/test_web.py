@@ -10,6 +10,7 @@ import numpy as np
 from gp.auth import SessionManager
 from gp.config import AppConfig
 from gp.runtime import GearProRuntime
+from gp.types import GearObservation, InspectionResult
 from gp.web import create_app
 
 
@@ -19,8 +20,8 @@ class FakeRuntime:
         self.active = False
         self.resets = 0
 
-    def state(self, control=None):
-        return {"version": "api.v1", "control": control or {}, "inspection": {"active": self.active}}
+    def state(self, control=None, api_version="api.v2"):
+        return {"version": api_version, "control": control or {}, "inspection": {"active": self.active}}
 
     def start_inspection(self):
         self.active = True
@@ -77,10 +78,20 @@ class ApiTests(unittest.IsolatedAsyncioTestCase):
         response = await client.post("/api/v1/session/login", json={"password": "secret", "label": label})
         self.assertEqual(response.status_code, 200)
 
+    async def login_v2(self, client=None, label="测试终端"):
+        client = client or self.client
+        response = await client.post("/api/v2/session/login", json={"password": "secret", "label": label})
+        self.assertEqual(response.status_code, 200)
+
     async def test_state_requires_login(self):
         self.assertEqual((await self.client.get("/api/v1/state")).status_code, 401)
         await self.login()
         self.assertEqual((await self.client.get("/api/v1/state")).status_code, 200)
+
+    async def test_v1_and_v2_return_matching_versions(self):
+        await self.login_v2()
+        self.assertEqual((await self.client.get("/api/v1/state")).json()["version"], "api.v1")
+        self.assertEqual((await self.client.get("/api/v2/state")).json()["version"], "api.v2")
 
     async def test_mutation_requires_control_and_lock_is_exclusive(self):
         await self.login()
@@ -112,12 +123,38 @@ class PersistenceTests(unittest.TestCase):
             restored = AppConfig()
             loaded = restored.load_persisted(path)
             self.assertEqual(restored.camera_index, 7)
-            self.assertAlmostEqual(restored.defect_threshold, 0.456789)
-            self.assertIn("defect_threshold", loaded)
+            self.assertAlmostEqual(restored.scratch_threshold, 0.456789)
+            self.assertIn("scratch_threshold", loaded)
             self.assertNotIn("password", path.read_text(encoding="utf-8"))
+
+    def test_conflicting_legacy_and_v2_thresholds_are_rejected(self):
+        config = AppConfig()
+        with self.assertRaisesRegex(ValueError, "冲突"):
+            config.update({"defect_threshold": 0.4, "scratch_threshold": 0.5})
 
 
 class RuntimeSafetyTests(unittest.TestCase):
+    def test_result_serializers_keep_v1_shape_and_expose_v2_specialists(self):
+        observation = GearObservation(
+            (1, 2, 30, 40), 0.9, 0.2,
+            scratch_threshold=0.3,
+            scratch_reject=False,
+            missing_hole_probability=0.8,
+            missing_hole_threshold=0.4,
+            missing_hole_reject=True,
+        )
+        result = InspectionResult(
+            None,
+            [observation],
+            model_version="scratch_v5",
+            missing_hole_model_version="missing_hole_v1",
+        )
+        v1 = GearProRuntime._serialize_result_v1(result)
+        v2 = GearProRuntime._serialize_result_v2(result)
+        self.assertNotIn("missing_hole_probability", v1["observations"][0])
+        self.assertEqual(v2["reject_reasons"], ["missing_hole"])
+        self.assertTrue(v2["observations"][0]["specialists"]["missing_hole"]["reject"])
+
     def test_jpeg_is_encoded_once_for_the_same_frame(self):
         runtime = GearProRuntime(AppConfig())
         runtime.raw_frames.publish(np.zeros((8, 8, 3), dtype=np.uint8))
