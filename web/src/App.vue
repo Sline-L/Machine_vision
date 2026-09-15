@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 
-const API = '/api/v1'
+const API = '/api/v2'
 const state = ref(null)
 const authenticated = ref(false)
 const passwordRequired = ref(true)
@@ -26,6 +26,20 @@ const verdictClass = computed(() => {
   return result.value.is_defective ? 'bad' : 'good'
 })
 const goodRate = computed(() => `${((state.value?.stats?.good_rate || 0) * 100).toFixed(1)}%`)
+const specialistMaximum = (name, field = 'probability') => {
+  const values = result.value?.observations?.map(item => item.specialists?.[name]?.[field]).filter(Number.isFinite) || []
+  return values.length ? Math.max(...values) : null
+}
+const scratchProbability = computed(() => specialistMaximum('scratch'))
+const missingHoleProbability = computed(() => specialistMaximum('missing_hole'))
+const rejectReason = computed(() => {
+  const labels = { scratch: '划痕', missing_hole: '缺齿/缺口' }
+  return result.value?.reject_reasons?.map(reason => labels[reason] || reason).join(' + ') || '未命中缺陷'
+})
+const modelVersions = computed(() => {
+  const versions = result.value?.model_versions
+  return versions ? `${versions.scratch} + ${versions.missing_hole}` : '模型待加载'
+})
 const streamUrl = computed(() => `${API}/stream?view=${streamView.value}&v=${streamNonce.value}`)
 const healthItems = computed(() => [
   ['服务', true],
@@ -144,6 +158,13 @@ function openSettings() {
   settingsOpen.value = true
 }
 
+function resetThresholds() {
+  const defaults = state.value?.settings?.model_default_thresholds
+  if (!defaults) return
+  settings.scratch_threshold = defaults.scratch
+  settings.missing_hole_threshold = defaults.missing_hole
+}
+
 async function saveSettings() {
   await action('/settings', { ...settings })
   if (!error.value) settingsOpen.value = false
@@ -207,7 +228,7 @@ onBeforeUnmount(() => {
           <img :key="streamNonce" :src="streamUrl" alt="GearPro 实时检测画面" />
           <div :class="['verdict', verdictClass]">
             <span>{{ result?.verdict || (active ? '检测中' : '等待开始') }}</span>
-            <strong v-if="result?.observations?.length">{{ (Math.max(...result.observations.map(x => x.defect_score)) * 100).toFixed(1) }}%</strong>
+            <strong v-if="result?.observations?.length">{{ rejectReason }}</strong>
           </div>
           <div class="source-tag">{{ state.source.type === 'video' ? `测试视频 · ${state.source.video_name}` : `CAM ${state.settings.camera_index}` }}</div>
         </div>
@@ -231,23 +252,23 @@ onBeforeUnmount(() => {
             <strong>{{ result?.verdict || (active ? '检测中' : '等待开始') }}</strong>
           </div>
           <div class="important-values">
-            <div><span>缺陷融合概率</span><strong>{{ result?.observations?.length ? (Math.max(...result.observations.map(x => x.defect_score))*100).toFixed(2)+'%' : '—' }}</strong></div>
+            <div><span>命中原因</span><strong class="reason-value">{{ result?.observations?.length ? rejectReason : '—' }}</strong></div>
             <div><span>定位数量</span><strong>{{ result?.observations?.length ?? 0 }}<small> 个</small></strong></div>
           </div>
           <div class="runtime-status"><i :class="{ running: active }"></i><span>{{ state.status }}</span></div>
         </article>
 
         <article class="panel secondary-panel">
-          <div class="panel-head"><div><span class="eyebrow">INFERENCE DETAILS</span><h2>推理明细</h2></div><b>{{ result?.model_version || '模型待加载' }}</b></div>
+          <div class="panel-head"><div><span class="eyebrow">INFERENCE DETAILS</span><h2>推理明细</h2></div><b>{{ modelVersions }}</b></div>
           <div class="probability-list">
-            <div><span>分类器均值</span><strong>{{ result?.observations?.length ? (Math.max(...result.observations.map(x => x.classifier_probability))*100).toFixed(2)+'%' : '—' }}</strong></div>
-            <div><span>检测器概率</span><strong>{{ result?.observations?.length ? (Math.max(...result.observations.map(x => x.detector_probability))*100).toFixed(2)+'%' : '—' }}</strong></div>
+            <div><span>划痕融合概率</span><strong>{{ scratchProbability === null ? '—' : (scratchProbability*100).toFixed(2)+'%' }}</strong><small>阈值 {{ state.settings.scratch_threshold.toFixed(6) }}</small></div>
+            <div><span>缺齿/缺口概率</span><strong>{{ missingHoleProbability === null ? '—' : (missingHoleProbability*100).toFixed(2)+'%' }}</strong><small>阈值 {{ state.settings.missing_hole_threshold.toFixed(6) }}</small></div>
           </div>
           <div class="detail-grid">
             <span>总耗时<b>{{ result ? result.elapsed_ms.toFixed(1)+' ms' : '—' }}</b></span>
-            <span>定位阶段<b>{{ result ? result.locator_latency_ms.toFixed(1)+' ms' : '—' }}</b></span>
-            <span>分类阶段<b>{{ result ? (result.classifier1_latency_ms + result.classifier2_latency_ms).toFixed(1)+' ms' : '—' }}</b></span>
-            <span>划痕阶段<b>{{ result ? (result.classifier1_latency_ms + result.classifier2_latency_ms + result.detector_latency_ms).toFixed(1)+' ms' : '—' }}</b></span>
+            <span>定位阶段<b>{{ result ? result.timings.locator_ms.toFixed(1)+' ms' : '—' }}</b></span>
+            <span>划痕阶段<b>{{ result ? result.timings.scratch.total_ms.toFixed(1)+' ms' : '—' }}</b></span>
+            <span>缺口阶段<b>{{ result ? result.timings.missing_hole.total_ms.toFixed(1)+' ms' : '—' }}</b></span>
           </div>
         </article>
 
@@ -266,7 +287,7 @@ onBeforeUnmount(() => {
       </aside>
     </section>
 
-    <footer><span>操作权限：{{ ownsControl ? '当前终端' : (state.control.owner_label || '无人控制') }}</span><span>推理档位：{{ state.settings.inference_profile }}</span><span>缺陷阈值：{{ state.settings.defect_threshold.toFixed(6) }}</span></footer>
+    <footer><span>操作权限：{{ ownsControl ? '当前终端' : (state.control.owner_label || '无人控制') }}</span><span>推理档位：{{ state.settings.inference_profile }}</span><span>划痕阈值：{{ state.settings.scratch_threshold.toFixed(6) }}</span><span>缺口阈值：{{ state.settings.missing_hole_threshold.toFixed(6) }}</span></footer>
   </main>
 
   <main v-else class="login-page">
@@ -288,7 +309,8 @@ onBeforeUnmount(() => {
         <label>目标数量<input v-model.number="settings.target_quantity" type="number" min="1" /></label>
         <label>运行时长（分钟）<input v-model.number="settings.duration_minutes" type="number" min="1" /></label>
         <label>齿轮定位阈值<input v-model.number="settings.locator_confidence" type="number" min="0.01" max="0.99" step="0.01" /></label>
-        <label>缺陷判定阈值<input v-model.number="settings.defect_threshold" type="number" min="0.01" max="0.99" step="0.000001" /></label>
+        <label>划痕判定阈值<input v-model.number="settings.scratch_threshold" type="number" min="0.01" max="0.99" step="0.000001" /></label>
+        <label>缺齿/缺口阈值<input v-model.number="settings.missing_hole_threshold" type="number" min="0.01" max="0.99" step="0.000001" /></label>
         <label>推理间隔（秒）<input v-model.number="settings.inference_interval" type="number" min="0.03" max="5" step="0.01" /></label>
         <label>摄像头索引<input v-model.number="settings.camera_index" type="number" min="0" max="32" /></label>
         <label>串口设备<input v-model="settings.serial_port" /></label>
@@ -296,7 +318,7 @@ onBeforeUnmount(() => {
         <label>画面帧率<input v-model.number="settings.stream_fps" type="number" min="1" max="30" /></label>
         <label>JPEG 质量<input v-model.number="settings.stream_quality" type="number" min="30" max="95" /></label>
       </div>
-      <div class="settings-actions"><button type="button" class="button" @click="settingsOpen = false">取消</button><button class="button primary" :disabled="busy">保存设置</button></div>
+      <div class="settings-actions"><button type="button" class="button ghost" @click="resetThresholds">恢复模型默认阈值</button><button type="button" class="button" @click="settingsOpen = false">取消</button><button class="button primary" :disabled="busy">保存设置</button></div>
     </form>
   </div>
 </template>

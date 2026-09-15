@@ -216,6 +216,7 @@ button:disabled { cursor: not-allowed; opacity: .48; }
 .important-values div { padding: 8px 10px; border: 1px solid #e0eaec; border-radius: 9px; background: #fff; }
 .important-values span { display: block; color: #8ba0a6; font-size: 10px; }
 .important-values strong { display: block; margin-top: 2px; color: #3e6265; font-size: 17px; }
+.important-values .reason-value { font-size: 13px; }
 .important-values small { color: #8aa0a6; font-size: 10px; font-weight: 400; }
 
 .runtime-status { display: flex; align-items: center; gap: 7px; padding: 7px 12px; border-top: 1px solid #e4edef; color: #789198; font-size: 10px; }
@@ -224,6 +225,7 @@ button:disabled { cursor: not-allowed; opacity: .48; }
 .secondary-panel .probability-list { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; padding: 8px 12px; }
 .secondary-panel .probability-list div { display: block; padding: 7px 9px; border: 1px solid #e2ecee; border-radius: 8px; background: #f9fbfb; }
 .secondary-panel .probability-list strong { display: block; margin-top: 5px; }
+.secondary-panel .probability-list small { display: block; margin-top: 2px; color: #91a5aa; font-size: 9px; }
 .probability-list { padding: 9px 18px; }
 .probability-list div { display: flex; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid #e5edef; color: #839ba2; font-size: 12px; }
 .probability-list strong { color: #3c5961; font-size: 14px; }
