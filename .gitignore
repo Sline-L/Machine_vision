@@ -1,23 +1,75 @@
-# Python caches
+# Python caches and build artifacts
 __pycache__/
 *.py[cod]
 *$py.class
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
 
-# Local environments
+# Virtual environments
 .venv/
 venv/
 env/
 
-# Local tool/cache state
-.ultralytics/
-
-# Generated training and inference outputs
-runs/
-outputs/
-
-# OS/editor noise
-.DS_Store
-Thumbs.db
+# Local editor and OS files
 .vscode/
 .idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Local environment files and secrets
+.env
+.env.*
+!.env.example
+
+# Runtime caches and transient logs
+.ultralytics/
+*.log
+*.tmp
+*.temp
+*.bak
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Keep project assets, models, experiment outputs, and documentation
+!docs/
+!docs/**
+!weights/
+!weights/**
+!runs/
+!runs/**
+!outputs/
+!outputs/**
+!archive/
+!archive/**
+!*.md
+!*.txt
+!*.pdf
+!*.doc
+!*.docx
+!*.xls
+!*.xlsx
+!*.ppt
+!*.pptx
+!*.pt
+!*.pth
+!*.onnx
+!*.engine
+!*.yaml
+!*.yml
+!*.csv
+!*.json
+!*.xml
+!*.jpg
+!*.jpeg
+!*.png
+!*.bmp
+!*.tif
+!*.tiff

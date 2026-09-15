@@ -1,0 +1,981 @@
+{
+  "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\defect_search_v2\\final\\scratch_tiled_best.pt",
+  "selection": "tile_plus_full",
+  "validation": {
+    "tile_only": {
+      "threshold": 0.4,
+      "precision": 0.6153846153846154,
+      "recall": 0.3076923076923077,
+      "f1": 0.4102564102564103,
+      "tp": 8,
+      "fp": 5,
+      "fn": 18,
+      "per_image": [
+        {
+          "stem": "train_002",
+          "tp": 2,
+          "fp": 1,
+          "fn": 2
+        },
+        {
+          "stem": "train_006",
+          "tp": 3,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_011",
+          "tp": 1,
+          "fp": 0,
+          "fn": 3
+        },
+        {
+          "stem": "train_020",
+          "tp": 2,
+          "fp": 1,
+          "fn": 1
+        },
+        {
+          "stem": "train_025",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_026",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_027",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_063",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_064",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_065",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_066",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_080",
+          "tp": 0,
+          "fp": 0,
+          "fn": 1
+        },
+        {
+          "stem": "train_082",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_083",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_084",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_085",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_115",
+          "tp": 0,
+          "fp": 0,
+          "fn": 3
+        },
+        {
+          "stem": "train_135",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_137",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_139",
+          "tp": 0,
+          "fp": 1,
+          "fn": 0
+        },
+        {
+          "stem": "train_155",
+          "tp": 0,
+          "fp": 0,
+          "fn": 3
+        },
+        {
+          "stem": "train_156",
+          "tp": 0,
+          "fp": 0,
+          "fn": 1
+        },
+        {
+          "stem": "train_169",
+          "tp": 0,
+          "fp": 1,
+          "fn": 0
+        },
+        {
+          "stem": "train_209",
+          "tp": 0,
+          "fp": 0,
+          "fn": 1
+        },
+        {
+          "stem": "train_214",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_215",
+          "tp": 0,
+          "fp": 0,
+          "fn": 1
+        },
+        {
+          "stem": "train_216",
+          "tp": 0,
+          "fp": 0,
+          "fn": 1
+        },
+        {
+          "stem": "train_217",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_224",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_226",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_234",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_237",
+          "tp": 0,
+          "fp": 1,
+          "fn": 0
+        },
+        {
+          "stem": "train_255",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_256",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_265",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_266",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_267",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_268",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_274",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_275",
+          "tp": 0,
+          "fp": 0,
+          "fn": 1
+        },
+        {
+          "stem": "train_276",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_277",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_281",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_304",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_306",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_321",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_323",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_324",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_325",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_326",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_327",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_337",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      ]
+    },
+    "tile_plus_full": {
+      "threshold": 0.4,
+      "precision": 0.5555555555555556,
+      "recall": 0.38461538461538464,
+      "f1": 0.4545454545454546,
+      "tp": 10,
+      "fp": 8,
+      "fn": 16,
+      "per_image": [
+        {
+          "stem": "train_002",
+          "tp": 2,
+          "fp": 3,
+          "fn": 2
+        },
+        {
+          "stem": "train_006",
+          "tp": 3,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_011",
+          "tp": 1,
+          "fp": 0,
+          "fn": 3
+        },
+        {
+          "stem": "train_020",
+          "tp": 2,
+          "fp": 1,
+          "fn": 1
+        },
+        {
+          "stem": "train_025",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_026",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_027",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_063",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_064",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_065",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_066",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_080",
+          "tp": 0,
+          "fp": 0,
+          "fn": 1
+        },
+        {
+          "stem": "train_082",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_083",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_084",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_085",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_115",
+          "tp": 1,
+          "fp": 0,
+          "fn": 2
+        },
+        {
+          "stem": "train_135",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_137",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_139",
+          "tp": 0,
+          "fp": 1,
+          "fn": 0
+        },
+        {
+          "stem": "train_155",
+          "tp": 0,
+          "fp": 0,
+          "fn": 3
+        },
+        {
+          "stem": "train_156",
+          "tp": 0,
+          "fp": 0,
+          "fn": 1
+        },
+        {
+          "stem": "train_169",
+          "tp": 0,
+          "fp": 1,
+          "fn": 0
+        },
+        {
+          "stem": "train_209",
+          "tp": 0,
+          "fp": 0,
+          "fn": 1
+        },
+        {
+          "stem": "train_214",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_215",
+          "tp": 0,
+          "fp": 0,
+          "fn": 1
+        },
+        {
+          "stem": "train_216",
+          "tp": 0,
+          "fp": 0,
+          "fn": 1
+        },
+        {
+          "stem": "train_217",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_224",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_226",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_234",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_237",
+          "tp": 0,
+          "fp": 1,
+          "fn": 0
+        },
+        {
+          "stem": "train_255",
+          "tp": 0,
+          "fp": 1,
+          "fn": 0
+        },
+        {
+          "stem": "train_256",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_265",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_266",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_267",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_268",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_274",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_275",
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_276",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_277",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_281",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_304",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_306",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_321",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_323",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_324",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_325",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_326",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_327",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        {
+          "stem": "train_337",
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      ]
+    }
+  },
+  "test": {
+    "threshold": 0.4,
+    "precision": 0.5185185185185185,
+    "recall": 0.5384615384615384,
+    "f1": 0.5283018867924528,
+    "tp": 14,
+    "fp": 13,
+    "fn": 12,
+    "per_image": [
+      {
+        "stem": "train_007",
+        "tp": 1,
+        "fp": 0,
+        "fn": 2
+      },
+      {
+        "stem": "train_008",
+        "tp": 3,
+        "fp": 2,
+        "fn": 0
+      },
+      {
+        "stem": "train_012",
+        "tp": 4,
+        "fp": 1,
+        "fn": 0
+      },
+      {
+        "stem": "train_018",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_028",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_029",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_036",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_038",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_041",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_042",
+        "tp": 0,
+        "fp": 1,
+        "fn": 0
+      },
+      {
+        "stem": "train_050",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_052",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_071",
+        "tp": 1,
+        "fp": 0,
+        "fn": 3
+      },
+      {
+        "stem": "train_078",
+        "tp": 1,
+        "fp": 0,
+        "fn": 1
+      },
+      {
+        "stem": "train_079",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_095",
+        "tp": 0,
+        "fp": 0,
+        "fn": 1
+      },
+      {
+        "stem": "train_108",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_112",
+        "tp": 0,
+        "fp": 0,
+        "fn": 2
+      },
+      {
+        "stem": "train_114",
+        "tp": 2,
+        "fp": 1,
+        "fn": 0
+      },
+      {
+        "stem": "train_124",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_131",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_140",
+        "tp": 0,
+        "fp": 1,
+        "fn": 0
+      },
+      {
+        "stem": "train_142",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_163",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_164",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_166",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_184",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_191",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_193",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_194",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_197",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_204",
+        "tp": 0,
+        "fp": 3,
+        "fn": 2
+      },
+      {
+        "stem": "train_213",
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_218",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_221",
+        "tp": 0,
+        "fp": 1,
+        "fn": 1
+      },
+      {
+        "stem": "train_229",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_236",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_241",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_249",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_254",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_258",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_263",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_286",
+        "tp": 1,
+        "fp": 2,
+        "fn": 0
+      },
+      {
+        "stem": "train_291",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_295",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_300",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_308",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_312",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_313",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_322",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_334",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_339",
+        "tp": 0,
+        "fp": 1,
+        "fn": 0
+      }
+    ]
+  },
+  "inference": {
+    "tile": 384,
+    "overlap": 0.5,
+    "nms_iou": 0.5,
+    "confidence": 0.4
+  }
+}

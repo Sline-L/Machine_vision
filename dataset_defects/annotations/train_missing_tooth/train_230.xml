@@ -1,0 +1,26 @@
+<annotation>
+	<folder>train_missing_tooth</folder>
+	<filename>train_230.jpg</filename>
+	<path>F:\Work\VSCode\Projects\DATASET\dataset_defects\images\train_missing_tooth\train_230.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>506</width>
+		<height>190</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>oblique</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>86</xmin>
+			<ymin>55</ymin>
+			<xmax>102</xmax>
+			<ymax>79</ymax>
+		</bndbox>
+	</object>
+</annotation>

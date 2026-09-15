@@ -4,15 +4,21 @@
 
 ## 当前状态
 
+Missing Hole V1 已完成 34 个专项实验、统一模型对照和一次锁定 test。完整结论见 `docs/missing_hole_v1/FINAL_REPORT.md`。
+
 | 阶段 | 用途 | 当前推荐产物 |
 | --- | --- | --- |
 | 第一阶段 | 检测齿轮并裁切 ROI | `runs/gear_yolo26n_496train_50val_fixed/weights/best.pt` |
+| 第二阶段 Missing Hole V1 | 判断并辅助定位缺齿/缺口 | `outputs/missing_hole_v1/inference_config.json` |
+| 第二阶段 Scratch V5 + Missing Hole V1 | 生产高召回 OR 判定 | `infer_gear_defects.py` |
 | 第二阶段 V4 | 判断有无任意缺陷 | `outputs/binary_defect_v4/final_ensemble/` 三模型融合 |
 | 第二阶段 V3 | 区分并定位 scratch/missing_tooth | 保留用于研究和辅助复核，不建议直接生产剔除 |
 
 V4 最终融合在当前留出集上的 Recall 为 0.633、Precision 为 0.731、正常误报率为 0.350，尚未达到 Recall 0.95 / FPR 0.30 的目标。重新训练时应优先增加独立拍摄的低对比划痕和强反光正常样本。
 
 V5 只检测 `scratch`，同时使用两个图像分类器和一个单类检测器。当前验证集结果为 Recall 0.977、Precision 0.824、F1 0.894、正常误报率 0.084，已经达到 Recall >= 0.95 / FPR <= 0.20 的目标。验证集同时参与模型和阈值选择，因此该结果不是严格盲测成绩。
+
+Missing Hole V1 在锁定 test 上 Recall 为 0.818、Precision 为 0.900、FPR 为 0.038；主要瓶颈是 oblique Recall 仅 0.588。与 Scratch V5 按 OR 联合后，任意缺陷 Recall 为 0.887、FPR 为 0.228。统一单模型 test Recall 仅 0.761，因此当前推荐保留专项多模型方案。
 
 新增的 150 张 `test_scratch` 独立测试集固定阈值结果为 Recall 0.806、Precision 0.556、F1 0.658、正常误报率 0.168（TP/FP/TN/FN = 25/20/99/6）。完整结果位于 `outputs/scratch_v5/test_scratch/`；该测试集应继续锁定，不得用于后续训练和调阈值。
 

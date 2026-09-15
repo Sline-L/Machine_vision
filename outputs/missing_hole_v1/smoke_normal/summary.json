@@ -1,0 +1,8 @@
+{
+  "images": 1,
+  "rejected": 0,
+  "passed": 1,
+  "scratch_config": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\scratch_v5\\inference_config.json",
+  "missing_config": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\missing_hole_v1\\inference_config.json",
+  "decision_rule": "REJECT when scratch OR missing_hole reaches its locked threshold"
+}

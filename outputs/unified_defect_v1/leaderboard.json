@@ -1,0 +1,455 @@
+[
+  {
+    "name": "joint_cls_resnet18_512",
+    "kind": "classifier",
+    "family": "resnet18",
+    "imgsz": 512,
+    "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\runs\\missing_hole_v1\\joint_cls_resnet18_512\\best.pt",
+    "temperature": 0.6,
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.7659175937053323,
+        "recall": 0.6792452830188679,
+        "precision": 0.9473684210526315,
+        "f1": 0.7912087912087911,
+        "fpr": 0.08333333333333333,
+        "specificity": 0.9166666666666666,
+        "tp": 36,
+        "fp": 2,
+        "tn": 22,
+        "fn": 17
+      },
+      "0.2": {
+        "threshold": 0.7017331448314187,
+        "recall": 0.8867924528301887,
+        "precision": 0.9215686274509803,
+        "f1": 0.9038461538461539,
+        "fpr": 0.16666666666666666,
+        "specificity": 0.8333333333333334,
+        "tp": 47,
+        "fp": 4,
+        "tn": 20,
+        "fn": 6
+      },
+      "0.3": {
+        "threshold": 0.7017331448314187,
+        "recall": 0.8867924528301887,
+        "precision": 0.9215686274509803,
+        "f1": 0.9038461538461539,
+        "fpr": 0.16666666666666666,
+        "specificity": 0.8333333333333334,
+        "tp": 47,
+        "fp": 4,
+        "tn": 20,
+        "fn": 6
+      },
+      "0.5": {
+        "threshold": 0.6476332643616576,
+        "recall": 0.9245283018867925,
+        "precision": 0.8448275862068966,
+        "f1": 0.8828828828828829,
+        "fpr": 0.375,
+        "specificity": 0.625,
+        "tp": 49,
+        "fp": 9,
+        "tn": 15,
+        "fn": 4
+      }
+    },
+    "primary": {
+      "threshold": 0.7017331448314187,
+      "recall": 0.8867924528301887,
+      "precision": 0.9215686274509803,
+      "f1": 0.9038461538461539,
+      "fpr": 0.16666666666666666,
+      "specificity": 0.8333333333333334,
+      "tp": 47,
+      "fp": 4,
+      "tn": 20,
+      "fn": 6
+    },
+    "auroc": 0.8608490566037736,
+    "auprc": 0.9010595667006073,
+    "groups": {
+      "bottom": {
+        "images": 0,
+        "recall": 0.0
+      },
+      "oblique": {
+        "images": 0,
+        "recall": 0.0
+      },
+      "side": {
+        "images": 0,
+        "recall": 0.0
+      },
+      "difficult": {
+        "images": 3,
+        "recall": 0.3333333333333333
+      }
+    },
+    "tta": "none"
+  },
+  {
+    "name": "joint_cls_efficientnet_b0_512",
+    "kind": "classifier",
+    "family": "efficientnet_b0",
+    "imgsz": 512,
+    "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\runs\\missing_hole_v1\\joint_cls_efficientnet_b0_512\\best.pt",
+    "temperature": 1.125,
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.8594004400322351,
+        "recall": 0.6226415094339622,
+        "precision": 0.9428571428571428,
+        "f1": 0.7500000000000001,
+        "fpr": 0.08333333333333333,
+        "specificity": 0.9166666666666666,
+        "tp": 33,
+        "fp": 2,
+        "tn": 22,
+        "fn": 20
+      },
+      "0.2": {
+        "threshold": 0.6764997972601763,
+        "recall": 0.9433962264150944,
+        "precision": 0.9259259259259259,
+        "f1": 0.9345794392523364,
+        "fpr": 0.16666666666666666,
+        "specificity": 0.8333333333333334,
+        "tp": 50,
+        "fp": 4,
+        "tn": 20,
+        "fn": 3
+      },
+      "0.3": {
+        "threshold": 0.6764997972601763,
+        "recall": 0.9433962264150944,
+        "precision": 0.9259259259259259,
+        "f1": 0.9345794392523364,
+        "fpr": 0.16666666666666666,
+        "specificity": 0.8333333333333334,
+        "tp": 50,
+        "fp": 4,
+        "tn": 20,
+        "fn": 3
+      },
+      "0.5": {
+        "threshold": 0.4107453829453786,
+        "recall": 1.0,
+        "precision": 0.8548387096774194,
+        "f1": 0.9217391304347826,
+        "fpr": 0.375,
+        "specificity": 0.625,
+        "tp": 53,
+        "fp": 9,
+        "tn": 15,
+        "fn": 0
+      }
+    },
+    "primary": {
+      "threshold": 0.6764997972601763,
+      "recall": 0.9433962264150944,
+      "precision": 0.9259259259259259,
+      "f1": 0.9345794392523364,
+      "fpr": 0.16666666666666666,
+      "specificity": 0.8333333333333334,
+      "tp": 50,
+      "fp": 4,
+      "tn": 20,
+      "fn": 3
+    },
+    "auroc": 0.9056603773584906,
+    "auprc": 0.9448890040110808,
+    "groups": {
+      "bottom": {
+        "images": 0,
+        "recall": 0.0
+      },
+      "oblique": {
+        "images": 0,
+        "recall": 0.0
+      },
+      "side": {
+        "images": 0,
+        "recall": 0.0
+      },
+      "difficult": {
+        "images": 3,
+        "recall": 0.0
+      }
+    },
+    "tta": "none"
+  },
+  {
+    "name": "joint_cls_yolo_cls_512",
+    "kind": "classifier",
+    "family": "yolo_cls",
+    "imgsz": 512,
+    "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\runs\\missing_hole_v1\\joint_cls_yolo_cls_512\\weights\\best.pt",
+    "temperature": 3.3499999999999996,
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.8333476230608955,
+        "recall": 0.4339622641509434,
+        "precision": 0.92,
+        "f1": 0.5897435897435898,
+        "fpr": 0.08333333333333333,
+        "specificity": 0.9166666666666666,
+        "tp": 23,
+        "fp": 2,
+        "tn": 22,
+        "fn": 30
+      },
+      "0.2": {
+        "threshold": 0.7097248394648837,
+        "recall": 0.7169811320754716,
+        "precision": 0.9047619047619048,
+        "f1": 0.8,
+        "fpr": 0.16666666666666666,
+        "specificity": 0.8333333333333334,
+        "tp": 38,
+        "fp": 4,
+        "tn": 20,
+        "fn": 15
+      },
+      "0.3": {
+        "threshold": 0.6359846913764017,
+        "recall": 0.8301886792452831,
+        "precision": 0.8627450980392157,
+        "f1": 0.8461538461538461,
+        "fpr": 0.2916666666666667,
+        "specificity": 0.7083333333333333,
+        "tp": 44,
+        "fp": 7,
+        "tn": 17,
+        "fn": 9
+      },
+      "0.5": {
+        "threshold": 0.2684882295327866,
+        "recall": 1.0,
+        "precision": 0.8153846153846154,
+        "f1": 0.8983050847457628,
+        "fpr": 0.5,
+        "specificity": 0.5,
+        "tp": 53,
+        "fp": 12,
+        "tn": 12,
+        "fn": 0
+      }
+    },
+    "primary": {
+      "threshold": 0.7097248394648837,
+      "recall": 0.7169811320754716,
+      "precision": 0.9047619047619048,
+      "f1": 0.8,
+      "fpr": 0.16666666666666666,
+      "specificity": 0.8333333333333334,
+      "tp": 38,
+      "fp": 4,
+      "tn": 20,
+      "fn": 15
+    },
+    "auroc": 0.8294025157232704,
+    "auprc": 0.8765383690397024,
+    "groups": {
+      "bottom": {
+        "images": 0,
+        "recall": 0.0
+      },
+      "oblique": {
+        "images": 0,
+        "recall": 0.0
+      },
+      "side": {
+        "images": 0,
+        "recall": 0.0
+      },
+      "difficult": {
+        "images": 3,
+        "recall": 1.0
+      }
+    },
+    "tta": "flip"
+  },
+  {
+    "name": "joint_det_joint_one_class_p2_960",
+    "kind": "detector",
+    "scheme": "joint_one_class",
+    "imgsz": 960,
+    "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\runs\\missing_hole_v1\\joint_det_joint_one_class_p2_960\\weights\\best.pt",
+    "temperature": 3.675,
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.4816207981922263,
+        "recall": 0.41379310344827586,
+        "precision": 0.8571428571428571,
+        "f1": 0.5581395348837208,
+        "fpr": 0.08333333333333333,
+        "specificity": 0.9166666666666666,
+        "tp": 12,
+        "fp": 2,
+        "tn": 22,
+        "fn": 17
+      },
+      "0.2": {
+        "threshold": 0.3475140408258613,
+        "recall": 0.7241379310344828,
+        "precision": 0.84,
+        "f1": 0.7777777777777777,
+        "fpr": 0.16666666666666666,
+        "specificity": 0.8333333333333334,
+        "tp": 21,
+        "fp": 4,
+        "tn": 20,
+        "fn": 8
+      },
+      "0.3": {
+        "threshold": 0.3128417886991367,
+        "recall": 0.9655172413793104,
+        "precision": 0.8235294117647058,
+        "f1": 0.888888888888889,
+        "fpr": 0.25,
+        "specificity": 0.75,
+        "tp": 28,
+        "fp": 6,
+        "tn": 18,
+        "fn": 1
+      },
+      "0.5": {
+        "threshold": 0.3128417886991367,
+        "recall": 0.9655172413793104,
+        "precision": 0.8235294117647058,
+        "f1": 0.888888888888889,
+        "fpr": 0.25,
+        "specificity": 0.75,
+        "tp": 28,
+        "fp": 6,
+        "tn": 18,
+        "fn": 1
+      }
+    },
+    "primary": {
+      "threshold": 0.3475140408258613,
+      "recall": 0.7241379310344828,
+      "precision": 0.84,
+      "f1": 0.7777777777777777,
+      "fpr": 0.16666666666666666,
+      "specificity": 0.8333333333333334,
+      "tp": 21,
+      "fp": 4,
+      "tn": 20,
+      "fn": 8
+    },
+    "auroc": 0.875,
+    "auprc": 0.8847076489088063,
+    "groups": {
+      "bottom": {
+        "images": 0,
+        "recall": 0.0
+      },
+      "oblique": {
+        "images": 0,
+        "recall": 0.0
+      },
+      "side": {
+        "images": 0,
+        "recall": 0.0
+      },
+      "difficult": {
+        "images": 2,
+        "recall": 0.5
+      }
+    }
+  },
+  {
+    "name": "joint_det_joint_two_class_p2_960",
+    "kind": "detector",
+    "scheme": "joint_two_class",
+    "imgsz": 960,
+    "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\runs\\missing_hole_v1\\joint_det_joint_two_class_p2_960\\weights\\best.pt",
+    "temperature": 3.1999999999999997,
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.4916176931032915,
+        "recall": 0.3793103448275862,
+        "precision": 0.8461538461538461,
+        "f1": 0.5238095238095238,
+        "fpr": 0.08333333333333333,
+        "specificity": 0.9166666666666666,
+        "tp": 11,
+        "fp": 2,
+        "tn": 22,
+        "fn": 18
+      },
+      "0.2": {
+        "threshold": 0.416072265905845,
+        "recall": 0.6551724137931034,
+        "precision": 0.8260869565217391,
+        "f1": 0.7307692307692308,
+        "fpr": 0.16666666666666666,
+        "specificity": 0.8333333333333334,
+        "tp": 19,
+        "fp": 4,
+        "tn": 20,
+        "fn": 10
+      },
+      "0.3": {
+        "threshold": 0.388822725372149,
+        "recall": 0.7586206896551724,
+        "precision": 0.8148148148148148,
+        "f1": 0.7857142857142857,
+        "fpr": 0.20833333333333334,
+        "specificity": 0.7916666666666666,
+        "tp": 22,
+        "fp": 5,
+        "tn": 19,
+        "fn": 7
+      },
+      "0.5": {
+        "threshold": 0.30193816910835697,
+        "recall": 0.9655172413793104,
+        "precision": 0.7777777777777778,
+        "f1": 0.8615384615384615,
+        "fpr": 0.3333333333333333,
+        "specificity": 0.6666666666666667,
+        "tp": 28,
+        "fp": 8,
+        "tn": 16,
+        "fn": 1
+      }
+    },
+    "primary": {
+      "threshold": 0.416072265905845,
+      "recall": 0.6551724137931034,
+      "precision": 0.8260869565217391,
+      "f1": 0.7307692307692308,
+      "fpr": 0.16666666666666666,
+      "specificity": 0.8333333333333334,
+      "tp": 19,
+      "fp": 4,
+      "tn": 20,
+      "fn": 10
+    },
+    "auroc": 0.8347701149425287,
+    "auprc": 0.8473962585791981,
+    "groups": {
+      "bottom": {
+        "images": 0,
+        "recall": 0.0
+      },
+      "oblique": {
+        "images": 0,
+        "recall": 0.0
+      },
+      "side": {
+        "images": 0,
+        "recall": 0.0
+      },
+      "difficult": {
+        "images": 2,
+        "recall": 0.0
+      }
+    }
+  }
+]

@@ -1,0 +1,316 @@
+{
+  "version": "missing_hole_v1",
+  "evaluated_at": "2026-09-13 17:07:01",
+  "config": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\missing_hole_v1\\inference_config.json",
+  "config_sha256": "b33a87326a440640dd868bac46aa87535231cf1b947ca5905f59eeaffa5a5f9c",
+  "test_manifest_sha256": "317f49feb65d81ad4b4767bd553ff59bd01ba95b2bef9302d1e9939ce2e7de3b",
+  "weights_and_threshold_selected_without_test": true,
+  "image_metrics": {
+    "all": {
+      "images": 150,
+      "positives": 44,
+      "negatives": 106,
+      "threshold": 0.3413327979078584,
+      "recall": 0.8181818181818182,
+      "precision": 0.9,
+      "f1": 0.8571428571428572,
+      "fpr": 0.03773584905660377,
+      "specificity": 0.9622641509433962,
+      "npv": 0.9272727272727272,
+      "auroc": 0.8923670668953688,
+      "auprc": 0.8990378682356985,
+      "tp": 36,
+      "fp": 4,
+      "tn": 102,
+      "fn": 8,
+      "groups": {
+        "bottom": {
+          "images": 12,
+          "recall": 0.9166666666666666
+        },
+        "oblique": {
+          "images": 17,
+          "recall": 0.5882352941176471
+        },
+        "side": {
+          "images": 20,
+          "recall": 1.0
+        }
+      }
+    },
+    "ignore_difficult": {
+      "images": 149,
+      "positives": 43,
+      "negatives": 106,
+      "threshold": 0.3413327979078584,
+      "recall": 0.813953488372093,
+      "precision": 0.8974358974358975,
+      "f1": 0.8536585365853658,
+      "fpr": 0.03773584905660377,
+      "specificity": 0.9622641509433962,
+      "npv": 0.9272727272727272,
+      "auroc": 0.8898639754278193,
+      "auprc": 0.8956032249236674,
+      "tp": 35,
+      "fp": 4,
+      "tn": 102,
+      "fn": 8,
+      "groups": {
+        "bottom": {
+          "images": 12,
+          "recall": 0.9166666666666666
+        },
+        "oblique": {
+          "images": 17,
+          "recall": 0.5882352941176471
+        },
+        "side": {
+          "images": 19,
+          "recall": 1.0
+        }
+      }
+    },
+    "easy_only": {
+      "images": 145,
+      "positives": 39,
+      "negatives": 106,
+      "threshold": 0.3413327979078584,
+      "recall": 0.8205128205128205,
+      "precision": 0.8888888888888888,
+      "f1": 0.8533333333333333,
+      "fpr": 0.03773584905660377,
+      "specificity": 0.9622641509433962,
+      "npv": 0.9357798165137615,
+      "auroc": 0.8807450411223996,
+      "auprc": 0.8863783745153723,
+      "tp": 32,
+      "fp": 4,
+      "tn": 102,
+      "fn": 7,
+      "groups": {
+        "bottom": {
+          "images": 10,
+          "recall": 1.0
+        },
+        "oblique": {
+          "images": 17,
+          "recall": 0.5882352941176471
+        },
+        "side": {
+          "images": 17,
+          "recall": 1.0
+        }
+      }
+    }
+  },
+  "box_metrics": [
+    {
+      "iou": 0.3,
+      "confidence": 0.024708164855837825,
+      "class_aware": false,
+      "ignore_difficult": false,
+      "recall": 0.6011904761904762,
+      "precision": 0.4156378600823045,
+      "f1": 0.49148418491484186,
+      "tp": 101,
+      "fp": 142,
+      "fn": 67,
+      "ignored": 0
+    },
+    {
+      "iou": 0.3,
+      "confidence": 0.024708164855837825,
+      "class_aware": true,
+      "ignore_difficult": false,
+      "recall": 0.6011904761904762,
+      "precision": 0.4156378600823045,
+      "f1": 0.49148418491484186,
+      "tp": 101,
+      "fp": 142,
+      "fn": 67,
+      "ignored": 0
+    },
+    {
+      "iou": 0.3,
+      "confidence": 0.024708164855837825,
+      "class_aware": false,
+      "ignore_difficult": true,
+      "recall": 0.5925925925925926,
+      "precision": 0.40336134453781514,
+      "f1": 0.48,
+      "tp": 96,
+      "fp": 142,
+      "fn": 66,
+      "ignored": 5
+    },
+    {
+      "iou": 0.3,
+      "confidence": 0.024708164855837825,
+      "class_aware": true,
+      "ignore_difficult": true,
+      "recall": 0.5925925925925926,
+      "precision": 0.40336134453781514,
+      "f1": 0.48,
+      "tp": 96,
+      "fp": 142,
+      "fn": 66,
+      "ignored": 5
+    },
+    {
+      "iou": 0.5,
+      "confidence": 0.024708164855837825,
+      "class_aware": false,
+      "ignore_difficult": false,
+      "recall": 0.5535714285714286,
+      "precision": 0.38271604938271603,
+      "f1": 0.4525547445255475,
+      "tp": 93,
+      "fp": 150,
+      "fn": 75,
+      "ignored": 0
+    },
+    {
+      "iou": 0.5,
+      "confidence": 0.024708164855837825,
+      "class_aware": true,
+      "ignore_difficult": false,
+      "recall": 0.5535714285714286,
+      "precision": 0.38271604938271603,
+      "f1": 0.4525547445255475,
+      "tp": 93,
+      "fp": 150,
+      "fn": 75,
+      "ignored": 0
+    },
+    {
+      "iou": 0.5,
+      "confidence": 0.024708164855837825,
+      "class_aware": false,
+      "ignore_difficult": true,
+      "recall": 0.5493827160493827,
+      "precision": 0.3723849372384937,
+      "f1": 0.44389027431421446,
+      "tp": 89,
+      "fp": 150,
+      "fn": 73,
+      "ignored": 4
+    },
+    {
+      "iou": 0.5,
+      "confidence": 0.024708164855837825,
+      "class_aware": true,
+      "ignore_difficult": true,
+      "recall": 0.5493827160493827,
+      "precision": 0.3723849372384937,
+      "f1": 0.44389027431421446,
+      "tp": 89,
+      "fp": 150,
+      "fn": 73,
+      "ignored": 4
+    }
+  ],
+  "detector_map": {
+    "mAP50": 0.501188667202641,
+    "mAP50_95": 0.208684851982601,
+    "by_iou": {
+      "0.50": 0.501188667202641,
+      "0.55": 0.4750906780523202,
+      "0.60": 0.4372214208502814,
+      "0.65": 0.3356631453640603,
+      "0.70": 0.1931549161352848,
+      "0.75": 0.08585481748000229,
+      "0.80": 0.039382900483416604,
+      "0.85": 0.018070629402750903,
+      "0.90": 0.0012213448552523187,
+      "0.95": 0.0
+    },
+    "by_class": {
+      "0": {
+        "0.50": 0.501188667202641,
+        "0.55": 0.4750906780523202,
+        "0.60": 0.4372214208502814,
+        "0.65": 0.3356631453640603,
+        "0.70": 0.1931549161352848,
+        "0.75": 0.08585481748000229,
+        "0.80": 0.039382900483416604,
+        "0.85": 0.018070629402750903,
+        "0.90": 0.0012213448552523187,
+        "0.95": 0.0
+      }
+    },
+    "difficult_policy": "ignore"
+  },
+  "visualizations": [
+    {
+      "category": "normal",
+      "image": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\missing_hole_v1\\test\\visualizations\\normal_test_001.jpg",
+      "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\test_missing_tooth\\test_001.jpg"
+    },
+    {
+      "category": "bottom",
+      "image": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\missing_hole_v1\\test\\visualizations\\bottom_test_009.jpg",
+      "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\test_missing_tooth\\test_009.jpg"
+    },
+    {
+      "category": "oblique",
+      "image": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\missing_hole_v1\\test\\visualizations\\oblique_test_011.jpg",
+      "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\test_missing_tooth\\test_011.jpg"
+    },
+    {
+      "category": "side",
+      "image": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\missing_hole_v1\\test\\visualizations\\side_test_002.jpg",
+      "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\test_missing_tooth\\test_002.jpg"
+    },
+    {
+      "category": "mixed",
+      "image": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\missing_hole_v1\\test\\visualizations\\mixed_test_015.jpg",
+      "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\test_missing_tooth\\test_015.jpg"
+    },
+    {
+      "category": "difficult",
+      "image": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\missing_hole_v1\\test\\visualizations\\difficult_test_005.jpg",
+      "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\test_missing_tooth\\test_005.jpg"
+    },
+    {
+      "category": "scratch_and_missing",
+      "image": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\missing_hole_v1\\test\\visualizations\\scratch_and_missing_test_121.jpg",
+      "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\test_missing_tooth\\test_121.jpg"
+    }
+  ],
+  "combined_systems": {
+    "counts": {
+      "scratch": 31,
+      "missing_hole": 44,
+      "any_defect": 71,
+      "both": 4,
+      "normal": 79
+    },
+    "specialist_or": {
+      "recall": 0.8873239436619719,
+      "precision": 0.7777777777777778,
+      "f1": 0.8289473684210527,
+      "fpr": 0.22784810126582278,
+      "tp": 63,
+      "fp": 18,
+      "tn": 61,
+      "fn": 8
+    },
+    "specialist_scratch_recall": 0.8064516129032258,
+    "specialist_missing_recall": 0.9318181818181818,
+    "unified_single_model": {
+      "recall": 0.7605633802816901,
+      "precision": 0.6206896551724138,
+      "f1": 0.6835443037974683,
+      "fpr": 0.4177215189873418,
+      "tp": 54,
+      "fp": 33,
+      "tn": 46,
+      "fn": 17
+    }
+  },
+  "target": {
+    "recall_min": 0.95,
+    "fpr_max": 0.2
+  },
+  "target_met": false
+}

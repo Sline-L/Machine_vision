@@ -1,0 +1,253 @@
+{
+  "version": "missing_hole_v1",
+  "models": [
+    {
+      "name": "f_cls_efficientnet_b0_512_exclude_difficult_s20260913",
+      "kind": "classifier",
+      "family": "efficientnet_b0",
+      "scheme": null,
+      "difficult_policy": "exclude_difficult",
+      "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\missing_hole_v1\\final\\classifier_1.pt",
+      "imgsz": 512,
+      "tta": "none",
+      "temperature": 0.9999999999999999,
+      "operating_points": {
+        "0.1": {
+          "threshold": 0.3809993863105774,
+          "recall": 1.0,
+          "precision": 0.85,
+          "f1": 0.9189189189189189,
+          "fpr": 0.09230769230769231,
+          "specificity": 0.9076923076923077,
+          "tp": 34,
+          "fp": 6,
+          "tn": 59,
+          "fn": 0
+        },
+        "0.2": {
+          "threshold": 0.3809993863105774,
+          "recall": 1.0,
+          "precision": 0.85,
+          "f1": 0.9189189189189189,
+          "fpr": 0.09230769230769231,
+          "specificity": 0.9076923076923077,
+          "tp": 34,
+          "fp": 6,
+          "tn": 59,
+          "fn": 0
+        },
+        "0.3": {
+          "threshold": 0.3809993863105774,
+          "recall": 1.0,
+          "precision": 0.85,
+          "f1": 0.9189189189189189,
+          "fpr": 0.09230769230769231,
+          "specificity": 0.9076923076923077,
+          "tp": 34,
+          "fp": 6,
+          "tn": 59,
+          "fn": 0
+        },
+        "0.5": {
+          "threshold": 0.3809993863105774,
+          "recall": 1.0,
+          "precision": 0.85,
+          "f1": 0.9189189189189189,
+          "fpr": 0.09230769230769231,
+          "specificity": 0.9076923076923077,
+          "tp": 34,
+          "fp": 6,
+          "tn": 59,
+          "fn": 0
+        }
+      }
+    },
+    {
+      "name": "f_cls_resnet18_384_include_difficult_s20260913",
+      "kind": "classifier",
+      "family": "resnet18",
+      "scheme": null,
+      "difficult_policy": "include_difficult",
+      "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\missing_hole_v1\\final\\classifier_2.pt",
+      "imgsz": 384,
+      "tta": "none",
+      "temperature": 2.375,
+      "operating_points": {
+        "0.1": {
+          "threshold": 0.6516356081146706,
+          "recall": 0.9411764705882353,
+          "precision": 0.8648648648648649,
+          "f1": 0.9014084507042254,
+          "fpr": 0.07692307692307693,
+          "specificity": 0.9230769230769231,
+          "tp": 32,
+          "fp": 5,
+          "tn": 60,
+          "fn": 2
+        },
+        "0.2": {
+          "threshold": 0.6255032716085878,
+          "recall": 1.0,
+          "precision": 0.8095238095238095,
+          "f1": 0.8947368421052632,
+          "fpr": 0.12307692307692308,
+          "specificity": 0.8769230769230769,
+          "tp": 34,
+          "fp": 8,
+          "tn": 57,
+          "fn": 0
+        },
+        "0.3": {
+          "threshold": 0.6255032716085878,
+          "recall": 1.0,
+          "precision": 0.8095238095238095,
+          "f1": 0.8947368421052632,
+          "fpr": 0.12307692307692308,
+          "specificity": 0.8769230769230769,
+          "tp": 34,
+          "fp": 8,
+          "tn": 57,
+          "fn": 0
+        },
+        "0.5": {
+          "threshold": 0.6255032716085878,
+          "recall": 1.0,
+          "precision": 0.8095238095238095,
+          "f1": 0.8947368421052632,
+          "fpr": 0.12307692307692308,
+          "specificity": 0.8769230769230769,
+          "tp": 34,
+          "fp": 8,
+          "tn": 57,
+          "fn": 0
+        }
+      }
+    },
+    {
+      "name": "p_det_one_class_exclude_difficult_standard_960",
+      "kind": "detector",
+      "family": "standard",
+      "scheme": "one_class",
+      "difficult_policy": "exclude_difficult",
+      "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\missing_hole_v1\\final\\detector_3.pt",
+      "imgsz": 960,
+      "tta": "none",
+      "temperature": 1.8499999999999996,
+      "operating_points": {
+        "0.1": {
+          "threshold": 0.12059450038989711,
+          "recall": 0.9705882352941176,
+          "precision": 0.8461538461538461,
+          "f1": 0.9041095890410958,
+          "fpr": 0.09230769230769231,
+          "specificity": 0.9076923076923077,
+          "tp": 33,
+          "fp": 6,
+          "tn": 59,
+          "fn": 1
+        },
+        "0.2": {
+          "threshold": 0.12059450038989711,
+          "recall": 0.9705882352941176,
+          "precision": 0.8461538461538461,
+          "f1": 0.9041095890410958,
+          "fpr": 0.09230769230769231,
+          "specificity": 0.9076923076923077,
+          "tp": 33,
+          "fp": 6,
+          "tn": 59,
+          "fn": 1
+        },
+        "0.3": {
+          "threshold": 0.06173486998770686,
+          "recall": 1.0,
+          "precision": 0.6938775510204082,
+          "f1": 0.819277108433735,
+          "fpr": 0.23076923076923078,
+          "specificity": 0.7692307692307692,
+          "tp": 34,
+          "fp": 15,
+          "tn": 50,
+          "fn": 0
+        },
+        "0.5": {
+          "threshold": 0.06173486998770686,
+          "recall": 1.0,
+          "precision": 0.6938775510204082,
+          "f1": 0.819277108433735,
+          "fpr": 0.23076923076923078,
+          "specificity": 0.7692307692307692,
+          "tp": 34,
+          "fp": 15,
+          "tn": 50,
+          "fn": 0
+        }
+      }
+    }
+  ],
+  "fusion": {
+    "type": "weighted",
+    "alpha": 0.5,
+    "classifier": {
+      "type": "classifier_mean",
+      "models": [
+        "f_cls_efficientnet_b0_512_exclude_difficult_s20260913",
+        "f_cls_resnet18_384_include_difficult_s20260913"
+      ]
+    },
+    "detector": "p_det_one_class_exclude_difficult_standard_960"
+  },
+  "default_threshold": 0.3413327979078584,
+  "operating_points": {
+    "0.1": {
+      "threshold": 0.3413327979078584,
+      "recall": 1.0,
+      "precision": 0.8947368421052632,
+      "f1": 0.9444444444444444,
+      "fpr": 0.06153846153846154,
+      "specificity": 0.9384615384615385,
+      "tp": 34,
+      "fp": 4,
+      "tn": 61,
+      "fn": 0
+    },
+    "0.2": {
+      "threshold": 0.3413327979078584,
+      "recall": 1.0,
+      "precision": 0.8947368421052632,
+      "f1": 0.9444444444444444,
+      "fpr": 0.06153846153846154,
+      "specificity": 0.9384615384615385,
+      "tp": 34,
+      "fp": 4,
+      "tn": 61,
+      "fn": 0
+    },
+    "0.3": {
+      "threshold": 0.3413327979078584,
+      "recall": 1.0,
+      "precision": 0.8947368421052632,
+      "f1": 0.9444444444444444,
+      "fpr": 0.06153846153846154,
+      "specificity": 0.9384615384615385,
+      "tp": 34,
+      "fp": 4,
+      "tn": 61,
+      "fn": 0
+    },
+    "0.5": {
+      "threshold": 0.3413327979078584,
+      "recall": 1.0,
+      "precision": 0.8947368421052632,
+      "f1": 0.9444444444444444,
+      "fpr": 0.06153846153846154,
+      "specificity": 0.9384615384615385,
+      "tp": 34,
+      "fp": 4,
+      "tn": 61,
+      "fn": 0
+    }
+  },
+  "selection": "validation FPR<=0.20 then maximum image recall",
+  "test_used": false
+}

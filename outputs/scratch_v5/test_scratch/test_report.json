@@ -1,0 +1,139 @@
+{
+  "locked_evaluation": true,
+  "config": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\scratch_v5\\inference_config.json",
+  "weights_and_threshold_selected_without_test": true,
+  "counts": {
+    "images": 150,
+    "scratch_images": 31,
+    "normal_images": 119,
+    "scratch_boxes": 72
+  },
+  "metrics": {
+    "threshold": 0.300273610279458,
+    "recall": 0.8064516129032258,
+    "precision": 0.5555555555555556,
+    "f1": 0.6578947368421053,
+    "fpr": 0.16806722689075632,
+    "specificity": 0.8319327731092436,
+    "npv": 0.9428571428571428,
+    "auroc": 0.8831661696936839,
+    "auprc": 0.81249053900209,
+    "tp": 25,
+    "fp": 20,
+    "tn": 99,
+    "fn": 6
+  },
+  "leakage_check": {
+    "reference_images": 514,
+    "exact_cross_pairs": 0,
+    "dhash_le_2_cross_pairs": 75,
+    "dhash_warning": true,
+    "examples": [
+      [
+        "test_008.jpg",
+        "val_054.jpg",
+        2
+      ],
+      [
+        "test_008.jpg",
+        "val_197.jpg",
+        2
+      ],
+      [
+        "test_014.jpg",
+        "val_027.jpg",
+        2
+      ],
+      [
+        "test_014.jpg",
+        "val_145.jpg",
+        2
+      ],
+      [
+        "test_017.jpg",
+        "val_054.jpg",
+        2
+      ],
+      [
+        "test_017.jpg",
+        "val_197.jpg",
+        0
+      ],
+      [
+        "test_020.jpg",
+        "val_042.jpg",
+        2
+      ],
+      [
+        "test_020.jpg",
+        "val_183.jpg",
+        2
+      ],
+      [
+        "test_020.jpg",
+        "val_197.jpg",
+        2
+      ],
+      [
+        "test_031.jpg",
+        "val_076.jpg",
+        2
+      ],
+      [
+        "test_031.jpg",
+        "val_156.jpg",
+        2
+      ],
+      [
+        "test_035.jpg",
+        "val_027.jpg",
+        2
+      ],
+      [
+        "test_035.jpg",
+        "val_145.jpg",
+        2
+      ],
+      [
+        "test_044.jpg",
+        "val_027.jpg",
+        0
+      ],
+      [
+        "test_044.jpg",
+        "val_089.jpg",
+        2
+      ],
+      [
+        "test_044.jpg",
+        "val_113.jpg",
+        2
+      ],
+      [
+        "test_044.jpg",
+        "val_142.jpg",
+        2
+      ],
+      [
+        "test_044.jpg",
+        "val_145.jpg",
+        0
+      ],
+      [
+        "test_044.jpg",
+        "val_154.jpg",
+        2
+      ],
+      [
+        "test_044.jpg",
+        "val_186.jpg",
+        2
+      ]
+    ]
+  },
+  "target": {
+    "scratch_recall": 0.95,
+    "normal_fpr_max": 0.2
+  },
+  "target_met": false
+}

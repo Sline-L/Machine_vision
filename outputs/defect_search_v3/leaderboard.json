@@ -1,0 +1,199 @@
+[
+  {
+    "name": "p_s_standard_original",
+    "mode": "scratch",
+    "stage": "pilot",
+    "score": 0.058823529411764705,
+    "details": {
+      "classes": {
+        "scratch": {
+          "precision": 1.0,
+          "recall": 0.058823529411764705,
+          "map50": 0.055,
+          "map5095": 0.033,
+          "conf": 0.4
+        }
+      },
+      "eligible": true,
+      "score": 0.058823529411764705
+    }
+  },
+  {
+    "name": "p_s_p2_original",
+    "mode": "scratch",
+    "stage": "pilot",
+    "score": -1.0,
+    "details": {
+      "classes": {
+        "scratch": {
+          "precision": 0.17379741204885749,
+          "recall": 0.058823529411764705,
+          "map50": 0.01375,
+          "map5095": 0.005805555555555555,
+          "conf": 0.01
+        }
+      },
+      "eligible": false,
+      "score": -1.0
+    }
+  },
+  {
+    "name": "p_s_p2_clahe",
+    "mode": "scratch",
+    "stage": "pilot",
+    "score": 0.058823529411764705,
+    "details": {
+      "classes": {
+        "scratch": {
+          "precision": 0.810333022777009,
+          "recall": 0.058823529411764705,
+          "map50": 0.06529184211427203,
+          "map5095": 0.013346586480475145,
+          "conf": 0.01
+        }
+      },
+      "eligible": true,
+      "score": 0.058823529411764705
+    }
+  },
+  {
+    "name": "p_s_p2_gray",
+    "mode": "scratch",
+    "stage": "pilot",
+    "score": -1.0,
+    "details": {
+      "classes": {
+        "scratch": {
+          "precision": 0.023255813953488372,
+          "recall": 0.11764705882352941,
+          "map50": 0.004712918660287081,
+          "map5095": 0.0007607655502392344,
+          "conf": 0.01
+        }
+      },
+      "eligible": false,
+      "score": -1.0
+    }
+  },
+  {
+    "name": "p_m_standard_original",
+    "mode": "missing_tooth",
+    "stage": "pilot",
+    "score": 0.4117647058823529,
+    "details": {
+      "classes": {
+        "missing_tooth": {
+          "precision": 0.6363636363636364,
+          "recall": 0.4117647058823529,
+          "map50": 0.36957208674599973,
+          "map5095": 0.1540880669467626,
+          "conf": 0.25
+        }
+      },
+      "eligible": true,
+      "score": 0.4117647058823529
+    }
+  },
+  {
+    "name": "p_m_p2_original",
+    "mode": "missing_tooth",
+    "stage": "pilot",
+    "score": 0.10294117647058823,
+    "details": {
+      "classes": {
+        "missing_tooth": {
+          "precision": 0.5,
+          "recall": 0.10294117647058823,
+          "map50": 0.07166666666666666,
+          "map5095": 0.02384722222222222,
+          "conf": 0.5
+        }
+      },
+      "eligible": true,
+      "score": 0.10294117647058823
+    }
+  },
+  {
+    "name": "p_m_p2_clahe",
+    "mode": "missing_tooth",
+    "stage": "pilot",
+    "score": 0.22058823529411764,
+    "details": {
+      "classes": {
+        "missing_tooth": {
+          "precision": 0.5,
+          "recall": 0.22058823529411764,
+          "map50": 0.1878231854352544,
+          "map5095": 0.07483311241843456,
+          "conf": 0.2
+        }
+      },
+      "eligible": true,
+      "score": 0.22058823529411764
+    }
+  },
+  {
+    "name": "p_joint_standard_original",
+    "mode": "joint",
+    "stage": "pilot",
+    "score": -1.0,
+    "details": {
+      "classes": {
+        "scratch": {
+          "precision": 0.19060530774647824,
+          "recall": 0.11764705882352941,
+          "map50": 0.07327667688117126,
+          "map5095": 0.02585316466931935,
+          "conf": 0.01
+        },
+        "missing_tooth": {
+          "precision": 0.5403383048027955,
+          "recall": 0.36764705882352944,
+          "map50": 0.3620751565118576,
+          "map5095": 0.16214958339092395,
+          "conf": 0.01
+        }
+      },
+      "eligible": false,
+      "score": -1.0
+    }
+  },
+  {
+    "name": "f_scratch_standard_original_seed42",
+    "mode": "scratch",
+    "stage": "full",
+    "score": 0.11764705882352941,
+    "details": {
+      "classes": {
+        "scratch": {
+          "precision": 0.7826949107229751,
+          "recall": 0.11764705882352941,
+          "map50": 0.11499999999999999,
+          "map5095": 0.086,
+          "conf": 0.4
+        }
+      },
+      "eligible": true,
+      "score": 0.11764705882352941
+    }
+  },
+  {
+    "name": "f_missing_tooth_standard_original_seed42",
+    "mode": "missing_tooth",
+    "stage": "full",
+    "score": 0.47058823529411764,
+    "details": {
+      "classes": {
+        "missing_tooth": {
+          "precision": 0.5245901639344263,
+          "recall": 0.47058823529411764,
+          "map50": 0.3888406363291891,
+          "map5095": 0.16815001627660794,
+          "conf": 0.25
+        }
+      },
+      "eligible": true,
+      "score": 0.47058823529411764
+    }
+  }
+]

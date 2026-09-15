@@ -1,0 +1,44 @@
+{
+  "created_at": "2026-09-01T12:00:57",
+  "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\runs\\gear_yolo26n_496train_50val_fixed\\weights\\best.pt",
+  "conf": 0.5,
+  "iou": 0.7,
+  "pad": 0.15,
+  "imgsz": 640,
+  "device": "0",
+  "test": {
+    "test_images": 150,
+    "test_detections": 145,
+    "test_images_without_detections": [
+      "test_041.jpg",
+      "test_045.jpg",
+      "test_065.jpg",
+      "test_069.jpg",
+      "test_072.jpg",
+      "test_077.jpg",
+      "test_099.jpg",
+      "test_142.jpg",
+      "test_150.jpg"
+    ],
+    "mean_confidence": 0.8985484813821727,
+    "predictions_dir": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\test_predictions",
+    "crops_dir": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\test_crops",
+    "csv": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\test_predictions.csv"
+  },
+  "val_pseudo_labels": {
+    "val_images": 199,
+    "val_labels_written": 0,
+    "val_images_without_detections": [],
+    "val_labels_total": 199
+  },
+  "test_metrics": {
+    "available": true,
+    "test_label_count": 150,
+    "test_image_count": 150,
+    "mAP50": 0.9332646520146521,
+    "mAP50_95": 0.8381116860494677,
+    "precision": 0.9791666666666666,
+    "recall": 0.94
+  },
+  "full_val_yaml": "F:\\Work\\VSCode\\Projects\\DATASET\\DATASET\\data_full_val.yaml"
+}

@@ -1,0 +1,106 @@
+{
+  "models": [
+    {
+      "name": "xfull_resnet18_384_w1_s73_r1",
+      "family": "resnet18",
+      "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\binary_defect_v4\\final_ensemble\\xfull_resnet18_384_w1_s73_r1.pt",
+      "imgsz": 384,
+      "tta": "tta_mean",
+      "temperature": 1.275
+    },
+    {
+      "name": "x_yolo_384_w1_s17",
+      "family": "yolo",
+      "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\binary_defect_v4\\final_ensemble\\x_yolo_384_w1_s17.pt",
+      "imgsz": 384,
+      "tta": "tta_mean",
+      "temperature": 2.9
+    },
+    {
+      "name": "p_resnet18_512_w4",
+      "family": "resnet18",
+      "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\binary_defect_v4\\final_ensemble\\p_resnet18_512_w4.pt",
+      "imgsz": 512,
+      "tta": "tta_mean",
+      "temperature": 2.025
+    }
+  ],
+  "fusion": "max",
+  "default_threshold": 0.7028422262420143,
+  "operating_points": {
+    "0.1": {
+      "threshold": 0.8118170908325607,
+      "recall": 0.6333333333333333,
+      "precision": 0.9047619047619048,
+      "f1": 0.7450980392156863,
+      "fpr": 0.1,
+      "specificity": 0.9,
+      "tp": 19,
+      "fp": 2,
+      "tn": 18,
+      "fn": 11
+    },
+    "0.2": {
+      "threshold": 0.8013317627477046,
+      "recall": 0.6666666666666666,
+      "precision": 0.8695652173913043,
+      "f1": 0.7547169811320754,
+      "fpr": 0.15,
+      "specificity": 0.85,
+      "tp": 20,
+      "fp": 3,
+      "tn": 17,
+      "fn": 10
+    },
+    "0.3": {
+      "threshold": 0.7028422262420143,
+      "recall": 0.9333333333333333,
+      "precision": 0.8484848484848485,
+      "f1": 0.888888888888889,
+      "fpr": 0.25,
+      "specificity": 0.75,
+      "tp": 28,
+      "fp": 5,
+      "tn": 15,
+      "fn": 2
+    },
+    "0.5": {
+      "threshold": 0.6405667573575748,
+      "recall": 0.9666666666666667,
+      "precision": 0.7435897435897436,
+      "f1": 0.8405797101449275,
+      "fpr": 0.5,
+      "specificity": 0.5,
+      "tp": 29,
+      "fp": 10,
+      "tn": 10,
+      "fn": 1
+    },
+    "1.0": {
+      "threshold": 0.588211008005453,
+      "recall": 1.0,
+      "precision": 0.6976744186046512,
+      "f1": 0.8219178082191781,
+      "fpr": 0.65,
+      "specificity": 0.35,
+      "tp": 30,
+      "fp": 13,
+      "tn": 7,
+      "fn": 0
+    }
+  },
+  "high_sensitivity_threshold": 0.588211008005453,
+  "validation_operating_point": {
+    "threshold": 0.7028422262420143,
+    "recall": 0.9333333333333333,
+    "precision": 0.8484848484848485,
+    "f1": 0.888888888888889,
+    "fpr": 0.25,
+    "specificity": 0.75,
+    "tp": 28,
+    "fp": 5,
+    "tn": 15,
+    "fn": 2
+  },
+  "decision": "REJECT when fused defect_probability >= threshold"
+}

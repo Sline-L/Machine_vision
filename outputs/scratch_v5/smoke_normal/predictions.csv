@@ -1,0 +1,2 @@
+﻿image,decision,scratch_probability,classifier_probability,detector_probability,threshold,visualization
+F:\Work\VSCode\Projects\DATASET\dataset_defects\images\val_scratch\val_001.jpg,PASS,0.06928128195395625,0.1322790022627093,0.048282041851038564,0.300273610279458,F:\Work\VSCode\Projects\DATASET\outputs\scratch_v5\smoke_normal\val_001_prediction.jpg

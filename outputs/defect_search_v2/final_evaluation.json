@@ -1,0 +1,752 @@
+{
+  "scratch": {
+    "precision": 0.5948359945730587,
+    "recall": 0.5769230769230769,
+    "f1": 0.5857426165525862,
+    "tp": 15,
+    "fp": 15,
+    "fn": 11,
+    "threshold": 0.08,
+    "per_image": [
+      {
+        "stem": "train_007",
+        "category": "scratch",
+        "tp": 1,
+        "fp": 0,
+        "fn": 2
+      },
+      {
+        "stem": "train_008",
+        "category": "scratch",
+        "tp": 3,
+        "fp": 2,
+        "fn": 0
+      },
+      {
+        "stem": "train_012",
+        "category": "scratch",
+        "tp": 4,
+        "fp": 1,
+        "fn": 0
+      },
+      {
+        "stem": "train_018",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_028",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_029",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_036",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_038",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_041",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_042",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_050",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_052",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_071",
+        "category": "scratch",
+        "tp": 1,
+        "fp": 3,
+        "fn": 3
+      },
+      {
+        "stem": "train_078",
+        "category": "scratch",
+        "tp": 0,
+        "fp": 0,
+        "fn": 2
+      },
+      {
+        "stem": "train_079",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_095",
+        "category": "scratch",
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_108",
+        "category": "negative",
+        "tp": 0,
+        "fp": 1,
+        "fn": 0
+      },
+      {
+        "stem": "train_112",
+        "category": "scratch",
+        "tp": 1,
+        "fp": 2,
+        "fn": 1
+      },
+      {
+        "stem": "train_114",
+        "category": "scratch",
+        "tp": 2,
+        "fp": 2,
+        "fn": 0
+      },
+      {
+        "stem": "train_124",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_131",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_140",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_142",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_163",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_164",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_166",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_184",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_191",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_193",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_194",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_197",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_204",
+        "category": "scratch",
+        "tp": 0,
+        "fp": 4,
+        "fn": 2
+      },
+      {
+        "stem": "train_213",
+        "category": "scratch",
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_218",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_221",
+        "category": "scratch",
+        "tp": 0,
+        "fp": 0,
+        "fn": 1
+      },
+      {
+        "stem": "train_229",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_236",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_241",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_249",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_254",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_258",
+        "category": "negative",
+        "tp": 0,
+        "fp": 1,
+        "fn": 0
+      },
+      {
+        "stem": "train_263",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_286",
+        "category": "scratch",
+        "tp": 0,
+        "fp": 3,
+        "fn": 1
+      },
+      {
+        "stem": "train_291",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_295",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_300",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_308",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_312",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_313",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_322",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_334",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_339",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      }
+    ]
+  },
+  "missing_tooth": {
+    "precision": 0.6181818181818182,
+    "recall": 0.5483870967741935,
+    "f1": 0.5811965811965812,
+    "tp": 35,
+    "fp": 20,
+    "fn": 27,
+    "threshold": 0.25,
+    "per_image": [
+      {
+        "stem": "train_007",
+        "category": "scratch",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_008",
+        "category": "scratch",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_012",
+        "category": "scratch",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_018",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_028",
+        "category": "missing_tooth",
+        "tp": 7,
+        "fp": 1,
+        "fn": 1
+      },
+      {
+        "stem": "train_029",
+        "category": "missing_tooth",
+        "tp": 6,
+        "fp": 1,
+        "fn": 3
+      },
+      {
+        "stem": "train_036",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_038",
+        "category": "missing_tooth",
+        "tp": 2,
+        "fp": 0,
+        "fn": 5
+      },
+      {
+        "stem": "train_041",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_042",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_050",
+        "category": "missing_tooth",
+        "tp": 3,
+        "fp": 2,
+        "fn": 1
+      },
+      {
+        "stem": "train_052",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_071",
+        "category": "scratch",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_078",
+        "category": "scratch",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_079",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_095",
+        "category": "scratch",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_108",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_112",
+        "category": "scratch",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_114",
+        "category": "scratch",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_124",
+        "category": "negative",
+        "tp": 0,
+        "fp": 2,
+        "fn": 0
+      },
+      {
+        "stem": "train_131",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_140",
+        "category": "negative",
+        "tp": 0,
+        "fp": 1,
+        "fn": 0
+      },
+      {
+        "stem": "train_142",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_163",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 2,
+        "fn": 2
+      },
+      {
+        "stem": "train_164",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 0,
+        "fn": 2
+      },
+      {
+        "stem": "train_166",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 1,
+        "fn": 2
+      },
+      {
+        "stem": "train_184",
+        "category": "missing_tooth",
+        "tp": 3,
+        "fp": 1,
+        "fn": 1
+      },
+      {
+        "stem": "train_191",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_193",
+        "category": "missing_tooth",
+        "tp": 3,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_194",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 0,
+        "fn": 1
+      },
+      {
+        "stem": "train_197",
+        "category": "missing_tooth",
+        "tp": 2,
+        "fp": 0,
+        "fn": 2
+      },
+      {
+        "stem": "train_204",
+        "category": "scratch",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_213",
+        "category": "scratch",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_218",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_221",
+        "category": "scratch",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_229",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 6,
+        "fn": 1
+      },
+      {
+        "stem": "train_236",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_241",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 0,
+        "fn": 2
+      },
+      {
+        "stem": "train_249",
+        "category": "missing_tooth",
+        "tp": 4,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_254",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 1,
+        "fn": 1
+      },
+      {
+        "stem": "train_258",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_263",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_286",
+        "category": "scratch",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_291",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_295",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_300",
+        "category": "missing_tooth",
+        "tp": 2,
+        "fp": 2,
+        "fn": 1
+      },
+      {
+        "stem": "train_308",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 0,
+        "fn": 1
+      },
+      {
+        "stem": "train_312",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_313",
+        "category": "missing_tooth",
+        "tp": 1,
+        "fp": 1,
+        "fn": 1
+      },
+      {
+        "stem": "train_322",
+        "category": "negative",
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "stem": "train_334",
+        "category": "missing_tooth",
+        "tp": 0,
+        "fp": 0,
+        "fn": 1
+      },
+      {
+        "stem": "train_339",
+        "category": "missing_tooth",
+        "tp": 1,
+        "fp": 3,
+        "fn": 0
+      }
+    ]
+  }
+}

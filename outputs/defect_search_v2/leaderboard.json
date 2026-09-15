@@ -1,0 +1,243 @@
+[
+  {
+    "name": "p_s_off_bal_none",
+    "mode": "scratch",
+    "stage": "pilot",
+    "score": 0.11538461538461539,
+    "eligible": true,
+    "details": {
+      "classes": {
+        "scratch": {
+          "precision": 0.5384732036677444,
+          "recall": 0.11538461538461539,
+          "map50": 0.15189587043523917,
+          "map5095": 0.08689310457189303,
+          "conf": 0.01
+        }
+      },
+      "eligible": true,
+      "score": 0.11538461538461539
+    }
+  },
+  {
+    "name": "p_s_off_2x_light",
+    "mode": "scratch",
+    "stage": "pilot",
+    "score": 0.15384615384615385,
+    "eligible": true,
+    "details": {
+      "classes": {
+        "scratch": {
+          "precision": 0.7265739485967613,
+          "recall": 0.15384615384615385,
+          "map50": 0.19809441520884086,
+          "map5095": 0.0842579675231903,
+          "conf": 0.01
+        }
+      },
+      "eligible": true,
+      "score": 0.15384615384615385
+    }
+  },
+  {
+    "name": "p_s_off_all_1280",
+    "mode": "scratch",
+    "stage": "pilot",
+    "score": 0.11538461538461539,
+    "eligible": true,
+    "details": {
+      "classes": {
+        "scratch": {
+          "precision": 0.75,
+          "recall": 0.11538461538461539,
+          "map50": 0.08625,
+          "map5095": 0.013250000000000001,
+          "conf": 0.2
+        }
+      },
+      "eligible": true,
+      "score": 0.11538461538461539
+    }
+  },
+  {
+    "name": "p_s_gear_bal_light",
+    "mode": "scratch",
+    "stage": "pilot",
+    "score": -1.0,
+    "eligible": false,
+    "details": {
+      "classes": {
+        "scratch": {
+          "precision": 1.0,
+          "recall": 0.038461538461538464,
+          "map50": 0.035,
+          "map5095": 0.0175,
+          "conf": 0.4
+        }
+      },
+      "eligible": true,
+      "score": 0.038461538461538464
+    }
+  },
+  {
+    "name": "p_m_off_bal_light",
+    "mode": "missing_tooth",
+    "stage": "pilot",
+    "score": 0.6923076923076923,
+    "eligible": true,
+    "details": {
+      "classes": {
+        "missing_tooth": {
+          "precision": 0.7297297297297297,
+          "recall": 0.6923076923076923,
+          "map50": 0.6415397042880432,
+          "map5095": 0.3223555994078168,
+          "conf": 0.2
+        }
+      },
+      "eligible": true,
+      "score": 0.6923076923076923
+    }
+  },
+  {
+    "name": "p_m_off_2x_light",
+    "mode": "missing_tooth",
+    "stage": "pilot",
+    "score": 0.5897435897435898,
+    "eligible": true,
+    "details": {
+      "classes": {
+        "missing_tooth": {
+          "precision": 0.5876433093391054,
+          "recall": 0.5897435897435898,
+          "map50": 0.6109460363535018,
+          "map5095": 0.30849141248859435,
+          "conf": 0.01
+        }
+      },
+      "eligible": true,
+      "score": 0.5897435897435898
+    }
+  },
+  {
+    "name": "p_joint_off_light",
+    "mode": "joint",
+    "stage": "pilot",
+    "score": 0.15384615384615385,
+    "eligible": true,
+    "details": {
+      "classes": {
+        "scratch": {
+          "precision": 0.5,
+          "recall": 0.15384615384615385,
+          "map50": 0.14700000000000002,
+          "map5095": 0.057766666666666674,
+          "conf": 0.3
+        },
+        "missing_tooth": {
+          "precision": 0.6769728840628438,
+          "recall": 0.6538461538461539,
+          "map50": 0.5747967063710842,
+          "map5095": 0.28142254378442033,
+          "conf": 0.1
+        }
+      },
+      "eligible": true,
+      "score": 0.15384615384615385
+    }
+  },
+  {
+    "name": "p_joint_old_light",
+    "mode": "joint",
+    "stage": "pilot",
+    "score": -1.0,
+    "eligible": false,
+    "details": {
+      "classes": {
+        "scratch": {
+          "precision": 0.8051580275006753,
+          "recall": 0.31860351971296696,
+          "map50": 0.4144593221515098,
+          "map5095": 0.18912230474313557,
+          "conf": 0.01
+        },
+        "missing_tooth": {
+          "precision": 0.7059580409809684,
+          "recall": 0.7079785108833485,
+          "map50": 0.7220718298000288,
+          "map5095": 0.37270814137168606,
+          "conf": 0.01
+        }
+      },
+      "eligible": true,
+      "score": 0.31860351971296696
+    }
+  },
+  {
+    "name": "f_scratch_light_960_seed42",
+    "mode": "scratch",
+    "stage": "full",
+    "score": 0.34615384615384615,
+    "eligible": true,
+    "details": {
+      "classes": {
+        "scratch": {
+          "precision": 0.6927632658001224,
+          "recall": 0.34615384615384615,
+          "map50": 0.331952380952381,
+          "map5095": 0.1703802955665025,
+          "conf": 0.01
+        }
+      },
+      "eligible": true,
+      "score": 0.34615384615384615
+    }
+  },
+  {
+    "name": "f_missing_tooth_light_960_seed42",
+    "mode": "missing_tooth",
+    "stage": "full",
+    "score": 0.6538461538461539,
+    "eligible": true,
+    "details": {
+      "classes": {
+        "missing_tooth": {
+          "precision": 0.8061227586047012,
+          "recall": 0.6538461538461539,
+          "map50": 0.7060137794162717,
+          "map5095": 0.3560354506049598,
+          "conf": 0.01
+        }
+      },
+      "eligible": true,
+      "score": 0.6538461538461539
+    }
+  },
+  {
+    "name": "f_joint_light_960_seed42",
+    "mode": "joint",
+    "stage": "full",
+    "score": 0.3076923076923077,
+    "eligible": true,
+    "details": {
+      "classes": {
+        "scratch": {
+          "precision": 0.5714285714285714,
+          "recall": 0.3076923076923077,
+          "map50": 0.2602813852813853,
+          "map5095": 0.11565313852813852,
+          "conf": 0.2
+        },
+        "missing_tooth": {
+          "precision": 0.686046511627907,
+          "recall": 0.7564102564102564,
+          "map50": 0.6983524588356669,
+          "map5095": 0.322249006291321,
+          "conf": 0.15
+        }
+      },
+      "eligible": true,
+      "score": 0.3076923076923077
+    }
+  }
+]

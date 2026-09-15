@@ -1,0 +1,1621 @@
+[
+  {
+    "name": "f_cls_efficientnet_b0_512_exclude_difficult_s20260913",
+    "rule": {
+      "type": "classifier",
+      "models": [
+        "f_cls_efficientnet_b0_512_exclude_difficult_s20260913"
+      ]
+    },
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.3809993863105774,
+        "recall": 1.0,
+        "precision": 0.85,
+        "f1": 0.9189189189189189,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 34,
+        "fp": 6,
+        "tn": 59,
+        "fn": 0
+      },
+      "0.2": {
+        "threshold": 0.3809993863105774,
+        "recall": 1.0,
+        "precision": 0.85,
+        "f1": 0.9189189189189189,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 34,
+        "fp": 6,
+        "tn": 59,
+        "fn": 0
+      },
+      "0.3": {
+        "threshold": 0.3809993863105774,
+        "recall": 1.0,
+        "precision": 0.85,
+        "f1": 0.9189189189189189,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 34,
+        "fp": 6,
+        "tn": 59,
+        "fn": 0
+      },
+      "0.5": {
+        "threshold": 0.3809993863105774,
+        "recall": 1.0,
+        "precision": 0.85,
+        "f1": 0.9189189189189189,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 34,
+        "fp": 6,
+        "tn": 59,
+        "fn": 0
+      }
+    },
+    "primary": {
+      "threshold": 0.3809993863105774,
+      "recall": 1.0,
+      "precision": 0.85,
+      "f1": 0.9189189189189189,
+      "fpr": 0.09230769230769231,
+      "specificity": 0.9076923076923077,
+      "tp": 34,
+      "fp": 6,
+      "tn": 59,
+      "fn": 0
+    },
+    "auroc": 0.9701357466063348,
+    "auprc": 0.9247403869240186
+  },
+  {
+    "name": "f_cls_resnet18_384_include_difficult_s20260913",
+    "rule": {
+      "type": "classifier",
+      "models": [
+        "f_cls_resnet18_384_include_difficult_s20260913"
+      ]
+    },
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.6516356081146706,
+        "recall": 0.9411764705882353,
+        "precision": 0.8648648648648649,
+        "f1": 0.9014084507042254,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 32,
+        "fp": 5,
+        "tn": 60,
+        "fn": 2
+      },
+      "0.2": {
+        "threshold": 0.6255032716085878,
+        "recall": 1.0,
+        "precision": 0.8095238095238095,
+        "f1": 0.8947368421052632,
+        "fpr": 0.12307692307692308,
+        "specificity": 0.8769230769230769,
+        "tp": 34,
+        "fp": 8,
+        "tn": 57,
+        "fn": 0
+      },
+      "0.3": {
+        "threshold": 0.6255032716085878,
+        "recall": 1.0,
+        "precision": 0.8095238095238095,
+        "f1": 0.8947368421052632,
+        "fpr": 0.12307692307692308,
+        "specificity": 0.8769230769230769,
+        "tp": 34,
+        "fp": 8,
+        "tn": 57,
+        "fn": 0
+      },
+      "0.5": {
+        "threshold": 0.6255032716085878,
+        "recall": 1.0,
+        "precision": 0.8095238095238095,
+        "f1": 0.8947368421052632,
+        "fpr": 0.12307692307692308,
+        "specificity": 0.8769230769230769,
+        "tp": 34,
+        "fp": 8,
+        "tn": 57,
+        "fn": 0
+      }
+    },
+    "primary": {
+      "threshold": 0.6255032716085878,
+      "recall": 1.0,
+      "precision": 0.8095238095238095,
+      "f1": 0.8947368421052632,
+      "fpr": 0.12307692307692308,
+      "specificity": 0.8769230769230769,
+      "tp": 34,
+      "fp": 8,
+      "tn": 57,
+      "fn": 0
+    },
+    "auroc": 0.9638009049773756,
+    "auprc": 0.8910958434740628
+  },
+  {
+    "name": "p_det_one_class_exclude_difficult_standard_960",
+    "rule": {
+      "type": "detector",
+      "models": [
+        "p_det_one_class_exclude_difficult_standard_960"
+      ]
+    },
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.12059450038989711,
+        "recall": 0.9705882352941176,
+        "precision": 0.8461538461538461,
+        "f1": 0.9041095890410958,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 33,
+        "fp": 6,
+        "tn": 59,
+        "fn": 1
+      },
+      "0.2": {
+        "threshold": 0.12059450038989711,
+        "recall": 0.9705882352941176,
+        "precision": 0.8461538461538461,
+        "f1": 0.9041095890410958,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 33,
+        "fp": 6,
+        "tn": 59,
+        "fn": 1
+      },
+      "0.3": {
+        "threshold": 0.06173486998770686,
+        "recall": 1.0,
+        "precision": 0.6938775510204082,
+        "f1": 0.819277108433735,
+        "fpr": 0.23076923076923078,
+        "specificity": 0.7692307692307692,
+        "tp": 34,
+        "fp": 15,
+        "tn": 50,
+        "fn": 0
+      },
+      "0.5": {
+        "threshold": 0.06173486998770686,
+        "recall": 1.0,
+        "precision": 0.6938775510204082,
+        "f1": 0.819277108433735,
+        "fpr": 0.23076923076923078,
+        "specificity": 0.7692307692307692,
+        "tp": 34,
+        "fp": 15,
+        "tn": 50,
+        "fn": 0
+      }
+    },
+    "primary": {
+      "threshold": 0.12059450038989711,
+      "recall": 0.9705882352941176,
+      "precision": 0.8461538461538461,
+      "f1": 0.9041095890410958,
+      "fpr": 0.09230769230769231,
+      "specificity": 0.9076923076923077,
+      "tp": 33,
+      "fp": 6,
+      "tn": 59,
+      "fn": 1
+    },
+    "auroc": 0.9742081447963801,
+    "auprc": 0.9447332702427802
+  },
+  {
+    "name": "classifier_mean",
+    "rule": {
+      "type": "classifier_mean",
+      "models": [
+        "f_cls_efficientnet_b0_512_exclude_difficult_s20260913",
+        "f_cls_resnet18_384_include_difficult_s20260913"
+      ]
+    },
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.5251138191759659,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      },
+      "0.2": {
+        "threshold": 0.5251138191759659,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      },
+      "0.3": {
+        "threshold": 0.5251138191759659,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      },
+      "0.5": {
+        "threshold": 0.5251138191759659,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      }
+    },
+    "primary": {
+      "threshold": 0.5251138191759659,
+      "recall": 1.0,
+      "precision": 0.8717948717948718,
+      "f1": 0.9315068493150686,
+      "fpr": 0.07692307692307693,
+      "specificity": 0.9230769230769231,
+      "tp": 34,
+      "fp": 5,
+      "tn": 60,
+      "fn": 0
+    },
+    "auroc": 0.9665158371040724,
+    "auprc": 0.8945315908626326
+  },
+  {
+    "name": "classifier_max",
+    "rule": {
+      "type": "classifier_max",
+      "models": [
+        "f_cls_efficientnet_b0_512_exclude_difficult_s20260913",
+        "f_cls_resnet18_384_include_difficult_s20260913"
+      ]
+    },
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.6516356081146706,
+        "recall": 1.0,
+        "precision": 0.85,
+        "f1": 0.9189189189189189,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 34,
+        "fp": 6,
+        "tn": 59,
+        "fn": 0
+      },
+      "0.2": {
+        "threshold": 0.6516356081146706,
+        "recall": 1.0,
+        "precision": 0.85,
+        "f1": 0.9189189189189189,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 34,
+        "fp": 6,
+        "tn": 59,
+        "fn": 0
+      },
+      "0.3": {
+        "threshold": 0.6516356081146706,
+        "recall": 1.0,
+        "precision": 0.85,
+        "f1": 0.9189189189189189,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 34,
+        "fp": 6,
+        "tn": 59,
+        "fn": 0
+      },
+      "0.5": {
+        "threshold": 0.6516356081146706,
+        "recall": 1.0,
+        "precision": 0.85,
+        "f1": 0.9189189189189189,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 34,
+        "fp": 6,
+        "tn": 59,
+        "fn": 0
+      }
+    },
+    "primary": {
+      "threshold": 0.6516356081146706,
+      "recall": 1.0,
+      "precision": 0.85,
+      "f1": 0.9189189189189189,
+      "fpr": 0.09230769230769231,
+      "specificity": 0.9076923076923077,
+      "tp": 34,
+      "fp": 6,
+      "tn": 59,
+      "fn": 0
+    },
+    "auroc": 0.9710407239819004,
+    "auprc": 0.9262636769172977
+  },
+  {
+    "name": "weighted_f_cls_efficientnet_b0_512_exclude_difficult_s20260913_0.25",
+    "rule": {
+      "type": "weighted",
+      "alpha": 0.25,
+      "classifier": {
+        "type": "classifier",
+        "models": [
+          "f_cls_efficientnet_b0_512_exclude_difficult_s20260913"
+        ]
+      },
+      "detector": "p_det_one_class_exclude_difficult_standard_960"
+    },
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.20599650265366867,
+        "recall": 1.0,
+        "precision": 0.8947368421052632,
+        "f1": 0.9444444444444444,
+        "fpr": 0.06153846153846154,
+        "specificity": 0.9384615384615385,
+        "tp": 34,
+        "fp": 4,
+        "tn": 61,
+        "fn": 0
+      },
+      "0.2": {
+        "threshold": 0.20599650265366867,
+        "recall": 1.0,
+        "precision": 0.8947368421052632,
+        "f1": 0.9444444444444444,
+        "fpr": 0.06153846153846154,
+        "specificity": 0.9384615384615385,
+        "tp": 34,
+        "fp": 4,
+        "tn": 61,
+        "fn": 0
+      },
+      "0.3": {
+        "threshold": 0.20599650265366867,
+        "recall": 1.0,
+        "precision": 0.8947368421052632,
+        "f1": 0.9444444444444444,
+        "fpr": 0.06153846153846154,
+        "specificity": 0.9384615384615385,
+        "tp": 34,
+        "fp": 4,
+        "tn": 61,
+        "fn": 0
+      },
+      "0.5": {
+        "threshold": 0.20599650265366867,
+        "recall": 1.0,
+        "precision": 0.8947368421052632,
+        "f1": 0.9444444444444444,
+        "fpr": 0.06153846153846154,
+        "specificity": 0.9384615384615385,
+        "tp": 34,
+        "fp": 4,
+        "tn": 61,
+        "fn": 0
+      }
+    },
+    "primary": {
+      "threshold": 0.20599650265366867,
+      "recall": 1.0,
+      "precision": 0.8947368421052632,
+      "f1": 0.9444444444444444,
+      "fpr": 0.06153846153846154,
+      "specificity": 0.9384615384615385,
+      "tp": 34,
+      "fp": 4,
+      "tn": 61,
+      "fn": 0
+    },
+    "auroc": 0.9828054298642533,
+    "auprc": 0.9633883765080992
+  },
+  {
+    "name": "weighted_f_cls_efficientnet_b0_512_exclude_difficult_s20260913_0.5",
+    "rule": {
+      "type": "weighted",
+      "alpha": 0.5,
+      "classifier": {
+        "type": "classifier",
+        "models": [
+          "f_cls_efficientnet_b0_512_exclude_difficult_s20260913"
+        ]
+      },
+      "detector": "p_det_one_class_exclude_difficult_standard_960"
+    },
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.26868232370476614,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      },
+      "0.2": {
+        "threshold": 0.26868232370476614,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      },
+      "0.3": {
+        "threshold": 0.26868232370476614,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      },
+      "0.5": {
+        "threshold": 0.26868232370476614,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      }
+    },
+    "primary": {
+      "threshold": 0.26868232370476614,
+      "recall": 1.0,
+      "precision": 0.8717948717948718,
+      "f1": 0.9315068493150686,
+      "fpr": 0.07692307692307693,
+      "specificity": 0.9230769230769231,
+      "tp": 34,
+      "fp": 5,
+      "tn": 60,
+      "fn": 0
+    },
+    "auroc": 0.9814479638009049,
+    "auprc": 0.9625452542035259
+  },
+  {
+    "name": "weighted_f_cls_efficientnet_b0_512_exclude_difficult_s20260913_0.75",
+    "rule": {
+      "type": "weighted",
+      "alpha": 0.75,
+      "classifier": {
+        "type": "classifier",
+        "models": [
+          "f_cls_efficientnet_b0_512_exclude_difficult_s20260913"
+        ]
+      },
+      "detector": "p_det_one_class_exclude_difficult_standard_960"
+    },
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.3313681447558636,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      },
+      "0.2": {
+        "threshold": 0.3313681447558636,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      },
+      "0.3": {
+        "threshold": 0.3313681447558636,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      },
+      "0.5": {
+        "threshold": 0.3313681447558636,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      }
+    },
+    "primary": {
+      "threshold": 0.3313681447558636,
+      "recall": 1.0,
+      "precision": 0.8717948717948718,
+      "f1": 0.9315068493150686,
+      "fpr": 0.07692307692307693,
+      "specificity": 0.9230769230769231,
+      "tp": 34,
+      "fp": 5,
+      "tn": 60,
+      "fn": 0
+    },
+    "auroc": 0.9760180995475113,
+    "auprc": 0.9504651993354348
+  },
+  {
+    "name": "soft_or_f_cls_efficientnet_b0_512_exclude_difficult_s20260913",
+    "rule": {
+      "type": "soft_or",
+      "classifier": {
+        "type": "classifier",
+        "models": [
+          "f_cls_efficientnet_b0_512_exclude_difficult_s20260913"
+        ]
+      },
+      "detector": "p_det_one_class_exclude_difficult_standard_960"
+    },
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.3809993863105774,
+        "recall": 1.0,
+        "precision": 0.85,
+        "f1": 0.9189189189189189,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 34,
+        "fp": 6,
+        "tn": 59,
+        "fn": 0
+      },
+      "0.2": {
+        "threshold": 0.3809993863105774,
+        "recall": 1.0,
+        "precision": 0.85,
+        "f1": 0.9189189189189189,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 34,
+        "fp": 6,
+        "tn": 59,
+        "fn": 0
+      },
+      "0.3": {
+        "threshold": 0.3809993863105774,
+        "recall": 1.0,
+        "precision": 0.85,
+        "f1": 0.9189189189189189,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 34,
+        "fp": 6,
+        "tn": 59,
+        "fn": 0
+      },
+      "0.5": {
+        "threshold": 0.3809993863105774,
+        "recall": 1.0,
+        "precision": 0.85,
+        "f1": 0.9189189189189189,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 34,
+        "fp": 6,
+        "tn": 59,
+        "fn": 0
+      }
+    },
+    "primary": {
+      "threshold": 0.3809993863105774,
+      "recall": 1.0,
+      "precision": 0.85,
+      "f1": 0.9189189189189189,
+      "fpr": 0.09230769230769231,
+      "specificity": 0.9076923076923077,
+      "tp": 34,
+      "fp": 6,
+      "tn": 59,
+      "fn": 0
+    },
+    "auroc": 0.9710407239819004,
+    "auprc": 0.92613340975667
+  },
+  {
+    "name": "weighted_f_cls_resnet18_384_include_difficult_s20260913_0.25",
+    "rule": {
+      "type": "weighted",
+      "alpha": 0.25,
+      "classifier": {
+        "type": "classifier",
+        "models": [
+          "f_cls_resnet18_384_include_difficult_s20260913"
+        ]
+      },
+      "detector": "p_det_one_class_exclude_difficult_standard_960"
+    },
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.25335477732109046,
+        "recall": 0.9705882352941176,
+        "precision": 0.8918918918918919,
+        "f1": 0.9295774647887325,
+        "fpr": 0.06153846153846154,
+        "specificity": 0.9384615384615385,
+        "tp": 33,
+        "fp": 4,
+        "tn": 61,
+        "fn": 1
+      },
+      "0.2": {
+        "threshold": 0.21027186973228074,
+        "recall": 1.0,
+        "precision": 0.8292682926829268,
+        "f1": 0.9066666666666667,
+        "fpr": 0.1076923076923077,
+        "specificity": 0.8923076923076922,
+        "tp": 34,
+        "fp": 7,
+        "tn": 58,
+        "fn": 0
+      },
+      "0.3": {
+        "threshold": 0.21027186973228074,
+        "recall": 1.0,
+        "precision": 0.8292682926829268,
+        "f1": 0.9066666666666667,
+        "fpr": 0.1076923076923077,
+        "specificity": 0.8923076923076922,
+        "tp": 34,
+        "fp": 7,
+        "tn": 58,
+        "fn": 0
+      },
+      "0.5": {
+        "threshold": 0.21027186973228074,
+        "recall": 1.0,
+        "precision": 0.8292682926829268,
+        "f1": 0.9066666666666667,
+        "fpr": 0.1076923076923077,
+        "specificity": 0.8923076923076922,
+        "tp": 34,
+        "fp": 7,
+        "tn": 58,
+        "fn": 0
+      }
+    },
+    "primary": {
+      "threshold": 0.21027186973228074,
+      "recall": 1.0,
+      "precision": 0.8292682926829268,
+      "f1": 0.9066666666666667,
+      "fpr": 0.1076923076923077,
+      "specificity": 0.8923076923076922,
+      "tp": 34,
+      "fp": 7,
+      "tn": 58,
+      "fn": 0
+    },
+    "auroc": 0.9846153846153847,
+    "auprc": 0.9698300159920186
+  },
+  {
+    "name": "weighted_f_cls_resnet18_384_include_difficult_s20260913_0.5",
+    "rule": {
+      "type": "weighted",
+      "alpha": 0.5,
+      "classifier": {
+        "type": "classifier",
+        "models": [
+          "f_cls_resnet18_384_include_difficult_s20260913"
+        ]
+      },
+      "detector": "p_det_one_class_exclude_difficult_standard_960"
+    },
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.3861150542522839,
+        "recall": 0.9705882352941176,
+        "precision": 0.8918918918918919,
+        "f1": 0.9295774647887325,
+        "fpr": 0.06153846153846154,
+        "specificity": 0.9384615384615385,
+        "tp": 33,
+        "fp": 4,
+        "tn": 61,
+        "fn": 1
+      },
+      "0.2": {
+        "threshold": 0.3588088694768546,
+        "recall": 1.0,
+        "precision": 0.8292682926829268,
+        "f1": 0.9066666666666667,
+        "fpr": 0.1076923076923077,
+        "specificity": 0.8923076923076922,
+        "tp": 34,
+        "fp": 7,
+        "tn": 58,
+        "fn": 0
+      },
+      "0.3": {
+        "threshold": 0.3588088694768546,
+        "recall": 1.0,
+        "precision": 0.8292682926829268,
+        "f1": 0.9066666666666667,
+        "fpr": 0.1076923076923077,
+        "specificity": 0.8923076923076922,
+        "tp": 34,
+        "fp": 7,
+        "tn": 58,
+        "fn": 0
+      },
+      "0.5": {
+        "threshold": 0.3588088694768546,
+        "recall": 1.0,
+        "precision": 0.8292682926829268,
+        "f1": 0.9066666666666667,
+        "fpr": 0.1076923076923077,
+        "specificity": 0.8923076923076922,
+        "tp": 34,
+        "fp": 7,
+        "tn": 58,
+        "fn": 0
+      }
+    },
+    "primary": {
+      "threshold": 0.3588088694768546,
+      "recall": 1.0,
+      "precision": 0.8292682926829268,
+      "f1": 0.9066666666666667,
+      "fpr": 0.1076923076923077,
+      "specificity": 0.8923076923076922,
+      "tp": 34,
+      "fp": 7,
+      "tn": 58,
+      "fn": 0
+    },
+    "auroc": 0.9832579185520361,
+    "auprc": 0.96567913638034
+  },
+  {
+    "name": "weighted_f_cls_resnet18_384_include_difficult_s20260913_0.75",
+    "rule": {
+      "type": "weighted",
+      "alpha": 0.75,
+      "classifier": {
+        "type": "classifier",
+        "models": [
+          "f_cls_resnet18_384_include_difficult_s20260913"
+        ]
+      },
+      "detector": "p_det_one_class_exclude_difficult_standard_960"
+    },
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.5188753311834772,
+        "recall": 0.9705882352941176,
+        "precision": 0.8461538461538461,
+        "f1": 0.9041095890410958,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 33,
+        "fp": 6,
+        "tn": 59,
+        "fn": 1
+      },
+      "0.2": {
+        "threshold": 0.5073458692214284,
+        "recall": 1.0,
+        "precision": 0.8292682926829268,
+        "f1": 0.9066666666666667,
+        "fpr": 0.1076923076923077,
+        "specificity": 0.8923076923076922,
+        "tp": 34,
+        "fp": 7,
+        "tn": 58,
+        "fn": 0
+      },
+      "0.3": {
+        "threshold": 0.5073458692214284,
+        "recall": 1.0,
+        "precision": 0.8292682926829268,
+        "f1": 0.9066666666666667,
+        "fpr": 0.1076923076923077,
+        "specificity": 0.8923076923076922,
+        "tp": 34,
+        "fp": 7,
+        "tn": 58,
+        "fn": 0
+      },
+      "0.5": {
+        "threshold": 0.5073458692214284,
+        "recall": 1.0,
+        "precision": 0.8292682926829268,
+        "f1": 0.9066666666666667,
+        "fpr": 0.1076923076923077,
+        "specificity": 0.8923076923076922,
+        "tp": 34,
+        "fp": 7,
+        "tn": 58,
+        "fn": 0
+      }
+    },
+    "primary": {
+      "threshold": 0.5073458692214284,
+      "recall": 1.0,
+      "precision": 0.8292682926829268,
+      "f1": 0.9066666666666667,
+      "fpr": 0.1076923076923077,
+      "specificity": 0.8923076923076922,
+      "tp": 34,
+      "fp": 7,
+      "tn": 58,
+      "fn": 0
+    },
+    "auroc": 0.9769230769230769,
+    "auprc": 0.9430107325384899
+  },
+  {
+    "name": "soft_or_f_cls_resnet18_384_include_difficult_s20260913",
+    "rule": {
+      "type": "soft_or",
+      "classifier": {
+        "type": "classifier",
+        "models": [
+          "f_cls_resnet18_384_include_difficult_s20260913"
+        ]
+      },
+      "detector": "p_det_one_class_exclude_difficult_standard_960"
+    },
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.6516356081146706,
+        "recall": 0.9705882352941176,
+        "precision": 0.8461538461538461,
+        "f1": 0.9041095890410958,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 33,
+        "fp": 6,
+        "tn": 59,
+        "fn": 1
+      },
+      "0.2": {
+        "threshold": 0.6378490809671441,
+        "recall": 1.0,
+        "precision": 0.7906976744186046,
+        "f1": 0.8831168831168831,
+        "fpr": 0.13846153846153847,
+        "specificity": 0.8615384615384616,
+        "tp": 34,
+        "fp": 9,
+        "tn": 56,
+        "fn": 0
+      },
+      "0.3": {
+        "threshold": 0.6378490809671441,
+        "recall": 1.0,
+        "precision": 0.7906976744186046,
+        "f1": 0.8831168831168831,
+        "fpr": 0.13846153846153847,
+        "specificity": 0.8615384615384616,
+        "tp": 34,
+        "fp": 9,
+        "tn": 56,
+        "fn": 0
+      },
+      "0.5": {
+        "threshold": 0.6378490809671441,
+        "recall": 1.0,
+        "precision": 0.7906976744186046,
+        "f1": 0.8831168831168831,
+        "fpr": 0.13846153846153847,
+        "specificity": 0.8615384615384616,
+        "tp": 34,
+        "fp": 9,
+        "tn": 56,
+        "fn": 0
+      }
+    },
+    "primary": {
+      "threshold": 0.6378490809671441,
+      "recall": 1.0,
+      "precision": 0.7906976744186046,
+      "f1": 0.8831168831168831,
+      "fpr": 0.13846153846153847,
+      "specificity": 0.8615384615384616,
+      "tp": 34,
+      "fp": 9,
+      "tn": 56,
+      "fn": 0
+    },
+    "auroc": 0.9647058823529412,
+    "auprc": 0.8927542567899758
+  },
+  {
+    "name": "weighted_classifier_mean_0.25",
+    "rule": {
+      "type": "weighted",
+      "alpha": 0.25,
+      "classifier": {
+        "type": "classifier_mean",
+        "models": [
+          "f_cls_efficientnet_b0_512_exclude_difficult_s20260913",
+          "f_cls_resnet18_384_include_difficult_s20260913"
+        ]
+      },
+      "detector": "p_det_one_class_exclude_difficult_standard_960"
+    },
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.21759473572996535,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      },
+      "0.2": {
+        "threshold": 0.21759473572996535,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      },
+      "0.3": {
+        "threshold": 0.21759473572996535,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      },
+      "0.5": {
+        "threshold": 0.21759473572996535,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      }
+    },
+    "primary": {
+      "threshold": 0.21759473572996535,
+      "recall": 1.0,
+      "precision": 0.8717948717948718,
+      "f1": 0.9315068493150686,
+      "fpr": 0.07692307692307693,
+      "specificity": 0.9230769230769231,
+      "tp": 34,
+      "fp": 5,
+      "tn": 60,
+      "fn": 0
+    },
+    "auroc": 0.983710407239819,
+    "auprc": 0.9663317265876722
+  },
+  {
+    "name": "weighted_classifier_mean_0.5",
+    "rule": {
+      "type": "weighted",
+      "alpha": 0.5,
+      "classifier": {
+        "type": "classifier_mean",
+        "models": [
+          "f_cls_efficientnet_b0_512_exclude_difficult_s20260913",
+          "f_cls_resnet18_384_include_difficult_s20260913"
+        ]
+      },
+      "detector": "p_det_one_class_exclude_difficult_standard_960"
+    },
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.3413327979078584,
+        "recall": 1.0,
+        "precision": 0.8947368421052632,
+        "f1": 0.9444444444444444,
+        "fpr": 0.06153846153846154,
+        "specificity": 0.9384615384615385,
+        "tp": 34,
+        "fp": 4,
+        "tn": 61,
+        "fn": 0
+      },
+      "0.2": {
+        "threshold": 0.3413327979078584,
+        "recall": 1.0,
+        "precision": 0.8947368421052632,
+        "f1": 0.9444444444444444,
+        "fpr": 0.06153846153846154,
+        "specificity": 0.9384615384615385,
+        "tp": 34,
+        "fp": 4,
+        "tn": 61,
+        "fn": 0
+      },
+      "0.3": {
+        "threshold": 0.3413327979078584,
+        "recall": 1.0,
+        "precision": 0.8947368421052632,
+        "f1": 0.9444444444444444,
+        "fpr": 0.06153846153846154,
+        "specificity": 0.9384615384615385,
+        "tp": 34,
+        "fp": 4,
+        "tn": 61,
+        "fn": 0
+      },
+      "0.5": {
+        "threshold": 0.3413327979078584,
+        "recall": 1.0,
+        "precision": 0.8947368421052632,
+        "f1": 0.9444444444444444,
+        "fpr": 0.06153846153846154,
+        "specificity": 0.9384615384615385,
+        "tp": 34,
+        "fp": 4,
+        "tn": 61,
+        "fn": 0
+      }
+    },
+    "primary": {
+      "threshold": 0.3413327979078584,
+      "recall": 1.0,
+      "precision": 0.8947368421052632,
+      "f1": 0.9444444444444444,
+      "fpr": 0.06153846153846154,
+      "specificity": 0.9384615384615385,
+      "tp": 34,
+      "fp": 4,
+      "tn": 61,
+      "fn": 0
+    },
+    "auroc": 0.9832579185520361,
+    "auprc": 0.9659552980449475
+  },
+  {
+    "name": "weighted_classifier_mean_0.75",
+    "rule": {
+      "type": "weighted",
+      "alpha": 0.75,
+      "classifier": {
+        "type": "classifier_mean",
+        "models": [
+          "f_cls_efficientnet_b0_512_exclude_difficult_s20260913",
+          "f_cls_resnet18_384_include_difficult_s20260913"
+        ]
+      },
+      "detector": "p_det_one_class_exclude_difficult_standard_960"
+    },
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.45170194666683916,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      },
+      "0.2": {
+        "threshold": 0.45170194666683916,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      },
+      "0.3": {
+        "threshold": 0.45170194666683916,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      },
+      "0.5": {
+        "threshold": 0.45170194666683916,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      }
+    },
+    "primary": {
+      "threshold": 0.45170194666683916,
+      "recall": 1.0,
+      "precision": 0.8717948717948718,
+      "f1": 0.9315068493150686,
+      "fpr": 0.07692307692307693,
+      "specificity": 0.9230769230769231,
+      "tp": 34,
+      "fp": 5,
+      "tn": 60,
+      "fn": 0
+    },
+    "auroc": 0.9782805429864253,
+    "auprc": 0.9526812418268576
+  },
+  {
+    "name": "soft_or_classifier_mean",
+    "rule": {
+      "type": "soft_or",
+      "classifier": {
+        "type": "classifier_mean",
+        "models": [
+          "f_cls_efficientnet_b0_512_exclude_difficult_s20260913",
+          "f_cls_resnet18_384_include_difficult_s20260913"
+        ]
+      },
+      "detector": "p_det_one_class_exclude_difficult_standard_960"
+    },
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.5620710954258198,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      },
+      "0.2": {
+        "threshold": 0.5620710954258198,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      },
+      "0.3": {
+        "threshold": 0.5620710954258198,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      },
+      "0.5": {
+        "threshold": 0.5620710954258198,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      }
+    },
+    "primary": {
+      "threshold": 0.5620710954258198,
+      "recall": 1.0,
+      "precision": 0.8717948717948718,
+      "f1": 0.9315068493150686,
+      "fpr": 0.07692307692307693,
+      "specificity": 0.9230769230769231,
+      "tp": 34,
+      "fp": 5,
+      "tn": 60,
+      "fn": 0
+    },
+    "auroc": 0.9665158371040724,
+    "auprc": 0.8945315908626326
+  },
+  {
+    "name": "weighted_classifier_max_0.25",
+    "rule": {
+      "type": "weighted",
+      "alpha": 0.25,
+      "classifier": {
+        "type": "classifier_max",
+        "models": [
+          "f_cls_efficientnet_b0_512_exclude_difficult_s20260913",
+          "f_cls_resnet18_384_include_difficult_s20260913"
+        ]
+      },
+      "detector": "p_det_one_class_exclude_difficult_standard_960"
+    },
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.22491760172764996,
+        "recall": 1.0,
+        "precision": 0.85,
+        "f1": 0.9189189189189189,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 34,
+        "fp": 6,
+        "tn": 59,
+        "fn": 0
+      },
+      "0.2": {
+        "threshold": 0.22491760172764996,
+        "recall": 1.0,
+        "precision": 0.85,
+        "f1": 0.9189189189189189,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 34,
+        "fp": 6,
+        "tn": 59,
+        "fn": 0
+      },
+      "0.3": {
+        "threshold": 0.22491760172764996,
+        "recall": 1.0,
+        "precision": 0.85,
+        "f1": 0.9189189189189189,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 34,
+        "fp": 6,
+        "tn": 59,
+        "fn": 0
+      },
+      "0.5": {
+        "threshold": 0.22491760172764996,
+        "recall": 1.0,
+        "precision": 0.85,
+        "f1": 0.9189189189189189,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 34,
+        "fp": 6,
+        "tn": 59,
+        "fn": 0
+      }
+    },
+    "primary": {
+      "threshold": 0.22491760172764996,
+      "recall": 1.0,
+      "precision": 0.85,
+      "f1": 0.9189189189189189,
+      "fpr": 0.09230769230769231,
+      "specificity": 0.9076923076923077,
+      "tp": 34,
+      "fp": 6,
+      "tn": 59,
+      "fn": 0
+    },
+    "auroc": 0.9832579185520361,
+    "auprc": 0.9649529528559573
+  },
+  {
+    "name": "weighted_classifier_max_0.5",
+    "rule": {
+      "type": "weighted",
+      "alpha": 0.5,
+      "classifier": {
+        "type": "classifier_max",
+        "models": [
+          "f_cls_efficientnet_b0_512_exclude_difficult_s20260913",
+          "f_cls_resnet18_384_include_difficult_s20260913"
+        ]
+      },
+      "detector": "p_det_one_class_exclude_difficult_standard_960"
+    },
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.3861150542522839,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      },
+      "0.2": {
+        "threshold": 0.3861150542522839,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      },
+      "0.3": {
+        "threshold": 0.3861150542522839,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      },
+      "0.5": {
+        "threshold": 0.3861150542522839,
+        "recall": 1.0,
+        "precision": 0.8717948717948718,
+        "f1": 0.9315068493150686,
+        "fpr": 0.07692307692307693,
+        "specificity": 0.9230769230769231,
+        "tp": 34,
+        "fp": 5,
+        "tn": 60,
+        "fn": 0
+      }
+    },
+    "primary": {
+      "threshold": 0.3861150542522839,
+      "recall": 1.0,
+      "precision": 0.8717948717948718,
+      "f1": 0.9315068493150686,
+      "fpr": 0.07692307692307693,
+      "specificity": 0.9230769230769231,
+      "tp": 34,
+      "fp": 5,
+      "tn": 60,
+      "fn": 0
+    },
+    "auroc": 0.9828054298642533,
+    "auprc": 0.9650639389021414
+  },
+  {
+    "name": "weighted_classifier_max_0.75",
+    "rule": {
+      "type": "weighted",
+      "alpha": 0.75,
+      "classifier": {
+        "type": "classifier_max",
+        "models": [
+          "f_cls_efficientnet_b0_512_exclude_difficult_s20260913",
+          "f_cls_resnet18_384_include_difficult_s20260913"
+        ]
+      },
+      "detector": "p_det_one_class_exclude_difficult_standard_960"
+    },
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.5188753311834772,
+        "recall": 1.0,
+        "precision": 0.85,
+        "f1": 0.9189189189189189,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 34,
+        "fp": 6,
+        "tn": 59,
+        "fn": 0
+      },
+      "0.2": {
+        "threshold": 0.5188753311834772,
+        "recall": 1.0,
+        "precision": 0.85,
+        "f1": 0.9189189189189189,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 34,
+        "fp": 6,
+        "tn": 59,
+        "fn": 0
+      },
+      "0.3": {
+        "threshold": 0.5188753311834772,
+        "recall": 1.0,
+        "precision": 0.85,
+        "f1": 0.9189189189189189,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 34,
+        "fp": 6,
+        "tn": 59,
+        "fn": 0
+      },
+      "0.5": {
+        "threshold": 0.5188753311834772,
+        "recall": 1.0,
+        "precision": 0.85,
+        "f1": 0.9189189189189189,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 34,
+        "fp": 6,
+        "tn": 59,
+        "fn": 0
+      }
+    },
+    "primary": {
+      "threshold": 0.5188753311834772,
+      "recall": 1.0,
+      "precision": 0.85,
+      "f1": 0.9189189189189189,
+      "fpr": 0.09230769230769231,
+      "specificity": 0.9076923076923077,
+      "tp": 34,
+      "fp": 6,
+      "tn": 59,
+      "fn": 0
+    },
+    "auroc": 0.9778280542986425,
+    "auprc": 0.9537128516065441
+  },
+  {
+    "name": "soft_or_classifier_max",
+    "rule": {
+      "type": "soft_or",
+      "classifier": {
+        "type": "classifier_max",
+        "models": [
+          "f_cls_efficientnet_b0_512_exclude_difficult_s20260913",
+          "f_cls_resnet18_384_include_difficult_s20260913"
+        ]
+      },
+      "detector": "p_det_one_class_exclude_difficult_standard_960"
+    },
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.6516356081146706,
+        "recall": 1.0,
+        "precision": 0.85,
+        "f1": 0.9189189189189189,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 34,
+        "fp": 6,
+        "tn": 59,
+        "fn": 0
+      },
+      "0.2": {
+        "threshold": 0.6516356081146706,
+        "recall": 1.0,
+        "precision": 0.85,
+        "f1": 0.9189189189189189,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 34,
+        "fp": 6,
+        "tn": 59,
+        "fn": 0
+      },
+      "0.3": {
+        "threshold": 0.6516356081146706,
+        "recall": 1.0,
+        "precision": 0.85,
+        "f1": 0.9189189189189189,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 34,
+        "fp": 6,
+        "tn": 59,
+        "fn": 0
+      },
+      "0.5": {
+        "threshold": 0.6516356081146706,
+        "recall": 1.0,
+        "precision": 0.85,
+        "f1": 0.9189189189189189,
+        "fpr": 0.09230769230769231,
+        "specificity": 0.9076923076923077,
+        "tp": 34,
+        "fp": 6,
+        "tn": 59,
+        "fn": 0
+      }
+    },
+    "primary": {
+      "threshold": 0.6516356081146706,
+      "recall": 1.0,
+      "precision": 0.85,
+      "f1": 0.9189189189189189,
+      "fpr": 0.09230769230769231,
+      "specificity": 0.9076923076923077,
+      "tp": 34,
+      "fp": 6,
+      "tn": 59,
+      "fn": 0
+    },
+    "auroc": 0.9710407239819004,
+    "auprc": 0.9262636769172977
+  }
+]

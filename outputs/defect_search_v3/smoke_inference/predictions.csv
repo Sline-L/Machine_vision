@@ -1,0 +1,2 @@
+image,decision,predicted_defects,scratch_score,missing_tooth_score,anomaly_score,view
+F:\Work\VSCode\Projects\DATASET\dataset_defects\images\train\train_001.jpg,reject,scratch,0.9981587529182434,0.001576802460476756,1.0,face

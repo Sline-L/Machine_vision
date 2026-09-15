@@ -1,0 +1,72 @@
+{
+  "version": "unified_defect_v1",
+  "models": [
+    {
+      "name": "joint_cls_efficientnet_b0_512",
+      "kind": "classifier",
+      "family": "efficientnet_b0",
+      "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\unified_defect_v1\\final\\unified_classifier.pt",
+      "imgsz": 512,
+      "tta": "none",
+      "temperature": 1.125
+    }
+  ],
+  "fusion": {
+    "type": "classifier",
+    "models": [
+      "joint_cls_efficientnet_b0_512"
+    ]
+  },
+  "default_threshold": 0.6764997972601763,
+  "operating_points": {
+    "0.1": {
+      "threshold": 0.8594004400322351,
+      "recall": 0.6226415094339622,
+      "precision": 0.9428571428571428,
+      "f1": 0.7500000000000001,
+      "fpr": 0.08333333333333333,
+      "specificity": 0.9166666666666666,
+      "tp": 33,
+      "fp": 2,
+      "tn": 22,
+      "fn": 20
+    },
+    "0.2": {
+      "threshold": 0.6764997972601763,
+      "recall": 0.9433962264150944,
+      "precision": 0.9259259259259259,
+      "f1": 0.9345794392523364,
+      "fpr": 0.16666666666666666,
+      "specificity": 0.8333333333333334,
+      "tp": 50,
+      "fp": 4,
+      "tn": 20,
+      "fn": 3
+    },
+    "0.3": {
+      "threshold": 0.6764997972601763,
+      "recall": 0.9433962264150944,
+      "precision": 0.9259259259259259,
+      "f1": 0.9345794392523364,
+      "fpr": 0.16666666666666666,
+      "specificity": 0.8333333333333334,
+      "tp": 50,
+      "fp": 4,
+      "tn": 20,
+      "fn": 3
+    },
+    "0.5": {
+      "threshold": 0.4107453829453786,
+      "recall": 1.0,
+      "precision": 0.8548387096774194,
+      "f1": 0.9217391304347826,
+      "fpr": 0.375,
+      "specificity": 0.625,
+      "tp": 53,
+      "fp": 9,
+      "tn": 15,
+      "fn": 0
+    }
+  },
+  "test_used": false
+}

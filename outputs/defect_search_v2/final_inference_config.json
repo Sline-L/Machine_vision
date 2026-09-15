@@ -1,0 +1,17 @@
+{
+  "models": {
+    "scratch": {
+      "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\defect_search_v2\\final\\scratch_best.pt",
+      "confidence": 0.08,
+      "nms_iou": 0.7,
+      "imgsz": 960
+    },
+    "missing_tooth": {
+      "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\defect_search_v2\\final\\missing_tooth_best.pt",
+      "confidence": 0.25,
+      "nms_iou": 0.7,
+      "imgsz": 960
+    }
+  },
+  "strategy": "run both independent models and merge their class-specific detections"
+}

@@ -1,0 +1,2 @@
+﻿image,decision,scratch_probability,scratch_threshold,scratch_reject,missing_hole_probability,missing_hole_threshold,missing_hole_reject
+F:\Work\VSCode\Projects\DATASET\dataset_defects\images\test_missing_tooth\test_009.jpg,REJECT,0.25700691071882076,0.300273610279458,False,0.6726203403190744,0.3413327979078584,True

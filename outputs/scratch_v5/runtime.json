@@ -1,0 +1,10 @@
+{
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "cuda": "13.0",
+  "torch": "2.14.0+cu130",
+  "cpu_logical_cores": 22,
+  "workers": 4,
+  "amp": true,
+  "train_images": 364,
+  "val_images": 150
+}

@@ -1,0 +1,309 @@
+{
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "elapsed_hours": 3.275376356138893,
+  "split_preflight": {
+    "counts": {
+      "train": {
+        "scratch": 56,
+        "normal": 92,
+        "missing_tooth": 95
+      },
+      "val": {
+        "missing_tooth": 18,
+        "normal": 20,
+        "scratch": 12
+      },
+      "test": {
+        "missing_tooth": 19,
+        "normal": 20,
+        "scratch": 11
+      }
+    },
+    "views": {
+      "train": {
+        "face": 90,
+        "side": 58,
+        "oblique": 95
+      },
+      "val": {
+        "face": 22,
+        "side": 9,
+        "oblique": 19
+      },
+      "test": {
+        "side": 12,
+        "face": 20,
+        "oblique": 18
+      }
+    },
+    "groups": 159,
+    "largest_group": 41,
+    "dhash_leaks_at_2": []
+  },
+  "gate_validation": {
+    "strategy": "yolo",
+    "normal_fpr": 0.1,
+    "classes": {
+      "scratch": {
+        "precision": 0.8571428571428571,
+        "recall": 0.5,
+        "f1": 0.631578947368421,
+        "tp": 6,
+        "fp": 1,
+        "fn": 6
+      },
+      "missing_tooth": {
+        "precision": 0.9375,
+        "recall": 0.8333333333333334,
+        "f1": 0.8823529411764706,
+        "tp": 15,
+        "fp": 1,
+        "fn": 3
+      }
+    },
+    "thresholds": {
+      "scratch": 0.85,
+      "missing_tooth": 0.65
+    }
+  },
+  "gate_test": {
+    "normal_fpr": 0.15,
+    "classes": {
+      "scratch": {
+        "precision": 1.0,
+        "recall": 0.36363636363636365,
+        "f1": 0.5333333333333333,
+        "tp": 4,
+        "fp": 0,
+        "fn": 7
+      },
+      "missing_tooth": {
+        "precision": 0.75,
+        "recall": 0.7894736842105263,
+        "f1": 0.7692307692307692,
+        "tp": 15,
+        "fp": 5,
+        "fn": 4
+      }
+    },
+    "thresholds": {
+      "scratch": 0.85,
+      "missing_tooth": 0.65
+    },
+    "by_view": {
+      "face": {
+        "normal_fpr": 0.0,
+        "classes": {
+          "scratch": {
+            "precision": 1.0,
+            "recall": 0.25,
+            "f1": 0.4,
+            "tp": 1,
+            "fp": 0,
+            "fn": 3
+          },
+          "missing_tooth": {
+            "precision": 1.0,
+            "recall": 0.6,
+            "f1": 0.7499999999999999,
+            "tp": 3,
+            "fp": 0,
+            "fn": 2
+          }
+        },
+        "thresholds": {
+          "scratch": 0.85,
+          "missing_tooth": 0.65
+        }
+      },
+      "oblique": {
+        "normal_fpr": 0.0,
+        "classes": {
+          "scratch": {
+            "precision": 1.0,
+            "recall": 0.6,
+            "f1": 0.7499999999999999,
+            "tp": 3,
+            "fp": 0,
+            "fn": 2
+          },
+          "missing_tooth": {
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1": 0.8571428571428571,
+            "tp": 6,
+            "fp": 0,
+            "fn": 2
+          }
+        },
+        "thresholds": {
+          "scratch": 0.85,
+          "missing_tooth": 0.65
+        }
+      },
+      "side": {
+        "normal_fpr": 0.75,
+        "classes": {
+          "scratch": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 2
+          },
+          "missing_tooth": {
+            "precision": 0.5454545454545454,
+            "recall": 1.0,
+            "f1": 0.7058823529411764,
+            "tp": 6,
+            "fp": 5,
+            "fn": 0
+          }
+        },
+        "thresholds": {
+          "scratch": 0.85,
+          "missing_tooth": 0.65
+        }
+      }
+    }
+  },
+  "localization_test": {
+    "scratch": {
+      "overall": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "map50": 0.0,
+        "map5095": 0.0,
+        "conf": 0.4,
+        "tp": 0,
+        "fp": 6,
+        "fn": 19
+      },
+      "by_view": {
+        "face": {
+          "iou_0.3": {
+            "recall": 0.0,
+            "precision": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 7
+          },
+          "iou_0.5": {
+            "recall": 0.0,
+            "precision": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 7
+          }
+        },
+        "oblique": {
+          "iou_0.3": {
+            "recall": 0.3,
+            "precision": 0.5,
+            "tp": 3,
+            "fp": 3,
+            "fn": 7
+          },
+          "iou_0.5": {
+            "recall": 0.1,
+            "precision": 0.16666666666666666,
+            "tp": 1,
+            "fp": 5,
+            "fn": 9
+          }
+        },
+        "side": {
+          "iou_0.3": {
+            "recall": 0.0,
+            "precision": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 2
+          },
+          "iou_0.5": {
+            "recall": 0.0,
+            "precision": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 2
+          }
+        }
+      },
+      "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\defect_search_v3\\final\\scratch_localizer.pt"
+    },
+    "missing_tooth": {
+      "overall": {
+        "precision": 0.78125,
+        "recall": 0.4807692307692308,
+        "f1": 0.5952380952380952,
+        "map50": 0.444589094875639,
+        "map5095": 0.21881904561330723,
+        "conf": 0.25,
+        "tp": 25,
+        "fp": 7,
+        "fn": 27
+      },
+      "by_view": {
+        "face": {
+          "iou_0.3": {
+            "recall": 0.5384615384615384,
+            "precision": 0.6363636363636364,
+            "tp": 7,
+            "fp": 4,
+            "fn": 6
+          },
+          "iou_0.5": {
+            "recall": 0.5384615384615384,
+            "precision": 0.6363636363636364,
+            "tp": 7,
+            "fp": 4,
+            "fn": 6
+          }
+        },
+        "oblique": {
+          "iou_0.3": {
+            "recall": 0.23809523809523808,
+            "precision": 1.0,
+            "tp": 5,
+            "fp": 0,
+            "fn": 16
+          },
+          "iou_0.5": {
+            "recall": 0.23809523809523808,
+            "precision": 1.0,
+            "tp": 5,
+            "fp": 0,
+            "fn": 16
+          }
+        },
+        "side": {
+          "iou_0.3": {
+            "recall": 0.7222222222222222,
+            "precision": 0.8666666666666667,
+            "tp": 13,
+            "fp": 2,
+            "fn": 5
+          },
+          "iou_0.5": {
+            "recall": 0.7222222222222222,
+            "precision": 0.8666666666666667,
+            "tp": 13,
+            "fp": 2,
+            "fn": 5
+          }
+        }
+      },
+      "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\defect_search_v3\\final\\missing_tooth_localizer.pt"
+    }
+  },
+  "targets": {
+    "scratch_image_recall": 0.9,
+    "missing_tooth_image_recall": 0.9,
+    "normal_fpr_max": 0.1,
+    "box_recall": 0.7,
+    "box_precision_floor": 0.5
+  },
+  "gate_target_met": false
+}

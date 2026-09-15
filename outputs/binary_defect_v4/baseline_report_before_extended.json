@@ -1,0 +1,178 @@
+{
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "elapsed_hours": 0.26684999441666557,
+  "preflight": {
+    "images": 343,
+    "unique_stems": 343,
+    "counts": {
+      "train": {
+        "defect": 151,
+        "normal": 92
+      },
+      "val": {
+        "defect": 30,
+        "normal": 20
+      },
+      "test": {
+        "defect": 30,
+        "normal": 20
+      }
+    },
+    "source_categories": {
+      "train": {
+        "scratch": 56,
+        "normal": 92,
+        "missing_tooth": 95
+      },
+      "val": {
+        "missing_tooth": 18,
+        "normal": 20,
+        "scratch": 12
+      },
+      "test": {
+        "missing_tooth": 19,
+        "normal": 20,
+        "scratch": 11
+      }
+    },
+    "views": {
+      "train": {
+        "face": 90,
+        "side": 58,
+        "oblique": 95
+      },
+      "val": {
+        "face": 22,
+        "side": 9,
+        "oblique": 19
+      },
+      "test": {
+        "side": 12,
+        "face": 20,
+        "oblique": 18
+      }
+    },
+    "groups": 159,
+    "largest_group": 41,
+    "dhash_leaks_at_2": []
+  },
+  "winner": {
+    "name": "p_resnet18_512_w4",
+    "stage": "pilot",
+    "family": "resnet18",
+    "size": 512,
+    "defect_weight": 4.0,
+    "epochs": 30,
+    "seed": 20260911,
+    "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\runs\\binary_defect_v4\\p_resnet18_512_w4\\best.pt",
+    "tta": "tta_mean",
+    "temperature": 2.025,
+    "operating_points": {
+      "0.1": {
+        "threshold": 0.7644555900802416,
+        "recall": 0.4,
+        "precision": 0.8571428571428571,
+        "f1": 0.5454545454545455,
+        "fpr": 0.1,
+        "specificity": 0.9,
+        "tp": 12,
+        "fp": 2,
+        "tn": 18,
+        "fn": 18
+      },
+      "0.2": {
+        "threshold": 0.7235741805941771,
+        "recall": 0.5666666666666667,
+        "precision": 0.8095238095238095,
+        "f1": 0.6666666666666666,
+        "fpr": 0.2,
+        "specificity": 0.8,
+        "tp": 17,
+        "fp": 4,
+        "tn": 16,
+        "fn": 13
+      },
+      "0.3": {
+        "threshold": 0.6405667573575748,
+        "recall": 0.9,
+        "precision": 0.8181818181818182,
+        "f1": 0.8571428571428572,
+        "fpr": 0.3,
+        "specificity": 0.7,
+        "tp": 27,
+        "fp": 6,
+        "tn": 14,
+        "fn": 3
+      },
+      "0.5": {
+        "threshold": 0.6209051971071399,
+        "recall": 0.9666666666666667,
+        "precision": 0.7631578947368421,
+        "f1": 0.8529411764705883,
+        "fpr": 0.45,
+        "specificity": 0.55,
+        "tp": 29,
+        "fp": 9,
+        "tn": 11,
+        "fn": 1
+      }
+    },
+    "auprc": 0.8531553705693804
+  },
+  "test": {
+    "overall": {
+      "threshold": 0.6405667573575748,
+      "recall": 0.5666666666666667,
+      "precision": 0.7391304347826086,
+      "f1": 0.6415094339622641,
+      "fpr": 0.3,
+      "specificity": 0.7,
+      "npv": 0.5185185185185185,
+      "tp": 17,
+      "fp": 6,
+      "tn": 14,
+      "fn": 13,
+      "auroc": 0.6799999999999999,
+      "auprc": 0.7669016928093593
+    },
+    "subgroups": {
+      "scratch": {
+        "count": 11,
+        "recall": 0.36363636363636365
+      },
+      "missing_tooth": {
+        "count": 19,
+        "recall": 0.6842105263157895
+      },
+      "face": {
+        "count": 9,
+        "recall": 0.7777777777777778
+      },
+      "oblique": {
+        "count": 13,
+        "recall": 0.38461538461538464
+      },
+      "side": {
+        "count": 8,
+        "recall": 0.625
+      }
+    },
+    "unused_unconstrained": {
+      "threshold": 0.49932656927181124,
+      "recall": 1.0,
+      "precision": 0.6382978723404256,
+      "f1": 0.7792207792207793,
+      "fpr": 0.85,
+      "specificity": 0.15000000000000002,
+      "tp": 30,
+      "fp": 17,
+      "tn": 3,
+      "fn": 0
+    }
+  },
+  "target": {
+    "recall": 0.95,
+    "fpr_max": 0.3
+  },
+  "target_met": false
+}

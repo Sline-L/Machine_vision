@@ -1,0 +1,5 @@
+path: F:/Work/VSCode/Projects/DATASET/dataset_defects/missing_hole_v1/yolo/joint_one_class_include_difficult
+train: images/train
+val: images/val
+names:
+  0: any_defect

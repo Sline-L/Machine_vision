@@ -1,0 +1,28 @@
+{
+  "gate": {
+    "strategy": "yolo",
+    "thresholds": {
+      "scratch": 0.85,
+      "missing_tooth": 0.65
+    },
+    "normal_fpr_limit": 0.1,
+    "yolo_classifier": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\defect_search_v3\\final\\gate_yolo26n_cls.pt",
+    "resnet_classifier": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\defect_search_v3\\final\\gate_resnet18.pt",
+    "anomaly_reference": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\defect_search_v3\\final\\anomaly_reference.pt"
+  },
+  "localizers": {
+    "scratch": {
+      "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\defect_search_v3\\final\\scratch_localizer.pt",
+      "confidence": 0.4,
+      "nms_iou": 0.7,
+      "imgsz": 960
+    },
+    "missing_tooth": {
+      "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\defect_search_v3\\final\\missing_tooth_localizer.pt",
+      "confidence": 0.25,
+      "nms_iou": 0.7,
+      "imgsz": 960
+    }
+  },
+  "decision": "reject if either calibrated defect gate score reaches its class threshold; localizers are explanatory"
+}

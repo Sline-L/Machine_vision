@@ -1,0 +1,53 @@
+{
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "elapsed_hours": 2.6635835146389018,
+  "target": {
+    "recall": 0.7,
+    "precision_floor": 0.5
+  },
+  "selected": [
+    {
+      "mode": "scratch",
+      "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\defect_search_v2\\final\\scratch_best.pt",
+      "metrics": {
+        "classes": {
+          "scratch": {
+            "precision": 0.5948359945730587,
+            "recall": 0.5769230769230769,
+            "map50": 0.4289047619047619,
+            "map5095": 0.1802451724137931,
+            "conf": 0.08,
+            "f1": 0.5857426165525862,
+            "tp": 15,
+            "fp": 15,
+            "fn": 11
+          }
+        },
+        "eligible": true,
+        "score": 0.5769230769230769
+      }
+    },
+    {
+      "mode": "missing_tooth",
+      "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\outputs\\defect_search_v2\\final\\missing_tooth_best.pt",
+      "metrics": {
+        "classes": {
+          "missing_tooth": {
+            "precision": 0.6181818181818182,
+            "recall": 0.5483870967741935,
+            "map50": 0.4668889328063241,
+            "map5095": 0.2574899653347032,
+            "conf": 0.25,
+            "f1": 0.5811965811965812,
+            "tp": 35,
+            "fp": 20,
+            "fn": 27
+          }
+        },
+        "eligible": true,
+        "score": 0.5483870967741935
+      }
+    }
+  ],
+  "target_met": false
+}

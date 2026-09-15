@@ -1,0 +1,38 @@
+{
+  "true_positive": {
+    "count": 25,
+    "mean_width": 332.12,
+    "mean_height": 286.4,
+    "mean_brightness": 128.55337890625,
+    "mean_contrast": 40.79591888427734,
+    "mean_classifier_probability": 0.8757203056651934,
+    "mean_detector_probability": 0.3615334589510274
+  },
+  "false_negative": {
+    "count": 6,
+    "mean_width": 334.6666666666667,
+    "mean_height": 301.5,
+    "mean_brightness": 130.4306983947754,
+    "mean_contrast": 42.37583923339844,
+    "mean_classifier_probability": 0.45484437433762687,
+    "mean_detector_probability": 0.14359541173307946
+  },
+  "true_negative": {
+    "count": 99,
+    "mean_width": 401.0808080808081,
+    "mean_height": 292.82828282828285,
+    "mean_brightness": 122.16232415401575,
+    "mean_contrast": 43.576052925803445,
+    "mean_classifier_probability": 0.5116840518719407,
+    "mean_detector_probability": 0.09696241442139783
+  },
+  "false_positive": {
+    "count": 20,
+    "mean_width": 357.35,
+    "mean_height": 215.5,
+    "mean_brightness": 120.9823184967041,
+    "mean_contrast": 39.32140769958496,
+    "mean_classifier_probability": 0.8143798575952006,
+    "mean_detector_probability": 0.17464527825533616
+  }
+}

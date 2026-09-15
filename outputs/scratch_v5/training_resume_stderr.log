@@ -1,0 +1,32 @@
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    from multiprocessing.spawn import spawn_main; spawn_main(parent_pid=18856, pipe_handle=2504)
+                                                  ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sline_W\miniconda3\Lib\multiprocessing\spawn.py", line 122, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+  File "C:\Users\Sline_W\miniconda3\Lib\multiprocessing\spawn.py", line 132, in _main
+    self = reduction.pickle.load(from_parent)
+_pickle.UnpicklingError: pickle data was truncated
+Exception ignored in: <function _MultiProcessingDataLoaderIter.__del__ at 0x000001D9ADAC4EA0>
+Traceback (most recent call last):
+  File "F:\Work\VSCode\Projects\DATASET\.venv\Lib\site-packages\torch\utils\data\dataloader.py", line 1706, in __del__
+    self._shutdown_workers()
+  File "F:\Work\VSCode\Projects\DATASET\.venv\Lib\site-packages\torch\utils\data\dataloader.py", line 1650, in _shutdown_workers
+    if self._persistent_workers or self._workers_status[worker_id]:
+AttributeError: '_MultiProcessingDataLoaderIter' object has no attribute '_workers_status'
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    from multiprocessing.spawn import spawn_main; spawn_main(parent_pid=18856, pipe_handle=2800)
+                                                  ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sline_W\miniconda3\Lib\multiprocessing\spawn.py", line 122, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+  File "C:\Users\Sline_W\miniconda3\Lib\multiprocessing\spawn.py", line 132, in _main
+    self = reduction.pickle.load(from_parent)
+_pickle.UnpicklingError: pickle data was truncated
+Exception ignored in: <function _MultiProcessingDataLoaderIter.__del__ at 0x000001D9ADAC4EA0>
+Traceback (most recent call last):
+  File "F:\Work\VSCode\Projects\DATASET\.venv\Lib\site-packages\torch\utils\data\dataloader.py", line 1706, in __del__
+    self._shutdown_workers()
+  File "F:\Work\VSCode\Projects\DATASET\.venv\Lib\site-packages\torch\utils\data\dataloader.py", line 1650, in _shutdown_workers
+    if self._persistent_workers or self._workers_status[worker_id]:
+AttributeError: '_MultiProcessingDataLoaderIter' object has no attribute '_workers_status'

@@ -1,0 +1,2 @@
+﻿image,decision,scratch_probability,classifier_probability,detector_probability,threshold,visualization
+F:\Work\VSCode\Projects\DATASET\dataset_defects\images\val_scratch\val_017.jpg,REJECT,0.7391608232150542,0.9563271883265247,0.6667720348445639,0.300273610279458,F:\Work\VSCode\Projects\DATASET\outputs\scratch_v5\smoke_scratch\val_017_prediction.jpg
