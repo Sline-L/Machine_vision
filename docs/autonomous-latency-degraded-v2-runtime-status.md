@@ -8,12 +8,14 @@ V2 topology switch                 PASS
 V2 rollback                        PASS
 V2 engineering soak                PASS
 
-V2 healthy latency improvement     SUPPORTED   (~189.1 → ~129.5 ms, −31.5%)
-V2 pressured latency mitigation    SUPPORTED   (397.6 → 318.4 ms, −19.9%)
-V2 severe-pressure recovery        NOT SUPPORTED  (gate 190 ms not restored)
+V2 healthy latency improvement     SUPPORTED
+V2 pressured latency mitigation    SUPPORTED (S2/S3)
+V2 moderate-pressure recovery      PRELIMINARY SUPPORTED (S1 envelope)
+V2 severe-pressure recovery        NOT SUPPORTED (S2/S3)
 
+V2 quality vs FULL (consumed test) MATERIAL RISK (diagnostic only; ΔQ_D≈−0.193)
 V2 quality admission               BLOCKED ON FRESH HOLDOUT
-A3 Mission recovery                NOT ESTABLISHED
+A3 Mission recovery                PARTIAL (moderate only; not end-to-end A3)
 A3 effectiveness                   NOT ESTABLISHED
 
 REGISTRY
@@ -22,94 +24,55 @@ REGISTRY
   available=false
 ```
 
-## Two independent blockers
+## Two independent blockers (+ latency nuance)
 
-Do **not** collapse these into one “only formal blocker” for Primary A / A3:
+| blocker | status |
+| --- | --- |
+| Capability admission | `FRESH SCRATCH-ONLY HOLDOUT` |
+| A3 severe Mission-recovery | `V2 DOES NOT RESTORE GATE UNDER S2/S3` |
+| Moderate recovery | S1 envelope **exists** (FULL FAIL / V2 PASS ×2) — not a holdout substitute |
 
-| blocker | question it blocks | status |
+## Severity sweep (preregistered)
+
+See `docs/capability-extraction/v3/v2-severity-sweep-nx.{json,md,csv}`.
+
+| S | replicas | FULL p95 (mean) | V2 p95 (mean) | envelope? |
+| --- | ---: | ---: | ---: | --- |
+| S0 | 0 | ~187 | ~136 | n/a |
+| S1 | 1 | ~226 | ~178 | **YES** |
+| S2 | 2 | ~321 | ~257 | no |
+| S3 | 3 | ~400 | ~323 | no |
+
+## Diagnostic quality (consumed `test_scratch`)
+
+See `v2-test_scratch-diagnostic-comparison.md`.  
+**Not admission.** ResNet mainly suppresses FPs (26); V2 Q_D 0.613 vs FULL 0.806.
+
+## Decision matrix
+
+| Dimension | Evidence | Status |
 | --- | --- | --- |
-| **Capability admission** | Can V2 pass Scratch Mission quality on a fresh holdout? | `FRESH SCRATCH-ONLY HOLDOUT` |
-| **A3 Mission-recovery** | Does V2 restore p95 &lt; 190 ms under qualified severe pressure? | `V2 DOES NOT RESTORE LATENCY GATE UNDER QUALIFIED SEVERE PRESSURE` |
+| Healthy latency | integrated NX | supported |
+| Severe pressure mitigation | S3 | supported |
+| Moderate recovery | severity sweep S1 | **preliminary supported** |
+| Runtime switch | NX engineering | pass |
+| Rollback | pressure | pass |
+| Soak | 30 min | pass |
+| Relative quality vs FULL | consumed test_scratch | diagnostic only — material risk |
+| Formal V2 quality | fresh holdout | blocked |
+| A3 effectiveness | end-to-end | not established |
 
-Even if holdout tomorrow yields `mission_approved=true`, current evidence says severe pressure remains approximately:
-
-```text
-397.6 ms → 318.4 ms
-```
-
-not:
-
-```text
-397.6 ms → <190 ms
-```
-
-So holdout success ≠ A3 Mission recovery established.
-
-## Classification (tight)
+## V3 recommendation
 
 ```text
-LATENCY_DEGRADED_V2
-= effective LATENCY MITIGATION
-≠ effective LATENCY RECOVERY capability (under qualified severe pressure)
+V3 NOT YET NECESSARY
 ```
 
-Mechanism is real (workload reduction, switch, rollback, soak all PASS). Under already-qualified `multi_bandwidth ×3` persistent pressure, dropping ResNet is **not enough** to restore the Mission latency gate.
-
-## Capability ladder (observed)
-
-```text
-SPARSE
-→ does not improve per-inference latency
-
-V2
-→ per-inference latency improves (healthy −31.5%, severe −19.9%)
-→ severe pressure improvement insufficient for gate recovery
-
-future V3 (only if severity sweep shows no recovery envelope)
-→ needs larger per-inspection workload reduction than “drop ResNet”
-```
-
-30 min soak PASS ⇒ current gap is **capability offload amplitude**, not runtime lifecycle instability.
-
-## Next experiment (pre-registered)
-
-**Do not invent V3 yet.** First map V2’s operating envelope with a fixed severity sweep:
-
-See [v2-severity-sweep-plan.md](capability-extraction/v3/v2-severity-sweep-plan.md).
-
-```text
-S0 healthy → S1 low → S2 medium → S3 qualified severe
-compare FULL vs V2: p95, ratio, gate
-ask: exists reproducible FULL>190 ∧ V2<190?
-```
-
-Discipline: severities are fixed **before** looking at results. No reverse-tuning injector until V2 lands at 189 ms.
-
-If no repeatable `FULL FAIL / V2 PASS` band:
-
-```text
-V2 = LATENCY MITIGATION CAPABILITY
-V2 ≠ MISSION-RECOVERY CAPABILITY
-→ then design V3 with a hard workload-reduction target
-```
+(for moderate Mission-latency recovery). Do not auto-train. Revisit if severe gate recovery and/or quality parity are required.
 
 ## Git
 
 | item | value |
 | --- | --- |
-| evidence branch | `srtp-agent/v2-pressure-pilot` |
-| runtime base | `integration/latency-degraded-v2-runtime` @ `b3f5cc5` |
-| worktree | `G:/CODE/Machine_vision-ldv2-runtime` |
-| backup (pre pressure) | `backup/pre-v2-pressure-soak-20260915-152758` |
-| evidence | `docs/capability-extraction/v3/v2-pressure-pilot-nx.{json,md}` |
-
-## Key numbers
-
-| condition | FULL wall p95 | V2 wall p95 | reduction |
-| --- | ---: | ---: | ---: |
-| healthy integrated (planning) | 189.1 ms | 129.5 ms | 31.5% |
-| lean healthy (this pilot) | 179.2 ms | 135.9 ms | — |
-| qualified severe pressure | **397.6 ms** | **318.4 ms** | **19.9%** |
-
-Mission latency gate: p95 &lt; 190 ms.  
-Early isolated probe 85.9 ms is **not** a runtime baseline.
+| branch | `srtp-agent/v2-pressure-pilot` |
+| teammate dataset tip audited | `dca0306` (unchanged) |

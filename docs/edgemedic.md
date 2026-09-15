@@ -40,44 +40,49 @@ Capability admission framework      ON MAINLINE (fail-closed registry)
 Existing lightweight search         EXHAUSTED
 classifier_only_v1                  REJECTED
 LATENCY_DEGRADED_V2                 ENGINEERING IMPLEMENTED / FORMAL ADMISSION PENDING
-  healthy latency improvement       SUPPORTED (~189.1 → ~129.5 ms, −31.5%)
-  pressured latency mitigation      SUPPORTED (397.6 → 318.4 ms, −19.9%)
+  healthy latency improvement       SUPPORTED
+  pressured latency mitigation      SUPPORTED (S2/S3)
+  moderate-pressure gate recovery   PRELIMINARY SUPPORTED (S1 envelope)
   severe-pressure gate recovery     NOT SUPPORTED
+  consumed-test quality diagnostic  MATERIAL RISK (ΔQ_D≈−0.193; not admission)
   engineering soak                  PASS
 Fresh formal holdout                MISSING (capability admission blocker)
-A3 Mission-recovery blocker         V2 DOES NOT RESTORE GATE UNDER QUALIFIED SEVERE PRESSURE
-Vision redesign / V3                ONLY AFTER severity sweep (or if envelope empty)
+A3 Mission-recovery                 PARTIAL — moderate only; severe still open
+Vision redesign / V3                NOT YET NECESSARY for moderate recovery
+                                    (optional later for severe/quality)
 
 A3 runtime readiness                HIGH
-A3 usable recovery capability       MISSING (formal + severe-pressure evidence)
+A3 usable recovery capability       PARTIAL (engineering moderate envelope; not formal)
 A3 effectiveness                    NOT ESTABLISHED
 ```
 
-`LATENCY_DEGRADED_V2` is an effective **latency mitigation**, not a proven **Mission recovery**
-capability under qualified severe pressure (`multi_bandwidth ×3`). Engineering path on
-`srtp-agent/v2-pressure-pilot`: switch / rollback / soak PASS; registry remains
-`implemented=true`, `mission_approved=false`, `available=false`.
+`LATENCY_DEGRADED_V2` is effective **latency mitigation**, with a **natural moderate recovery envelope at S1**
+(`replicas=1`: FULL ~226 ms FAIL → V2 ~178 ms PASS, both repeats). Under S2/S3 it remains
+mitigation-only (gate not restored). Evidence branch `srtp-agent/v2-pressure-pilot`.
+Registry: `implemented=true`, `mission_approved=false`, `available=false`.
 
-**Two independent blockers** (do not collapse):
+**Independent evidence chains** (do not collapse):
 
 1. Capability admission → **fresh Scratch-only holdout**
-2. A3 Mission recovery → **V2 does not restore p95 &lt; 190 ms under qualified severe pressure**
+2. Latency recovery mechanism → severity sweep (`v2-severity-sweep-nx.md`)
+3. Relative quality → consumed `test_scratch` diagnostic only (`v2-test_scratch-diagnostic-comparison.md`)
 
-Holdout PASS alone does not establish Primary A Mission recovery. Next measurement:
-pre-registered **severity sweep** (S0–S3) to find any moderate-overload recovery envelope —
-not reverse-tuned injector hunting. See
+Holdout PASS alone does not finish Primary A. Moderate recovery ≠ A3 effectiveness.
+V3 recommendation: **NOT YET NECESSARY** for moderate latency recovery; user decides if severe/quality drive a later V3.
+
+See
 [v2-severity-sweep-plan.md](capability-extraction/v3/v2-severity-sweep-plan.md),
+[v2-severity-sweep-nx.md](capability-extraction/v3/v2-severity-sweep-nx.md),
 [autonomous-latency-degraded-v2-runtime-status.md](autonomous-latency-degraded-v2-runtime-status.md),
-[v2-pressure-pilot-nx.md](capability-extraction/v3/v2-pressure-pilot-nx.md).
+[teammate-scratch-v5-latest-audit.md](capability-extraction/v3/teammate-scratch-v5-latest-audit.md).
 
-Primary A reopen still requires quality admission **and** a demonstrated recovery envelope
-(or a later V3 that actually restores the gate):
+Primary A reopen still requires quality admission **and** scoped recovery claims:
 
 ```text
 (fresh holdout PASS ∧ mission_approved=true)
 AND
-(recovery envelope at some pre-registered severity
- OR a future capability that restores gate under target fault)
+(declared recovery severity band with evidence
+ — currently S1 preliminary only; S3 not supported)
 ```
 
 Then: `admission_proposal → registry → NX smoke → formal A3`.
