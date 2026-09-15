@@ -11,7 +11,8 @@ from .config import PROJECT_ROOT, RUNTIME_ROOT
 from .runtime import GearProRuntime
 
 
-API_PREFIX = "/api/v1"
+API_PREFIX = "/api/v2"
+LEGACY_API_PREFIX = "/api/v1"
 STATIC_ROOT = PROJECT_ROOT / "gp" / "static"
 VIDEO_SUFFIXES = {".mp4", ".avi", ".mov", ".mkv", ".m4v"}
 
@@ -37,7 +38,7 @@ def create_app(config, runtime=None, sessions=None, manage_lifespan=True):
 
     app = FastAPI(
         title="GearPro Web",
-        version="1.0.0",
+        version="2.0.0",
         lifespan=lifespan,
         docs_url=None,
         redoc_url=None,
@@ -59,6 +60,12 @@ def create_app(config, runtime=None, sessions=None, manage_lifespan=True):
         sessions.heartbeat(token)
         return token
 
+    def api_version(target):
+        return "api.v1" if target.url.path.startswith(LEGACY_API_PREFIX) else "api.v2"
+
+    def runtime_state(target, token):
+        return runtime.state(sessions.control_state(token), api_version=api_version(target))
+
     @app.exception_handler(ValueError)
     async def value_error_handler(_request, exc):
         return JSONResponse(status_code=400, content={"detail": str(exc)})
@@ -68,11 +75,13 @@ def create_app(config, runtime=None, sessions=None, manage_lifespan=True):
         return JSONResponse(status_code=423, content={"detail": str(exc)})
 
     @app.get(f"{API_PREFIX}/session")
+    @app.get(f"{LEGACY_API_PREFIX}/session")
     async def session_info(request: Request):
         token = request.cookies.get(SessionManager.COOKIE_NAME)
         return {"authenticated": sessions.validate(token), "password_required": sessions.password_required}
 
     @app.post(f"{API_PREFIX}/session/login")
+    @app.post(f"{LEGACY_API_PREFIX}/session/login")
     async def login(request: Request):
         try:
             body = await request.json()
@@ -93,6 +102,7 @@ def create_app(config, runtime=None, sessions=None, manage_lifespan=True):
         return response
 
     @app.post(f"{API_PREFIX}/session/logout")
+    @app.post(f"{LEGACY_API_PREFIX}/session/logout")
     async def logout(request: Request):
         token = request.cookies.get(SessionManager.COOKIE_NAME)
         if token:
@@ -102,39 +112,46 @@ def create_app(config, runtime=None, sessions=None, manage_lifespan=True):
         return response
 
     @app.get(f"{API_PREFIX}/state")
+    @app.get(f"{LEGACY_API_PREFIX}/state")
     async def state(request: Request):
         token = session_token(request)
-        return runtime.state(sessions.control_state(token))
+        return runtime_state(request, token)
 
     @app.post(f"{API_PREFIX}/control/acquire")
+    @app.post(f"{LEGACY_API_PREFIX}/control/acquire")
     async def acquire(request: Request):
         return sessions.acquire(session_token(request))
 
     @app.post(f"{API_PREFIX}/control/release")
+    @app.post(f"{LEGACY_API_PREFIX}/control/release")
     async def release(request: Request):
         token = session_token(request)
         sessions.release(token)
         return sessions.control_state(token)
 
     @app.post(f"{API_PREFIX}/inspection/start")
+    @app.post(f"{LEGACY_API_PREFIX}/inspection/start")
     async def start_inspection(request: Request):
         token = controller(request)
         runtime.start_inspection()
-        return runtime.state(sessions.control_state(token))
+        return runtime_state(request, token)
 
     @app.post(f"{API_PREFIX}/inspection/stop")
+    @app.post(f"{LEGACY_API_PREFIX}/inspection/stop")
     async def stop_inspection(request: Request):
         token = controller(request)
         runtime.stop_inspection()
-        return runtime.state(sessions.control_state(token))
+        return runtime_state(request, token)
 
     @app.post(f"{API_PREFIX}/source/camera")
+    @app.post(f"{LEGACY_API_PREFIX}/source/camera")
     async def use_camera(request: Request):
         token = controller(request)
         await asyncio.to_thread(runtime.use_camera)
-        return runtime.state(sessions.control_state(token))
+        return runtime_state(request, token)
 
     @app.post(f"{API_PREFIX}/source/video")
+    @app.post(f"{LEGACY_API_PREFIX}/source/video")
     async def upload_video(request: Request, file: UploadFile = File(...)):
         token = controller(request)
         suffix = Path(file.filename or "").suffix.lower()
@@ -158,24 +175,27 @@ def create_app(config, runtime=None, sessions=None, manage_lifespan=True):
             raise
         finally:
             await file.close()
-        return runtime.state(sessions.control_state(token))
+        return runtime_state(request, token)
 
     @app.put(f"{API_PREFIX}/settings")
+    @app.put(f"{LEGACY_API_PREFIX}/settings")
     async def update_settings(request: Request):
         token = controller(request)
         values = await request.json()
         if not isinstance(values, dict):
             raise HTTPException(status_code=400, detail="设置必须是 JSON 对象")
-        await asyncio.to_thread(runtime.update_settings, values)
-        return runtime.state(sessions.control_state(token))
+        runtime.update_settings(values)
+        return runtime_state(request, token)
 
     @app.post(f"{API_PREFIX}/stats/reset")
+    @app.post(f"{LEGACY_API_PREFIX}/stats/reset")
     async def reset_stats(request: Request):
         token = controller(request)
         runtime.reset_stats()
-        return runtime.state(sessions.control_state(token))
+        return runtime_state(request, token)
 
     @app.get(f"{API_PREFIX}/stream")
+    @app.get(f"{LEGACY_API_PREFIX}/stream")
     async def stream(request: Request, view: str = "auto"):
         session_token(request)
         if view not in ("auto", "raw", "annotated"):
@@ -194,6 +214,7 @@ def create_app(config, runtime=None, sessions=None, manage_lifespan=True):
         return StreamingResponse(frames(), media_type="multipart/x-mixed-replace; boundary=frame")
 
     @app.websocket(f"{API_PREFIX}/events")
+    @app.websocket(f"{LEGACY_API_PREFIX}/events")
     async def events(websocket: WebSocket):
         token = websocket.cookies.get(SessionManager.COOKIE_NAME)
         if not sessions.validate(token):
@@ -202,7 +223,9 @@ def create_app(config, runtime=None, sessions=None, manage_lifespan=True):
         await websocket.accept()
         try:
             while sessions.validate(token):
-                await websocket.send_json(runtime.state(sessions.control_state(token)))
+                await websocket.send_json(
+                    runtime.state(sessions.control_state(token), api_version=api_version(websocket))
+                )
                 try:
                     message = await asyncio.wait_for(websocket.receive_json(), timeout=0.5)
                     if message.get("type") == "control_heartbeat":

@@ -1,4 +1,4 @@
-"""SystemSnapshot v1 builder. Fill only measured fields; leave GPU null if unknown."""
+"""SystemSnapshot builders. Fill only measured fields; leave GPU null if unknown."""
 
 from datetime import datetime, timezone
 from pathlib import Path
@@ -101,7 +101,10 @@ def build_snapshot(
     last_result=None,
     inspection_active=False,
     scratch_errors=0,
+    schema_version="system-snapshot.v2",
 ):
+    if schema_version not in {"system-snapshot.v1", "system-snapshot.v2"}:
+        raise ValueError(f"不支持的快照版本：{schema_version}")
     packet = frame_store.read() if frame_store is not None else None
     sequence = 0 if packet is None else packet.sequence
     age_ms = None if packet is None else packet.age_ms
@@ -109,6 +112,7 @@ def build_snapshot(
     locator_loaded = last_result is not None or inspection_active
     locator_ms = None if last_result is None else last_result.locator_latency_ms
     v5_total = None if last_result is None else last_result.scratch_latency_ms
+    missing_total = None if last_result is None else last_result.missing_hole_latency_ms
     gears = 0 if last_result is None else len(last_result.observations)
     confs = [] if last_result is None else [item.location_confidence for item in last_result.observations]
     serial_required = bool(getattr(config, "serial_enabled", True))
@@ -122,9 +126,12 @@ def build_snapshot(
     v5_h = 0.0 if last_result is None else latency_health(v5_total, 80, 200)
     if last_result is None and inspection_active:
         v5_h = 0.5
+    missing_h = 0.0 if last_result is None else latency_health(missing_total, 80, 200)
+    if last_result is None and inspection_active:
+        missing_h = 0.5
     ser_h = serial_health(connected, failures, serial_required)
-    return {
-        "schema_version": "system-snapshot.v1",
+    snapshot = {
+        "schema_version": schema_version,
         "timestamp": utc_now(),
         "system": read_system_metrics(),
         "camera": {
@@ -143,18 +150,6 @@ def build_snapshot(
             "gears_found": int(gears),
             "confidence_mean": None if not confs else round(sum(confs) / len(confs), 4),
             "health": round(loc_h, 4),
-        },
-        "scratch_v5": {
-            "profile": "FULL",
-            "classifier1_latency_ms": None if last_result is None else last_result.classifier1_latency_ms,
-            "classifier2_latency_ms": None if last_result is None else last_result.classifier2_latency_ms,
-            "detector_latency_ms": None if last_result is None else last_result.detector_latency_ms,
-            "fusion_latency_ms": None if last_result is None else last_result.fusion_latency_ms,
-            "total_latency_ms": v5_total,
-            "detector_enabled": True,
-            "classifiers_enabled": True,
-            "error_count": int(scratch_errors),
-            "health": round(v5_h, 4),
         },
         "serial": {
             "port": config.serial_port,
@@ -176,3 +171,39 @@ def build_snapshot(
             ),
         },
     }
+    scratch = {
+        "profile": "FULL",
+        "classifier1_latency_ms": None if last_result is None else last_result.classifier1_latency_ms,
+        "classifier2_latency_ms": None if last_result is None else last_result.classifier2_latency_ms,
+        "detector_latency_ms": None if last_result is None else last_result.detector_latency_ms,
+        "fusion_latency_ms": None if last_result is None else last_result.fusion_latency_ms,
+        "total_latency_ms": v5_total,
+        "detector_enabled": True,
+        "classifiers_enabled": True,
+        "error_count": int(scratch_errors),
+        "health": round(v5_h, 4),
+    }
+    if schema_version == "system-snapshot.v1":
+        snapshot["scratch_v5"] = scratch
+        return snapshot
+
+    missing = {
+        "profile": "FULL",
+        "classifier1_latency_ms": None if last_result is None else last_result.missing_hole_classifier1_latency_ms,
+        "classifier2_latency_ms": None if last_result is None else last_result.missing_hole_classifier2_latency_ms,
+        "detector_latency_ms": None if last_result is None else last_result.missing_hole_detector_latency_ms,
+        "fusion_latency_ms": None if last_result is None else last_result.missing_hole_fusion_latency_ms,
+        "total_latency_ms": missing_total,
+        "detector_enabled": True,
+        "classifiers_enabled": True,
+        "error_count": int(scratch_errors),
+        "health": round(missing_h, 4),
+    }
+    total = None if last_result is None else v5_total + missing_total
+    snapshot["specialists"] = {"scratch_v5": scratch, "missing_hole_v1": missing}
+    snapshot["inference"] = {
+        "total_specialist_latency_ms": total,
+        "health": round(min(v5_h, missing_h), 4),
+        "error_count": int(scratch_errors),
+    }
+    return snapshot

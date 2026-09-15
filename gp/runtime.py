@@ -148,7 +148,7 @@ class GearProRuntime:
         elif previous_profile == "SAFE_STOP" and profile is not None:
             self.start_inspection()
 
-    def state(self, control=None):
+    def state(self, control=None, api_version="api.v2"):
         with self._lock:
             result = self.last_result
             stats = asdict(self.stats)
@@ -166,10 +166,11 @@ class GearProRuntime:
             last_result=result,
             inspection_active=self.inspection_active,
             scratch_errors=self.error_count,
+            schema_version="system-snapshot.v1" if api_version == "api.v1" else "system-snapshot.v2",
         )
         stats["good_rate"] = 0.0 if not stats["total"] else stats["good"] / stats["total"]
         return {
-            "version": "api.v1",
+            "version": api_version,
             "status": status,
             "error": error,
             "source": {
@@ -182,19 +183,18 @@ class GearProRuntime:
                 "model_loaded": self.worker.model_loaded,
             },
             "stats": stats,
-            "result": self._serialize_result(result),
-            "settings": self.settings(),
+            "result": self._serialize_result_v1(result) if api_version == "api.v1" else self._serialize_result_v2(result),
+            "settings": self.settings(api_version),
             "health": snapshot,
             "control": control or {},
         }
 
-    def settings(self):
-        return {
+    def settings(self, api_version="api.v2"):
+        settings = {
             "mode": self.config.mode,
             "target_quantity": self.config.target_quantity,
             "duration_minutes": self.config.duration_minutes,
             "locator_confidence": self.config.locator_confidence,
-            "defect_threshold": self.config.defect_threshold,
             "inference_profile": self.config.inference_profile,
             "inference_interval": self.config.inference_interval,
             "camera_index": self.config.camera_index,
@@ -206,6 +206,18 @@ class GearProRuntime:
             "stream_fps": self.config.stream_fps,
             "stream_quality": self.config.stream_quality,
         }
+        if api_version == "api.v1":
+            settings["defect_threshold"] = self.config.scratch_threshold
+        else:
+            settings.update({
+                "scratch_threshold": self.config.scratch_threshold,
+                "missing_hole_threshold": self.config.missing_hole_threshold,
+                "model_default_thresholds": {
+                    "scratch": self.config.scratch_model_default_threshold,
+                    "missing_hole": self.config.missing_hole_model_default_threshold,
+                },
+            })
+        return settings
 
     def jpeg(self, view="auto"):
         if view not in ("auto", "raw", "annotated"):
@@ -283,7 +295,7 @@ class GearProRuntime:
             shutil.rmtree(uploads, ignore_errors=True)
 
     @staticmethod
-    def _serialize_result(result):
+    def _serialize_result_v1(result):
         if result is None:
             return None
         return {
@@ -297,5 +309,78 @@ class GearProRuntime:
             "classifier2_latency_ms": result.classifier2_latency_ms,
             "detector_latency_ms": result.detector_latency_ms,
             "fusion_latency_ms": result.fusion_latency_ms,
-            "observations": [asdict(item) for item in result.observations],
+            "observations": [
+                {
+                    "box": item.box,
+                    "location_confidence": item.location_confidence,
+                    "defect_score": item.defect_score,
+                    "classifier_probability": item.classifier_probability,
+                    "detector_probability": item.detector_probability,
+                    "auxiliary_box": item.auxiliary_box,
+                }
+                for item in result.observations
+            ],
+            "compatibility_notice": "v1 probability fields describe Scratch V5; verdict includes both specialists",
+        }
+
+    @staticmethod
+    def _serialize_result_v2(result):
+        if result is None:
+            return None
+        observations = []
+        for item in result.observations:
+            observations.append({
+                "box": item.box,
+                "location_confidence": item.location_confidence,
+                "is_defective": item.is_defective,
+                "reject_reasons": item.reject_reasons,
+                "specialists": {
+                    "scratch": {
+                        "version": result.model_version,
+                        "probability": item.defect_score,
+                        "threshold": item.scratch_threshold,
+                        "reject": item.scratch_is_reject,
+                        "classifier_probability": item.classifier_probability,
+                        "detector_probability": item.detector_probability,
+                        "auxiliary_box": item.auxiliary_box,
+                    },
+                    "missing_hole": {
+                        "version": result.missing_hole_model_version,
+                        "probability": item.missing_hole_probability,
+                        "threshold": item.missing_hole_threshold,
+                        "reject": item.missing_hole_reject,
+                        "classifier_probability": item.missing_hole_classifier_probability,
+                        "detector_probability": item.missing_hole_detector_probability,
+                        "auxiliary_box": item.missing_hole_auxiliary_box,
+                    },
+                },
+            })
+        return {
+            "verdict": result.verdict,
+            "has_gear": result.has_gear,
+            "is_defective": result.is_defective,
+            "reject_reasons": result.reject_reasons,
+            "model_versions": {
+                "scratch": result.model_version,
+                "missing_hole": result.missing_hole_model_version,
+            },
+            "elapsed_ms": result.elapsed_ms,
+            "timings": {
+                "locator_ms": result.locator_latency_ms,
+                "scratch": {
+                    "classifier1_ms": result.classifier1_latency_ms,
+                    "classifier2_ms": result.classifier2_latency_ms,
+                    "detector_ms": result.detector_latency_ms,
+                    "fusion_ms": result.fusion_latency_ms,
+                    "total_ms": result.scratch_latency_ms,
+                },
+                "missing_hole": {
+                    "classifier1_ms": result.missing_hole_classifier1_latency_ms,
+                    "classifier2_ms": result.missing_hole_classifier2_latency_ms,
+                    "detector_ms": result.missing_hole_detector_latency_ms,
+                    "fusion_ms": result.missing_hole_fusion_latency_ms,
+                    "total_ms": result.missing_hole_latency_ms,
+                },
+            },
+            "observations": observations,
         }
