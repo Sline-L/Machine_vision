@@ -112,6 +112,11 @@ V3     → restore FP veto at ≤~12 ms S1 budget
 
 ```text
 SPEC READY
-IMPLEMENTATION: NOT STARTED
+V3-1 IMPLEMENTATION: CANDIDATE PROMISING (val KPI + ≪1 ms veto)
+V3-2: NOT STARTED (not required yet)
+V3-3: NOT STARTED
 HOLD OUT: DO NOT OPEN
+REGISTRY: UNCHANGED
 ```
+
+See [v3-1-fp-veto-status.md](v3-1-fp-veto-status.md).

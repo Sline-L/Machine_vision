@@ -1,0 +1,11 @@
+{
+  "banner": "V3-1 FEATURE EXTRACT \u2014 train/val ONLY \u2014 NOT MISSION APPROVED \u2014 NO HOLDOUT",
+  "n_rows": 514,
+  "splits": [
+    "train_scratch",
+    "val_scratch"
+  ],
+  "v2_config": "/home/jetson/Projects/Machine_vision-ldv2-runtime/model/model2/profiles/latency_degraded_v2/inference_config.json",
+  "v2_threshold": 0.2653394325872992,
+  "note": "train/val only; no test_scratch; no holdout"
+}

@@ -1,0 +1,8 @@
+{
+  "iters": 20000,
+  "per_call_ms": 0.005162951499914925,
+  "p95_budget_s1_ms": 12.0,
+  "budget_ok": true,
+  "model_type": "logistic",
+  "note": "CPU numpy veto only; excludes backbone. S1 envelope preserved if backbone==V2."
+}

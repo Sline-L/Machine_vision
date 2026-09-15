@@ -48,8 +48,11 @@ LATENCY_DEGRADED_V2                 FROZEN AS MECHANISM DEMONSTRATOR
   Mission admission                 NOT ESTABLISHED — do NOT spend fresh holdout on V2
   production                        DISABLED (mission_approved=false, available=false)
 Fresh formal holdout                COLLECT/SEAL ONLY — open after V3 primary freeze
-Scratch V3 FP-veto / distill        SPEC READY — RECOMMENDED for Mission-capable A3
-  S1 extra p95 budget               ≲10–12 ms vs V2 (~178→&lt;190); no ~50 ms 2nd backbone
+Scratch V3 FP-veto / distill        V3-1 CANDIDATE PROMISING (val)
+  V3-1 logistic replace_score       val Q_D 0.930 / FPR 0.056 (vs V2 0.888 / 0.112)
+  veto overhead                     ~0.005 ms (≪ 10–12 ms S1 budget)
+  V3-2 / V3-3                       not required yet
+  fresh holdout                     STILL SEALED
 
 A3 runtime readiness                HIGH
 A3 usable recovery capability       PARTIAL (V2 moderate demonstrator; quality gap)
