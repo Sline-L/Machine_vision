@@ -197,10 +197,10 @@ class StageRunner:
         self._watchdog = None
 
     def _cancel_watchdog(self):
-        with self._lock:
-            if self._watchdog is not None:
-                self._watchdog.cancel()
-                self._watchdog = None
+        # Caller must hold self._lock (non-reentrant Lock).
+        if self._watchdog is not None:
+            self._watchdog.cancel()
+            self._watchdog = None
 
     def _arm_watchdog(self, name: str, timeout_s: float, profile):
         def _fire():
@@ -273,7 +273,8 @@ class StageRunner:
             log(f"[FAIL] {name} {entry['error']}")
             raise
         finally:
-            self._cancel_watchdog()
+            with self._lock:
+                self._cancel_watchdog()
 
 
 def load_crops(replay_root: Path, limit: int = 40):
