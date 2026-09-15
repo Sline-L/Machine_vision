@@ -1,0 +1,51 @@
+{
+  "mode": "ENGINEERING ONLY",
+  "mission_approved": false,
+  "a3_effectiveness": "NOT ESTABLISHED",
+  "probe": "integrated_scratch_runtime_v2",
+  "production_rejected": true,
+  "frozen_config_hash": "5cc1730c0c9cdd83e8909e963184c759f4d29bec5ed4eab1bfe44f0ae13b4588",
+  "n_crops": 40,
+  "gpu_before": {
+    "error": "could not convert string to float: '[N/A]'"
+  },
+  "gpu_after": {
+    "error": "could not convert string to float: '[N/A]'"
+  },
+  "FULL": {
+    "n": 40,
+    "wall_ms": {
+      "mean": 177.86854695004877,
+      "p50": 175.7875775001594,
+      "p95": 189.06504279966612
+    },
+    "stage_sum_ms": {
+      "mean": 175.6608069255435,
+      "p50": 173.65621850240132,
+      "p95": 186.81125990078726
+    },
+    "cls1_p95": 53.647882999848655,
+    "cls2_p95": 51.318990748768556,
+    "det_p95": 85.17415144960978,
+    "finite_scores": true
+  },
+  "LATENCY_DEGRADED_V2": {
+    "n": 40,
+    "wall_ms": {
+      "mean": 124.55534532487036,
+      "p50": 124.71668349917309,
+      "p95": 129.5483486489502
+    },
+    "stage_sum_ms": {
+      "mean": 120.07983382518432,
+      "p50": 120.0595849986712,
+      "p95": 125.1277594498788
+    },
+    "cls1_p95": 56.7940323016046,
+    "cls2_p95": 0.0,
+    "det_p95": 68.80536504977499,
+    "finite_scores": true
+  },
+  "relative_p95_wall": 0.6852051903969366,
+  "relative_p95_stage": 0.6698084447175846
+}

@@ -38,6 +38,7 @@ A3 effectiveness                    NOT ESTABLISHED
 | config_hash | see frozen JSON |
 | Q_D,val / U_val | 0.8879 / 0.9439 (exploratory) |
 | NX experimental p95 | 85.9 ms vs FULL 246.4 ms (pre-integration probe) |
+| NX integrated p95 | **wall 129.5 ms** vs FULL **189.1 ms** (0.69×); stage 125.1 vs 186.8 (0.67×); n=40 crops |
 | formal_holdout_status | MISSING |
 | frozen path | `docs/capability-extraction/v3/latency_degraded_v2_effnet_det.frozen.json` |
 | runtime config | `model/model2/profiles/latency_degraded_v2/inference_config.json` |
@@ -78,21 +79,29 @@ No special-case `if profile == LATENCY_DEGRADED_V2: allow()`.
 | registry/state availability | PASS |
 | holdout seal/validate | PASS |
 | formal one-shot lock | PASS |
-| NX integrated latency | NOT RUN THIS SESSION (experimental probe only) |
+| NX integrated latency | PASS — wall p95 129.5 vs FULL 189.1 (0.69×); ENGINEERING ONLY |
 | pressure engineering pilot | NOT RUN |
-| 10–20× leak loop / 30–60 min soak | NOT RUN (no NX session) |
+| 10–20× leak loop / 30–60 min soak | NOT RUN |
 
 Evidence: `python -m unittest tests.test_latency_degraded_v2` + `python tools/test_latency_degraded_v2.py`.
 
 ## Integrated latency
 
 ```text
-FULL p95 (experimental probe): 246.4 ms
-V2 p95 (experimental probe):    85.9 ms
-integrated_v2_p95:              PENDING NX replay with engineering harness
+ENGINEERING ONLY — NOT MISSION APPROVED
+probe: integrated_scratch_runtime_v2 (ScratchV5Runtime FULL vs V2)
+n_crops: 40  (tests/replay frames)
+production_rejected: true
+
+FULL wall p95:                  189.1 ms
+LATENCY_DEGRADED_V2 wall p95:   129.5 ms   (0.69×)
+FULL stage_sum p95:             186.8 ms
+V2 stage_sum p95:               125.1 ms   (0.67×)
+V2 cls2_p95:                    0.0 ms     (topology confirmed)
 ```
 
-Do not treat experimental probe as integrated runtime characterization.
+Artifact: `results/latency_degraded_v2/integrated_latency_nx.json`  
+Experimental evaluator (85.9 ms) remains a lower bound; integrated runtime includes real overhead and must be the planning number.
 
 ## Engineering pilot
 
