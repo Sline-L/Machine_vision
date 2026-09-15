@@ -6,18 +6,19 @@
 
 约束、等级、RQ 与原则见 Cursor 规则 `.cursor/rules/edgemedic.mdc`。
 
-## Phase seal — measurement baseline
+## Phase seal — measurement baseline + capability admission
 
 ```text
-stable:  srtp-web @ 7c346fd
-tag:     edgemedic-a2a3-measurement-baseline
+measurement tag:  edgemedic-a2a3-measurement-baseline → 7c346fd
+stable branch:    srtp-web
 ```
 
-> Agent/runtime has reached a reproducible **measurement** baseline: safety
-> constraints and small-model behavior have empirical evidence; the A3
-> measurement framework and current strategy boundaries are clarified. The next
-> phase is **not** “keep adding Agent features,” but waiting for a new vision
-> capability or entering real deployment validation.
+> Agent/runtime already has the full framework to admit, constrain, and verify a
+> lightweight capability. The blocker is no longer runtime — vision must deliver
+> a new Mission-passing lightweight capability.
+>
+> You are no longer waiting for “Agent to be finished”; you are waiting for a
+> lightweight vision capability worth the Agent safely scheduling.
 
 Tag semantics (**not** “A2/A3 validated”):
 
@@ -28,17 +29,37 @@ Current A3 strategies — CHARACTERIZED
 A3 effectiveness — NOT ESTABLISHED
 ```
 
-Only two conditions reopen mainline A3 product work:
+Technical status:
 
-1. A new lightweight vision capability that passes a **frozen Mission contract**
-   (fresh independent holdout).
-2. Real production-line / real-camera **deployment validation**.
+```text
+Agent/runtime architecture          COMPLETE
+Line 1 containment                  COMPLETE / REPRODUCED
+Measurement infrastructure          COMPLETE
 
-Otherwise prefer research packaging: RQ, figures, methodology, negative results,
-architecture diagrams, and the Line 1 / Primary A / Secondary B evidence chain.
+Capability admission framework      ON MAINLINE (fail-closed registry)
+Existing lightweight search         EXHAUSTED
+classifier_only_v1                  REJECTED
+Fresh formal holdout                MISSING
+Vision redesign                     REQUIRED
 
-Release review: [integration-release-review-edcab22.md](integration-release-review-edcab22.md).  
-Strategy matrix: [a3-strategy-matrix.md](a3-strategy-matrix.md).
+A3 runtime readiness                HIGH
+A3 usable recovery capability       MISSING
+A3 effectiveness                    NOT ESTABLISHED
+```
+
+Primary A reopen trigger:
+
+```text
+vision capability v2 arrives
+AND
+new independent holdout exists
+```
+
+Then: `val freeze → latency → contract → fresh locked → registry → runtime → NX → pressure A3`.
+Interface for vision: [vision-redesign-interface.md](capability-extraction/v2/vision-redesign-interface.md).
+Registry review: [integration-capability-registry-review.md](integration-capability-registry-review.md).
+
+Exploration leftovers stay on `experiment/lightweight-capability-v2` (Pareto / failure analysis).
 
 ## Research status (mechanism ≠ effectiveness)
 
@@ -53,6 +74,7 @@ classifier_only_v1    RUNTIME REJECTED BY MISSION CONTRACT
 
 Primary A
 BLOCKED ON ACCEPTABLE LIGHTWEIGHT VISION CAPABILITY
+  (VISION REDESIGN REQUIRED; frozen-artifact search exhausted)
 
 A3 effectiveness
 NOT ESTABLISHED
@@ -61,6 +83,7 @@ Injector: QUALIFIED (multi_bandwidth × replicas=3)
 Mission thresholds: UNCHANGED
 test_scratch: consumed (diagnostic only)
 CLASSIFY_ONLY: NOT IMPLEMENTED
+Capability registry: fail-closed (implemented ∧ mission_approved)
 ```
 
 > Current SPARSE is neither a per-inference latency recovery mechanism nor an
