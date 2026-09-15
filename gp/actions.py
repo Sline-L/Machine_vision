@@ -162,6 +162,11 @@ def _pre_set_profile(params, snapshot, extras):
         return False, str(exc)
     if not profile.get("implemented"):
         return False, f"档位 {name} 尚未实现"
+    from .capability_registry import get_capability, is_runtime_available
+
+    row = get_capability(name)
+    if row is not None and not is_runtime_available(name):
+        return False, f"capability {name} 未获 registry 放行（implemented∧mission_approved）"
     if name == "TRT_FAST":
         from .profiles import ENGINE_LOCATOR
 

@@ -43,6 +43,15 @@ def fuse_probabilities(first, second, detector, alpha=0.25):
     return fused, classifier_probability
 
 
+def fuse_single_classifier(classifier, detector, alpha=0.25):
+    """LATENCY_DEGRADED_V2: one classifier + detector weighted fusion."""
+    classifier_probability = float(classifier)
+    fused = float(alpha) * classifier_probability + (1.0 - float(alpha)) * float(detector)
+    if not math.isfinite(fused):
+        raise RuntimeError("Scratch V5 输出包含 NaN 或 Inf")
+    return fused, classifier_probability
+
+
 def square_rgb_image(image, size):
     """Resize without distortion and center on the V5 gray canvas."""
     if not isinstance(image, Image.Image):
@@ -78,19 +87,29 @@ def load_model2_config(path, verify_hashes=True):
     except json.JSONDecodeError as exc:
         raise ValueError(f"Model2 配置不是有效 JSON：{path}: {exc}") from exc
 
-    if config.get("version") != "scratch_v5":
-        raise ValueError("Model2 配置 version 必须为 scratch_v5")
+    version = config.get("version")
+    if version not in {"scratch_v5", "scratch_v5_latency_degraded_v2"}:
+        raise ValueError("Model2 配置 version 必须为 scratch_v5 或 scratch_v5_latency_degraded_v2")
     classifiers = config.get("classifiers")
-    if not isinstance(classifiers, list) or len(classifiers) != 2:
-        raise ValueError("Scratch V5 必须配置两个分类器")
+    if not isinstance(classifiers, list) or not classifiers:
+        raise ValueError("Scratch V5 缺少分类器配置")
+    if version == "scratch_v5" and len(classifiers) != 2:
+        raise ValueError("Scratch V5 FULL 必须配置两个分类器")
+    if version == "scratch_v5_latency_degraded_v2" and len(classifiers) != 1:
+        raise ValueError("LATENCY_DEGRADED_V2 必须配置单个分类器")
     if not isinstance(config.get("detector"), dict):
         raise ValueError("Scratch V5 缺少 detector 配置")
     fusion = config.get("fusion", {})
-    if fusion.get("type") != "weighted" or fusion.get("classifier", {}).get("type") != "classifier_mean":
-        raise ValueError("Scratch V5 仅支持 weighted + classifier_mean 融合")
+    classifier_fusion = fusion.get("classifier", {}).get("type")
+    if fusion.get("type") != "weighted":
+        raise ValueError("Scratch V5 仅支持 weighted 融合")
+    if version == "scratch_v5" and classifier_fusion != "classifier_mean":
+        raise ValueError("Scratch V5 FULL 仅支持 weighted + classifier_mean 融合")
+    if version == "scratch_v5_latency_degraded_v2" and classifier_fusion != "classifier_single":
+        raise ValueError("LATENCY_DEGRADED_V2 仅支持 weighted + classifier_single 融合")
 
     names = [str(item.get("name", "")) for item in classifiers]
-    if len(set(names)) != 2 or set(fusion["classifier"].get("models", [])) != set(names):
+    if len(set(names)) != len(names) or set(fusion["classifier"].get("models", [])) != set(names):
         raise ValueError("Scratch V5 融合模型名称与分类器不一致")
     threshold = float(config.get("default_threshold", -1.0))
     alpha = float(fusion.get("alpha", -1.0))
@@ -237,9 +256,15 @@ class ScratchV5Runtime:
                 auxiliary_box = _clip_box(coordinates, crop.shape)
         started = time.perf_counter()
         detector_score = apply_temperature(raw_detector, detector.get("temperature", 1.0))
-        fused, classifier_score = fuse_probabilities(
-            classifier_scores[0], classifier_scores[1], detector_score, self.config["fusion"]["alpha"]
-        )
+        alpha = self.config["fusion"]["alpha"]
+        if len(classifier_scores) == 1:
+            fused, classifier_score = fuse_single_classifier(
+                classifier_scores[0], detector_score, alpha
+            )
+        else:
+            fused, classifier_score = fuse_probabilities(
+                classifier_scores[0], classifier_scores[1], detector_score, alpha
+            )
         fusion_ms = (time.perf_counter() - started) * 1000
         values = (fused, classifier_score, detector_score)
         if not all(math.isfinite(value) for value in values):

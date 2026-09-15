@@ -205,6 +205,7 @@ class GearProRuntime:
             started_at = self.started_at
         live = self.source != "video"
         from .profiles import available_capabilities
+        from .capability_v2 import capability_identity_from_runtime, load_frozen, CapabilityArtifactError
 
         snapshot = build_snapshot(
             self.config,
@@ -221,6 +222,14 @@ class GearProRuntime:
             inspection_count=self.worker.inspect_count,
         )
         stats["good_rate"] = 0.0 if not stats["total"] else stats["good"] / stats["total"]
+        scratch_identity = capability_identity_from_runtime(
+            self.config.model2_config, self.config.defect_threshold
+        )
+        frozen_hash = None
+        try:
+            frozen_hash = load_frozen().get("config_hash")
+        except CapabilityArtifactError:
+            frozen_hash = None
         return {
             "version": "api.v1",
             "status": status,
@@ -240,6 +249,24 @@ class GearProRuntime:
             "settings": self.settings(),
             "health": snapshot,
             "capabilities": available_capabilities(),
+            "capability_runtime": {
+                "requested_profile": self.config.inference_profile,
+                "active_profile": self.config.inference_profile,
+                "scratch_identity": scratch_identity,
+                "classifier_model_id": (scratch_identity.get("classifier_names") or [None])[0],
+                "classifier_sha": (scratch_identity.get("classifier_shas") or [None])[0],
+                "detector_model_id": "p_detector_p2_960" if scratch_identity.get("detector_sha") else None,
+                "detector_sha": scratch_identity.get("detector_sha"),
+                "classifier_input_size": 384 if scratch_identity.get("classifier_count") else None,
+                "detector_input_size": scratch_identity.get("detector_imgsz"),
+                "threshold": float(self.config.defect_threshold),
+                "config_hash": frozen_hash if scratch_identity.get("matches_latency_degraded_v2") else None,
+                "capability_contract_hash": frozen_hash,
+                "warmup_status": "loaded" if self.worker.model_loaded else "not_loaded",
+                "runtime_generation": self.worker.inspect_count,
+                "matches_latency_degraded_v2": bool(scratch_identity.get("matches_latency_degraded_v2")),
+                "matches_full_scratch_v5": bool(scratch_identity.get("matches_full_scratch_v5")),
+            },
             "control": control or {},
         }
 
@@ -306,6 +333,7 @@ class GearProRuntime:
     def _remember_config(self):
         self._config_backup = {
             "locator_model": str(self.config.locator_model),
+            "model2_config": str(self.config.model2_config),
             "fields": {name: getattr(self.config, name) for name in PERSISTED_FIELDS},
             "inference_profile": self.config.inference_profile,
             "inspection_active": self.inspection_active,
@@ -331,9 +359,15 @@ class GearProRuntime:
 
     def _restore_config_backup(self, snap):
         previous_locator = Path(self.config.locator_model)
+        previous_model2 = Path(self.config.model2_config)
         self.config.update(snap["fields"])
         self.config.locator_model = Path(snap["locator_model"])
-        rebuild = previous_locator.resolve() != Path(self.config.locator_model).resolve()
+        if snap.get("model2_config"):
+            self.config.model2_config = Path(snap["model2_config"])
+        rebuild = (
+            previous_locator.resolve() != Path(self.config.locator_model).resolve()
+            or previous_model2.resolve() != Path(self.config.model2_config).resolve()
+        )
         want_run = bool(snap.get("inspection_active")) and self.config.inference_profile != "SAFE_STOP"
         if rebuild:
             self.rebuild_inspector(resume=want_run)
@@ -346,14 +380,16 @@ class GearProRuntime:
         except OSError:
             pass
 
-    def set_inference_profile(self, name):
+    def set_inference_profile(self, name, *, engineering_mode=False):
         from .profiles import ProfileError, apply_to_config
 
         previous = self.config.inference_profile
         previous_locator = Path(self.config.locator_model)
+        previous_model2 = Path(self.config.model2_config)
+        previous_threshold = float(self.config.defect_threshold)
         was_active = self.inspection_active
         try:
-            plan = apply_to_config(self.config, name)
+            plan = apply_to_config(self.config, name, engineering_mode=engineering_mode)
         except ProfileError as exc:
             return False, str(exc)
         try:
@@ -370,14 +406,16 @@ class GearProRuntime:
                 self.start_inspection()
         except Exception:
             self.config.locator_model = previous_locator
+            self.config.model2_config = previous_model2
+            self.config.defect_threshold = previous_threshold
             try:
-                apply_to_config(self.config, previous)
+                apply_to_config(self.config, previous, engineering_mode=engineering_mode)
                 if plan["rebuild_inspector"]:
                     self.rebuild_inspector(resume=was_active and previous != "SAFE_STOP")
             except Exception:
                 pass
             raise
-        return True, f"已切换到 {name}"
+        return True, f"已切换到 {name}" + (" [ENGINEERING ONLY]" if engineering_mode else "")
 
     def set_locator_profile(self, name):
         from .profiles import locator_path_for
@@ -404,10 +442,16 @@ class GearProRuntime:
         was_active = self.inspection_active
         previous_locator = Path(self.config.locator_model)
         self.config.load_persisted()
+        requested = self.config.inference_profile
         try:
-            plan = apply_to_config(self.config, self.config.inference_profile)
+            plan = apply_to_config(self.config, requested)
         except ProfileError as exc:
-            raise RuntimeError(str(exc)) from exc
+            # Fail closed: never silently keep an unapproved degraded profile after restart.
+            if requested not in ("FULL", "SPARSE", "SAFE_STOP", "TRT_FAST"):
+                plan = apply_to_config(self.config, "FULL")
+                self.error = f"persisted profile {requested} unavailable ({exc}); recovered FULL"
+            else:
+                raise RuntimeError(str(exc)) from exc
         self.config.validate_models()
         rebuild = previous_locator.resolve() != Path(self.config.locator_model).resolve() or plan["rebuild_inspector"]
         resume = (not plan["stop_worker"]) and (was_active or plan["start_worker"])

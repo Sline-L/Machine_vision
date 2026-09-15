@@ -60,8 +60,18 @@ def is_runtime_available(profile_id: str, path: Path | None = None) -> bool:
     return bool(row.get("implemented")) and bool(row.get("mission_approved"))
 
 
-def assert_switchable(profile_id: str, *, legacy_implemented: bool, path: Path | None = None) -> None:
-    """Raise CapabilityError unless legacy + registry both allow the switch."""
+def assert_switchable(
+    profile_id: str,
+    *,
+    legacy_implemented: bool,
+    path: Path | None = None,
+    engineering_mode: bool = False,
+) -> None:
+    """Raise CapabilityError unless legacy + registry both allow the switch.
+
+    engineering_mode skips mission_approved only for explicit harness use.
+    REJECTED capabilities remain blocked even in engineering_mode.
+    """
     if not legacy_implemented:
         raise CapabilityError(f"capability {profile_id} is not implemented")
     row = get_capability(profile_id, path)
@@ -71,10 +81,12 @@ def assert_switchable(profile_id: str, *, legacy_implemented: bool, path: Path |
         return
     if row.get("status") == "REJECTED":
         raise CapabilityError(f"capability {profile_id} is REJECTED and cannot be enabled")
-    if not bool(row.get("mission_approved")):
-        raise CapabilityError(f"capability {profile_id} is not mission_approved")
     if not bool(row.get("implemented")):
         raise CapabilityError(f"capability {profile_id} registry.implemented is false")
+    if engineering_mode:
+        return
+    if not bool(row.get("mission_approved")):
+        raise CapabilityError(f"capability {profile_id} is not mission_approved")
 
 
 def list_capabilities(path: Path | None = None) -> list[dict]:

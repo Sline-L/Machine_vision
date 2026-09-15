@@ -100,6 +100,24 @@
       "formal_evaluation_status": "BLOCKED_NO_FRESH_HOLDOUT",
       "runtime_implemented": false,
       "notes": "Exploratory only. Diagnostic on consumed test_scratch also Mission-fail-like. Not NEXT formal without redesign+holdout."
+    },
+    {
+      "profile_id": "LATENCY_DEGRADED_V2",
+      "status": "ENGINEERING_IMPLEMENTED",
+      "implemented": true,
+      "mission_approved": false,
+      "semantic_capabilities": ["scratch_binary", "bbox_aux"],
+      "quality_coefficient": 0.8879,
+      "required_components": ["locator", "classifier_1", "detector"],
+      "candidate_id": "latency_degraded_v2_effnet_det",
+      "frozen_artifact": "docs/capability-extraction/v3/latency_degraded_v2_effnet_det.frozen.json",
+      "val_metrics": {"recall": 0.9767, "fpr": 0.1121, "Q_D": 0.8879, "U": 0.9439},
+      "latency_relative_to_full_p95": 0.35,
+      "formal_evaluation_status": "BLOCKED_NO_FRESH_HOLDOUT",
+      "formal_holdout_status": "MISSING",
+      "runtime_implemented": true,
+      "applicability": ["V5_OVERLOAD"],
+      "notes": "Engineering implemented. Production available=false until fresh Scratch-only holdout formal PASS + explicit registry admission. Do not alias to classifier_only_v1."
     }
   ]
 }

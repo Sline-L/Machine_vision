@@ -4,7 +4,7 @@ from pathlib import Path
 import json
 
 SCHEMA_VERSION = "runtime-bundle.v1"
-KNOWN_FAMILIES = ("scratch_v5",)
+KNOWN_FAMILIES = ("scratch_v5", "scratch_v5_latency_degraded_v2")
 
 
 class BundleError(ValueError):
@@ -77,17 +77,21 @@ def _validate_manifest(manifest, config, bundle_dir):
         raise BundleError(f"未知 model_family：{family}")
     if family != config.get("version"):
         raise BundleError("manifest.model_family 与 inference_config.version 不一致")
-    if family == "scratch_v5" and manifest.get("task") != "scratch_detection":
-        raise BundleError("scratch_v5 的 task 必须是 scratch_detection")
+    if family in KNOWN_FAMILIES and manifest.get("task") != "scratch_detection":
+        raise BundleError(f"{family} 的 task 必须是 scratch_detection")
 
     evaluation = manifest["evaluation"]
     if not isinstance(evaluation, dict):
         raise BundleError("evaluation 必须是对象")
-    if "validation" not in evaluation or "locked_test" not in evaluation:
-        raise BundleError("evaluation 必须分开 validation 与 locked_test，不能混成单一 recall")
-    locked = evaluation["locked_test"]
-    if isinstance(locked, dict) and locked.get("locked") is False:
-        raise BundleError("locked_test.locked 必须为 true")
+    if "validation" not in evaluation:
+        raise BundleError("evaluation 必须包含 validation")
+    # FULL scratch_v5 requires locked_test; degraded V2 is holdout-blocked and may omit it.
+    if family == "scratch_v5":
+        if "locked_test" not in evaluation:
+            raise BundleError("evaluation 必须分开 validation 与 locked_test，不能混成单一 recall")
+        locked = evaluation["locked_test"]
+        if isinstance(locked, dict) and locked.get("locked") is False:
+            raise BundleError("locked_test.locked 必须为 true")
 
     artifacts = manifest["artifacts"]
     if not isinstance(artifacts, dict) or not artifacts:
