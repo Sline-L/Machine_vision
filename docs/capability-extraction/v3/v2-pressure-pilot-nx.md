@@ -4,16 +4,33 @@
 mode: ENGINEERING ONLY
 mission_approved: false
 A3 effectiveness: NOT ESTABLISHED
-formal quality admission: BLOCKED ON FRESH SCRATCH-ONLY HOLDOUT
-previous silent run: SUSPICIOUS_ENGINEERING_EVENT (buffering vs hang UNDETERMINED)
+
+Capability admission blocker:  FRESH SCRATCH-ONLY HOLDOUT
+A3 Mission-recovery blocker:   V2 DOES NOT RESTORE LATENCY GATE
+                               UNDER QUALIFIED SEVERE PRESSURE
 ```
 
 Branch: `srtp-agent/v2-pressure-pilot`  
 Harness: `tools/nx_v2_pressure_soak_pilot.py` (`python -u`, stage START/PASS/FAIL, hard watchdogs)
 
+## Headline correction
+
+```text
+LATENCY_DEGRADED_V2
+= effective latency MITIGATION
+≠ effective latency RECOVERY under qualified severe pressure
+```
+
+| condition | FULL p95 | V2 p95 | reduction |
+| --- | ---: | ---: | ---: |
+| healthy (planning integrated) | ≈189.1 ms | ≈129.5 ms | **31.5%** |
+| qualified severe (`×3`) | **397.6 ms** | **318.4 ms** | **19.9%** |
+
+Mechanism is real; ResNet removal is **not enough** to cross the 190 ms Mission gate under already-qualified severe pressure. Fresh holdout success would still leave this A3 recovery gap.
+
 ## Previous aborted run
 
-See `v2-pressure-previous-run-event.md`. No research conclusion drawn.
+See `v2-pressure-previous-run-event.md`. Buffering vs hang **UNDETERMINED**. No research conclusion.
 
 ## Lean A–F (PASS)
 
@@ -47,16 +64,13 @@ hash=49da7bb852cb5e733fc505eb3bfe5c89f7992c8e8427840bc4e9d3c3ffbfd70f
 
 ```text
 LATENCY MITIGATION:              SUPPORTED
-MISSION LATENCY RECOVERY:        NOT ESTABLISHED
-LATENCY RECOVERY MECHANISM:      mitigation supported; gate recovery NOT ESTABLISHED
+MISSION LATENCY RECOVERY:        NOT ESTABLISHED / NOT SUPPORTED @ S3
 A3 EFFECTIVENESS:                NOT ESTABLISHED
 ```
 
-V2 lowers integrated Scratch latency under identical persistent pressure (~20%), but does **not** restore p95 under the Mission latency gate (190 ms).
-
 ## Engineering switch / rollback
 
-Injector remained alive across FULL overload → V2 activation → V2 observation → FULL rollback. Rollback under pressure restored FULL topology (expected latency re-worsening is allowed and was observed in the rollback window). This supports that recovery difference tracks **profile topology**, not injector disappearance.
+Injector remained alive across FULL overload → V2 → rollback FULL. Difference tracks **profile topology**, not injector disappearance.
 
 ## Soak
 
@@ -72,11 +86,12 @@ profile identity: stable (cls2=0 throughout)
 crash: none
 ```
 
-No crash, no sustained one-way latency drift, mild RSS growth consistent with allocator warmup then plateau (~2001 MiB).
+Lifecycle is stable; the remaining gap is **offload amplitude**, not soak fragility.
 
-## Soak
+## Next
 
-Pending / see updated JSON after 30 min V2 healthy soak completes.
+Pre-registered severity sweep (S0–S3), not V3 yet:  
+[v2-severity-sweep-plan.md](v2-severity-sweep-plan.md)
 
 ## Integrated healthy baselines (planning)
 

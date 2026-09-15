@@ -40,35 +40,47 @@ Capability admission framework      ON MAINLINE (fail-closed registry)
 Existing lightweight search         EXHAUSTED
 classifier_only_v1                  REJECTED
 LATENCY_DEGRADED_V2                 ENGINEERING IMPLEMENTED / FORMAL ADMISSION PENDING
-  healthy integrated latency        PASS (~129.5 vs FULL ~189.1 ms p95)
-  pressure latency mitigation       SUPPORTED (~318 vs FULL ~398 ms p95; gate NOT recovered)
+  healthy latency improvement       SUPPORTED (~189.1 → ~129.5 ms, −31.5%)
+  pressured latency mitigation      SUPPORTED (397.6 → 318.4 ms, −19.9%)
+  severe-pressure gate recovery     NOT SUPPORTED
   engineering soak                  PASS
-Fresh formal holdout                MISSING
-Vision redesign                     REQUIRED IF HOLDOUT FAILS (candidate frozen)
+Fresh formal holdout                MISSING (capability admission blocker)
+A3 Mission-recovery blocker         V2 DOES NOT RESTORE GATE UNDER QUALIFIED SEVERE PRESSURE
+Vision redesign / V3                ONLY AFTER severity sweep (or if envelope empty)
 
 A3 runtime readiness                HIGH
-A3 usable recovery capability       MISSING (formal)
+A3 usable recovery capability       MISSING (formal + severe-pressure evidence)
 A3 effectiveness                    NOT ESTABLISHED
 ```
 
-`LATENCY_DEGRADED_V2` (EffNet + P2 detector @960, α=0.25): engineering runtime exists on
-`integration/latency-degraded-v2-runtime` / evidence branch `srtp-agent/v2-pressure-pilot`
-with `implemented=true`, `mission_approved=false`, `available=false`. Production Control API
-rejects switches. NX lean pressure pilot: latency **mitigation** under qualified pressure is
-supported; Mission latency gate recovery is **not** established. Only formal blocker for
-Primary A: **fresh Scratch-only holdout**. See
-[autonomous-latency-degraded-v2-runtime-status.md](autonomous-latency-degraded-v2-runtime-status.md)
-and [v2-pressure-pilot-nx.md](capability-extraction/v3/v2-pressure-pilot-nx.md).
+`LATENCY_DEGRADED_V2` is an effective **latency mitigation**, not a proven **Mission recovery**
+capability under qualified severe pressure (`multi_bandwidth ×3`). Engineering path on
+`srtp-agent/v2-pressure-pilot`: switch / rollback / soak PASS; registry remains
+`implemented=true`, `mission_approved=false`, `available=false`.
 
-Primary A reopen trigger:
+**Two independent blockers** (do not collapse):
+
+1. Capability admission → **fresh Scratch-only holdout**
+2. A3 Mission recovery → **V2 does not restore p95 &lt; 190 ms under qualified severe pressure**
+
+Holdout PASS alone does not establish Primary A Mission recovery. Next measurement:
+pre-registered **severity sweep** (S0–S3) to find any moderate-overload recovery envelope —
+not reverse-tuned injector hunting. See
+[v2-severity-sweep-plan.md](capability-extraction/v3/v2-severity-sweep-plan.md),
+[autonomous-latency-degraded-v2-runtime-status.md](autonomous-latency-degraded-v2-runtime-status.md),
+[v2-pressure-pilot-nx.md](capability-extraction/v3/v2-pressure-pilot-nx.md).
+
+Primary A reopen still requires quality admission **and** a demonstrated recovery envelope
+(or a later V3 that actually restores the gate):
 
 ```text
-LATENCY_DEGRADED_V2 formal holdout PASS
+(fresh holdout PASS ∧ mission_approved=true)
 AND
-explicit registry mission_approved=true
+(recovery envelope at some pre-registered severity
+ OR a future capability that restores gate under target fault)
 ```
 
-Then: `one-shot formal eval → admission_proposal → registry → NX smoke → pressure A3`.
+Then: `admission_proposal → registry → NX smoke → formal A3`.
 Interface for vision: [vision-redesign-interface.md](capability-extraction/v2/vision-redesign-interface.md).
 Registry review: [integration-capability-registry-review.md](integration-capability-registry-review.md).
 V2 runtime review: [integration-latency-degraded-v2-review.md](integration-latency-degraded-v2-review.md).
