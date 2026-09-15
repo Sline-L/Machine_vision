@@ -1,0 +1,35 @@
+{
+  "selection_rule_doc": "/home/jetson/Projects/Machine_vision/docs/capability-extraction/selection-rule-candidate-a.md",
+  "primary_operating_point": {
+    "threshold": 0.5986470981744116,
+    "recall": 0.9534883720930233,
+    "precision": 0.803921568627451,
+    "f1": 0.8723404255319148,
+    "fpr": 0.09345794392523364,
+    "specificity": 0.9065420560747663,
+    "tp": 41,
+    "fp": 10,
+    "tn": 97,
+    "fn": 2
+  },
+  "primary_key": [
+    true,
+    0.9534883720930233,
+    -0.09345794392523364,
+    0.803921568627451
+  ],
+  "target_met": true,
+  "score_summary": {
+    "min": 0.11609968346241661,
+    "max": 0.9986739968882028,
+    "mean": 0.5224895698264159
+  },
+  "confusion": {
+    "tp": 41,
+    "fp": 10,
+    "tn": 97,
+    "fn": 2
+  },
+  "n_images": 150,
+  "test_scratch_accessed": false
+}

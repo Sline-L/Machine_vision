@@ -1,0 +1,39 @@
+{
+  "version": "scratch_v5",
+  "profile_candidate": "B_single_efficientnet",
+  "classes": {
+    "0": "normal",
+    "1": "scratch"
+  },
+  "classifiers": [
+    {
+      "name": "f_efficientnet_b0_384_w1_s20260911",
+      "family": "efficientnet_b0",
+      "weights": "classifier_1.pt",
+      "sha256": "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438",
+      "imgsz": 384,
+      "tta": "none",
+      "temperature": 0.7
+    }
+  ],
+  "detector": null,
+  "fusion": {
+    "type": "classifier",
+    "models": ["f_efficientnet_b0_384_w1_s20260911"]
+  },
+  "default_threshold": 0.542919409017341,
+  "operating_points": {
+    "0.2": {
+      "threshold": 0.542919409017341,
+      "recall": 0.9534883720930233,
+      "precision": 0.7592592592592593,
+      "f1": 0.845360824742268,
+      "fpr": 0.12149532710280374,
+      "split": "val",
+      "blind": false
+    }
+  },
+  "decision": "REJECT when scratch probability >= threshold",
+  "locked_test": null,
+  "notes": "Ready for one-shot locked evaluate_scratch_v5_test.py --config THISFILE only after product selects Candidate B. Do not retune threshold on test_scratch."
+}

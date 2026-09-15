@@ -1,0 +1,141 @@
+{
+  "schema_version": "runtime-capability.v0-draft",
+  "status": "DRAFT_NOT_RUNTIME",
+  "bundle_id": "scratch-v5-2026-09-14",
+  "notes": [
+    "Draft only. Do not set gp/profiles CLASSIFY_ONLY implemented=True from this file.",
+    "Weights already present in model/model2; classifier_only skips detector call.",
+    "Choose pre_registered_candidate and freeze threshold before any locked test_scratch run.",
+    "expected_Q_D and minimum_Mission_utility require vision+Mission sign-off."
+  ],
+  "dataset_protocol": {
+    "repo": "https://github.com/Sline-L/Machine_vision_dataset",
+    "infer_supports_detector_null": true,
+    "fusion_types_classifier_only": ["classifier", "classifier_mean", "classifier_max"],
+    "fusion_types_need_detector": ["weighted", "soft_or"],
+    "train_builds_classifier_only_candidates": true,
+    "evaluate_scratch_v5_test_accepts_config": true
+  },
+  "artifacts_shared_with_full": {
+    "classifier_1.pt": {
+      "name": "f_efficientnet_b0_384_w1_s20260911",
+      "sha256": "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438",
+      "imgsz": 384,
+      "temperature": 0.7
+    },
+    "classifier_2.pt": {
+      "name": "p_resnet18_384_w1",
+      "sha256": "d07678a6da421c4edc00ac24b8c5052b0b8b7f8b1614b9d82563ecefbf59360d",
+      "imgsz": 384,
+      "temperature": 2.05
+    },
+    "detector.pt": {
+      "name": "p_detector_p2_960",
+      "sha256": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3",
+      "used_by_classifier_only": false
+    }
+  },
+  "profiles": {
+    "full": {
+      "profile_id": "FULL",
+      "capabilities": ["scratch_verdict", "auxiliary_detector_box"],
+      "disabled_components": [],
+      "fusion": {
+        "type": "weighted",
+        "alpha": 0.25,
+        "classifier": {
+          "type": "classifier_mean",
+          "models": [
+            "f_efficientnet_b0_384_w1_s20260911",
+            "p_resnet18_384_w1"
+          ]
+        }
+      },
+      "detector": "required",
+      "default_threshold": 0.300273610279458,
+      "validation": {
+        "recall": 0.9767,
+        "fpr": 0.0841,
+        "blind": false
+      },
+      "locked_test": {
+        "set": "test_scratch",
+        "recall": 0.8065,
+        "fpr": 0.1681,
+        "locked": true
+      },
+      "expected_Q_D": 1.0,
+      "minimum_Mission_utility": 0.85,
+      "expected_latency_benefit": "baseline"
+    },
+    "classifier_only": {
+      "profile_id": "CLASSIFIER_ONLY",
+      "alias_runtime_names": ["CLASSIFY_ONLY", "LATENCY_DEGRADED"],
+      "capabilities": ["scratch_verdict"],
+      "disabled_components": ["detector_p2_960", "auxiliary_detector_box"],
+      "supported_verdict_semantics": "scratch reject/pass from classifier fusion only; no detector box",
+      "expected_latency_benefit": "skip detector@960 forward per inspection; measure on NX before claim",
+      "pre_registered_candidates": {
+        "A_classifier_mean_both": {
+          "preferred": true,
+          "fusion": {
+            "type": "classifier_mean",
+            "models": [
+              "f_efficientnet_b0_384_w1_s20260911",
+              "p_resnet18_384_w1"
+            ]
+          },
+          "detector": null,
+          "default_threshold": null,
+          "threshold_status": "MISSING_IN_COMMITTED_FINAL_NEED_VAL_FREEZE",
+          "validation": null,
+          "locked_test": null,
+          "notes": "Formal train fusion candidate; val OP not persisted in final/leaderboard.json"
+        },
+        "B_single_efficientnet": {
+          "preferred": false,
+          "fusion": {
+            "type": "classifier",
+            "models": ["f_efficientnet_b0_384_w1_s20260911"]
+          },
+          "detector": null,
+          "default_threshold": 0.542919409017341,
+          "threshold_status": "FROZEN_FROM_VAL_LEADERBOARD",
+          "validation": {
+            "recall": 0.9534883720930233,
+            "precision": 0.7592592592592593,
+            "fpr": 0.12149532710280374,
+            "f1": 0.845360824742268,
+            "meets_train_val_target": true,
+            "blind": false,
+            "notes": "val participated in selection; not production claim"
+          },
+          "locked_test": null,
+          "notes": "Complete val OP today; weaker than mean as product default but freeze-ready"
+        }
+      },
+      "selected_candidate": "A_classifier_mean_both",
+      "selected_role": {
+        "A_classifier_mean_both": "primary_latency_degraded_capability",
+        "B_single_efficientnet": "fallback_alternate"
+      },
+      "val_freeze": {
+        "path": "docs/capability-extraction/configs/classifier_only_mean.val-frozen.json",
+        "threshold": 0.5986470981744116,
+        "recall": 0.9534883720930233,
+        "fpr": 0.09345794392523364,
+        "target_met": true,
+        "test_scratch_accessed": false
+      },
+      "expected_Q_D": null,
+      "minimum_Mission_utility": null,
+      "artifact_bundle_id": "scratch-v5-2026-09-14",
+      "artifact_sha_set": "same as FULL classifiers; detector unused"
+    }
+  },
+  "discipline": {
+    "no_test_scratch_threshold_sweep": true,
+    "locked_test_at_most_once_per_frozen_config": true,
+    "agent_must_not_invent_imgsz_or_thresholds": true
+  }
+}

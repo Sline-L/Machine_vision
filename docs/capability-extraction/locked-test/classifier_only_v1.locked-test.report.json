@@ -1,0 +1,43 @@
+{
+  "protocol": "docs/capability-extraction/step4-locked-test-protocol.md",
+  "profile_id": "classifier_only_v1",
+  "claim": "one_shot_locked_test_scratch",
+  "threshold": 0.5986470981744116,
+  "fusion": "classifier_mean",
+  "detector": "disabled",
+  "Q_D_rule": "min(Recall, 1 - FPR)",
+  "bbox_acceptance_criterion": false,
+  "split": "test_scratch",
+  "n_images": 150,
+  "n_scratch": 31,
+  "n_normal": 119,
+  "tp": 26,
+  "fp": 53,
+  "tn": 66,
+  "fn": 5,
+  "recall": 0.8387096774193549,
+  "fpr": 0.44537815126050423,
+  "specificity": 0.5546218487394958,
+  "precision": 0.3291139240506329,
+  "f1": 0.47272727272727266,
+  "Q_D_test": 0.5546218487394958,
+  "U_test": 0.7773109243697479,
+  "dataset_target_pass": false,
+  "mission_contract_pass": false,
+  "runtime_gate": "CLOSED",
+  "classify_only_implementation_started": false,
+  "rules_changed": false,
+  "provenance": {
+    "run_timestamp_utc": "2026-09-15T04:12:47.394366+00:00",
+    "frozen_config": "/home/jetson/Projects/Machine_vision/docs/capability-extraction/configs/classifier_only_mean.val-frozen.json",
+    "frozen_config_sha256": "1a32b9c9a151d797a940f6b2cf9951519bb6c65fc2a26e3ca01943c343934936",
+    "model2": "/home/jetson/Projects/Machine_vision/model/model2/inference_config.json",
+    "dataset_commit": "581647de462256c40d357d9fc4a3d1f6061023b0",
+    "test_images": "/tmp/scratch_v5_test_pack/dataset_defects/images/test_scratch",
+    "test_ann": "/tmp/scratch_v5_test_pack/dataset_defects/annotations/test_scratch"
+  },
+  "on_fail_discipline": {
+    "tune_A": false,
+    "rescue_B_on_same_test_scratch_as_locked": false
+  }
+}

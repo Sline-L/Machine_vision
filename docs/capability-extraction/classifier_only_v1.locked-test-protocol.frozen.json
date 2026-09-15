@@ -1,0 +1,56 @@
+{
+  "schema_version": "locked-test-protocol.v1",
+  "status": "FROZEN",
+  "frozen_at_utc": "2026-09-15T04:08:00Z",
+  "profile_id": "classifier_only_v1",
+  "parent_contract": "docs/capability-extraction/classifier_only_v1.contract.frozen.json",
+  "test_scratch_executed_under_this_protocol": false,
+  "frozen_inputs": {
+    "fusion": "classifier_mean",
+    "models": ["classifier_1", "classifier_2"],
+    "detector": "disabled",
+    "threshold": 0.5986470981744116,
+    "Q_D_rule": "min(Recall, 1 - FPR)",
+    "bbox_acceptance_criterion": false,
+    "config": "docs/capability-extraction/configs/classifier_only_mean.val-frozen.json"
+  },
+  "forbidden": [
+    "threshold_tuning",
+    "model_or_fusion_switching_for_test_score",
+    "recalibration_on_test",
+    "test_driven_Q_D_rule_changes",
+    "discarding_unfavorable_samples_or_runs",
+    "selecting_or_tuning_candidate_B_on_observed_test_scratch_as_locked"
+  ],
+  "reported_metrics": [
+    "TP", "FP", "TN", "FN",
+    "Recall", "FPR", "Specificity",
+    "Precision", "F1",
+    "Q_D_test", "U_test"
+  ],
+  "judgments": {
+    "dataset_target_pass": {
+      "definition": "(Recall >= 0.95) and (FPR <= 0.20)",
+      "role": "report_only_generalization_vs_train_selection_target"
+    },
+    "mission_contract_pass": {
+      "definition": "(Q_D_test >= 0.70) and binary_mission_semantics_preserved",
+      "role": "sole_runtime_gate"
+    },
+    "runtime_gate": "OPEN only if mission_contract_pass == true"
+  },
+  "formulas": {
+    "Q_D_test": "min(Recall, 1 - FPR)",
+    "U_test": "0.5 + 0.5 * Q_D_test"
+  },
+  "on_pass": {
+    "runtime_gate": "OPEN",
+    "allow_classify_only_implementation": true
+  },
+  "on_fail": {
+    "runtime_gate": "CLOSED",
+    "tune_A_on_test_scratch": false,
+    "select_or_tune_B_using_test_scratch_as_locked": false,
+    "next": "return_to_validation_or_design; require_fresh_independent_holdout_for_next_formal_capability"
+  }
+}

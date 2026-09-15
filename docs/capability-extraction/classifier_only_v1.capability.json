@@ -1,0 +1,111 @@
+{
+  "schema_version": "capability.v1",
+  "layer": "objective_capability",
+  "profile_id": "classifier_only_v1",
+  "status": "VAL_FROZEN",
+  "role": "primary_latency_degraded_capability",
+  "alternate_fallback": "classifier_only_efficientnet_v0 (Candidate B)",
+  "notes": [
+    "Facts and provenance only. Do not rewrite validation metrics for Mission convenience.",
+    "Q_D / Mission acceptance live in classifier_only_v1.mission-contract.md — not here.",
+    "CLASSIFY_ONLY runtime API remains closed."
+  ],
+  "inference_path": {
+    "classifier_1": "enabled",
+    "classifier_2": "enabled",
+    "detector": "disabled"
+  },
+  "fusion": {
+    "type": "classifier_mean",
+    "models": [
+      "f_efficientnet_b0_384_w1_s20260911",
+      "p_resnet18_384_w1"
+    ]
+  },
+  "threshold": 0.5986470981744116,
+  "decision": "REJECT when classifier_mean scratch probability >= threshold",
+  "artifacts": {
+    "bundle_id": "scratch-v5-2026-09-14",
+    "classifier_1.pt": {
+      "name": "f_efficientnet_b0_384_w1_s20260911",
+      "sha256": "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438",
+      "imgsz": 384,
+      "temperature": 0.7
+    },
+    "classifier_2.pt": {
+      "name": "p_resnet18_384_w1",
+      "sha256": "d07678a6da421c4edc00ac24b8c5052b0b8b7f8b1614b9d82563ecefbf59360d",
+      "imgsz": 384,
+      "temperature": 2.05
+    },
+    "detector.pt": {
+      "used": false,
+      "sha256": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3"
+    }
+  },
+  "validation": {
+    "split": "val_scratch",
+    "n": 150,
+    "n_scratch": 43,
+    "n_normal": 107,
+    "recall": 0.9534883720930233,
+    "fpr": 0.09345794392523364,
+    "precision": 0.803921568627451,
+    "f1": 0.8723404255319148,
+    "confusion": {
+      "TP": 41,
+      "FP": 10,
+      "TN": 97,
+      "FN": 2
+    },
+    "target": {
+      "scratch_recall": 0.95,
+      "normal_fpr_max": 0.20
+    },
+    "target_met": true,
+    "blind": false,
+    "selection_rule": "train_scratch_v5.choose_threshold; key=(fpr<=0.20, recall, -fpr, precision)",
+    "source_freeze": "docs/capability-extraction/configs/classifier_only_mean.val-frozen.json",
+    "config_hash": "08bd0af2c645e759d258cb90ff0f934be55ec0d7920bbbf9427c2755f588f96c",
+    "freeze_id": "classifier_only_mean_v1_20260915T034408Z",
+    "dataset_commit": "581647de462256c40d357d9fc4a3d1f6061023b0"
+  },
+  "latency_probe": {
+    "harness": "edgemedic/latency_probe_skip_detector.py",
+    "setup": "tests/replay + model1.pt + same model2 weights; crop-level",
+    "classifiers_only_p95_ms": {
+      "full_first": 61.974,
+      "cls_first": 63.684
+    },
+    "full_p95_ms": {
+      "full_first": 275.646,
+      "cls_first": 260.62
+    },
+    "note": "crop-level comparative probe only; not Mission window / not Stage-C healthy envelope"
+  },
+  "quality_policy": {
+    "Q_D_assignment_rule": "min(Recall, 1 - FPR)",
+    "Q_D_assignment_rule_status": "PREREGISTERED",
+    "Q_D_val": 0.9065420560747663,
+    "U_val_assuming_QL_QS_1": 0.9532710280373832,
+    "admission_floor_Q_D": 0.70,
+    "Q_D_val_meets_admission": true,
+    "mission_semantics_acceptance": "PASS",
+    "mission_acceptance_accepted": true,
+    "mission_critical_preserved": "binary Scratch defect verdict",
+    "auxiliary_degraded_accepted": "Scratch bbox / visual localization",
+    "locked_test_bbox_is_acceptance_criterion": false,
+    "note": "Q_D is not Recall; rule fixed before locked test; see mission-contract.md"
+  },
+  "locked_test": {
+    "status": "NOT_RUN",
+    "policy": "one-shot after Step 3 freeze; same threshold + Q_D rule; bbox NOT a criterion; never retune"
+  },
+  "runtime": {
+    "classify_only_api_opened": false,
+    "gearpro_profile_implemented": false
+  },
+  "test_scratch_accessed": false,
+  "contract_status": "FROZEN",
+  "frozen_contract": "docs/capability-extraction/classifier_only_v1.contract.frozen.json"
+}

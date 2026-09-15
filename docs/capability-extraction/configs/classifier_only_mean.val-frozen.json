@@ -1,0 +1,183 @@
+{
+  "version": "scratch_v5",
+  "profile_candidate": "A_classifier_mean_both",
+  "profile_id": "classifier_only_mean_v1",
+  "classes": {
+    "0": "normal",
+    "1": "scratch"
+  },
+  "classifiers": [
+    {
+      "name": "f_efficientnet_b0_384_w1_s20260911",
+      "family": "efficientnet_b0",
+      "weights": "classifier_1.pt",
+      "sha256": "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438",
+      "imgsz": 384,
+      "tta": "none",
+      "temperature": 0.7
+    },
+    {
+      "name": "p_resnet18_384_w1",
+      "family": "resnet18",
+      "weights": "classifier_2.pt",
+      "sha256": "d07678a6da421c4edc00ac24b8c5052b0b8b7f8b1614b9d82563ecefbf59360d",
+      "imgsz": 384,
+      "tta": "none",
+      "temperature": 2.05
+    }
+  ],
+  "detector": null,
+  "fusion": {
+    "type": "classifier_mean",
+    "models": [
+      "f_efficientnet_b0_384_w1_s20260911",
+      "p_resnet18_384_w1"
+    ]
+  },
+  "default_threshold": 0.5986470981744116,
+  "operating_points": {
+    "0.1": {
+      "threshold": 0.5986470981744116,
+      "recall": 0.9534883720930233,
+      "precision": 0.803921568627451,
+      "f1": 0.8723404255319148,
+      "fpr": 0.09345794392523364,
+      "specificity": 0.9065420560747663,
+      "tp": 41,
+      "fp": 10,
+      "tn": 97,
+      "fn": 2,
+      "selection_key": [
+        true,
+        0.9534883720930233,
+        -0.09345794392523364,
+        0.803921568627451
+      ]
+    },
+    "0.2": {
+      "threshold": 0.5986470981744116,
+      "recall": 0.9534883720930233,
+      "precision": 0.803921568627451,
+      "f1": 0.8723404255319148,
+      "fpr": 0.09345794392523364,
+      "specificity": 0.9065420560747663,
+      "tp": 41,
+      "fp": 10,
+      "tn": 97,
+      "fn": 2,
+      "selection_key": [
+        true,
+        0.9534883720930233,
+        -0.09345794392523364,
+        0.803921568627451
+      ]
+    },
+    "0.3": {
+      "threshold": 0.5986470981744116,
+      "recall": 0.9534883720930233,
+      "precision": 0.803921568627451,
+      "f1": 0.8723404255319148,
+      "fpr": 0.09345794392523364,
+      "specificity": 0.9065420560747663,
+      "tp": 41,
+      "fp": 10,
+      "tn": 97,
+      "fn": 2,
+      "selection_key": [
+        true,
+        0.9534883720930233,
+        -0.09345794392523364,
+        0.803921568627451
+      ]
+    },
+    "0.5": {
+      "threshold": 0.42471131837717613,
+      "recall": 1.0,
+      "precision": 0.5180722891566265,
+      "f1": 0.6825396825396826,
+      "fpr": 0.37383177570093457,
+      "specificity": 0.6261682242990654,
+      "tp": 43,
+      "fp": 40,
+      "tn": 67,
+      "fn": 0,
+      "selection_key": [
+        true,
+        1.0,
+        -0.37383177570093457,
+        0.5180722891566265
+      ]
+    }
+  },
+  "decision": "REJECT when scratch probability >= threshold",
+  "validation": {
+    "split": "val_scratch",
+    "n_images": 150,
+    "n_scratch": 43,
+    "n_normal": 107,
+    "primary_fpr_cap": 0.2,
+    "threshold": 0.5986470981744116,
+    "recall": 0.9534883720930233,
+    "precision": 0.803921568627451,
+    "f1": 0.8723404255319148,
+    "fpr": 0.09345794392523364,
+    "specificity": 0.9065420560747663,
+    "tp": 41,
+    "fp": 10,
+    "tn": 97,
+    "fn": 2,
+    "target": {
+      "scratch_recall": 0.95,
+      "normal_fpr_max": 0.2
+    },
+    "target_met": true,
+    "blind": false,
+    "notes": "val participated in threshold selection; not a locked-test claim"
+  },
+  "selection_rule": {
+    "source": "train_scratch_v5.choose_threshold",
+    "documented_in": "/home/jetson/Projects/Machine_vision/docs/capability-extraction/selection-rule-candidate-a.md",
+    "primary_fpr_cap": 0.2,
+    "key": "(fpr <= primary_fpr_cap, recall, -fpr, precision)",
+    "chosen_key": [
+      true,
+      0.9534883720930233,
+      -0.09345794392523364,
+      0.803921568627451
+    ],
+    "temperatures_refit": false
+  },
+  "provenance": {
+    "freeze_id": "classifier_only_mean_v1_20260915T034408Z",
+    "freeze_timestamp_utc": "2026-09-15T03:44:08.393302+00:00",
+    "model2_config": "/home/jetson/Projects/Machine_vision/model/model2/inference_config.json",
+    "model2_config_sha256": "127f9a7df9bf9b9c048603d45a143b806df943787408e8e18d09ab5e9f7d5ca5",
+    "val_images": "/tmp/scratch_v5_val_pack/dataset_defects/images/val_scratch",
+    "val_annotations": "/tmp/scratch_v5_val_pack/dataset_defects/annotations/val_scratch",
+    "dataset_commit": "581647de462256c40d357d9fc4a3d1f6061023b0",
+    "artifact_hashes": {
+      "classifier_1.pt": {
+        "name": "f_efficientnet_b0_384_w1_s20260911",
+        "sha256": "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438",
+        "imgsz": 384,
+        "temperature": 0.7,
+        "family": "efficientnet_b0"
+      },
+      "classifier_2.pt": {
+        "name": "p_resnet18_384_w1",
+        "sha256": "d07678a6da421c4edc00ac24b8c5052b0b8b7f8b1614b9d82563ecefbf59360d",
+        "imgsz": 384,
+        "temperature": 2.05,
+        "family": "resnet18"
+      }
+    },
+    "test_scratch_accessed": false,
+    "classify_only_api_opened": false
+  },
+  "locked_test": null,
+  "notes": [
+    "Step 2 freeze only. Do not retune on test_scratch.",
+    "Do not open GearPro CLASSIFY_ONLY from this file alone."
+  ],
+  "config_hash": "08bd0af2c645e759d258cb90ff0f934be55ec0d7920bbbf9427c2755f588f96c"
+}
