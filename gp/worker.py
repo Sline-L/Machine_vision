@@ -77,7 +77,16 @@ class InspectionWorker:
             if packet.frame is not None and packet.sequence != last_sequence:
                 last_sequence = packet.sequence
                 self.bump_inspect()
-                self.on_result(inspector.inspect(packet.frame))
+                started = time.monotonic()
+                result = inspector.inspect(packet.frame)
+                ended = time.monotonic()
+                latest = self.frame_store.read()
+                result.source_frame_seq = packet.sequence
+                result.source_capture_ts = packet.published_at
+                result.inspection_start_ts = started
+                result.inspection_end_ts = ended
+                result.latest_frame_seq_at_completion = latest.sequence
+                self.on_result(result)
             self._interrupt_event.wait(self.config.inference_interval)
 
     def _inspect_video(self, inspector):

@@ -605,6 +605,14 @@ class GearProRuntime:
             "locator_ms": result.locator_latency_ms,
             "v5_ms": result.scratch_latency_ms,
             "elapsed_ms": result.elapsed_ms,
+            "source_frame_seq": result.source_frame_seq,
+            "inspection_age_ms": result.inspection_age_ms,
+            "frame_lag": result.frame_lag,
+            "inspection_wall_ms": (
+                None
+                if result.inspection_start_ts is None or result.inspection_end_ts is None
+                else (float(result.inspection_end_ts) - float(result.inspection_start_ts)) * 1000.0
+            ),
         }
         with self._lock:
             self._action_cycles.append(sample)

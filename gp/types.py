@@ -27,6 +27,24 @@ class InspectionResult:
     scratch_latency_ms: float = 0.0
     defect_threshold: float = 0.5
     model_version: str = ""
+    # Freshness / continuity telemetry (monotonic timestamps; optional)
+    source_frame_seq: Optional[int] = None
+    source_capture_ts: Optional[float] = None
+    inspection_start_ts: Optional[float] = None
+    inspection_end_ts: Optional[float] = None
+    latest_frame_seq_at_completion: Optional[int] = None
+
+    @property
+    def inspection_age_ms(self):
+        if self.source_capture_ts is None or self.inspection_end_ts is None:
+            return None
+        return (float(self.inspection_end_ts) - float(self.source_capture_ts)) * 1000.0
+
+    @property
+    def frame_lag(self):
+        if self.source_frame_seq is None or self.latest_frame_seq_at_completion is None:
+            return None
+        return int(self.latest_frame_seq_at_completion) - int(self.source_frame_seq)
 
     @property
     def has_gear(self):
