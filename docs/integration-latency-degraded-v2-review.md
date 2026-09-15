@@ -30,13 +30,18 @@ available:         false
 status:            ENGINEERING_IMPLEMENTED
 ```
 
-## Formal path remaining
+## Formal / A3 path remaining
 
 ```text
-ONLY FORMAL BLOCKER: FRESH SCRATCH-ONLY HOLDOUT
+Capability admission blocker:  FRESH SCRATCH-ONLY HOLDOUT
+A3 Mission-recovery blocker:   V2 DOES NOT RESTORE LATENCY GATE
+                               UNDER QUALIFIED SEVERE PRESSURE
+                               (397.6 → 318.4 ms; need severity sweep / possible V3)
 ```
 
-Holdout tooling ready under `tools/holdout/` (seal / validate / one-shot formal eval + lock + admission_proposal).
+Holdout tooling ready under `tools/holdout/` (seal / validate / one-shot formal eval + lock + admission_proposal).  
+Holdout PASS alone does **not** establish Primary A Mission recovery. See
+`docs/capability-extraction/v3/v2-severity-sweep-plan.md`.
 
 ## Merge recommendation
 
