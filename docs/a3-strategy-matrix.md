@@ -95,7 +95,8 @@ latency bars to manufacture a pass.
 
 ## Integration note
 
-Promote measurement / injector / freshness / Secondary-B harness / provenance /
-docs into `integration/injector-a3-measurement`. Keep failed strategies and
-accidental bulk artifacts on exploration branches. Do **not** bulk-merge into
-`srtp-web` without an explicit review. See [integration-plan.md](integration-plan.md).
+Measurement infra lives on `integration/injector-a3-measurement` @ `edcab22`.
+Release review: [integration-release-review-edcab22.md](integration-release-review-edcab22.md)
+(**PASS** — recommend FF into `srtp-web` + tag `edgemedic-a2a3-measurement-baseline`).
+Keep failed strategies and accidental bulk artifacts on exploration branches.
+Do **not** invent new Agent A3 actions while lightweight capability is missing.

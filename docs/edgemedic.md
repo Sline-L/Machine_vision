@@ -57,8 +57,21 @@ Admission: V5 p95 <190 + FULL + PT + injector OFF + worker healthy + temp in ban
 
 > A2+A3 mechanism implemented, research-level effectiveness not yet validated.
 
-Q0–Q3 frozen. Measurement integration: `integration/injector-a3-measurement`
-([integration-plan.md](integration-plan.md)). Do not bulk-merge exploration into `srtp-web`.
+Waiting state after measurement baseline (see [integration-release-review-edcab22.md](integration-release-review-edcab22.md)):
+
+```text
+Agent/runtime architecture        COMPLETE
+Line 1 evidence                   COMPLETE
+A3 measurement infrastructure     COMPLETE
+Current A3 strategies             CHARACTERIZED
+Acceptable lightweight capability MISSING
+Production-line validation        FUTURE
+```
+
+Q0–Q3 frozen. Measurement branch: `integration/injector-a3-measurement` @ `edcab22`
+([integration-plan.md](integration-plan.md)). Do not invent new Agent A3 actions
+until a mission-grade lightweight vision capability exists. Do not bulk-merge
+exploration into `srtp-web`.
 
 Baseline tag：`edgemedic-a2a3-mechanism-baseline`。A4、CLASSIFY_ONLY / LOCATE_ONLY 仍不在范围。测量文档：[architecture](edgemedic-architecture.md)、[verification](edgemedic-verification.md)、[benchmark](edgemedic-benchmark.md)、[experiments](edgemedic-experiments.md)、[model bundle](model-bundle.md)。
 

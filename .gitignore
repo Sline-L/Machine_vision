@@ -2,6 +2,7 @@ __pycache__/
 tmp/
 var/
 results/
+results_secondary_b_*/
 web/node_modules/
 *.pyc
 .venv/
@@ -14,6 +15,8 @@ web/node_modules/
 *.onnx
 .idea/
 .vscode/
+backup/
+tmp_*.sh
 docs/capability-extraction/val_extracted/
 docs/capability-extraction/test_extracted/
 docs/capability-extraction/_archive_tmp/
