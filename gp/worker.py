@@ -50,7 +50,7 @@ class InspectionWorker:
                     continue
                 try:
                     if self._inspector is None:
-                        self.on_status("正在加载两阶段模型…")
+                        self.on_status("正在加载定位与双专项模型…")
                         self._inspector = TwoStageInspector(self.config)
                     if self.config.video_path is not None:
                         self._inspect_video(self._inspector)

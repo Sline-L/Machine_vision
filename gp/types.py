@@ -12,6 +12,31 @@ class GearObservation:
     classifier_probability: float = 0.0
     detector_probability: float = 0.0
     auxiliary_box: Optional[Tuple[int, int, int, int]] = None
+    scratch_threshold: float = 0.5
+    scratch_reject: Optional[bool] = None
+    missing_hole_probability: float = 0.0
+    missing_hole_classifier_probability: float = 0.0
+    missing_hole_detector_probability: float = 0.0
+    missing_hole_auxiliary_box: Optional[Tuple[int, int, int, int]] = None
+    missing_hole_threshold: float = 0.5
+    missing_hole_reject: bool = False
+
+    @property
+    def scratch_is_reject(self):
+        return self.defect_score >= self.scratch_threshold if self.scratch_reject is None else self.scratch_reject
+
+    @property
+    def is_defective(self):
+        return self.scratch_is_reject or self.missing_hole_reject
+
+    @property
+    def reject_reasons(self):
+        reasons = []
+        if self.scratch_is_reject:
+            reasons.append("scratch")
+        if self.missing_hole_reject:
+            reasons.append("missing_hole")
+        return reasons
 
 
 @dataclass
@@ -27,6 +52,13 @@ class InspectionResult:
     scratch_latency_ms: float = 0.0
     defect_threshold: float = 0.5
     model_version: str = ""
+    missing_hole_classifier1_latency_ms: float = 0.0
+    missing_hole_classifier2_latency_ms: float = 0.0
+    missing_hole_detector_latency_ms: float = 0.0
+    missing_hole_fusion_latency_ms: float = 0.0
+    missing_hole_latency_ms: float = 0.0
+    missing_hole_threshold: float = 0.5
+    missing_hole_model_version: str = ""
 
     @property
     def has_gear(self):
@@ -34,7 +66,24 @@ class InspectionResult:
 
     @property
     def is_defective(self):
-        return any(item.defect_score >= self.defect_threshold for item in self.observations)
+        return any(
+            (item.defect_score >= self.defect_threshold or item.missing_hole_reject)
+            if item.scratch_reject is None
+            else item.is_defective
+            for item in self.observations
+        )
+
+    @property
+    def reject_reasons(self):
+        reasons = []
+        if any(
+            item.defect_score >= self.defect_threshold if item.scratch_reject is None else item.scratch_reject
+            for item in self.observations
+        ):
+            reasons.append("scratch")
+        if any(item.missing_hole_reject for item in self.observations):
+            reasons.append("missing_hole")
+        return reasons
 
     @property
     def verdict(self):

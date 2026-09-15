@@ -1,0 +1,57 @@
+{
+  "version": "missing_hole_v1",
+  "classes": {
+    "0": "normal",
+    "1": "missing_hole"
+  },
+  "models": [
+    {
+      "name": "f_cls_efficientnet_b0_512_exclude_difficult_s20260913",
+      "kind": "classifier",
+      "family": "efficientnet_b0",
+      "weights": "classifier_1.pt",
+      "sha256": "98a89cb0eea938b290f7cd2d6fa847634cef666aceca49e4082a729b76353228",
+      "imgsz": 512,
+      "tta": "none",
+      "temperature": 0.9999999999999999
+    },
+    {
+      "name": "f_cls_resnet18_384_include_difficult_s20260913",
+      "kind": "classifier",
+      "family": "resnet18",
+      "weights": "classifier_2.pt",
+      "sha256": "65db4aa1eeee41ab96b38bb860ef017994511472ee1f68cae214b0ee604a66e1",
+      "imgsz": 384,
+      "tta": "none",
+      "temperature": 2.375
+    },
+    {
+      "name": "p_det_one_class_exclude_difficult_standard_960",
+      "kind": "detector",
+      "family": "standard",
+      "scheme": "one_class",
+      "weights": "detector_3.pt",
+      "sha256": "b4b7870e07e63a548be735278652025ac4ec67ae771a7ed771d55e5122b58b63",
+      "imgsz": 960,
+      "tta": "none",
+      "temperature": 1.8499999999999996,
+      "conf_floor": 0.001,
+      "display_confidence": 0.05,
+      "iou": 0.7
+    }
+  ],
+  "fusion": {
+    "type": "weighted",
+    "alpha": 0.5,
+    "classifier": {
+      "type": "classifier_mean",
+      "models": [
+        "f_cls_efficientnet_b0_512_exclude_difficult_s20260913",
+        "f_cls_resnet18_384_include_difficult_s20260913"
+      ]
+    },
+    "detector": "p_det_one_class_exclude_difficult_standard_960"
+  },
+  "default_threshold": 0.3413327979078584,
+  "decision": "REJECT when fused missing-hole probability >= threshold"
+}

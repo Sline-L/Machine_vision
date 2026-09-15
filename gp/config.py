@@ -10,6 +10,8 @@ from typing import Optional
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 RUNTIME_ROOT = PROJECT_ROOT / "var"
 SETTINGS_FILE = RUNTIME_ROOT / "settings.json"
+DEFAULT_SCRATCH_THRESHOLD = 0.300273610279458
+DEFAULT_MISSING_HOLE_THRESHOLD = 0.3413327979078584
 
 PERSISTED_FIELDS = (
     "camera_index",
@@ -20,7 +22,8 @@ PERSISTED_FIELDS = (
     "serial_baudrate",
     "locator_confidence",
     "locator_iou",
-    "defect_threshold",
+    "scratch_threshold",
+    "missing_hole_threshold",
     "inference_interval",
     "result_cooldown",
     "inference_profile",
@@ -45,9 +48,13 @@ class AppConfig:
     serial_baudrate: int = 9600
     locator_model: Path = PROJECT_ROOT / "model" / "model1.pt"
     model2_config: Path = PROJECT_ROOT / "model" / "model2" / "inference_config.json"
+    missing_hole_config: Path = PROJECT_ROOT / "model" / "missing_hole_v1" / "inference_config.json"
     locator_confidence: float = 0.70
     locator_iou: float = 0.45
-    defect_threshold: float = 0.300273610279458
+    scratch_threshold: float = DEFAULT_SCRATCH_THRESHOLD
+    missing_hole_threshold: float = DEFAULT_MISSING_HOLE_THRESHOLD
+    scratch_model_default_threshold: float = DEFAULT_SCRATCH_THRESHOLD
+    missing_hole_model_default_threshold: float = DEFAULT_MISSING_HOLE_THRESHOLD
     inference_interval: float = 0.10
     result_cooldown: float = 5.0
     inference_profile: str = "FULL"
@@ -69,13 +76,31 @@ class AppConfig:
         config.serial_port = os.getenv("GEARPRO_SERIAL_PORT", config.serial_port)
         config.locator_model = Path(os.getenv("GEARPRO_MODEL1", str(config.locator_model)))
         config.model2_config = Path(os.getenv("GEARPRO_MODEL2", str(config.model2_config)))
-        # Model1 may be .pt or .engine. Model2 is a Scratch V5 JSON bundle.
-        if config.model2_config.is_file() and "defect_threshold" not in persisted:
+        config.missing_hole_config = Path(
+            os.getenv("GEARPRO_MISSING_HOLE_MODEL", str(config.missing_hole_config))
+        )
+        # Model1 may be .pt or .engine. Specialist bundles are JSON configurations.
+        if config.model2_config.is_file() and "scratch_threshold" not in persisted:
             try:
                 model2 = json.loads(config.model2_config.read_text(encoding="utf-8"))
-                config.defect_threshold = float(model2["default_threshold"])
+                config.scratch_model_default_threshold = float(model2["default_threshold"])
+                config.scratch_threshold = config.scratch_model_default_threshold
             except (KeyError, TypeError, ValueError, json.JSONDecodeError):
                 # The worker reports the complete configuration error in the UI.
+                pass
+        elif config.model2_config.is_file():
+            try:
+                model2 = json.loads(config.model2_config.read_text(encoding="utf-8"))
+                config.scratch_model_default_threshold = float(model2["default_threshold"])
+            except (KeyError, TypeError, ValueError, json.JSONDecodeError):
+                pass
+        if config.missing_hole_config.is_file():
+            try:
+                missing_hole = json.loads(config.missing_hole_config.read_text(encoding="utf-8"))
+                config.missing_hole_model_default_threshold = float(missing_hole["default_threshold"])
+                if "missing_hole_threshold" not in persisted:
+                    config.missing_hole_threshold = config.missing_hole_model_default_threshold
+            except (KeyError, TypeError, ValueError, json.JSONDecodeError):
                 pass
         return config
 
@@ -89,6 +114,7 @@ class AppConfig:
             return set()
         if not isinstance(values, dict):
             return set()
+        values = self._normalize_legacy_settings(values)
         filtered = {name: values[name] for name in PERSISTED_FIELDS if name in values}
         try:
             self.update(filtered)
@@ -110,6 +136,7 @@ class AppConfig:
 
     def update(self, values):
         """Validate and apply settings received from the Web UI."""
+        values = self._normalize_legacy_settings(values)
         unknown = sorted(set(values) - set(PERSISTED_FIELDS))
         if unknown:
             raise ValueError("不支持的设置：" + "、".join(unknown))
@@ -123,7 +150,8 @@ class AppConfig:
             "serial_baudrate": (300, 4_000_000),
             "locator_confidence": (0.01, 0.99),
             "locator_iou": (0.01, 0.99),
-            "defect_threshold": (0.01, 0.99),
+            "scratch_threshold": (0.01, 0.99),
+            "missing_hole_threshold": (0.01, 0.99),
             "inference_interval": (0.03, 5.0),
             "result_cooldown": (0.0, 3600.0),
             "ui_refresh_hz": (1.0, 60.0),
@@ -161,7 +189,30 @@ class AppConfig:
         for name, value in values.items():
             setattr(self, name, value)
 
+    @staticmethod
+    def _normalize_legacy_settings(values):
+        values = dict(values)
+        if "defect_threshold" in values:
+            legacy = values.pop("defect_threshold")
+            if "scratch_threshold" in values and values["scratch_threshold"] != legacy:
+                raise ValueError("defect_threshold 与 scratch_threshold 冲突")
+            values["scratch_threshold"] = legacy
+        return values
+
+    @property
+    def defect_threshold(self):
+        """Deprecated v1 alias for the Scratch V5 threshold."""
+        return self.scratch_threshold
+
+    @defect_threshold.setter
+    def defect_threshold(self, value):
+        self.scratch_threshold = value
+
     def validate_models(self):
-        missing = [str(path) for path in (self.locator_model, self.model2_config) if not path.is_file()]
+        missing = [
+            str(path)
+            for path in (self.locator_model, self.model2_config, self.missing_hole_config)
+            if not path.is_file()
+        ]
         if missing:
             raise FileNotFoundError("找不到模型文件：" + "、".join(missing))
