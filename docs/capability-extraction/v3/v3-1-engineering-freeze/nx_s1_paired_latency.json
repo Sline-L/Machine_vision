@@ -1,0 +1,205 @@
+{
+  "banner": "V3-1 NX S1 PAIRED LATENCY \u2014 ENGINEERING ONLY \u2014 NOT VALIDATED",
+  "started_at": "2026-09-15T13:11:44.931908+00:00",
+  "fresh_holdout": "UNTOUCHED",
+  "registry": "UNCHANGED",
+  "s1": {
+    "replicas": 1,
+    "injector": {
+      "kind": "bandwidth",
+      "bytes_mb": 512,
+      "buffers": 3,
+      "streams": 4,
+      "load_ms": 100,
+      "idle_ms": 0
+    },
+    "start": {
+      "replicas": 1,
+      "workers": [
+        {
+          "pid": 250305,
+          "config": {
+            "type": "gpu_contention",
+            "version": "5",
+            "kind": "bandwidth",
+            "matrix": 128,
+            "load_ms": 100.0,
+            "idle_ms": 0.0,
+            "bytes_mb": 512,
+            "reserve_free_mb": 512,
+            "size": 640,
+            "batch": 1,
+            "channels": 16,
+            "streams": 4,
+            "buffers": 3,
+            "nice": null,
+            "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py"
+          },
+          "hash": "6f272533ce8c4d0ab1f1570d95857b9625d4dd36b46efe0b5d74929330b2ccc8"
+        }
+      ],
+      "config": {
+        "type": "gpu_contention",
+        "version": "5",
+        "kind": "multi_bandwidth",
+        "matrix": 128,
+        "load_ms": 100.0,
+        "idle_ms": 0.0,
+        "bytes_mb": 512,
+        "reserve_free_mb": 512,
+        "size": 640,
+        "batch": 1,
+        "channels": 16,
+        "streams": 4,
+        "buffers": 3,
+        "nice": null,
+        "script": "/home/jetson/Projects/Machine_vision-ldv2-runtime/edgemedic/gpu_pressure.py",
+        "replicas": 1
+      },
+      "hash": "8ae2a4ea0dc897d907723752d99bdcbf5cf43efd887c6d1fed9f133415b7ff31"
+    }
+  },
+  "veto": {
+    "artifact": "/home/jetson/Projects/Machine_vision-ldv2-runtime/docs/capability-extraction/v3/v3-1-fp-veto/primary_veto_model.json",
+    "mode": "replace_score",
+    "threshold": 0.845,
+    "type": "logistic"
+  },
+  "v2_threshold": 0.2653394325872992,
+  "window_s": 45.0,
+  "order": [
+    "V2",
+    "V3_1",
+    "V3_1",
+    "V2"
+  ],
+  "arms": [
+    {
+      "mode": "V2",
+      "n": 272,
+      "duration_s": 45.061,
+      "wall_ms": {
+        "p50": 168.6921140026243,
+        "p95": 173.97357600129908,
+        "p99": 175.37091934027558,
+        "mean": 165.65106865447675,
+        "max": 177.6247699963278
+      },
+      "reject_rate": 0.15073529411764705,
+      "process": {
+        "rss_mib": 1811.27734375,
+        "threads": 17,
+        "cpu_pct": 0.0
+      },
+      "gpu": {
+        "tegrastats": {},
+        "gpu_clock_mhz": 1173.0,
+        "emc_mhz": null,
+        "power_mode": "NV Power Mode: MAXN_SUPER\n0"
+      },
+      "repeat_index": 1,
+      "injector_alive": true
+    },
+    {
+      "mode": "V3_1",
+      "n": 266,
+      "duration_s": 45.083,
+      "wall_ms": {
+        "p50": 172.93105999851832,
+        "p95": 177.90898575185565,
+        "p99": 179.12682100250095,
+        "mean": 169.47275062417808,
+        "max": 207.16857099614572
+      },
+      "reject_rate": 0.09774436090225563,
+      "process": {
+        "rss_mib": 1795.77734375,
+        "threads": 17,
+        "cpu_pct": 0.0
+      },
+      "gpu": {
+        "tegrastats": {},
+        "gpu_clock_mhz": 1173.0,
+        "emc_mhz": null,
+        "power_mode": "NV Power Mode: MAXN_SUPER\n0"
+      },
+      "repeat_index": 2,
+      "injector_alive": true
+    },
+    {
+      "mode": "V3_1",
+      "n": 265,
+      "duration_s": 45.02,
+      "wall_ms": {
+        "p50": 172.01018699415727,
+        "p95": 177.9492011977709,
+        "p99": 179.0956476793508,
+        "mean": 169.87519392832667,
+        "max": 205.08115499978885
+      },
+      "reject_rate": 0.09811320754716982,
+      "process": {
+        "rss_mib": 1795.78515625,
+        "threads": 18,
+        "cpu_pct": 0.0
+      },
+      "gpu": {
+        "tegrastats": {},
+        "gpu_clock_mhz": 1173.0,
+        "emc_mhz": null,
+        "power_mode": "NV Power Mode: MAXN_SUPER\n0"
+      },
+      "repeat_index": 3,
+      "injector_alive": true
+    },
+    {
+      "mode": "V2",
+      "n": 265,
+      "duration_s": 45.016,
+      "wall_ms": {
+        "p50": 172.68009400140727,
+        "p95": 177.91460839944193,
+        "p99": 179.93620164023017,
+        "mean": 169.85563835450932,
+        "max": 211.01821199408732
+      },
+      "reject_rate": 0.1471698113207547,
+      "process": {
+        "rss_mib": 1795.81640625,
+        "threads": 17,
+        "cpu_pct": 0.0
+      },
+      "gpu": {
+        "tegrastats": {},
+        "gpu_clock_mhz": 1173.0,
+        "emc_mhz": null,
+        "power_mode": "NV Power Mode: MAXN_SUPER\n0"
+      },
+      "repeat_index": 4,
+      "injector_alive": true
+    }
+  ],
+  "summary": {
+    "V2_p50_mean": 170.68610400201578,
+    "V2_p95_mean": 175.9440922003705,
+    "V2_p99_mean": 177.65356049025286,
+    "V3_1_p50_mean": 172.4706234963378,
+    "V3_1_p95_mean": 177.92909347481327,
+    "V3_1_p99_mean": 179.11123434092588,
+    "delta_p95": 1.9850012744427659,
+    "gate_190": true,
+    "extra_budget_12ms": true,
+    "PASS": true
+  },
+  "verdict": {
+    "result": "PASS",
+    "status_if_pass": "V3-1 ENGINEERING-QUALIFIED CANDIDATE",
+    "not": [
+      "VALIDATED",
+      "production-ready",
+      "mission_approved"
+    ],
+    "note": "Accuracy not re-evaluated here. Microbench \u2260 integrated proof; this paired S1 is the integrated proof for latency only."
+  },
+  "finished_at": "2026-09-15T13:11:44.932142+00:00"
+}

@@ -112,11 +112,16 @@ V3     → restore FP veto at ≤~12 ms S1 budget
 
 ```text
 SPEC READY
-V3-1 IMPLEMENTATION: CANDIDATE PROMISING (val KPI + ≪1 ms veto)
-V3-2: NOT STARTED (not required yet)
+V3-1: ENGINEERING-QUALIFIED CANDIDATE
+  - engineering freeze package complete
+  - NX S1 paired latency PASS (delta_p95 ≈ +2.0 ms; p95 ≈ 178 < 190)
+  - NOT validated / NOT mission_approved
+V3-2: NOT STARTED (not required)
 V3-3: NOT STARTED
-HOLD OUT: DO NOT OPEN
+HOLD OUT: SEALED — see v3-1-fresh-holdout-preregistration.md (NOT EXECUTED)
 REGISTRY: UNCHANGED
+PARAM LOCK: no V3-1 changes before holdout adjudication
 ```
 
-See [v3-1-fp-veto-status.md](v3-1-fp-veto-status.md).
+See [v3-1-gate-completion.md](v3-1-gate-completion.md),
+[v3-1-engineering-freeze/v3-1-engineering-freeze.md](v3-1-engineering-freeze/v3-1-engineering-freeze.md).

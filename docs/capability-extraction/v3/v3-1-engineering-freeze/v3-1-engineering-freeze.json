@@ -1,0 +1,167 @@
+{
+  "candidate_id": "scratch_v3_1_fp_veto_logistic",
+  "status": "V3-1 CANDIDATE PROMISING \u2014 ENGINEERING FREEZE",
+  "freeze_utc": "2026-09-15T13:07:34.650418+00:00",
+  "exploration_commit": "2377521f827ba8137025c6bb53afe590db1bd982",
+  "freeze_commit_at_build": "2377521f827ba8137025c6bb53afe590db1bd982",
+  "branch": "experiment/v3-lightweight-fp-veto",
+  "fresh_holdout": "UNTOUCHED",
+  "registry": "UNCHANGED",
+  "param_lock": "From this freeze forward, V3-1 parameters must not change before fresh-holdout adjudication.",
+  "backbone": {
+    "profile": "LATENCY_DEGRADED_V2",
+    "frozen_v2_path": "docs/capability-extraction/v3/latency_degraded_v2_effnet_det.frozen.json",
+    "frozen_v2_config_hash": "5cc1730c0c9cdd83e8909e963184c759f4d29bec5ed4eab1bfe44f0ae13b4588",
+    "inference_config": "model/model2/profiles/latency_degraded_v2/inference_config.json",
+    "classifier_1_pt": "model/model2/classifier_1.pt",
+    "classifier_1_sha256": "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438",
+    "detector_pt": "model/model2/detector.pt",
+    "detector_sha256": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3",
+    "expected_classifier_sha256": "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438",
+    "expected_detector_sha256": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3",
+    "v2_threshold": 0.2653394325872992,
+    "fusion_alpha": 0.25
+  },
+  "veto": {
+    "type": "logistic",
+    "mode": "replace_score",
+    "threshold": 0.845,
+    "feature_names": [
+      "cls1",
+      "det",
+      "fused_v2",
+      "n_boxes",
+      "sum_conf",
+      "mean_conf",
+      "top1_conf",
+      "top2_conf",
+      "top3_conf",
+      "cls_minus_det",
+      "log1p_boxes",
+      "raw_cls",
+      "raw_det"
+    ],
+    "artifact": "docs/capability-extraction/v3/v3-1-fp-veto/primary_veto_model.json",
+    "artifact_sha256": "99377b3fc21283334f71cb998aafda61c7b379b6fd3e9c9875adb13afa7e1138",
+    "canonical_payload_sha256": "3cdea5860eee17af4c2f2b7ba2a3d6e265dadfd8115ff2d9428507c67bc43a2b"
+  },
+  "feature_extraction": {
+    "implementation": "tools/v3_fp_veto/extract_features.py",
+    "implementation_sha256": "fbf7325f5a36cc258bb4458fbce86132d677a9841ace638c2749a6448ca8b2ca",
+    "train_script": "tools/v3_fp_veto/train_pareto.py",
+    "train_script_sha256": "b6dcd7892521a7fbb1755efb6bc4361d1e877a5f245ebd7bbeee1da6f8679cf1",
+    "features_csv": "docs/capability-extraction/v3/v3-1-fp-veto/features_train_val.csv",
+    "features_csv_sha256": "dfd3b51849276edfc4eec410cafcca446f2c6dbf4aca88c786ce3460b4df1da1"
+  },
+  "dataset": {
+    "source": "Machine_vision_dataset / dataset_defects",
+    "annotation_format": "Pascal VOC XML; presence of scratch object => positive",
+    "label_rule": "XML with >=1 object => 1 else 0",
+    "splits_used": [
+      "train_scratch",
+      "val_scratch"
+    ],
+    "splits_forbidden": [
+      "test_scratch",
+      "fresh_holdout"
+    ],
+    "train_manifest": {
+      "split": "train_scratch",
+      "n": 364,
+      "positives": 119,
+      "manifest_sha256": "7bec763a5afb6bc962aaf05f39146cefbd17f569e24234111aab3f2f20390429"
+    },
+    "val_manifest": {
+      "split": "val_scratch",
+      "n": 150,
+      "positives": 43,
+      "manifest_sha256": "880dc3416efe20b29d4d0fc48f4063b3f5f1ef6e34267d16c1773063eb169917"
+    },
+    "manifest_train_csv_sha256": "313a08d7e6625d7e70e0df1c48a288583dbdf40682db25f6f8b04c8b1c5a6a69",
+    "manifest_val_csv_sha256": "dafb65596605bc5d1ef587ced8b04f84128468d3d231805ac553d8b798e9aa6e"
+  },
+  "training": {
+    "seed": {
+      "logistic_l2_1e-2": 0
+    },
+    "command": "python -u tools/v3_fp_veto/extract_features.py --splits train_scratch val_scratch && python -u tools/v3_fp_veto/train_pareto.py",
+    "selection": "max val Q_D among candidates; threshold swept on val only",
+    "python": "3.12.12 (main, Oct 10 2025, 15:08:20)  [GCC 15.2.0 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26200-SP0"
+  },
+  "metrics_at_freeze": {
+    "v2_val": {
+      "tp": 42,
+      "fp": 12,
+      "tn": 95,
+      "fn": 1,
+      "recall": 0.9767441860465116,
+      "fpr": 0.11214953271028037,
+      "specificity": 0.8878504672897196,
+      "precision": 0.7777777777777778,
+      "f1": 0.8659793814432991,
+      "Q_D": 0.8878504672897196,
+      "U": 0.9439252336448598,
+      "mission_qd_pass": true
+    },
+    "v2_train": {
+      "tp": 115,
+      "fp": 1,
+      "tn": 244,
+      "fn": 4,
+      "recall": 0.9663865546218487,
+      "fpr": 0.004081632653061225,
+      "specificity": 0.9959183673469387,
+      "precision": 0.9913793103448276,
+      "f1": 0.9787234042553192,
+      "Q_D": 0.9663865546218487,
+      "U": 0.9831932773109244,
+      "mission_qd_pass": true
+    },
+    "v3_1_val": {
+      "tp": 40,
+      "fp": 6,
+      "tn": 101,
+      "fn": 3,
+      "recall": 0.9302325581395349,
+      "fpr": 0.056074766355140186,
+      "specificity": 0.9439252336448598,
+      "precision": 0.8695652173913043,
+      "f1": 0.898876404494382,
+      "Q_D": 0.9302325581395349,
+      "U": 0.9651162790697674,
+      "mission_qd_pass": true,
+      "threshold": 0.845,
+      "mode": "replace_score",
+      "model": "logistic_l2_1e-2"
+    },
+    "v3_1_train_at_val_threshold": {
+      "tp": 112,
+      "fp": 0,
+      "tn": 245,
+      "fn": 7,
+      "recall": 0.9411764705882353,
+      "fpr": 0.0,
+      "specificity": 1.0,
+      "precision": 1.0,
+      "f1": 0.9696969696969697,
+      "Q_D": 0.9411764705882353,
+      "U": 0.9705882352941176,
+      "mission_qd_pass": true
+    },
+    "delta_qd_vs_v2_val": 0.04238209084981526,
+    "delta_fpr_vs_v2_val": -0.056074766355140186,
+    "note": "Recall dropped 0.977\u21920.930 on val (FN\u2194FP trade). Q_D improved; confirmatory judgment deferred to preregistered fresh holdout."
+  },
+  "latency_component": {
+    "veto_overhead_json": "docs/capability-extraction/v3/v3-1-fp-veto/veto_overhead.json",
+    "veto_overhead_sha256": "dd49039bcdb4bb485a5de0408b43d4d99a15cd7f526ca830d579b11ca182d660",
+    "note": "component microbench only; NX S1 integrated paired required"
+  },
+  "hard_constraints": {
+    "s1_integrated_p95_ms_max": 190.0,
+    "s1_extra_budget_vs_v2_ms": 12.0,
+    "no_second_backbone": true
+  },
+  "freeze_package_hash": "b3724ee1e19dde5bc8343964b29ceaf58ebafec914b43d0346cd498362813683"
+}
