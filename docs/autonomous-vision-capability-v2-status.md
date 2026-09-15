@@ -1,9 +1,8 @@
 # Autonomous Vision Capability v2 — session status
 
 ```text
-Final state: A
-CAPABILITY V2 PRIMARY IDENTIFIED
-FORMAL ADMISSION BLOCKED ON FRESH HOLDOUT
+Final state: A (Scratch v2 exploratory primary)
+Teammate audit: B (useful components; formal capability incomplete)
 ```
 
 ## Repo
@@ -14,35 +13,62 @@ FORMAL ADMISSION BLOCKED ON FRESH HOLDOUT
 | worktree | `G:/CODE/Machine_vision-vision-v2` |
 | base | `srtp-web` @ `cfdbbe8` |
 | backup | `backup/pre-vision-capability-v2-20260915-142247.txt` |
+| dataset upstream | `Machine_vision_dataset/main` @ `dca0306` (see teammate audit) |
 | measurement tag | untouched (`edgemedic-a2a3-measurement-baseline`) |
-| push | see branch tip after session commits |
+
+---
+
+## Teammate Latest Vision Update Audit
+
+Full audit: [v3/teammate-latest-audit.md](capability-extraction/v3/teammate-latest-audit.md).
+
+| # | question | answer |
+| --- | --- | --- |
+| 1 | Teammate latest commit? | `dca030654eefd84e15b0bf16a391e1affc17af0b` @ 2026-09-13T23:43:46Z |
+| 2 | New models / pipelines? | **Missing Hole V1**, **unified_defect_v1**, `missing_hole_runtime.py`, `infer_gear_defects.py`, expanded `docs/missing_hole_v1/` |
+| 3 | unified_defect_v1 trained? | **YES** — EffNet-B0@512 single classifier; config + leaderboard complete |
+| 4 | Missing Hole V1 trained? | **YES** — 34 experiments + locked test eval 2026-09-13 |
+| 5 | Fresh holdout? | **NO** — `test_scratch` and `test_missing_tooth` both consumed; unified has no sealed test |
+| 6 | Best v2 primary? | **`latency_degraded_v2_effnet_det`** (Scratch-exact). unified_classifier **not** promoted (superset semantics, weaker diagnostic test) |
+| 7 | Changed VISION REDESIGN judgment? | **Partially.** Teammate work confirms classifier-only / unified paths are **not** drop-in Scratch recovery; effnet+det remains best **existing-artifact** Scratch candidate. Retraining spec still valid if holdout fails. |
+
+```text
+Teammate verdict: B
+TEAMMATE PRODUCED USEFUL COMPONENTS,
+BUT FORMAL CAPABILITY STILL INCOMPLETE
+```
+
+Key teammate findings:
+
+- `unified_classifier.pt`: ~15.6 MB, one forward @512, but **Scratch∨MissingHole** semantics → Mission change.  
+- Unified diagnostic on locked test: R=0.7606, FPR=0.4177 — worse than specialist OR.  
+- Missing Hole V1 mature for **its own** mission; test consumed; do not auto-merge into GearPro.  
+- GitHub weights are **LFS pointers**; GearPro bundle unchanged.
+
+---
 
 ## 1. GitHub models
 
-Full inventory: [v3/model-inventory.md](capability-extraction/v3/model-inventory.md).
+[v3/model-inventory.md](capability-extraction/v3/model-inventory.md) + [teammate-latest-audit.md](capability-extraction/v3/teammate-latest-audit.md).
 
-`origin/dataset` @ `581647d` — scripts + splits + base YOLO weights; **production Scratch weights live in GearPro `model/model2/`**. Pilot `runs/` weights not in git.
+Production Scratch weights: GearPro `model/model2/`. New teammate weights: `Machine_vision_dataset` LFS under `outputs/*/final/`.
 
-## 2. Legal lightweight candidates (existing artifacts)
+## 2. Legal lightweight candidates (Scratch mission)
 
 | route | verdict |
 | --- | --- |
-| classifier-only / mean | val ok, **locked FAIL** — do not rescue |
-| effnet + det @960 α=0.25 | **v2 primary (exploratory)** |
+| classifier_only_v1 | REJECTED locked |
+| unified_classifier (teammate) | **superset — not Scratch admissible** |
+| effnet + det @960 α=0.25 | **Scratch v2 exploratory primary** |
 | FULL | production baseline |
-| smaller detector / standard det | weights **not shipped** |
-| new training | spec if holdout fails — [vision-retraining-spec.md](capability-extraction/v3/vision-retraining-spec.md) |
+| Missing Hole V1 | inventory only (different mission) |
 
-## 3. Quality Pareto (val)
-
-[v3/quality-latency-pareto.md](capability-extraction/v3/quality-latency-pareto.md)  
-Machine output: `results/lightweight_capability_v2/val_pareto/pareto_summary.json`
-
-Key row:
+## 3. Quality Pareto (Scratch val)
 
 ```text
-effnet_det_a0.25:  Q_D,val=0.8879  R=0.9767  FPR=0.1121  target_met=yes
+effnet_det_a0.25:  Q_D,val=0.8879  R=0.9767  FPR=0.1121
 FULL:               Q_D,val=0.9159  R=0.9767  FPR=0.0841
+unified (joint val): Q_D,val=0.8333  R=0.9434  FPR=0.1667  [not Scratch-comparable]
 ```
 
 ## 4. NX latency Pareto
@@ -50,26 +76,25 @@ FULL:               Q_D,val=0.9159  R=0.9767  FPR=0.0841
 ```text
 FULL p95:           246.4 ms
 effnet_det_a0.25:    85.9 ms  (0.35×)
-classifiers_only:    ~58 ms   (not admissible)
+unified_classifier:  NOT PROBED (weights LFS; est. faster, uncharacterized)
 ```
-
-NX artifact copy: `results/lightweight_capability_v2/latency/vision_v2_latency_summary.NX.json`
 
 ## 5. Fresh holdout?
 
 ```text
-NO — test_scratch consumed; no new split in origin/dataset
+NO
+test_scratch — GearPro consumed
+test_missing_tooth — Missing Hole V1 consumed 2026-09-13
+unified — no independent sealed split
 ```
 
-[v3/data-split-provenance.md](capability-extraction/v3/data-split-provenance.md)
-
-## 6. Primary candidate
+## 6. Primary candidate (Scratch)
 
 ```text
 profile_id:   latency_degraded_v2_effnet_det
-components:   EfficientNet-B0@384 + P2 detector@960
+components:   EffNet-B0@384 + P2 detector@960, drop ResNet
 fusion:       weighted α=0.25
-threshold:    0.2653394325872992 (val freeze)
+threshold:    0.2653394325872992
 ```
 
 [v3/v2-primary-candidate-freeze.md](capability-extraction/v3/v2-primary-candidate-freeze.md)
@@ -82,26 +107,21 @@ NO — blocked on fresh holdout
 
 ## 8. Registry status
 
-Not updated on `srtp-web`. Proposed row remains `implemented=false`, `mission_approved=false` until holdout PASS.
+Unchanged on `srtp-web`: `implemented=false`, `mission_approved=false`.
 
 ## 9. Runtime implemented?
 
 ```text
-NO — by design until formal PASS
-gp/scratch_v5.py unchanged
+NO
 ```
 
 ## 10. Primary A reopened?
 
 ```text
-NO — requires fresh holdout + runtime implementation + smoke first
+NO
 ```
 
-## Design principles confirmed
-
-1. **Keep detector** for cross-domain robustness (classifier-only locked FPR explosion).  
-2. **Drop ResNet** for real per-inspection savings (~65% p95 on NX).  
-3. **Smaller detector** needs vision retraining — not available from frozen bundle alone.
+---
 
 ## Frozen research state (unchanged)
 
@@ -112,8 +132,9 @@ classifier_only_v1: REJECTED
 Agent/runtime admission framework: ON MAINLINE (srtp-web)
 ```
 
-## Next steps (vision team)
+## Next steps
 
-1. Seal **new independent holdout** (provenance doc).  
-2. Preregister `latency_degraded_v2_effnet_det` one-shot eval.  
-3. On PASS → registry `mission_approved=true` → runtime profile → NX smoke → Primary A pilot.
+1. Vision team: seal **new Scratch-only holdout** (not reuse test_scratch / test_missing_tooth).  
+2. Optional: LFS-pull teammate weights for NX latency characterization (diagnostic only).  
+3. Preregister one-shot formal eval for `latency_degraded_v2_effnet_det`.  
+4. Missing Hole / unified: separate mission track if product expands beyond Scratch.

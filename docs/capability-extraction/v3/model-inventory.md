@@ -1,7 +1,8 @@
 # Model inventory (v3) — GitHub + GearPro artifacts
 
 Audit date: 2026-09-15  
-Sources: `srtp-web` @ `cfdbbe8`, `origin/dataset` @ `581647d`, NX probe.
+Sources: `srtp-web` @ `cfdbbe8`, `origin/dataset` @ `581647d`, `Machine_vision_dataset/main` @ `dca0306`, NX probe.  
+Teammate detail: [teammate-latest-audit.md](teammate-latest-audit.md).
 
 ## GitHub dataset branch (`origin/dataset`)
 
@@ -48,6 +49,17 @@ From `final/leaderboard.json` — paths under external `runs/scratch_v5/`:
 
 `model/model1/model1.engine` — optional locator fast path; not required for Scratch v2 design.
 
+## Teammate upstream (`Machine_vision_dataset/main` @ `dca0306`)
+
+| artifact | architecture | input | role | val @ FPR≤0.20 | runtime |
+| --- | --- | ---: | --- | --- | --- |
+| `unified_classifier.pt` | EffNet-B0 | 512 | scratch∨missing_hole binary | R=0.943 FPR=0.167 Q_D=0.833 | LFS only; **superset** |
+| `missing_hole_v1/final/classifier_1.pt` | EffNet-B0 | 512 | missing_hole specialist | R=1.000 FPR=0.092 | LFS; inventory |
+| `missing_hole_v1/final/classifier_2.pt` | ResNet18 | 384 | missing_hole specialist | (fusion) | LFS; inventory |
+| `missing_hole_v1/final/detector_3.pt` | YOLO std | 960 | missing_hole specialist | R=0.971 FPR=0.092 | LFS; inventory |
+
+Missing Hole fusion val: R=1.000, FPR=0.0615. Locked test: R=0.818, FPR=0.038 (target not met).
+
 ## Runtime status summary
 
 | path | status |
@@ -56,3 +68,5 @@ From `final/leaderboard.json` — paths under external `runs/scratch_v5/`:
 | classifier_only_v1 | **REJECTED** (registry) |
 | CLASSIFY_ONLY profile | **not implemented** |
 | v2 effnet+det (proposed) | **design only** — not in runtime |
+| unified_classifier (teammate) | **inventory** — Mission superset; not GearPro profile |
+| Missing Hole V1 (teammate) | **inventory** — separate mission; test consumed |

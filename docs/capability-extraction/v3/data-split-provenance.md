@@ -7,7 +7,15 @@ fresh formal holdout available?  NO
 test_scratch:                    CONSUMED (diagnostic_only)
 ```
 
-Re-audited `origin/dataset` @ `581647d` — no new Scratch holdout beyond the three documented splits.
+Re-audited `origin/dataset` @ `581647d` and upstream `Machine_vision_dataset/main` @ `dca0306` — no new **Scratch-only** holdout.
+
+Upstream adds consumed splits:
+
+| split | n | consumed by | fresh? |
+| --- | ---: | --- | --- |
+| `test_missing_tooth` | 150 | Missing Hole V1 one-shot (2026-09-13) | **false** |
+| unified joint val | 77 | unified_defect_v1 threshold | **false** |
+| unified diagnostic | 150 | `test_report.json` unified_single_model block | **false** (not selection, but predictions seen) |
 
 ## Scratch V5 splits
 
