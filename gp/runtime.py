@@ -204,6 +204,8 @@ class GearProRuntime:
             error = self.error
             started_at = self.started_at
         live = self.source != "video"
+        from .profiles import available_capabilities
+
         snapshot = build_snapshot(
             self.config,
             self.raw_frames,
@@ -237,6 +239,7 @@ class GearProRuntime:
             "result": self._serialize_result(result),
             "settings": self.settings(),
             "health": snapshot,
+            "capabilities": available_capabilities(),
             "control": control or {},
         }
 

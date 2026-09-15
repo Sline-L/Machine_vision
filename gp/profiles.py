@@ -4,6 +4,7 @@ from pathlib import Path
 import hashlib
 import json
 
+from .capability_registry import CapabilityError, assert_switchable, list_profile_availability
 from .config import PROJECT_ROOT
 
 PT_LOCATOR = PROJECT_ROOT / "model" / "model1.pt"
@@ -92,6 +93,10 @@ def apply_to_config(config, name):
     profile = spec(name)
     if not profile.get("implemented"):
         raise ProfileError(f"档位 {name} 尚未实现")
+    try:
+        assert_switchable(name, legacy_implemented=True)
+    except CapabilityError as exc:
+        raise ProfileError(str(exc)) from exc
     previous = getattr(config, "inference_profile", "FULL")
     previous_locator = Path(config.locator_model)
     rebuild = False
@@ -114,6 +119,11 @@ def apply_to_config(config, name):
         "start_worker": name != "SAFE_STOP" and previous == "SAFE_STOP",
         "rebuild_inspector": rebuild,
     }
+
+
+def available_capabilities():
+    """Read-only availability for Control/Agent (fail-closed registry)."""
+    return list_profile_availability(SPECS)
 
 
 def locator_path_for(name):

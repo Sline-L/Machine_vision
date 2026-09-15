@@ -1,0 +1,105 @@
+{
+  "schema_version": "capability-registry.v1",
+  "fail_closed": true,
+  "admission_rule": "implemented AND mission_approved",
+  "notes": "Declarative. Rejected or unapproved profiles must not become switchable. Do not edit to reopen classifier_only_v1.",
+  "capabilities": [
+    {
+      "profile_id": "FULL",
+      "status": "A3_ELIGIBLE",
+      "implemented": true,
+      "mission_approved": true,
+      "semantic_capabilities": ["scratch_binary", "bbox_aux", "locator"],
+      "quality_coefficient": 1.0,
+      "required_components": ["locator", "classifier_1", "classifier_2", "detector"],
+      "formal_evaluation_status": "LOCKED_PASS_HISTORICAL",
+      "runtime_implemented": true
+    },
+    {
+      "profile_id": "SPARSE",
+      "status": "A3_ELIGIBLE",
+      "implemented": true,
+      "mission_approved": true,
+      "semantic_capabilities": ["scratch_binary", "bbox_aux", "locator", "cadence_degraded"],
+      "quality_coefficient": 0.9,
+      "required_components": ["locator", "classifier_1", "classifier_2", "detector"],
+      "notes": "Cadence-only. Not latency or capacity recovery under LatestFrame+single-worker.",
+      "runtime_implemented": true
+    },
+    {
+      "profile_id": "SAFE_STOP",
+      "status": "A3_ELIGIBLE",
+      "implemented": true,
+      "mission_approved": true,
+      "semantic_capabilities": ["stop"],
+      "quality_coefficient": 0.0,
+      "required_components": [],
+      "runtime_implemented": true
+    },
+    {
+      "profile_id": "TRT_FAST",
+      "status": "A3_ELIGIBLE",
+      "implemented": true,
+      "mission_approved": true,
+      "semantic_capabilities": ["scratch_binary", "bbox_aux", "locator_engine"],
+      "quality_coefficient": 1.0,
+      "required_components": ["locator_engine", "classifier_1", "classifier_2", "detector"],
+      "runtime_implemented": true,
+      "notes": "Still requires engine artifact on device."
+    },
+    {
+      "profile_id": "classifier_only_v1",
+      "status": "REJECTED",
+      "implemented": false,
+      "mission_approved": false,
+      "semantic_capabilities": ["scratch_binary"],
+      "quality_coefficient": null,
+      "required_components": ["classifier_1", "classifier_2"],
+      "val_metrics": {"recall": 0.9535, "fpr": 0.0935, "Q_D": 0.9065},
+      "latency_relative_to_full_p95": 0.22,
+      "formal_evaluation_status": "LOCKED_FAIL",
+      "formal_evaluation_result": {
+        "split": "test_scratch",
+        "Q_D_test": 0.5546,
+        "U_test": 0.7773,
+        "runtime_gate": "CLOSED"
+      },
+      "runtime_implemented": false,
+      "notes": "Terminal REJECTED. Must never become available without a new capability id + fresh holdout."
+    },
+    {
+      "profile_id": "CLASSIFY_ONLY",
+      "status": "DISCOVERED",
+      "implemented": false,
+      "mission_approved": false,
+      "semantic_capabilities": ["scratch_binary"],
+      "quality_coefficient": 0.65,
+      "required_components": ["classifier_1", "classifier_2"],
+      "runtime_implemented": false,
+      "notes": "Placeholder profile name. Not opened. Do not alias to rejected classifier_only_v1."
+    },
+    {
+      "profile_id": "LOCATE_ONLY",
+      "status": "DISCOVERED",
+      "implemented": false,
+      "mission_approved": false,
+      "semantic_capabilities": ["locator"],
+      "quality_coefficient": 0.2,
+      "required_components": ["locator"],
+      "runtime_implemented": false
+    },
+    {
+      "profile_id": "classifier_effnet_v2_exploratory",
+      "status": "LATENCY_CHARACTERIZED",
+      "implemented": false,
+      "mission_approved": false,
+      "semantic_capabilities": ["scratch_binary"],
+      "quality_coefficient": null,
+      "required_components": ["classifier_1"],
+      "val_metrics": {"recall": 0.9535, "fpr": 0.1215, "Q_D": 0.8785},
+      "formal_evaluation_status": "BLOCKED_NO_FRESH_HOLDOUT",
+      "runtime_implemented": false,
+      "notes": "Exploratory only. Diagnostic on consumed test_scratch also Mission-fail-like. Not NEXT formal without redesign+holdout."
+    }
+  ]
+}
