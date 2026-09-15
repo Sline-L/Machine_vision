@@ -14,3 +14,9 @@ web/node_modules/
 *.onnx
 .idea/
 .vscode/
+docs/capability-extraction/val_extracted/
+docs/capability-extraction/test_extracted/
+docs/capability-extraction/_archive_tmp/
+docs/capability-extraction/*.tar
+docs/capability-extraction/val_pack/
+docs/capability-extraction/dataset_defects/

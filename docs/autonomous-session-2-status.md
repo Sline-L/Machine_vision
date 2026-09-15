@@ -117,9 +117,7 @@ Tables showing utility 1.00→0.95 refer to \(U\), not \(Q_D\).
 
 **A3 strategy suitability for latency-defined V5_OVERLOAD:** NOT SUPPORTED by current SPARSE.
 
-**Next (design decision only — not implemented here):**
-redesign a latency-targeted degradation action, **or** open a separate
-throughput/capacity-shedding study that evaluates SPARSE on rate/utility metrics.
+**Route lock:** Primary **A** reframed (dataset already has classifier-only; extraction in `docs/capability-extraction/`). Blocked on freeze + Mission utility — not on inventing a new vision stack. `CLASSIFY_ONLY` not opened; Mission thresholds unchanged.
 
 ## 6. Bug / measurement fixes
 

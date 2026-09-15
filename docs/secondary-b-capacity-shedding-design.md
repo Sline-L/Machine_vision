@@ -1,6 +1,9 @@
 # Secondary B Design Review — SPARSE as capacity shedding
 
-Status: **design review only**. No Mission latency-gate changes. No `CLASSIFY_ONLY`. Independent of Primary A.
+Status: **CLOSED — NOT SUPPORTED** under tested fault models.
+See [autonomous-secondary-b-status.md](autonomous-secondary-b-status.md) and
+[a3-strategy-matrix.md](a3-strategy-matrix.md). No Mission latency-gate changes.
+No `CLASSIFY_ONLY`. Independent of Primary A.
 
 ```text
 Secondary B — capacity shedding

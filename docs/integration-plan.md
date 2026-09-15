@@ -1,81 +1,103 @@
-# Integration plan: exploration → srtp-web
+# Integration plan: exploration → measurement branch → srtp-web
 
-Do **not** merge all of `experiment/injector-exploration` into `srtp-web` as-is.
+Do **not** merge all of `experiment/injector-exploration` or
+`experiment/secondary-b-capacity` wholesale into `srtp-web`.
 
-Suggested integration branch (when ready):
+Active measurement branch:
 
 ```text
 integration/injector-a3-measurement
-base: srtp-web @ a4546e0
 ```
 
-## Recommend merge (measurement infrastructure)
+A3 strategy study is **closed** for current actions — see
+[a3-strategy-matrix.md](a3-strategy-matrix.md). Promote infrastructure; do not
+reopen Agent A3 invention.
+
+## Already on integration (baseline)
+
+Qualified injector + Case B / A3 measurement stack through `6e28fff` and earlier:
 
 | path / topic | why |
 | --- | --- |
-| `edgemedic/gpu_pressure.py` v5 bandwidth / mem_* kinds | needed for multi-bandwidth |
-| `edgemedic/multi_pressure.py` | **the** qualified injector mechanism |
-| `edgemedic/injector_qual.py` | qualification gates + promote-only-on-success |
-| `edgemedic/injector_report.py` | summarizer |
-| `edgemedic/a3.py` `_summarize_arm` + replicas + trial checkpoints | harness correctness |
-| `edgemedic/a3_capability.py` (+ report) | Case B characterization harness |
-| `edgemedic/provenance.py` `llama_server=off`, frame_seq / inspect telem | provenance / rates |
-| `gp/worker.py` `inspect_count` | cadence measurement |
-| `gp/telemetry.py` / `gp/runtime.py` interval + count in snapshot | measurement |
-| `docs/a3-strategy-capability.md` | mechanism truth + \(Q_D\) vs \(U\) |
-| `docs/autonomous-session-2-status.md` | frozen Line 2 finding |
-| tests for injector_qual / a3 / telemetry | keep CI green |
+| `edgemedic/gpu_pressure.py`, `multi_pressure.py` | qualified injector |
+| `edgemedic/injector_qual.py`, `injector_report.py` | qualification |
+| `edgemedic/a3.py`, `a3_capability.py` | A3 / Case B harness |
+| `edgemedic/provenance.py` | provenance |
+| related `gp/` telemetry / worker inspect counts | measurement |
+| tests for injector / a3 | CI |
 
-## Keep exploration-only (or rewrite later)
+## Promote next (from `experiment/secondary-b-capacity`, cleanly)
 
-| path / topic | why |
-| --- | --- |
-| `edgemedic/sys_pressure.py` cpu_spin / host mem | rejected for V5 overload; thrash risk |
-| `edgemedic/clock_cap.py` / `injector_clockcap_diag.py` | needs root; diagnostic only |
-| `edgemedic/injector_dvfs_diag.py` | diagnostic only |
-| `edgemedic/injector_explore.py` large matrices | research harness; optional |
-| failed prototypes / tmp scripts | never merge |
-| `results/**` | not source |
+| path / topic | why | note |
+| --- | --- | --- |
+| `gp/types.py` / `gp/worker.py` / `gp/runtime.py` freshness fields | InspectionAge / FrameLag | non-invasive measurement |
+| `edgemedic/secondary_b_metrics.py` | intentional_skip vs pressure_miss | keep |
+| `edgemedic/secondary_b_feasibility.py` | feasibility harness | keep; pilot-only |
+| `tests/test_secondary_b_metrics.py` | unit coverage | keep |
+| `docs/a3-strategy-matrix.md` | closed strategy matrix | **canonical status** |
+| `docs/autonomous-secondary-b-status.md` | Secondary B mechanism否证 | keep |
+| `docs/secondary-b-capacity-shedding-design.md` | design record | keep |
+| `docs/secondary-b-feasibility-pilot-SUMMARY.md` (+ json summary) | pilot summary | keep; not raw NX dumps |
+| `docs/edgemedic.md` status compression | hub status | keep |
+| `docs/capability-extraction/**` markdown + frozen JSON configs | Primary A record | **exclude** `dataset_defects/` images/xml |
+| Primary A harness scripts (`latency_probe_*`, `locked_test_*`, `freeze_*`) | reproducibility of rejected capability | optional; mark historical |
 
-## Frozen product decision (do not “fix” in integration)
+Preferred promote method:
 
 ```text
-Current SPARSE behavior: UNCHANGED
-Mission V5 latency bars: UNCHANGED
+1. cherry-pick f083f09 (freshness + Secondary B harness only)
+2. add docs / capability-extraction text+JSON without dataset_defects
+3. do NOT cherry-pick b4ad9df wholesale (accidental val image dump)
+```
+
+## Keep exploration-only
+
+| path / topic | why |
+| --- | --- |
+| `docs/capability-extraction/dataset_defects/**` | accidental bulk; training data not for GearPro merge |
+| `edgemedic/sys_pressure.py`, clock_cap / dvfs diags | rejected / needs root |
+| `edgemedic/injector_explore.py` large matrices | research optional |
+| `results/**`, `results_secondary_b_*` local copies | not source |
+| `tmp_*.sh`, `backup/**` | never merge |
+| failed prototypes that change runtime service semantics (queues, etc.) | diagnostic only |
+
+## Frozen product decisions (do not “fix” in integration)
+
+```text
+Current SPARSE interval / Q_D: UNCHANGED
+Mission V5 latency bars / utility floors: UNCHANGED
 Admission / overload gates: UNCHANGED
 
-Next is a design choice:
-  redesign latency-targeted A3 action
-  OR
-  open a separate capacity-shedding study for SPARSE
+SPARSE latency recovery: NOT SUPPORTED
+SPARSE capacity shedding: NOT SUPPORTED
+classifier_only_v1: RUNTIME REJECTED — do not open CLASSIFY_ONLY on it
+Primary A: BLOCKED ON VISION CAPABILITY
+A3 effectiveness: NOT ESTABLISHED
+No new Agent A3 actions until a new lightweight capability passes Mission contract
 ```
 
 ## Merge procedure (safe)
 
 ```bash
-git switch srtp-web
-git pull --ff-only origin srtp-web
-git switch -c integration/injector-a3-measurement
-# port only the files above from experiment/injector-exploration
+git switch integration/injector-a3-measurement
+git pull --ff-only origin integration/injector-a3-measurement
+# cherry-pick f083f09 OR port listed paths from experiment/secondary-b-capacity
+# add strategy-matrix + status docs + capability-extraction text/JSON only
 # run unit tests + py_compile
-# do NOT copy results JSON into the commit
-# do NOT change SPARSE interval / mission_quality
+# do NOT copy results JSON trees or dataset_defects into the commit
+# do NOT change SPARSE interval / mission_quality / Mission bars
 ```
 
-## Do not change on merge
+When later promoting to `srtp-web`: review PR; exclude research-only harnesses if product tree should stay lean; never merge exploration bulk.
+
+## Research state after promote (unchanged claims)
 
 ```text
-admission <190
-hold ≥2s
-Mission V5 bars
-SPARSE interval / mission_quality (strategy redesign)
-```
-
-## Research state after merge would still be
-
-```text
-Injector: QUALIFIED (multi_bandwidth ×3)
-SPARSE capability: CHARACTERIZED (Case B — cadence only)
-Latency-defined V5_OVERLOAD recovery via current SPARSE: NOT SUPPORTED
-A3 Mission effectiveness: NOT ESTABLISHED
+Line 1 — COMPLETE / REPRODUCED
+Restart baseline      CHARACTERIZED
+SPARSE latency        NOT SUPPORTED
+SPARSE capacity       NOT SUPPORTED
+classifier_only_v1    RUNTIME REJECTED BY MISSION CONTRACT
+Primary A             BLOCKED ON ACCEPTABLE LIGHTWEIGHT VISION CAPABILITY
+A3 effectiveness      NOT ESTABLISHED
 ```

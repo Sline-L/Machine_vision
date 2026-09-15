@@ -6,42 +6,47 @@
 
 约束、等级、RQ 与原则见 Cursor 规则 `.cursor/rules/edgemedic.mdc`。
 
-当前研究状态（机制 ≠ 能力验证）：
+当前研究状态（机制 ≠ 能力验证）。A3 策略研究已收口为机制否证；正式矩阵见 [a3-strategy-matrix.md](a3-strategy-matrix.md)。
 
 ```text
-Line 1 — Reasoner Reliability & Containment
-FROZEN / REPRODUCED
+Line 1 — COMPLETE / REPRODUCED
 
-Real-resource-pressure injector
-QUALIFIED
-  mechanism: multi_bandwidth × replicas=3
-  (compute-heavy GEMM/conv: DISQUALIFIED)
+A3 strategy study
+Restart baseline      CHARACTERIZED
+SPARSE latency        NOT SUPPORTED
+SPARSE capacity       NOT SUPPORTED
+classifier_only_v1    RUNTIME REJECTED BY MISSION CONTRACT
 
-Current SPARSE strategy
-CHARACTERIZED
-  type: cadence degradation (interval 0.10 → 0.20)
-  per-inference V5 path: unchanged
-
-Latency-defined V5_OVERLOAD recovery
-NOT SUPPORTED by current SPARSE mechanism
-
-A3 severe-pressure pilot
-  Restart-only: Mission 0/3
-  SPARSE:       Mission 0/3
-  FUNCTION:     3/3 both arms
-  pressure ON throughout
+Primary A
+BLOCKED ON ACCEPTABLE LIGHTWEIGHT VISION CAPABILITY
 
 A3 effectiveness
 NOT ESTABLISHED
 
-Next design decision (not implemented yet)
-  A) redesign latency-targeted degradation action, OR
-  B) open a separate throughput/capacity-shedding study for SPARSE
+Injector: QUALIFIED (multi_bandwidth × replicas=3)
+Mission thresholds: UNCHANGED
+test_scratch: consumed (diagnostic only)
+CLASSIFY_ONLY: NOT IMPLEMENTED
 ```
 
-> Line 2 mechanism finding: under sustained memory-bandwidth pressure, SPARSE reduces inspection cadence but leaves the per-inference V5 computation path unchanged; it therefore does not restore a latency-gated Mission under persistent overload.
+> Current SPARSE is neither a per-inference latency recovery mechanism nor an
+> effective capacity-shedding mechanism under the present
+> `LatestFrame + single-worker` runtime.
 
-Do **not** retune Mission V5 bars or rename current SPARSE to claim latency recovery. Details: [a3-strategy-capability](a3-strategy-capability.md), [session-2 status](autonomous-session-2-status.md), [integration plan](integration-plan.md).
+Structural reason: `inspect_wall ≈ 170–300 ms` vs FULL 100 ms / SPARSE 200 ms —
+cadence is not a strong capacity knob; input FPS only overwrites LatestFrame.
+
+Retained findings:
+
+1. Line 1 — containment works (structured decode / Guardian / Verify).
+2. Degradation must match fault — SPARSE is cadence-only; not latency recovery; not effective capacity shedding here.
+3. Capability contract refused fast-but-weak `classifier_only_v1`.
+
+Do **not** invent new Agent A3 actions until a mission-grade lightweight vision
+capability + fresh holdout exists. Reopen via:
+`capability freeze → locked Mission contract → runtime profile → Guardian → Verify → pressure experiment`.
+Do **not** retune `test_scratch`, lower \(Q_D\)/U floors, or reopen `CLASSIFY_ONLY` on the rejected capability.
+Verdict: [primary-a-verdict](capability-extraction/primary-a-verdict.md); Secondary B: [autonomous-secondary-b-status](autonomous-secondary-b-status.md).
 
 Healthy envelope / admission (unchanged):
 
@@ -52,7 +57,8 @@ Admission: V5 p95 <190 + FULL + PT + injector OFF + worker healthy + temp in ban
 
 > A2+A3 mechanism implemented, research-level effectiveness not yet validated.
 
-Q0–Q3 are frozen. Injector qualification gates and A3 Mission definitions stay frozen. Integration of measurement infrastructure: branch `integration/injector-a3-measurement` (do not bulk-merge the whole exploration branch).
+Q0–Q3 frozen. Measurement integration: `integration/injector-a3-measurement`
+([integration-plan.md](integration-plan.md)). Do not bulk-merge exploration into `srtp-web`.
 
 Baseline tag：`edgemedic-a2a3-mechanism-baseline`。A4、CLASSIFY_ONLY / LOCATE_ONLY 仍不在范围。测量文档：[architecture](edgemedic-architecture.md)、[verification](edgemedic-verification.md)、[benchmark](edgemedic-benchmark.md)、[experiments](edgemedic-experiments.md)、[model bundle](model-bundle.md)。
 

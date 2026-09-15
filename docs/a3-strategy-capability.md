@@ -136,10 +136,19 @@ pressure ON throughout
 Consistent with: SPARSE does not accelerate per-inference V5 under this fault;
 Mission bars stay latency-based → Mission fails while pressure remains.
 
-## Measured conclusion (session 2)
+## Measured conclusion (session 2 + Secondary B)
 
-**Case B:** under `multi_bandwidth` severity S0–S5, FULL and SPARSE **per-inference V5 p95** track each other; SPARSE **inspect rate** is lower and **utility** sits at 0.95 vs 1.00.
+**Case B (latency):** under `multi_bandwidth` severity S0–S5, FULL and SPARSE **per-inference V5 p95** track each other; SPARSE **inspect rate** is lower and **utility** sits at 0.95 vs 1.00.
 
-See `docs/autonomous-session-2-status.md` and `results/a3_capability/`.
+**Capacity (Secondary B):** under `LatestFrame + single-worker`, input-FPS pressure is **INVALID**; service-capacity pressure finds **no natural P1** — FULL and SPARSE degrade together because `inspect_wall ≳ interval`.
 
-Implication: current SPARSE is a **cadence** degradation, not a **latency** mitigator. It is a poor match for Mission Verify that gates on V5 p95 ms while the fault keeps every call slow.
+See `docs/autonomous-session-2-status.md`, `docs/autonomous-secondary-b-status.md`, `results/a3_capability/`, `results/secondary_b/`.
+
+Canonical closed matrix: [a3-strategy-matrix.md](a3-strategy-matrix.md).
+
+```text
+Current SPARSE is neither a per-inference latency recovery mechanism
+nor an effective capacity-shedding mechanism under LatestFrame + single-worker.
+```
+
+**Route lock:** Primary A remains the only coherent A3 main line, **blocked on vision capability**. Do not retune SPARSE Mission latency bars or invent Agent A3 actions to claim success.
