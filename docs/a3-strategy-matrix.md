@@ -41,7 +41,10 @@ SPARSE
 ## Compressed research state
 
 ```text
-Line 1 — COMPLETE / REPRODUCED
+stable: srtp-web @ 7c346fd
+tag:    edgemedic-a2a3-measurement-baseline   # measurement, NOT effectiveness
+
+Line 1 — REPRODUCED
 
 A3 strategy study
 Restart baseline      CHARACTERIZED
@@ -95,8 +98,11 @@ latency bars to manufacture a pass.
 
 ## Integration note
 
-Measurement infra lives on `integration/injector-a3-measurement` @ `edcab22`.
-Release review: [integration-release-review-edcab22.md](integration-release-review-edcab22.md)
-(**PASS** — recommend FF into `srtp-web` + tag `edgemedic-a2a3-measurement-baseline`).
-Keep failed strategies and accidental bulk artifacts on exploration branches.
-Do **not** invent new Agent A3 actions while lightweight capability is missing.
+**Sealed** on `srtp-web @ 7c346fd` as tag
+`edgemedic-a2a3-measurement-baseline` (measurement baseline — **not** A3
+effectiveness validated). Review:
+[integration-release-review-edcab22.md](integration-release-review-edcab22.md).
+
+Do **not** land exploratory A3 code on mainline until a new Mission-passing
+lightweight capability appears, or until production-line validation begins.
+Keep failed strategies / bulk artifacts on exploration branches only.

@@ -6,10 +6,44 @@
 
 约束、等级、RQ 与原则见 Cursor 规则 `.cursor/rules/edgemedic.mdc`。
 
-当前研究状态（机制 ≠ 能力验证）。A3 策略研究已收口为机制否证；正式矩阵见 [a3-strategy-matrix.md](a3-strategy-matrix.md)。
+## Phase seal — measurement baseline
 
 ```text
-Line 1 — COMPLETE / REPRODUCED
+stable:  srtp-web @ 7c346fd
+tag:     edgemedic-a2a3-measurement-baseline
+```
+
+> Agent/runtime has reached a reproducible **measurement** baseline: safety
+> constraints and small-model behavior have empirical evidence; the A3
+> measurement framework and current strategy boundaries are clarified. The next
+> phase is **not** “keep adding Agent features,” but waiting for a new vision
+> capability or entering real deployment validation.
+
+Tag semantics (**not** “A2/A3 validated”):
+
+```text
+Line 1 — REPRODUCED
+A3 measurement infrastructure — COMPLETE
+Current A3 strategies — CHARACTERIZED
+A3 effectiveness — NOT ESTABLISHED
+```
+
+Only two conditions reopen mainline A3 product work:
+
+1. A new lightweight vision capability that passes a **frozen Mission contract**
+   (fresh independent holdout).
+2. Real production-line / real-camera **deployment validation**.
+
+Otherwise prefer research packaging: RQ, figures, methodology, negative results,
+architecture diagrams, and the Line 1 / Primary A / Secondary B evidence chain.
+
+Release review: [integration-release-review-edcab22.md](integration-release-review-edcab22.md).  
+Strategy matrix: [a3-strategy-matrix.md](a3-strategy-matrix.md).
+
+## Research status (mechanism ≠ effectiveness)
+
+```text
+Line 1 — REPRODUCED
 
 A3 strategy study
 Restart baseline      CHARACTERIZED
@@ -55,9 +89,10 @@ Expected steady-state V5 p95: ~178–186 ms
 Admission: V5 p95 <190 + FULL + PT + injector OFF + worker healthy + temp in band
 ```
 
-> A2+A3 mechanism implemented, research-level effectiveness not yet validated.
+> A2+A3 **mechanism** implemented; research-level **effectiveness** not yet validated.
+> `edgemedic-a2a3-measurement-baseline` is a measurement baseline, not an A3 effectiveness baseline.
 
-Waiting state after measurement baseline (see [integration-release-review-edcab22.md](integration-release-review-edcab22.md)):
+Waiting state:
 
 ```text
 Agent/runtime architecture        COMPLETE
@@ -68,12 +103,9 @@ Acceptable lightweight capability MISSING
 Production-line validation        FUTURE
 ```
 
-Q0–Q3 frozen. Measurement branch: `integration/injector-a3-measurement` @ `edcab22`
-([integration-plan.md](integration-plan.md)). Do not invent new Agent A3 actions
-until a mission-grade lightweight vision capability exists. Do not bulk-merge
-exploration into `srtp-web`.
-
-Baseline tag：`edgemedic-a2a3-mechanism-baseline`。A4、CLASSIFY_ONLY / LOCATE_ONLY 仍不在范围。测量文档：[architecture](edgemedic-architecture.md)、[verification](edgemedic-verification.md)、[benchmark](edgemedic-benchmark.md)、[experiments](edgemedic-experiments.md)、[model bundle](model-bundle.md)。
+Q0–Q3 frozen. Pre-measurement tip `a4546e0` retired as prior baseline (history kept).
+Earlier mechanism tag `edgemedic-a2a3-mechanism-baseline` remains historical.
+A4、CLASSIFY_ONLY / LOCATE_ONLY 仍不在范围。测量文档：[architecture](edgemedic-architecture.md)、[verification](edgemedic-verification.md)、[benchmark](edgemedic-benchmark.md)、[experiments](edgemedic-experiments.md)、[model bundle](model-bundle.md)。
 
 | 协议 | 文档 | JSON Schema |
 | --- | --- | --- |

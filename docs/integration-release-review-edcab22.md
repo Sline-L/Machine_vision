@@ -5,19 +5,16 @@ Subject: `integration/injector-a3-measurement` @ `edcab22`
 Base for delta: `a4546e0` (= current `origin/srtp-web` tip / merge-base)  
 Purpose: decide whether this measurement-complete branch is safe to merge into `srtp-web`.
 
-**Reviewer verdict: PASS — recommend merge + tag**
+**Reviewer verdict: PASS — merged + tagged**
 
 ```text
-edgemedic-a2a3-measurement-baseline
+srtp-web @ 7c346fd
+tag: edgemedic-a2a3-measurement-baseline
 ```
 
-Meaning of the tag (if applied after merge):
+Phase is **sealed**. Do not land exploratory A3 code on mainline without a new
+Mission-passing lightweight capability or production-line validation work.
 
-> A2/containment has reproducible evidence; A3 measurement framework is complete;
-> current A3 candidate strategies are mechanistically characterized;
-> **A3 effectiveness is not established.**
-
-Do **not** interpret merge as opening new A3 actions or claiming effectiveness.
 
 ---
 
