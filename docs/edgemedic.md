@@ -39,27 +39,36 @@ Measurement infrastructure          COMPLETE
 Capability admission framework      ON MAINLINE (fail-closed registry)
 Existing lightweight search         EXHAUSTED
 classifier_only_v1                  REJECTED
+LATENCY_DEGRADED_V2                 ENGINEERING IMPLEMENTED / FORMAL ADMISSION PENDING
 Fresh formal holdout                MISSING
-Vision redesign                     REQUIRED
+Vision redesign                     REQUIRED IF HOLDOUT FAILS (candidate frozen)
 
 A3 runtime readiness                HIGH
-A3 usable recovery capability       MISSING
+A3 usable recovery capability       MISSING (formal)
 A3 effectiveness                    NOT ESTABLISHED
 ```
+
+`LATENCY_DEGRADED_V2` (EffNet + P2 detector @960, α=0.25): engineering runtime exists on
+`integration/latency-degraded-v2-runtime` with `implemented=true`, `mission_approved=false`,
+`available=false`. Production Control API rejects switches. Only blocker for Primary A formal
+path: **fresh Scratch-only holdout**. See
+[autonomous-latency-degraded-v2-runtime-status.md](autonomous-latency-degraded-v2-runtime-status.md).
 
 Primary A reopen trigger:
 
 ```text
-vision capability v2 arrives
+LATENCY_DEGRADED_V2 formal holdout PASS
 AND
-new independent holdout exists
+explicit registry mission_approved=true
 ```
 
-Then: `val freeze → latency → contract → fresh locked → registry → runtime → NX → pressure A3`.
+Then: `one-shot formal eval → admission_proposal → registry → NX smoke → pressure A3`.
 Interface for vision: [vision-redesign-interface.md](capability-extraction/v2/vision-redesign-interface.md).
 Registry review: [integration-capability-registry-review.md](integration-capability-registry-review.md).
+V2 runtime review: [integration-latency-degraded-v2-review.md](integration-latency-degraded-v2-review.md).
 
-Exploration leftovers stay on `experiment/lightweight-capability-v2` (Pareto / failure analysis).
+Exploration leftovers stay on `experiment/lightweight-capability-v2` /
+`experiment/vision-capability-v2` (Pareto / teammate audit).
 
 ## Research status (mechanism ≠ effectiveness)
 
