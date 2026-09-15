@@ -2,7 +2,15 @@
 
 日期：2026-09-15
 
-状态：方案完成，尚未执行数据同步、代码集成或部署。
+状态：本地迁移与验证已完成；尚未合并、推送或在 Jetson 上部署。
+
+## 实施结果（2026-09-15）
+
+- `migration/dataset-missing-hole-v1` 已同步源提交 `dca0306` 的 49,531 个跟踪文件，并增加本 plan；快照提交为 `734e0eb`，可移植性提交为 `6f28a41`。
+- `feat/missing-hole-v1-web` 已集成 Missing Hole V1、双专项 OR 判定、独立阈值、API v2/v1 兼容、SystemSnapshot v2 和新版 Web 页面；实现提交为 `29640d9`、`a5153d4`、`fb43752`、`de608d9`。
+- 三份新增生产权重使用 Git LFS，两个工作树的 `git lfs fsck` 均通过。应用端 41 项测试、Python 编译、依赖一致性、JSON 与前端构建均通过。
+- Scratch V5 和 Missing Hole V1 的源实现与生产运行时在固定样本上的三路概率及融合概率逐值一致；完整 Model1 → 双专项 CPU 链路成功输出 1 个齿轮和 `missing_hole` 拒绝原因。
+- 远端 fetch 因当前环境缺少 GitHub SSH 私钥未完成，因此以上基于调查时已有的本地引用。Jetson CUDA、显存、相机和串口验收仍按第 6、7 节执行。
 
 目标：将最新研究成果完整更新到 `dataset` 分支，并将 Scratch V5 + Missing Hole V1 双专项能力集成到 `main-web`。
 
