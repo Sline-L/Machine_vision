@@ -540,7 +540,7 @@ def main():
         # A. FULL healthy
         log("=== A FULL healthy sanity ===")
         full_rt, _ = bringup_profile(stages, "FULL", crops[0])
-        healthy_full, _ = stages.run(
+        healthy_full = stages.run(
             "FULL healthy window",
             args.healthy_s + TIMEOUT_WINDOW_MARGIN_S,
             lambda: run_window(full_rt, crops, args.healthy_s, "healthy_FULL")[0],
@@ -571,7 +571,7 @@ def main():
             lambda: first_inference(v2_rt, crops[0]),
             profile="LATENCY_DEGRADED_V2",
         )
-        healthy_v2, _ = stages.run(
+        healthy_v2 = stages.run(
             "V2 healthy window",
             args.healthy_s + TIMEOUT_WINDOW_MARGIN_S,
             lambda: run_window(v2_rt, crops, args.healthy_s, "healthy_V2")[0],
@@ -616,7 +616,7 @@ def main():
             cool(5)
 
             full_rt, _ = bringup_profile(stages, "FULL", crops[0])
-            full_p, _ = stages.run(
+            full_p = stages.run(
                 "FULL pressure window",
                 args.pressure_s + TIMEOUT_WINDOW_MARGIN_S,
                 lambda: run_window(full_rt, crops, args.pressure_s, "pressure_FULL", injector=pressure)[0],
@@ -671,7 +671,7 @@ def main():
             switch["profile_activation_s"] = round(time.monotonic() - t_switch0, 3)
             switch["injector_alive_after_activation"] = pressure.alive()
 
-            v2_p, _ = stages.run(
+            v2_p = stages.run(
                 "V2 pressure window",
                 args.pressure_s + TIMEOUT_WINDOW_MARGIN_S,
                 lambda: run_window(v2_rt, crops, args.pressure_s, "pressure_V2", injector=pressure)[0],
@@ -716,7 +716,7 @@ def main():
                 profile="FULL",
             )
             switch["rollback_load_s"] = round(time.monotonic() - t_rb0, 3)
-            rolled, _ = stages.run(
+            rolled = stages.run(
                 "rollback FULL window under pressure",
                 30.0 + TIMEOUT_WINDOW_MARGIN_S,
                 lambda: run_window(full_rt, crops, 30.0, "rollback_FULL", injector=pressure)[0],
