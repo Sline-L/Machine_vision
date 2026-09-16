@@ -8,6 +8,8 @@ import time
 
 import cv2
 
+from .research_inject import clear_research_camera_freeze, freeze_camera_requested
+
 
 class CameraCapture:
     def __init__(self, config, frame_store):
@@ -84,6 +86,11 @@ class CameraCapture:
                 capture = self.capture
             if capture is None:
                 return
+            if freeze_camera_requested():
+                remaining = frame_period - (time.monotonic() - started)
+                if remaining > 0:
+                    self._stop_event.wait(remaining)
+                continue
             ok, frame = capture.read()
             if ok:
                 self.read_failures = 0
@@ -111,5 +118,6 @@ class CameraCapture:
         self._thread = None
 
     def restart(self):
+        clear_research_camera_freeze()
         self.stop()
         return self.start()

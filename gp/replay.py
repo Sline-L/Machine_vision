@@ -10,6 +10,8 @@ import time
 
 import cv2
 
+from .research_inject import clear_research_camera_freeze, freeze_camera_requested
+
 
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff", ".webp"}
 LOCKED_MARKERS = ("test_scratch",)
@@ -212,6 +214,11 @@ class ReplayCapture:
         loop = bool(getattr(self.config, "replay_loop", True))
         while not self._stop_event.is_set():
             started = time.monotonic()
+            if freeze_camera_requested():
+                remaining = frame_period - (time.monotonic() - started)
+                if remaining > 0:
+                    self._stop_event.wait(remaining)
+                continue
             path = self._images[index]
             frame = cv2.imread(str(path), cv2.IMREAD_COLOR)
             if frame is None:
@@ -246,6 +253,7 @@ class ReplayCapture:
         self._thread = None
 
     def restart(self):
+        clear_research_camera_freeze()
         self.stop()
         return self.start()
 

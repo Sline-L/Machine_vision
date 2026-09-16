@@ -17,6 +17,7 @@ from .serial_io import SerialOutput
 from .telemetry import build_snapshot, camera_health, locator_backend
 from .verify import summarize_cycles
 from .types import InspectionStats
+from .research_inject import allow_restart_camera
 from .worker import InspectionWorker
 
 
@@ -473,7 +474,7 @@ class GearProRuntime:
         if name in ("set_inference_profile", "set_locator_profile", "reload_config", "apply_settings"):
             self._remember_config()
         if name == "restart_camera":
-            if self.source != "camera":
+            if not allow_restart_camera(self.source):
                 raise RuntimeError("视频模式下不能重启摄像头")
             if not self.camera.restart():
                 raise RuntimeError(self.camera.error_message or "摄像头重启失败")
