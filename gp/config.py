@@ -69,6 +69,8 @@ class AppConfig:
     serial_enabled: bool = True
     stream_fps: float = 10.0
     stream_quality: int = 75
+    control_host: str = "127.0.0.1"
+    control_port: int = 8787
 
     @classmethod
     def from_environment(cls):

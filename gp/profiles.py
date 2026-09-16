@@ -1,6 +1,11 @@
 """Named inference profiles that humans and EdgeMedic both use."""
 
+from pathlib import Path
+
+from .config import PROJECT_ROOT
+
 IMPLEMENTED = ("FULL", "SPARSE", "SAFE_STOP")
+ENGINE_LOCATOR = PROJECT_ROOT / "model" / "model1" / "model1.engine"
 
 SPECS = {
     "FULL": {
@@ -53,7 +58,12 @@ def apply_to_config(config, name):
     }
 
 
-def mission_utility(profile_name, locator_ok, serial_ok):
+def locator_path_for(name):
+    raise ProfileError(f"定位档位 {name} 尚未在双专项集成中启用")
+
+
+def mission_utility(profile_name, locator_ok, serial_ok, valid_output_ratio=None, latency_score=None):
+    del valid_output_ratio, latency_score
     profile = SPECS.get(profile_name)
     if profile is None or not profile.get("implemented"):
         return None

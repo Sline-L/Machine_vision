@@ -45,6 +45,18 @@ class SerialOutput:
         self.port = port
         self.baudrate = baudrate
 
+    def ensure_open(self):
+        with self._lock:
+            try:
+                if self._serial is None or not self._serial.is_open:
+                    import serial
+
+                    self._serial = serial.Serial(self.port, self.baudrate, timeout=1)
+                return True, None
+            except Exception as exc:
+                self.last_error = str(exc)
+                return False, str(exc)
+
     def close(self):
         with self._lock:
             if self._serial is not None and self._serial.is_open:

@@ -12,6 +12,13 @@ def build_parser():
     parser.add_argument("--host", default=os.getenv("GEARPRO_WEB_HOST", "0.0.0.0"))
     parser.add_argument("--port", type=int, default=int(os.getenv("GEARPRO_WEB_PORT", "8000")))
     parser.add_argument("--video", type=Path, help="使用服务器上的视频文件进入测试模式")
+    parser.add_argument(
+        "--control-port",
+        type=int,
+        default=int(os.getenv("GEARPRO_CONTROL_PORT", "8787")),
+        help="本机 Control API 端口，0 关闭",
+    )
+    parser.add_argument("--no-control", action="store_true", help="不启动 Control API")
     return parser
 
 
@@ -26,6 +33,8 @@ def main(argv=None):
     if args.host not in ("127.0.0.1", "localhost", "::1") and not password:
         raise SystemExit("局域网监听必须设置 GEARPRO_WEB_PASSWORD")
     config = AppConfig.from_environment()
+    config.control_host = os.getenv("GEARPRO_CONTROL_HOST", "127.0.0.1")
+    config.control_port = 0 if args.no_control else args.control_port
     if args.video is not None:
         video_path = args.video.expanduser().resolve()
         if not video_path.is_file():
