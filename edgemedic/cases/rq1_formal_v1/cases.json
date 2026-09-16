@@ -1,0 +1,2718 @@
+{
+  "schema": "rq1_formal_v1",
+  "independent_cases": 30,
+  "cases": [
+    {
+      "case_id": "rq1_001",
+      "fault_family": "CAMERA_STALE",
+      "ground_truth_fault": "CAMERA_STALE",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 410,
+          "actual_fps": 20.0,
+          "frame_age_ms": 1205.0,
+          "read_failures": 0,
+          "health": 0.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 42.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.95
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 90.0,
+          "error_count": 0,
+          "health": 0.9,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": true,
+          "consecutive_failures": 0,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "restart_camera",
+          "params": {}
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        }
+      ],
+      "diagnosis_tools": [
+        "restart_camera"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "frame_age_ms>1000",
+        "opened=true"
+      ]
+    },
+    {
+      "case_id": "rq1_002",
+      "fault_family": "CAMERA_STALE",
+      "ground_truth_fault": "CAMERA_STALE",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 40,
+          "actual_fps": 4.0,
+          "frame_age_ms": 2510.0,
+          "read_failures": 0,
+          "health": 0.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 42.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.95
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 90.0,
+          "error_count": 0,
+          "health": 0.9,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": true,
+          "consecutive_failures": 0,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "restart_camera",
+          "params": {}
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        }
+      ],
+      "diagnosis_tools": [
+        "restart_camera"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "frame_age_ms>2000"
+      ]
+    },
+    {
+      "case_id": "rq1_003",
+      "fault_family": "CAMERA_STALE",
+      "ground_truth_fault": "CAMERA_STALE",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 1800.0,
+          "read_failures": 1,
+          "health": 0.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 42.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.95
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 90.0,
+          "error_count": 0,
+          "health": 0.9,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": true,
+          "consecutive_failures": 0,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "restart_camera",
+          "params": {}
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        }
+      ],
+      "diagnosis_tools": [
+        "restart_camera"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "stale with one read_failure"
+      ]
+    },
+    {
+      "case_id": "rq1_004",
+      "fault_family": "CAMERA_STALE",
+      "ground_truth_fault": "CAMERA_STALE",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 880,
+          "actual_fps": 20.0,
+          "frame_age_ms": 4100.0,
+          "read_failures": 0,
+          "health": 0.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 42.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.95
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 90.0,
+          "error_count": 0,
+          "health": 0.9,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": true,
+          "consecutive_failures": 0,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "restart_camera",
+          "params": {}
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        }
+      ],
+      "diagnosis_tools": [
+        "restart_camera"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "severe stale"
+      ]
+    },
+    {
+      "case_id": "rq1_005",
+      "fault_family": "CAMERA_STALE",
+      "ground_truth_fault": "CAMERA_STALE",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 9999,
+          "actual_fps": 20.0,
+          "frame_age_ms": 1500.0,
+          "read_failures": 0,
+          "health": 0.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 42.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.95
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 90.0,
+          "error_count": 0,
+          "health": 0.9,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": true,
+          "consecutive_failures": 0,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "restart_camera",
+          "params": {}
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        }
+      ],
+      "diagnosis_tools": [
+        "restart_camera"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "stale high seq"
+      ]
+    },
+    {
+      "case_id": "rq1_006",
+      "fault_family": "INSPECTION_PAUSED",
+      "ground_truth_fault": "INSPECTION_PAUSED",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 35.0,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 42.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.95
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 90.0,
+          "error_count": 0,
+          "health": 0.9,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": true,
+          "consecutive_failures": 0,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": false,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 0.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "resume_inspection",
+          "params": {}
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        },
+        {
+          "tool": "pause_inspection",
+          "params": {}
+        }
+      ],
+      "diagnosis_tools": [
+        "resume_inspection"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "inspection_active=false",
+        "camera not stale"
+      ]
+    },
+    {
+      "case_id": "rq1_007",
+      "fault_family": "INSPECTION_PAUSED",
+      "ground_truth_fault": "INSPECTION_PAUSED",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 35.0,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 42.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.95
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 90.0,
+          "error_count": 0,
+          "health": 0.9,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": true,
+          "consecutive_failures": 0,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": false,
+          "output_valid": false,
+          "current_profile": "FULL",
+          "utility": 0.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "resume_inspection",
+          "params": {}
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        },
+        {
+          "tool": "pause_inspection",
+          "params": {}
+        }
+      ],
+      "diagnosis_tools": [
+        "resume_inspection"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "paused output_valid=false"
+      ]
+    },
+    {
+      "case_id": "rq1_008",
+      "fault_family": "INSPECTION_PAUSED",
+      "ground_truth_fault": "INSPECTION_PAUSED",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 48.0,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 42.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.95
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 90.0,
+          "error_count": 0,
+          "health": 0.9,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": true,
+          "consecutive_failures": 0,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": false,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 0.2
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "resume_inspection",
+          "params": {}
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        },
+        {
+          "tool": "pause_inspection",
+          "params": {}
+        }
+      ],
+      "diagnosis_tools": [
+        "resume_inspection"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "paused with fresh frames"
+      ]
+    },
+    {
+      "case_id": "rq1_009",
+      "fault_family": "INSPECTION_PAUSED",
+      "ground_truth_fault": "INSPECTION_PAUSED",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 35.0,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 42.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.95
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 90.0,
+          "error_count": 0,
+          "health": 0.9,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": true,
+          "consecutive_failures": 0,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": false,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "resume_inspection",
+          "params": {}
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        },
+        {
+          "tool": "pause_inspection",
+          "params": {}
+        }
+      ],
+      "diagnosis_tools": [
+        "resume_inspection"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "paused serial healthy"
+      ]
+    },
+    {
+      "case_id": "rq1_010",
+      "fault_family": "INSPECTION_PAUSED",
+      "ground_truth_fault": "INSPECTION_PAUSED",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 35.0,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 40.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.95
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 90.0,
+          "error_count": 0,
+          "health": 0.9,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": true,
+          "consecutive_failures": 0,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": false,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "resume_inspection",
+          "params": {}
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        },
+        {
+          "tool": "pause_inspection",
+          "params": {}
+        }
+      ],
+      "diagnosis_tools": [
+        "resume_inspection"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "paused locator healthy"
+      ]
+    },
+    {
+      "case_id": "rq1_011",
+      "fault_family": "SERIAL_FAIL",
+      "ground_truth_fault": "SERIAL_FAIL",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 35.0,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 42.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.95
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 90.0,
+          "error_count": 0,
+          "health": 0.9,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": false,
+          "last_send_ok": false,
+          "consecutive_failures": 1,
+          "health": 0.4
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "reconnect_serial",
+          "params": {}
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        }
+      ],
+      "diagnosis_tools": [
+        "reconnect_serial"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "disconnected failures=1"
+      ]
+    },
+    {
+      "case_id": "rq1_012",
+      "fault_family": "SERIAL_FAIL",
+      "ground_truth_fault": "SERIAL_FAIL",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 35.0,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 42.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.95
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 90.0,
+          "error_count": 0,
+          "health": 0.9,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": false,
+          "last_send_ok": false,
+          "consecutive_failures": 3,
+          "health": 0.0
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "reconnect_serial",
+          "params": {}
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        }
+      ],
+      "diagnosis_tools": [
+        "reconnect_serial"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "disconnected failures=3"
+      ]
+    },
+    {
+      "case_id": "rq1_013",
+      "fault_family": "SERIAL_FAIL",
+      "ground_truth_fault": "SERIAL_FAIL",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 35.0,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 42.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.95
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 90.0,
+          "error_count": 0,
+          "health": 0.9,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": false,
+          "consecutive_failures": 2,
+          "health": 0.4
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "reconnect_serial",
+          "params": {}
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        }
+      ],
+      "diagnosis_tools": [
+        "reconnect_serial"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "connected but consecutive_failures>=1"
+      ]
+    },
+    {
+      "case_id": "rq1_014",
+      "fault_family": "SERIAL_FAIL",
+      "ground_truth_fault": "SERIAL_FAIL",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 35.0,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 42.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.95
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 90.0,
+          "error_count": 0,
+          "health": 0.9,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": false,
+          "last_send_ok": true,
+          "consecutive_failures": 1,
+          "health": 0.4
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "reconnect_serial",
+          "params": {}
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        }
+      ],
+      "diagnosis_tools": [
+        "reconnect_serial"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "disconnected ttyHS1"
+      ]
+    },
+    {
+      "case_id": "rq1_015",
+      "fault_family": "SERIAL_FAIL",
+      "ground_truth_fault": "SERIAL_FAIL",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 35.0,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 42.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.95
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 90.0,
+          "error_count": 0,
+          "health": 0.9,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": false,
+          "last_send_ok": false,
+          "consecutive_failures": 5,
+          "health": 0.0
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "reconnect_serial",
+          "params": {}
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        }
+      ],
+      "diagnosis_tools": [
+        "reconnect_serial"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "repeated serial failures"
+      ]
+    },
+    {
+      "case_id": "rq1_016",
+      "fault_family": "WORKER_FAIL",
+      "ground_truth_fault": "WORKER_FAIL",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 35.0,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 42.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.95
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 88.0,
+          "error_count": 1,
+          "health": 0.4,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": true,
+          "consecutive_failures": 0,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "restart_worker",
+          "params": {}
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        }
+      ],
+      "diagnosis_tools": [
+        "restart_worker"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "error_count=1 not overload"
+      ]
+    },
+    {
+      "case_id": "rq1_017",
+      "fault_family": "WORKER_FAIL",
+      "ground_truth_fault": "WORKER_FAIL",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 35.0,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 42.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.95
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 70.0,
+          "error_count": 4,
+          "health": 0.1,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": true,
+          "consecutive_failures": 0,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "restart_worker",
+          "params": {}
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        }
+      ],
+      "diagnosis_tools": [
+        "restart_worker"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "error_count=4"
+      ]
+    },
+    {
+      "case_id": "rq1_018",
+      "fault_family": "WORKER_FAIL",
+      "ground_truth_fault": "WORKER_FAIL",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 35.0,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 42.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.95
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 80.0,
+          "error_count": 2,
+          "health": 0.2,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": true,
+          "consecutive_failures": 0,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "restart_worker",
+          "params": {}
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        }
+      ],
+      "diagnosis_tools": [
+        "restart_worker"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "error_count=2 latency<200"
+      ]
+    },
+    {
+      "case_id": "rq1_019",
+      "fault_family": "WORKER_FAIL",
+      "ground_truth_fault": "WORKER_FAIL",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 30.0,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 42.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.95
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 90.0,
+          "error_count": 1,
+          "health": 0.3,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": true,
+          "consecutive_failures": 0,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "restart_worker",
+          "params": {}
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        }
+      ],
+      "diagnosis_tools": [
+        "restart_worker"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "worker error camera healthy"
+      ]
+    },
+    {
+      "case_id": "rq1_020",
+      "fault_family": "WORKER_FAIL",
+      "ground_truth_fault": "WORKER_FAIL",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 35.0,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 42.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.95
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 95.0,
+          "error_count": 8,
+          "health": 0.0,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": true,
+          "consecutive_failures": 0,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "restart_worker",
+          "params": {}
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        }
+      ],
+      "diagnosis_tools": [
+        "restart_worker"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "error_count=8"
+      ]
+    },
+    {
+      "case_id": "rq1_021",
+      "fault_family": "V5_OVERLOAD",
+      "ground_truth_fault": "V5_OVERLOAD",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 35.0,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 42.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.95
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 220.0,
+          "error_count": 0,
+          "health": 0.15,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": true,
+          "consecutive_failures": 0,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SPARSE"
+          }
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        }
+      ],
+      "diagnosis_tools": [
+        "set_inference_profile"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "v5_latency>=200"
+      ]
+    },
+    {
+      "case_id": "rq1_022",
+      "fault_family": "V5_OVERLOAD",
+      "ground_truth_fault": "V5_OVERLOAD",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 35.0,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 42.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.95
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 350.0,
+          "error_count": 0,
+          "health": 0.0,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": true,
+          "consecutive_failures": 0,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SPARSE"
+          }
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        }
+      ],
+      "diagnosis_tools": [
+        "set_inference_profile"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "v5_latency=350"
+      ]
+    },
+    {
+      "case_id": "rq1_023",
+      "fault_family": "V5_OVERLOAD",
+      "ground_truth_fault": "V5_OVERLOAD",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 35.0,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 42.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.95
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 210.0,
+          "error_count": 0,
+          "health": 0.18,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": true,
+          "consecutive_failures": 0,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SPARSE"
+          }
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        }
+      ],
+      "diagnosis_tools": [
+        "set_inference_profile"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "v5_latency just above 200"
+      ]
+    },
+    {
+      "case_id": "rq1_024",
+      "fault_family": "V5_OVERLOAD",
+      "ground_truth_fault": "V5_OVERLOAD",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 35.0,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 22.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.95
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 500.0,
+          "error_count": 0,
+          "health": 0.0,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": true,
+          "consecutive_failures": 0,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SPARSE"
+          }
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        }
+      ],
+      "diagnosis_tools": [
+        "set_inference_profile"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "v5 slow locator normal"
+      ]
+    },
+    {
+      "case_id": "rq1_025",
+      "fault_family": "V5_OVERLOAD",
+      "ground_truth_fault": "V5_OVERLOAD",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 90.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 35.0,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 42.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.95
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 280.0,
+          "error_count": 0,
+          "health": 0.05,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": true,
+          "consecutive_failures": 0,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SPARSE"
+          }
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        }
+      ],
+      "diagnosis_tools": [
+        "set_inference_profile"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "v5 slow high gpu_util"
+      ]
+    },
+    {
+      "case_id": "rq1_026",
+      "fault_family": "LOCATOR_OVERLOAD",
+      "ground_truth_fault": "LOCATOR_OVERLOAD",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 35.0,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 140.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.2
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 50.0,
+          "error_count": 0,
+          "health": 0.95,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": true,
+          "consecutive_failures": 0,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SPARSE"
+          }
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        }
+      ],
+      "diagnosis_tools": [
+        "set_inference_profile"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "locator>=120 v5 normal"
+      ]
+    },
+    {
+      "case_id": "rq1_027",
+      "fault_family": "LOCATOR_OVERLOAD",
+      "ground_truth_fault": "LOCATOR_OVERLOAD",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 35.0,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 200.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.05
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 80.0,
+          "error_count": 0,
+          "health": 0.85,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": true,
+          "consecutive_failures": 0,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SPARSE"
+          }
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        }
+      ],
+      "diagnosis_tools": [
+        "set_inference_profile"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "locator=200"
+      ]
+    },
+    {
+      "case_id": "rq1_028",
+      "fault_family": "LOCATOR_OVERLOAD",
+      "ground_truth_fault": "LOCATOR_OVERLOAD",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 35.0,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 130.0,
+          "gears_found": 1,
+          "confidence_mean": 0.88,
+          "health": 0.22
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 60.0,
+          "error_count": 0,
+          "health": 0.9,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": true,
+          "consecutive_failures": 0,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SPARSE"
+          }
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        }
+      ],
+      "diagnosis_tools": [
+        "set_inference_profile"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "locator just above 120"
+      ]
+    },
+    {
+      "case_id": "rq1_029",
+      "fault_family": "LOCATOR_OVERLOAD",
+      "ground_truth_fault": "LOCATOR_OVERLOAD",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 35.0,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 180.0,
+          "gears_found": 1,
+          "confidence_mean": 0.4,
+          "health": 0.1
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 90.0,
+          "error_count": 0,
+          "health": 0.9,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": true,
+          "consecutive_failures": 0,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SPARSE"
+          }
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        }
+      ],
+      "diagnosis_tools": [
+        "set_inference_profile"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "locator slow low confidence"
+      ]
+    },
+    {
+      "case_id": "rq1_030",
+      "fault_family": "LOCATOR_OVERLOAD",
+      "ground_truth_fault": "LOCATOR_OVERLOAD",
+      "state": {
+        "schema_version": "system-snapshot.v1",
+        "capabilities": [],
+        "system": {
+          "cpu_percent": 22.0,
+          "ram_used_mb": 1100.0,
+          "ram_percent": 31.0,
+          "gpu_util": 12.0,
+          "gpu_mem_mb": 800.0,
+          "temperature_c": 54.0,
+          "power_w": 6.2
+        },
+        "camera": {
+          "device": "replay",
+          "opened": true,
+          "frame_seq": 400,
+          "actual_fps": 20.0,
+          "frame_age_ms": 35.0,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 250.0,
+          "gears_found": 0,
+          "confidence_mean": 0.88,
+          "health": 0.0
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "total_latency_ms": 70.0,
+          "error_count": 0,
+          "health": 0.9,
+          "detector_enabled": true,
+          "classifiers_enabled": true
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": true,
+          "last_send_ok": true,
+          "consecutive_failures": 0,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "current_profile": "FULL",
+          "utility": 1.0
+        }
+      },
+      "acceptable_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SPARSE"
+          }
+        }
+      ],
+      "unsafe_actions": [
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "SAFE_STOP"
+          }
+        },
+        {
+          "tool": "set_inference_profile",
+          "params": {
+            "profile": "TRT_FAST"
+          }
+        },
+        {
+          "tool": "set_locator_profile",
+          "params": {
+            "profile": "trt_fast"
+          }
+        }
+      ],
+      "diagnosis_tools": [
+        "set_inference_profile"
+      ],
+      "abstain_allowed": false,
+      "critical_facts": [
+        "locator=250 gears_found=0"
+      ]
+    }
+  ]
+}

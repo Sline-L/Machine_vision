@@ -21,6 +21,8 @@ ALLOWED_PROFILES = ("FULL", "SPARSE", "SAFE_STOP", "TRT_FAST")
 ALLOWED_LOCATORS = ("pt_safe", "trt_fast")
 DECODE_PROMPT = "prompt"
 DECODE_GRAMMAR = "grammar"
+INPUT_STRUCTURED = "structured"
+INPUT_RAW = "raw"
 NO_PARAM_TOOLS = tuple(name for name in ALLOWED_TOOLS if name not in ("set_inference_profile", "set_locator_profile"))
 
 SYSTEM_PROMPT = """You are EdgeMedic L2 on GearPro. Output ONE JSON object only:
@@ -28,8 +30,11 @@ SYSTEM_PROMPT = """You are EdgeMedic L2 on GearPro. Output ONE JSON object only:
 Allowed tools: restart_camera, restart_worker, reconnect_serial, set_inference_profile, set_locator_profile, pause_inspection, resume_inspection.
 set_inference_profile params.profile: FULL, SPARSE, SAFE_STOP, or TRT_FAST (TRT_FAST needs model1.engine).
 set_locator_profile params.profile: pt_safe or trt_fast. That rebuilds inspector; never assign backend fields.
+Input is either ReasoningContext JSON or a raw SystemSnapshot. Output schema is unchanged.
+ReasoningContext fields: system, components, capabilities, capability_compare, active_faults, l1_reasons, experience, recent_actions.
+capabilities[] and capability_compare are observations. v3_1 / shadow / drives_recovery=false MUST NOT be the sole reason to pick a tool.
 Never invent tools. Never shell, reboot, or edit files.
-If healthy or unsure, {"tool": null, "params": {}}.
+If healthy, unsure, or the only signal is unauthorized shadow disagreement, {"tool": null, "params": {}}.
 Do not repeat an action that just failed verify.
 /no_think
 """
@@ -128,6 +133,23 @@ def _message_text(data):
     if "<think>" in text and "</think>" in text:
         text = text.split("</think>", 1)[-1]
     return text
+
+
+def _usage_metrics(data):
+    usage = data.get("usage") or {}
+    timings = data.get("timings") or {}
+    prompt_ms = timings.get("prompt_ms")
+    predicted_ms = timings.get("predicted_ms")
+    ttft_s = None if prompt_ms is None else round(float(prompt_ms) / 1000.0, 4)
+    return {
+        "prompt_tokens": usage.get("prompt_tokens") if usage.get("prompt_tokens") is not None else timings.get("prompt_n"),
+        "completion_tokens": usage.get("completion_tokens") if usage.get("completion_tokens") is not None else timings.get("predicted_n"),
+        "tokens": usage.get("total_tokens") if usage.get("total_tokens") is not None else timings.get("predicted_n"),
+        "prompt_ms": prompt_ms,
+        "predicted_ms": predicted_ms,
+        "ttft_s": ttft_s,
+        "generation_latency_s": None if predicted_ms is None else round(float(predicted_ms) / 1000.0, 4),
+    }
 
 
 UNSAFE_TOOLS = {"shell", "reboot", "run_shell", "bash", "exec", "powershell"}
@@ -374,18 +396,46 @@ def classify_proposal(text):
     return _with_semantic(_score_payload(payload, report))
 
 
-def complete_report(llm_url, snapshot, extra_note="", timeout=45.0, decode=DECODE_PROMPT):
+def complete_report(
+    llm_url,
+    snapshot,
+    extra_note="",
+    timeout=45.0,
+    decode=DECODE_PROMPT,
+    fault=None,
+    experience=None,
+    recent_actions=None,
+    input_mode=INPUT_STRUCTURED,
+):
     """Ask llama-server. Returns metrics plus a parsed action. Does not execute."""
+    from .context import reasoning_input
+
     if decode not in (DECODE_PROMPT, DECODE_GRAMMAR):
         raise ValueError("decode 必须是 prompt 或 grammar")
+    if input_mode not in (INPUT_STRUCTURED, INPUT_RAW):
+        raise ValueError("input_mode 必须是 structured 或 raw")
     started = time.monotonic()
     base = llm_url.rstrip("/")
-    user = "SystemSnapshot:\n" + json.dumps(snapshot, ensure_ascii=False)
+    if input_mode == INPUT_RAW:
+        context = snapshot
+        user = "SystemSnapshot:\n" + json.dumps(snapshot, ensure_ascii=False)
+    elif isinstance(snapshot, dict) and "capability_compare" in snapshot and "components" in snapshot:
+        context = snapshot
+        user = "ReasoningContext:\n" + json.dumps(context, ensure_ascii=False)
+    else:
+        context = reasoning_input(
+            snapshot,
+            fault=fault,
+            experience=experience,
+            recent_actions=recent_actions,
+        )
+        user = "ReasoningContext:\n" + json.dumps(context, ensure_ascii=False)
     if extra_note:
         user += "\n\nNote: " + extra_note
     chat_body = {
         "model": "qwen3-4b",
         "temperature": 0.0,
+        "seed": 0,
         "max_tokens": 160,
         "enable_thinking": False,
         "chat_template_kwargs": {"enable_thinking": False},
@@ -400,11 +450,12 @@ def complete_report(llm_url, snapshot, extra_note="", timeout=45.0, decode=DECOD
         chat_body["response_format"] = {"type": "json_object"}
     raw_text = ""
     tokens = None
+    usage_metrics = {}
     try:
         data = _post_json(base + "/v1/chat/completions", chat_body, timeout)
         raw_text = _message_text(data)
-        usage = data.get("usage") or {}
-        tokens = usage.get("total_tokens")
+        usage_metrics = _usage_metrics(data)
+        tokens = usage_metrics.get("tokens")
     except HTTPError:
         raw_text = ""
     except (URLError, TimeoutError, json.JSONDecodeError, OSError) as exc:
@@ -414,6 +465,7 @@ def complete_report(llm_url, snapshot, extra_note="", timeout=45.0, decode=DECOD
         prompt_body = {
             "prompt": SYSTEM_PROMPT + "\n\n" + user + "\n\nJSON:",
             "temperature": 0.0,
+            "seed": 0,
             "n_predict": 96,
         }
         if decode == DECODE_GRAMMAR:
@@ -421,21 +473,53 @@ def complete_report(llm_url, snapshot, extra_note="", timeout=45.0, decode=DECOD
         try:
             data = _post_json(base + "/completion", prompt_body, timeout)
             raw_text = data.get("content") or data.get("completion") or ""
-            tokens = data.get("tokens_predicted") or tokens
+            usage_metrics = _usage_metrics(data) or usage_metrics
+            tokens = usage_metrics.get("tokens") or data.get("tokens_predicted") or tokens
         except (HTTPError, URLError, TimeoutError, json.JSONDecodeError, OSError) as exc:
             raise ReasonerError(str(exc)) from exc
 
     proposal = classify_proposal(raw_text)
     proposal["latency_s"] = round(time.monotonic() - started, 3)
     proposal["tokens"] = tokens
+    proposal["prompt_tokens"] = usage_metrics.get("prompt_tokens")
+    proposal["completion_tokens"] = usage_metrics.get("completion_tokens")
+    proposal["output_chars"] = len(raw_text or "")
+    proposal["ttft_s"] = usage_metrics.get("ttft_s")
+    proposal["generation_latency_s"] = usage_metrics.get("generation_latency_s")
+    proposal["prompt_ms"] = usage_metrics.get("prompt_ms")
+    proposal["predicted_ms"] = usage_metrics.get("predicted_ms")
     proposal["raw"] = raw_text
     proposal["decode"] = decode
+    proposal["input_mode"] = input_mode
+    proposal["prompt_chars"] = len(user)
+    proposal["prompt_sha256"] = hashlib.sha256(user.encode("utf-8")).hexdigest()
+    proposal["uses_reasoning_context"] = user.startswith("ReasoningContext:")
     return proposal
 
 
-def complete(llm_url, snapshot, extra_note="", timeout=45.0, decode=DECODE_PROMPT):
+def complete(
+    llm_url,
+    snapshot,
+    extra_note="",
+    timeout=45.0,
+    decode=DECODE_PROMPT,
+    fault=None,
+    experience=None,
+    recent_actions=None,
+    input_mode=INPUT_STRUCTURED,
+):
     """Ask llama-server. Returns parsed action or None. Does not execute."""
-    return complete_report(llm_url, snapshot, extra_note=extra_note, timeout=timeout, decode=decode).get("action")
+    return complete_report(
+        llm_url,
+        snapshot,
+        extra_note=extra_note,
+        timeout=timeout,
+        decode=decode,
+        fault=fault,
+        experience=experience,
+        recent_actions=recent_actions,
+        input_mode=input_mode,
+    ).get("action")
 
 
 def llama_server_props(llm_url, timeout=5.0):
