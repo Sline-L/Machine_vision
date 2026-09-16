@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from gp.config import AppConfig, PROJECT_ROOT
+from gp.config import AppConfig, PROJECT_ROOT, load_last_known_good_snapshot
 from gp.export_engine import DEFAULT_DEST, DEFAULT_SOURCE
 from gp.launch import EXPORTS, start
 from gp.models import TwoStageInspector
@@ -41,6 +41,7 @@ class ConfigTests(unittest.TestCase):
                 "GEARPRO_MODEL1": "/tmp/one.pt",
                 "GEARPRO_MODEL2": "/tmp/two.json",
                 "GEARPRO_MISSING_HOLE_MODEL": "/tmp/three.json",
+                "GEARPRO_REPLAY_DIR": "/tmp/replay-frames",
             },
         ):
             config = AppConfig.from_environment()
@@ -48,6 +49,9 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(config.locator_model, Path("/tmp/one.pt"))
         self.assertEqual(config.model2_config, Path("/tmp/two.json"))
         self.assertEqual(config.missing_hole_config, Path("/tmp/three.json"))
+        self.assertEqual(config.replay_dir, Path("/tmp/replay-frames"))
+        self.assertFalse(config.serial_enabled)
+        self.assertEqual(config.mode, "数据集回放模式")
 
     def test_model2_config_supplies_default_threshold(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -228,6 +232,56 @@ class ResultTests(unittest.TestCase):
         self.assertEqual((stats.total, stats.good, stats.defective), (2, 1, 1))
         stats.clear()
         self.assertEqual((stats.total, stats.good, stats.defective), (0, 0, 0))
+
+    def test_freshness_fields_default_none_and_compute_age(self):
+        result = InspectionResult(None)
+        self.assertIsNone(result.source_frame_seq)
+        self.assertIsNone(result.inspection_age_ms)
+        self.assertIsNone(result.frame_lag)
+        result.source_capture_ts = 1.0
+        result.inspection_end_ts = 1.25
+        result.source_frame_seq = 3
+        result.latest_frame_seq_at_completion = 5
+        self.assertAlmostEqual(result.inspection_age_ms, 250.0)
+        self.assertEqual(result.frame_lag, 2)
+
+
+class LastGoodConfigTests(unittest.TestCase):
+    def test_last_good_keeps_dual_thresholds_and_maps_legacy_defect(self):
+        with tempfile.TemporaryDirectory() as directory:
+            last_good = Path(directory) / "settings.last_known_good.json"
+            with patch("gp.config.LAST_GOOD_FILE", last_good):
+                config = AppConfig()
+                config.scratch_threshold = 0.22
+                config.missing_hole_threshold = 0.41
+                config.locator_model = Path("/tmp/locator.pt")
+                config.persist_last_known_good()
+                payload = json.loads(last_good.read_text(encoding="utf-8"))
+                self.assertIn("scratch_threshold", payload)
+                self.assertIn("missing_hole_threshold", payload)
+                self.assertNotIn("defect_threshold", payload)
+                snapshot = load_last_known_good_snapshot()
+                self.assertAlmostEqual(snapshot["fields"]["scratch_threshold"], 0.22)
+                self.assertAlmostEqual(snapshot["fields"]["missing_hole_threshold"], 0.41)
+
+            last_good.write_text(
+                json.dumps(
+                    {
+                        "locator_model": "/tmp/locator.pt",
+                        "defect_threshold": 0.33,
+                        "inference_profile": "SPARSE",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            with patch("gp.config.LAST_GOOD_FILE", last_good):
+                snapshot = load_last_known_good_snapshot()
+            self.assertAlmostEqual(snapshot["fields"]["scratch_threshold"], 0.33)
+            self.assertNotIn("missing_hole_threshold", snapshot["fields"])
+            restored = AppConfig()
+            restored.update(snapshot["fields"])
+            self.assertAlmostEqual(restored.scratch_threshold, 0.33)
+            self.assertAlmostEqual(restored.missing_hole_threshold, 0.3413327979078584)
 
 
 if __name__ == "__main__":

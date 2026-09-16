@@ -10,6 +10,7 @@ from typing import Optional
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 RUNTIME_ROOT = PROJECT_ROOT / "var"
 SETTINGS_FILE = RUNTIME_ROOT / "settings.json"
+LAST_GOOD_FILE = RUNTIME_ROOT / "settings.last_known_good.json"
 DEFAULT_SCRATCH_THRESHOLD = 0.300273610279458
 DEFAULT_MISSING_HOLE_THRESHOLD = 0.3413327979078584
 
@@ -63,6 +64,8 @@ class AppConfig:
     target_quantity: int = 100
     duration_minutes: int = 10
     video_path: Optional[Path] = None
+    replay_dir: Optional[Path] = None
+    replay_loop: bool = True
     serial_enabled: bool = True
     stream_fps: float = 10.0
     stream_quality: int = 75
@@ -72,6 +75,8 @@ class AppConfig:
         """Build settings while allowing deployment-only environment overrides."""
         config = cls()
         persisted = config.load_persisted()
+        if not persisted:
+            persisted = config.load_persisted(LAST_GOOD_FILE)
         config.camera_index = int(os.getenv("GEARPRO_CAMERA_INDEX", config.camera_index))
         config.serial_port = os.getenv("GEARPRO_SERIAL_PORT", config.serial_port)
         config.locator_model = Path(os.getenv("GEARPRO_MODEL1", str(config.locator_model)))
@@ -79,6 +84,11 @@ class AppConfig:
         config.missing_hole_config = Path(
             os.getenv("GEARPRO_MISSING_HOLE_MODEL", str(config.missing_hole_config))
         )
+        replay = os.getenv("GEARPRO_REPLAY_DIR")
+        if replay:
+            config.replay_dir = Path(replay)
+            config.serial_enabled = False
+            config.mode = "数据集回放模式"
         # Model1 may be .pt or .engine. Specialist bundles are JSON configurations.
         if config.model2_config.is_file() and "scratch_threshold" not in persisted:
             try:
@@ -120,6 +130,10 @@ class AppConfig:
             self.update(filtered)
         except ValueError:
             return set()
+        locator = values.get("locator_model")
+        if isinstance(locator, str) and locator.strip():
+            self.locator_model = Path(locator)
+            filtered["locator_model"] = locator
         return set(filtered)
 
     def persist(self, path=SETTINGS_FILE):
@@ -133,6 +147,15 @@ class AppConfig:
             encoding="utf-8",
         )
         temporary.replace(path)
+
+    def persist_last_known_good(self):
+        """Promote in-memory config after function/mission verify (Control Step 6.2)."""
+        LAST_GOOD_FILE.parent.mkdir(parents=True, exist_ok=True)
+        payload = {name: getattr(self, name) for name in PERSISTED_FIELDS}
+        payload["locator_model"] = str(self.locator_model)
+        good_tmp = LAST_GOOD_FILE.with_suffix(LAST_GOOD_FILE.suffix + ".tmp")
+        good_tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        good_tmp.replace(LAST_GOOD_FILE)
 
     def update(self, values):
         """Validate and apply settings received from the Web UI."""
@@ -179,7 +202,7 @@ class AppConfig:
         for name in integer_fields:
             if not isinstance(candidate[name], int):
                 raise ValueError(f"{name} 必须是整数")
-        if candidate["mode"] not in ("自由模式", "定量模式", "定时模式", "视频测试模式"):
+        if candidate["mode"] not in ("自由模式", "定量模式", "定时模式", "视频测试模式", "数据集回放模式"):
             raise ValueError("无效的运行模式")
         from .profiles import IMPLEMENTED
         if candidate["inference_profile"] not in IMPLEMENTED:
@@ -216,3 +239,26 @@ class AppConfig:
         ]
         if missing:
             raise FileNotFoundError("找不到模型文件：" + "、".join(missing))
+
+
+def load_last_known_good_snapshot():
+    """Disk fallback used by rollback when no in-memory Control snapshot exists."""
+    if not LAST_GOOD_FILE.is_file():
+        return None
+    try:
+        values = json.loads(LAST_GOOD_FILE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(values, dict):
+        return None
+    locator = values.get("locator_model")
+    if not isinstance(locator, str) or not locator.strip():
+        return None
+    values = AppConfig._normalize_legacy_settings(values)
+    fields = {name: values[name] for name in PERSISTED_FIELDS if name in values}
+    return {
+        "locator_model": locator,
+        "fields": fields,
+        "inference_profile": values.get("inference_profile", "FULL"),
+        "inspection_active": False,
+    }
