@@ -19,6 +19,13 @@ class InspectionWorker:
         self._interrupt_event = threading.Event()
         self._thread = None
         self._inspector = None
+        self.inspect_count = 0
+        self._inspect_lock = threading.Lock()
+
+    def bump_inspect(self):
+        with self._inspect_lock:
+            self.inspect_count += 1
+            return self.inspect_count
 
     @property
     def active(self):
@@ -69,7 +76,17 @@ class InspectionWorker:
             packet = self.frame_store.read()
             if packet.frame is not None and packet.sequence != last_sequence:
                 last_sequence = packet.sequence
-                self.on_result(inspector.inspect(packet.frame))
+                self.bump_inspect()
+                started = time.monotonic()
+                result = inspector.inspect(packet.frame)
+                ended = time.monotonic()
+                latest = self.frame_store.read()
+                result.source_frame_seq = packet.sequence
+                result.source_capture_ts = packet.published_at
+                result.inspection_start_ts = started
+                result.inspection_end_ts = ended
+                result.latest_frame_seq_at_completion = latest.sequence
+                self.on_result(result)
             self._interrupt_event.wait(self.config.inference_interval)
 
     def _inspect_video(self, inspector):
@@ -92,12 +109,19 @@ class InspectionWorker:
                     self.on_video_complete(video_path)
                     return
                 self.frame_store.publish(frame)
+                self.bump_inspect()
                 self.on_result(inspector.inspect(frame))
                 remaining = frame_period - (time.monotonic() - started)
                 if remaining > 0:
                     self._interrupt_event.wait(remaining)
         finally:
             capture.release()
+
+    def drop_inspector(self):
+        """Release loaded models so the next start reconstructs TwoStageInspector."""
+        self.pause()
+        time.sleep(max(0.12, float(getattr(self.config, "inference_interval", 0.1)) + 0.05))
+        self._inspector = None
 
     def stop_service(self):
         self._active_event.clear()
