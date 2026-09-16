@@ -1,0 +1,84 @@
+{
+  "overall": "DRY_RUN_FEATURES_NOT_HOLDOUT",
+  "pass_conditions": {
+    "Q_D_floor": {
+      "rule": "Q_D(V3-1) >= 0.70",
+      "value": 0.9302325581395349,
+      "threshold": 0.7,
+      "pass": true
+    },
+    "Q_D_improvement": {
+      "rule": "Q_D(V3-1) - Q_D(V2) >= 0.02",
+      "value": 0.04238209084981526,
+      "threshold": 0.02,
+      "pass": true
+    },
+    "FPR_reduction": {
+      "rule": "FPR(V2) - FPR(V3-1) >= 0.03",
+      "value": 0.056074766355140186,
+      "threshold": 0.03,
+      "pass": true
+    },
+    "recall_drop_limit": {
+      "rule": "Recall(V2) - Recall(V3-1) <= 0.08",
+      "value": 0.046511627906976716,
+      "threshold": 0.08,
+      "pass": true
+    },
+    "FULL_collapse_rule": {
+      "rule": "Not a mechanical gate. Secondary flag only: report Q_D(FULL)-Q_D(V3-1). Human narrative review after CONSUMED lock; cannot change overall.",
+      "value": 0.06976744186046513,
+      "pass": null,
+      "mechanical": false
+    }
+  },
+  "failure_flags": {
+    "FAIL_A": false,
+    "FAIL_B": false,
+    "FAIL_C": false
+  },
+  "failure_details": {
+    "FAIL_A": {
+      "recall_drop_exceeds_0_08": false
+    },
+    "FAIL_B": {
+      "fpr_reduction_lt_0_02": false,
+      "Q_D_v3_1_not_greater_than_v2": false
+    },
+    "FAIL_C": {
+      "Q_D_below_0_70": false
+    }
+  },
+  "manual_review_flags": {
+    "easy_high_confidence_fn": {
+      "definition": "ground_truth==1 AND full_prediction==1 AND v2_prediction==1 (both FULL and V2 operating points already predict scratch)",
+      "easy_high_confidence_scratch_n": 42,
+      "fn_on_easy_high_confidence_n": 2,
+      "fn_on_easy_high_confidence_rate": 0.047619047619047616,
+      "triggers_FAIL_A": false,
+      "status": "SECONDARY_MANUAL_REVIEW_FLAG"
+    },
+    "collapse_vs_FULL": {
+      "definition": "Not mechanically adjudicated. Record Q_D(FULL)-Q_D(V3-1) only. Narrative domain-gap review is post-lock and cannot rewrite overall.",
+      "Q_D_FULL": 1.0,
+      "Q_D_V3_1": 0.9302325581395349,
+      "Q_D_FULL_minus_V3_1": 0.06976744186046513,
+      "triggers_overall": false,
+      "status": "NOT_APPLICABLE_FEATURE_CSV_DRY_RUN"
+    }
+  },
+  "deltas": {
+    "Q_D_v3_1_minus_v2": 0.04238209084981526,
+    "FPR_v2_minus_v3_1": 0.056074766355140186,
+    "Recall_v2_minus_v3_1": 0.046511627906976716
+  },
+  "amendment": {
+    "name": "PRE-HOLDOUT PREREGISTRATION AMENDMENT",
+    "fresh_holdout_status_at_amendment": "UNTOUCHED",
+    "fail_flags_non_exclusive": true,
+    "overall_rule": "any FAIL flag -> FAIL; else all mechanical PASS conditions -> PASS; else INCONCLUSIVE"
+  },
+  "candidate_commit": "e8b2b0fda2af2c9c8c697d4655d527947381377a",
+  "adjudicator_commit": "e8b2b0fda2af2c9c8c697d4655d527947381377a",
+  "holdout_status": "NOT_HOLDOUT"
+}

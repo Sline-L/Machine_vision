@@ -1,0 +1,19 @@
+{
+  "arm": "FULL",
+  "threshold": NaN,
+  "score_semantics": "not_scored",
+  "tp": 43,
+  "fp": 0,
+  "tn": 107,
+  "fn": 0,
+  "n": 150,
+  "recall": 1.0,
+  "fpr": 0.0,
+  "specificity": 1.0,
+  "precision": 1.0,
+  "f1": 1.0,
+  "Q_D": 1.0,
+  "U": 1.0,
+  "note": "FULL not scored in feature-csv dry-run; placeholder is identity and MUST NOT be used as holdout FULL",
+  "valid_for_formal_holdout": false
+}

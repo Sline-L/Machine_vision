@@ -1,0 +1,10 @@
+{
+  "status": "DRY_RUN_COMPLETE",
+  "holdout_status": "NOT_HOLDOUT",
+  "manifest_hash": null,
+  "candidate_commit": "e8b2b0fda2af2c9c8c697d4655d527947381377a",
+  "adjudicator_commit": "e8b2b0fda2af2c9c8c697d4655d527947381377a",
+  "run_id": "dry-run-val-features",
+  "timestamp": "2026-09-16T01:42:32.735609+00:00",
+  "reason": "feature-csv dry-run; fresh holdout not used"
+}

@@ -9,13 +9,11 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-import cv2
 import numpy as np
 
 TOOLS = Path(__file__).resolve().parents[1]
@@ -32,6 +30,7 @@ from nx_v2_pressure_soak_pilot import (  # noqa: E402
     process_snapshot,
     _pct,
 )
+from v3_fp_veto.frozen_inference import backbone_features, load_veto  # noqa: E402
 
 BANNER = "V3-1 NX S1 PAIRED LATENCY — ENGINEERING ONLY — NOT VALIDATED"
 S1_REPLICAS = 1
@@ -50,74 +49,6 @@ def make_s1():
     from edgemedic.multi_pressure import MultiGpuContention
 
     return MultiGpuContention(replicas=S1_REPLICAS, **INJECTOR_BASE)
-
-
-def load_veto(path: Path):
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    mean = np.asarray(payload["mean"], dtype=np.float64)
-    std = np.asarray(payload["std"], dtype=np.float64)
-    w = np.asarray(payload["weights"], dtype=np.float64)
-    b = float(payload["bias"])
-    names = list(payload["feature_names"])
-    thr = float(payload["threshold"])
-
-    def proba(feat: dict) -> float:
-        x = np.asarray([float(feat[n]) for n in names], dtype=np.float64)
-        xs = (x - mean) / std
-        z = float(xs @ w + b)
-        z = min(max(z, -30.0), 30.0)
-        return 1.0 / (1.0 + math.exp(-z))
-
-    return payload, proba, thr, names
-
-
-def backbone_features(runtime, crop):
-    from gp.scratch_v5 import apply_temperature, fuse_single_classifier, square_rgb_image
-
-    rgb = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB)
-    item, model = runtime.classifiers[0]
-    with runtime.torch.inference_mode():
-        tensor = runtime.tensor_transform(square_rgb_image(rgb, int(item["imgsz"]))).unsqueeze(0).to(
-            runtime.device
-        )
-        raw_cls = float(model(tensor).sigmoid()[0, 0].item())
-    cls1 = apply_temperature(raw_cls, item.get("temperature", 1.0))
-    detector = runtime.config["detector"]
-    result = runtime.detector.predict(
-        crop,
-        imgsz=int(detector["imgsz"]),
-        conf=float(detector["conf_floor"]),
-        iou=float(detector["iou"]),
-        device=runtime.yolo_device,
-        verbose=False,
-    )[0]
-    raw_confs = []
-    if result.boxes is not None and len(result.boxes):
-        raw_confs = [float(c) for c in result.boxes.conf.detach().cpu().numpy().tolist()]
-    raw_det = max(raw_confs) if raw_confs else 0.0
-    det = apply_temperature(raw_det, detector.get("temperature", 1.0))
-    alpha = float(runtime.config["fusion"]["alpha"])
-    fused, _ = fuse_single_classifier(cls1, det, alpha)
-    n_boxes = len(raw_confs)
-    top3 = sorted(raw_confs, reverse=True)[:3]
-    while len(top3) < 3:
-        top3.append(0.0)
-    feat = {
-        "raw_cls": raw_cls,
-        "cls1": cls1,
-        "raw_det": raw_det,
-        "det": det,
-        "fused_v2": fused,
-        "n_boxes": n_boxes,
-        "sum_conf": float(sum(raw_confs)),
-        "mean_conf": float(sum(raw_confs) / n_boxes) if n_boxes else 0.0,
-        "top1_conf": top3[0],
-        "top2_conf": top3[1],
-        "top3_conf": top3[2],
-        "cls_minus_det": cls1 - det,
-        "log1p_boxes": math.log1p(n_boxes),
-    }
-    return feat
 
 
 def run_arm(runtime, crops, duration_s, mode, veto_proba=None, veto_thr=None, v2_thr=None):

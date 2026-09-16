@@ -1,0 +1,23 @@
+{
+  "mode": "DRY_RUN_FEATURES",
+  "candidate_commit": "e8b2b0fda2af2c9c8c697d4655d527947381377a",
+  "adjudicator_commit": "e8b2b0fda2af2c9c8c697d4655d527947381377a",
+  "branch": "experiment/v3-1-holdout-adjudication",
+  "git_status": "M docs/capability-extraction/v3/v3-1-fresh-holdout-preregistration.md\n M tools/v3_fp_veto/nx_s1_paired_latency.py\n?? docs/capability-extraction/v3/v3-1-adjudication-tooling.md\n?? docs/capability-extraction/v3/v3-1-adjudication-tooling/\n?? docs/capability-extraction/v3/v3-1-inference-chain-audit.md\n?? tests/test_v3_1_holdout_adjudication.py\n?? tools/v3_fp_veto/adjudication.py\n?? tools/v3_fp_veto/formal_fresh_holdout_adjudicate.py\n?? tools/v3_fp_veto/frozen_inference.py\n?? tools/v3_fp_veto/metrics.py\n?? tools/v3_fp_veto/seal_fresh_holdout.py",
+  "v2_config_hash": "5cc1730c0c9cdd83e8909e963184c759f4d29bec5ed4eab1bfe44f0ae13b4588",
+  "classifier_sha": "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438",
+  "detector_sha": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3",
+  "v2_threshold": 0.2653394325872992,
+  "v2_freeze_threshold": 0.2653394325872992,
+  "full_threshold": 0.300273610279458,
+  "veto_artifact": "G:\\CODE\\Machine_vision-v3-1-adjudication\\docs\\capability-extraction\\v3\\v3-1-fp-veto\\primary_veto_model.json",
+  "veto_artifact_sha256": "eb6ebfbf002f83004a3be672ce138f38a2ad7ab550dea0500cff20729d7f1818",
+  "v3_1_threshold": 0.845,
+  "fusion_mode": "replace_score",
+  "holdout_manifest_hash": null,
+  "holdout_status": "NOT_HOLDOUT",
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "win32",
+  "feature_csv": "docs\\capability-extraction\\v3\\v3-1-fp-veto\\features_train_val.csv",
+  "split": "val_scratch"
+}

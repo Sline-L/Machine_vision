@@ -111,3 +111,87 @@ If S1 latency FAIL, do **not** open holdout for V3-1.
 6. Apply PASS / FAIL-A / FAIL-B / FAIL-C above
 7. Stop
 ```
+
+---
+
+## PRE-HOLDOUT PREREGISTRATION AMENDMENT
+
+```text
+status: AMENDMENT — BEFORE ANY HOLDOUT EXECUTION OR INSPECTION
+fresh_holdout_status_at_amendment: UNTOUCHED
+candidate_commit: e8b2b0fda2af2c9c8c697d4655d527947381377a
+numeric_gates: UNCHANGED
+```
+
+This amendment does **not** change the locked numeric thresholds in the original PASS / FAIL-A / FAIL-B / FAIL-C clauses. It only closes pre-execution logic gaps. Commit history for this change must keep:
+
+```text
+PRE-HOLDOUT AMENDMENT
+fresh holdout status at amendment: UNTOUCHED
+numeric thresholds unchanged
+```
+
+### Overall verdict (mechanical)
+
+FAIL-A / FAIL-B / FAIL-C are **non-exclusive failure flags**.
+
+```text
+if one or more FAIL flags trigger:
+    overall = FAIL
+else if ALL mechanical PASS conditions trigger:
+    overall = PASS
+else:
+    overall = INCONCLUSIVE
+```
+
+Mechanical PASS conditions are original items 1–4 only:
+
+```text
+1. Q_D(V3-1) >= 0.70
+2. Q_D(V3-1) - Q_D(V2) >= 0.02
+3. FPR(V2) - FPR(V3-1) >= 0.03
+4. Recall(V2) - Recall(V3-1) <= 0.08
+```
+
+Therefore FPR reduction in `[0.02, 0.03)` is **INCONCLUSIVE** (not PASS, not FAIL-B). Do not widen FAIL-B to 0.03 and do not relax PASS to 0.02.
+
+No extra categories (`soft pass`, `near pass`, `engineering pass`).
+
+### Subjective clauses — locked status before holdout
+
+Original PASS item 5 (`collapse vs FULL`) and FAIL-A item 2 (`FN surge on easy/high-confidence scratches`) are **not mechanical gates**.
+
+They are secondary manual-review flags. They **must not** change `overall`.
+
+#### easy/high-confidence scratch (frozen operational definition)
+
+```text
+ground_truth == 1
+AND full_prediction == 1
+AND v2_prediction == 1
+```
+
+Meaning: both frozen operating points already predict scratch. Count `v3_1_prediction == 0` on that subset as `fn_on_easy_high_confidence_*`. Report only. `triggers_FAIL_A = false`.
+
+Mechanical FAIL-A is solely:
+
+```text
+Recall(V2) - Recall(V3-1) > 0.08
+```
+
+#### collapse vs FULL (frozen operational definition)
+
+```text
+record Q_D(FULL) - Q_D(V3-1)
+do not mechanically fail or pass on this gap
+human narrative review only after CONSUMED lock
+cannot rewrite overall
+```
+
+### After any formal scoring of the sealed population
+
+```text
+fresh_holdout = CONSUMED
+```
+
+regardless of PASS / FAIL / INCONCLUSIVE / runtime error after exposure. Registry remains unmodified.
