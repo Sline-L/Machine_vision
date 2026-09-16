@@ -17,6 +17,15 @@ STATIC_ROOT = PROJECT_ROOT / "gp" / "static"
 VIDEO_SUFFIXES = {".mp4", ".avi", ".mov", ".mkv", ".m4v"}
 
 
+def _raise_control(result):
+    from fastapi import HTTPException
+
+    if not result.get("accepted"):
+        raise HTTPException(status_code=400, detail=result.get("error") or "动作被拒绝")
+    if result.get("error") and not result.get("executed"):
+        raise HTTPException(status_code=500, detail=result["error"])
+
+
 def create_app(config, runtime=None, sessions=None, manage_lifespan=True):
     try:
         from fastapi import FastAPI, File, HTTPException, Request, UploadFile, WebSocket
@@ -133,21 +142,24 @@ def create_app(config, runtime=None, sessions=None, manage_lifespan=True):
     @app.post(f"{LEGACY_API_PREFIX}/inspection/start")
     async def start_inspection(request: Request):
         token = controller(request)
-        runtime.start_inspection()
+        result = await asyncio.to_thread(runtime.human_action, "resume_inspection", {})
+        _raise_control(result)
         return runtime_state(request, token)
 
     @app.post(f"{API_PREFIX}/inspection/stop")
     @app.post(f"{LEGACY_API_PREFIX}/inspection/stop")
     async def stop_inspection(request: Request):
         token = controller(request)
-        runtime.stop_inspection()
+        result = await asyncio.to_thread(runtime.human_action, "pause_inspection", {})
+        _raise_control(result)
         return runtime_state(request, token)
 
     @app.post(f"{API_PREFIX}/source/camera")
     @app.post(f"{LEGACY_API_PREFIX}/source/camera")
     async def use_camera(request: Request):
         token = controller(request)
-        await asyncio.to_thread(runtime.use_camera)
+        result = await asyncio.to_thread(runtime.human_action, "use_camera", {})
+        _raise_control(result)
         return runtime_state(request, token)
 
     @app.post(f"{API_PREFIX}/source/video")
@@ -169,7 +181,12 @@ def create_app(config, runtime=None, sessions=None, manage_lifespan=True):
                     if size > maximum:
                         raise HTTPException(status_code=413, detail="视频文件超过上传限制")
                     output.write(chunk)
-            await asyncio.to_thread(runtime.use_video, destination, True)
+            result = await asyncio.to_thread(
+                runtime.human_action,
+                "use_video",
+                {"path": str(destination), "managed": True},
+            )
+            _raise_control(result)
         except Exception:
             destination.unlink(missing_ok=True)
             raise
@@ -184,14 +201,16 @@ def create_app(config, runtime=None, sessions=None, manage_lifespan=True):
         values = await request.json()
         if not isinstance(values, dict):
             raise HTTPException(status_code=400, detail="设置必须是 JSON 对象")
-        runtime.update_settings(values)
+        result = await asyncio.to_thread(runtime.human_action, "apply_settings", values)
+        _raise_control(result)
         return runtime_state(request, token)
 
     @app.post(f"{API_PREFIX}/stats/reset")
     @app.post(f"{LEGACY_API_PREFIX}/stats/reset")
     async def reset_stats(request: Request):
         token = controller(request)
-        runtime.reset_stats()
+        result = await asyncio.to_thread(runtime.human_action, "reset_stats", {})
+        _raise_control(result)
         return runtime_state(request, token)
 
     @app.get(f"{API_PREFIX}/stream")

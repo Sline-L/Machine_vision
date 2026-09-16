@@ -29,6 +29,36 @@ class FakeRuntime:
     def stop_inspection(self):
         self.active = False
 
+    def human_action(self, name, params=None):
+        params = params or {}
+        if name == "resume_inspection":
+            self.start_inspection()
+        elif name == "pause_inspection":
+            self.stop_inspection()
+        elif name == "use_camera":
+            self.use_camera()
+        elif name == "use_video":
+            self.use_video(params.get("path"), params.get("managed"))
+        elif name == "apply_settings":
+            self.update_settings(params)
+        elif name == "reset_stats":
+            self.reset_stats()
+        else:
+            return {
+                "accepted": False,
+                "executed": False,
+                "error": f"未知动作：{name}",
+            }
+        return {
+            "accepted": True,
+            "executed": True,
+            "verified": False,
+            "recovery_success": False,
+            "config_verified": True,
+            "verify_level": "config",
+            "error": None,
+        }
+
     def use_camera(self):
         pass
 
