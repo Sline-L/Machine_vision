@@ -9,8 +9,12 @@ THERMAL_POLICY_C = 80.0
 THERMAL_STOP_C = THERMAL_POLICY_C
 
 
-def thermal_stop_needed(snapshot, current_profile):
+def thermal_alarm(snapshot):
     temp = (snapshot.get("system") or {}).get("temperature_c")
     if temp is None:
         return False
-    return float(temp) >= THERMAL_STOP_C and current_profile != "SAFE_STOP"
+    return float(temp) >= THERMAL_STOP_C
+
+
+def thermal_stop_needed(snapshot, current_profile):
+    return thermal_alarm(snapshot) and current_profile != "SAFE_STOP"

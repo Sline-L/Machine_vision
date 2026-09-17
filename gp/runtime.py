@@ -14,7 +14,7 @@ from .camera import CameraCapture
 from .config import PERSISTED_FIELDS, RUNTIME_ROOT, load_last_known_good_snapshot
 from .control_view import as_control_view
 from .frames import LatestFrame
-from .guardian import thermal_stop_needed
+from .guardian import thermal_alarm, thermal_stop_needed
 from .serial_io import SerialOutput
 from .telemetry import build_snapshot, camera_health, locator_backend
 from .types import InspectionStats
@@ -45,6 +45,10 @@ class GearProRuntime:
         self._guardian_thread = None
         self._action_lock = threading.Lock()
         self._emergency_hold = False
+        self._emergency_generation = 0
+        self._exec_authority = None
+        self._verify_origin_seq = 0
+        self._verify_origin_inspect = 0
         self._config_backup = None
         self._action_cycles = deque(maxlen=64)
         self._window_started = None
@@ -93,11 +97,11 @@ class GearProRuntime:
         return "video" if self.config.video_path is not None else "camera"
 
     def start_inspection(self):
-        if self._emergency_hold:
-            raise RuntimeError("紧急停机锁存中，不能开始检测")
+        self._reject_if_emergency("开始检测")
         if self.config.inference_profile == "SAFE_STOP":
             raise RuntimeError("SAFE_STOP 档位下不能开始检测")
-        if thermal_stop_needed(self.current_snapshot(), "FULL"):
+        if thermal_alarm(self.current_snapshot()):
+            self.assert_emergency_hold()
             raise RuntimeError("温度保护仍有效，不能开始检测")
         if self.config.video_path is None and not self.camera.opened:
             raise RuntimeError(self.camera.error_message or "摄像头未连接")
@@ -195,6 +199,9 @@ class GearProRuntime:
             inspection_active=self.inspection_active,
             scratch_errors=self.error_count,
             schema_version="system-snapshot.v1" if api_version == "api.v1" else "system-snapshot.v2",
+            specialist_status=getattr(self.worker, "load_status", None),
+            inspect_count=self.worker.inspect_count,
+            last_error_source=getattr(self.worker, "last_error_source", "unknown"),
         )
         stats["good_rate"] = 0.0 if not stats["total"] else stats["good"] / stats["total"]
         return {
@@ -260,6 +267,28 @@ class GearProRuntime:
             profile = self.config.inference_profile
             hold = self._emergency_hold
         snapshot = self.current_snapshot()
+        last = self.last_result
+        origin_seq = self._verify_origin_seq
+        window_started = self._window_started
+        fresh = False
+        if last is not None and window_started is not None:
+            end_ts = last.inspection_end_ts
+            seq = last.source_frame_seq
+            if end_ts is not None and float(end_ts) >= float(window_started):
+                fresh = True
+            elif seq is not None and int(seq) > int(origin_seq):
+                fresh = True
+        scratch = (snapshot.get("specialists") or {}).get("scratch_v5") or snapshot.get("scratch_v5") or {}
+        missing = (snapshot.get("specialists") or {}).get("missing_hole_v1") or {}
+        dual = (
+            scratch.get("loaded") is True
+            and missing.get("loaded") is True
+            and scratch.get("last_valid_output")
+            and missing.get("last_valid_output")
+            and fresh
+            and not hold
+            and not failed
+        )
         return {
             "serial_enabled": bool(self.config.serial_enabled),
             "serial_open": bool(self.serial.is_open),
@@ -283,13 +312,24 @@ class GearProRuntime:
             "worker_failed": failed,
             "settings": self.settings(),
             "emergency_hold": hold,
+            "emergency_generation": self._emergency_generation,
             "thermal_stop_needed": thermal_stop_needed(snapshot, profile),
+            "thermal_alarm": thermal_alarm(snapshot),
             "authority": None,
+            "dual_specialist_evidence": dual,
+            "output_fresh": fresh,
+            "specialists_loaded": scratch.get("loaded") is True and missing.get("loaded") is True,
+            "verify_origin_frame_seq": origin_seq,
+            "last_result_frame_seq": None if last is None else last.source_frame_seq,
+            "inspect_count": self.worker.inspect_count,
         }
 
     def begin_verify_window(self):
+        packet = self.raw_frames.read()
         self._action_cycles.clear()
         self._window_started = time.monotonic()
+        self._verify_origin_seq = 0 if packet is None else int(packet.sequence)
+        self._verify_origin_inspect = int(self.worker.inspect_count)
 
     def promote_last_known_good(self):
         self.config.persist_last_known_good()
@@ -321,16 +361,24 @@ class GearProRuntime:
         }
 
     def rebuild_inspector(self, resume=True):
+        generation = self._emergency_generation
         self.stop_inspection("正在重建定位与双专项模型…")
+        with self._lock:
+            self.last_result = None
         self.worker.drop_inspector()
+        self._abort_rebuild_if_held(generation)
         self.config.validate_models()
-        if not resume or self.config.inference_profile == "SAFE_STOP":
+        self._abort_rebuild_if_held(generation)
+        if not resume or self.config.inference_profile == "SAFE_STOP" or self._emergency_hold:
+            if self._emergency_hold:
+                raise RuntimeError("紧急停机锁存中，不能恢复检测")
             return
         with self._lock:
             self.error = None
         self.start_inspection()
         deadline = time.monotonic() + 75
         while time.monotonic() < deadline:
+            self._abort_rebuild_if_held(generation)
             if self.worker.model_loaded and self.error is None:
                 return
             if self.error:
@@ -338,15 +386,42 @@ class GearProRuntime:
             time.sleep(0.2)
         raise RuntimeError("inspector 重建超时")
 
+    def _abort_rebuild_if_held(self, generation):
+        if self._emergency_hold or self._emergency_generation != generation:
+            self.stop_inspection("紧急停机锁存中，中止 inspector 恢复")
+            raise RuntimeError("紧急停机锁存中，不能恢复检测")
+
+    def _reject_if_emergency(self, action):
+        if self._emergency_hold:
+            raise RuntimeError(f"紧急停机锁存中，不能{action}")
+
+    def assert_emergency_hold(self, status="Guardian：温度过高，已切换 SAFE_STOP"):
+        """Latch SAFE_STOP without waiting for Control's _action_lock."""
+        from .profiles import ProfileError, apply_to_config
+
+        with self._lock:
+            already = self._emergency_hold and self.config.inference_profile == "SAFE_STOP"
+            self._emergency_hold = True
+            if not already:
+                self._emergency_generation += 1
+            try:
+                apply_to_config(self.config, "SAFE_STOP")
+            except ProfileError:
+                self.config.inference_profile = "SAFE_STOP"
+            self.status = status
+        self.worker.pause()
+
     def _restore_config_backup(self, snap):
         previous_locator = Path(self.config.locator_model)
         self.config.update(snap["fields"])
         self.config.locator_model = Path(snap["locator_model"])
         rebuild = previous_locator.resolve() != Path(self.config.locator_model).resolve()
         want_run = bool(snap.get("inspection_active")) and self.config.inference_profile != "SAFE_STOP"
+        if self._emergency_hold:
+            want_run = False
         if rebuild:
             self.rebuild_inspector(resume=want_run)
-        elif self.config.inference_profile == "SAFE_STOP":
+        elif self.config.inference_profile == "SAFE_STOP" or self._emergency_hold:
             self.stop_inspection("已进入 SAFE_STOP")
         elif want_run and not self.inspection_active:
             self.start_inspection()
@@ -360,27 +435,40 @@ class GearProRuntime:
 
         previous = self.config.inference_profile
         was_active = self.inspection_active
+        if name != "SAFE_STOP" and self._emergency_hold:
+            if thermal_alarm(self.current_snapshot()) or self._exec_authority != "human":
+                return False, "紧急停机锁存中，拒绝离开 SAFE_STOP"
+            self._emergency_hold = False
         try:
             plan = apply_to_config(self.config, name)
         except ProfileError as exc:
             return False, str(exc)
         if name != "SAFE_STOP" and self._emergency_hold:
-            if thermal_stop_needed(self.current_snapshot(), "FULL"):
-                apply_to_config(self.config, previous)
-                return False, "紧急停机锁存中，拒绝离开 SAFE_STOP"
-            self._emergency_hold = False
+            try:
+                apply_to_config(self.config, "SAFE_STOP")
+            except ProfileError:
+                self.config.inference_profile = "SAFE_STOP"
+            self.stop_inspection("紧急停机已抢占")
+            return False, "紧急停机锁存中，拒绝离开 SAFE_STOP"
         try:
             self.config.persist()
         except OSError:
             pass
         try:
-            if plan["stop_worker"]:
+            if plan["stop_worker"] or name == "SAFE_STOP":
                 self.stop_inspection("已进入 SAFE_STOP")
             elif plan["start_worker"]:
                 self.start_inspection()
             elif was_active and name != "SAFE_STOP" and not self.inspection_active:
                 self.start_inspection()
         except Exception:
+            if self._emergency_hold:
+                try:
+                    apply_to_config(self.config, "SAFE_STOP")
+                except Exception:
+                    pass
+                self.stop_inspection("紧急停机锁存中")
+                raise
             try:
                 apply_to_config(self.config, previous)
             except Exception:
@@ -414,15 +502,19 @@ class GearProRuntime:
             raise RuntimeError(str(exc)) from exc
         self.config.validate_models()
         resume = (not plan["stop_worker"]) and (was_active or plan["start_worker"])
-        if plan["stop_worker"]:
-            self.stop_inspection("已进入 SAFE_STOP")
+        if plan["stop_worker"] or self._emergency_hold:
+            self.stop_inspection("已进入 SAFE_STOP" if plan["stop_worker"] else "紧急停机锁存中")
         elif resume and not self.inspection_active:
             self.start_inspection()
         return {}
 
-    def execute_action(self, name, params):
+    def execute_action(self, name, params, authority=None):
         with self._action_lock:
-            return self._execute_action_locked(name, params)
+            self._exec_authority = authority
+            try:
+                return self._execute_action_locked(name, params)
+            finally:
+                self._exec_authority = None
 
     def _execute_action_locked(self, name, params):
         params = params or {}
@@ -526,14 +618,8 @@ class GearProRuntime:
             while not self._guardian_stop.wait(0.5):
                 try:
                     snapshot = self.current_snapshot()
-                    if thermal_stop_needed(snapshot, self.config.inference_profile):
-                        self._emergency_hold = True
-                        ok, message = self.set_inference_profile("SAFE_STOP")
-                        if ok:
-                            with self._lock:
-                                self.status = "Guardian：温度过高，已切换 SAFE_STOP"
-                        else:
-                            self.stop_inspection(message or "Guardian：温度过高")
+                    if thermal_alarm(snapshot):
+                        self.assert_emergency_hold()
                 except Exception:
                     continue
 
@@ -584,7 +670,9 @@ class GearProRuntime:
                     "valid": bool(result.has_gear),
                     "locator_ms": result.locator_latency_ms,
                     "v5_ms": result.scratch_latency_ms,
+                    "missing_ms": result.missing_hole_latency_ms,
                     "elapsed_ms": result.elapsed_ms,
+                    "frame_seq": result.source_frame_seq,
                 }
             )
             if result.has_gear and now - getattr(self, "_last_counted_at", 0.0) >= self.config.result_cooldown:
