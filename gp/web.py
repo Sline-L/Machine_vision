@@ -17,6 +17,77 @@ STATIC_ROOT = PROJECT_ROOT / "gp" / "static"
 VIDEO_SUFFIXES = {".mp4", ".avi", ".mov", ".mkv", ".m4v"}
 
 
+def _agent_base():
+    return os.getenv("EDGEMEDIC_STATUS_URL", "http://127.0.0.1:8790").rstrip("/")
+
+
+def _fetch_agent_status():
+    import json
+    from urllib.error import URLError
+    from urllib.request import urlopen
+
+    try:
+        with urlopen(_agent_base() + "/status", timeout=1.5) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except (URLError, TimeoutError, OSError, json.JSONDecodeError) as exc:
+        return {
+            "service": "edgemedic-agent",
+            "available": False,
+            "error": str(exc),
+            "monitoring": False,
+            "llm_ready": False,
+            "note": "Agent service unreachable",
+        }
+
+
+def _notify_agent(path, payload=None):
+    import json
+    from urllib.error import URLError
+    from urllib.request import Request, urlopen
+
+    raw = json.dumps(payload or {}).encode("utf-8")
+    request = Request(
+        _agent_base() + "/" + path.lstrip("/"),
+        data=raw,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urlopen(request, timeout=1.5) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except (URLError, TimeoutError, OSError, json.JSONDecodeError):
+        return None
+
+
+def _agent_command(path, payload=None):
+    """POST to Agent; raise if unreachable so GUI can show the failure."""
+    import json
+    from urllib.error import HTTPError, URLError
+    from urllib.request import Request, urlopen
+
+    from fastapi import HTTPException
+
+    raw = json.dumps(payload or {}).encode("utf-8")
+    request = Request(
+        _agent_base() + "/" + path.lstrip("/"),
+        data=raw,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urlopen(request, timeout=2.0) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except HTTPError as exc:
+        body = exc.read().decode("utf-8", errors="replace")
+        try:
+            detail = json.loads(body)
+        except json.JSONDecodeError:
+            detail = {"error": body or str(exc)}
+        raise HTTPException(status_code=exc.code, detail=detail.get("error") or detail) from exc
+    except (URLError, TimeoutError, OSError) as exc:
+        raise HTTPException(status_code=503, detail=f"Agent service unreachable: {exc}") from exc
+
+
 def _raise_control(result):
     from fastapi import HTTPException
 
@@ -144,6 +215,7 @@ def create_app(config, runtime=None, sessions=None, manage_lifespan=True):
         token = controller(request)
         result = await asyncio.to_thread(runtime.human_action, "resume_inspection", {})
         _raise_control(result)
+        await asyncio.to_thread(_notify_agent, "monitor/start", {"arm_recovery": False})
         return runtime_state(request, token)
 
     @app.post(f"{API_PREFIX}/inspection/stop")
@@ -152,7 +224,29 @@ def create_app(config, runtime=None, sessions=None, manage_lifespan=True):
         token = controller(request)
         result = await asyncio.to_thread(runtime.human_action, "pause_inspection", {})
         _raise_control(result)
+        await asyncio.to_thread(_notify_agent, "monitor/stop", {})
         return runtime_state(request, token)
+
+    @app.get(f"{API_PREFIX}/agent/status")
+    @app.get(f"{LEGACY_API_PREFIX}/agent/status")
+    async def agent_status(request: Request):
+        session_token(request)
+        return await asyncio.to_thread(_fetch_agent_status)
+
+    @app.post(f"{API_PREFIX}/agent/recovery/arm")
+    @app.post(f"{LEGACY_API_PREFIX}/agent/recovery/arm")
+    async def agent_recovery_arm(request: Request):
+        """Arm low-risk recovery posts. Requires controller. Does not change observe_only agents."""
+        controller(request)
+        result = await asyncio.to_thread(_agent_command, "recovery/arm", {})
+        return result
+
+    @app.post(f"{API_PREFIX}/agent/recovery/disarm")
+    @app.post(f"{LEGACY_API_PREFIX}/agent/recovery/disarm")
+    async def agent_recovery_disarm(request: Request):
+        controller(request)
+        result = await asyncio.to_thread(_agent_command, "recovery/disarm", {})
+        return result
 
     @app.post(f"{API_PREFIX}/source/camera")
     @app.post(f"{LEGACY_API_PREFIX}/source/camera")

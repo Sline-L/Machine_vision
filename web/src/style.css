@@ -285,6 +285,45 @@ footer { display: flex; height: 21px; gap: 22px; justify-content: flex-end; padd
 .login-card .button { width: 100%; margin-top: 8px; }
 .form-error { margin-bottom: 12px; color: #ad5656; font-size: 12px; }
 
+.agent-panel .agent-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+  margin-top: 8px;
+}
+.agent-panel .agent-grid > div {
+  background: #f4faf8;
+  border: 1px solid #d7e8e3;
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+.agent-panel .agent-grid span {
+  display: block;
+  color: #6a8288;
+  font-size: 11px;
+}
+.agent-panel .agent-grid strong {
+  display: block;
+  margin-top: 2px;
+  color: #2f4a51;
+  font-size: 13px;
+  word-break: break-all;
+}
+.agent-panel .agent-wide { grid-column: 1 / -1; }
+.agent-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.agent-actions .button { font-size: 12px; padding: 8px 12px; }
+.agent-note {
+  margin: 10px 0 0;
+  color: #6a8288;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
 .modal { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 20px; background: #6d858c4d; backdrop-filter: blur(6px); }
 .settings-card { width: min(760px, 100%); max-height: 90vh; overflow: auto; padding: 24px; }
 .settings-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }

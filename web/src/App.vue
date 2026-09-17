@@ -41,12 +41,85 @@ const modelVersions = computed(() => {
   return versions ? `${versions.scratch} + ${versions.missing_hole}` : '模型待加载'
 })
 const streamUrl = computed(() => `${API}/stream?view=${streamView.value}&v=${streamNonce.value}`)
+const agent = ref(null)
+let agentTimer
+const agentCycle = computed(() => agent.value?.last_cycle || null)
+const agentRoute = computed(() => agentCycle.value?.route?.selected || '—')
+const agentFault = computed(() => agentCycle.value?.fault || '无')
+const agentProposal = computed(() => {
+  const action = agentCycle.value?.proposed_action
+  if (!action) return '无提案'
+  return `${action.layer || '?'}:${action.name}`
+})
+const agentAuthority = computed(() => {
+  const gate = agentCycle.value?.authority_decision || {}
+  if (gate.execution_authority) return gate.execution_authority
+  return gate.note || '—'
+})
+const agentVerify = computed(() => agentCycle.value?.verify_level || agentCycle.value?.recovery_outcome || '—')
+const agentExecDetail = computed(() => {
+  const result = agentCycle.value?.control_result
+  if (!result) return '无'
+  const bits = [
+    result.request_id || null,
+    result.executed ? 'executed' : 'not-executed',
+    result.verify_level || null,
+    result.recovery_success === true ? 'ok' : (result.recovery_success === false ? 'fail' : null),
+  ].filter(Boolean)
+  return bits.join(' / ') || '无'
+})
+const canArmRecovery = computed(() =>
+  ownsControl.value
+  && agent.value?.available !== false
+  && agent.value?.execution_mode === 'execute_replay'
+  && !agent.value?.recovery_armed
+)
+const canDisarmRecovery = computed(() =>
+  ownsControl.value && Boolean(agent.value?.recovery_armed)
+)
 const healthItems = computed(() => [
   ['服务', true],
   ['相机', state.value?.source?.type === 'video' || state.value?.health?.camera?.opened],
   ['模型', state.value?.inspection?.model_loaded],
   ['串口', state.value?.source?.type === 'video' || state.value?.health?.serial?.connected],
+  ['Agent', Boolean(agent.value && agent.value.available !== false)],
+  ['4B', Boolean(agent.value?.llm_ready)],
 ])
+
+async function refreshAgent() {
+  try {
+    agent.value = await request('/agent/status')
+    if (agent.value && agent.value.available === undefined) agent.value.available = true
+  } catch (exc) {
+    agent.value = { available: false, error: exc.message, monitoring: false, llm_ready: false }
+  }
+}
+
+async function armRecovery() {
+  error.value = ''
+  busy.value = true
+  try {
+    agent.value = await request('/agent/recovery/arm', { method: 'POST', body: '{}' })
+    if (agent.value && agent.value.available === undefined) agent.value.available = true
+  } catch (exc) {
+    error.value = exc.message
+  } finally {
+    busy.value = false
+  }
+}
+
+async function disarmRecovery() {
+  error.value = ''
+  busy.value = true
+  try {
+    agent.value = await request('/agent/recovery/disarm', { method: 'POST', body: '{}' })
+    if (agent.value && agent.value.available === undefined) agent.value.available = true
+  } catch (exc) {
+    error.value = exc.message
+  } finally {
+    busy.value = false
+  }
+}
 
 async function request(path, options = {}) {
   const response = await fetch(`${API}${path}`, {
@@ -185,10 +258,15 @@ watch(() => settings.inference_profile, (profile, previous) => {
   if (profile === 'SPARSE') settings.inference_interval = 0.20
 })
 
-onMounted(() => session().catch((exc) => { error.value = exc.message }))
+onMounted(() => {
+  session().catch((exc) => { error.value = exc.message })
+  refreshAgent()
+  agentTimer = setInterval(refreshAgent, 2000)
+})
 onBeforeUnmount(() => {
   clearTimeout(reconnectTimer)
   clearInterval(heartbeatTimer)
+  clearInterval(agentTimer)
   socket?.close()
 })
 </script>
@@ -270,6 +348,31 @@ onBeforeUnmount(() => {
             <span>划痕阶段<b>{{ result ? result.timings.scratch.total_ms.toFixed(1)+' ms' : '—' }}</b></span>
             <span>缺口阶段<b>{{ result ? result.timings.missing_hole.total_ms.toFixed(1)+' ms' : '—' }}</b></span>
           </div>
+        </article>
+
+        <article class="panel agent-panel">
+          <div class="panel-head">
+            <div><span class="eyebrow">EDGEMEDIC AGENT</span><h2>4B 诊断状态</h2></div>
+            <b>{{ agent?.monitoring ? '监测中' : '未监测' }}</b>
+          </div>
+          <div class="agent-grid">
+            <div><span>服务</span><strong>{{ agent?.available === false ? '离线' : '在线' }}</strong></div>
+            <div><span>4B</span><strong>{{ agent?.llm_ready ? '就绪' : '未就绪' }}</strong></div>
+            <div><span>执行模式</span><strong>{{ agent?.execution_mode || '—' }}</strong></div>
+            <div><span>恢复武装</span><strong>{{ agent?.recovery_armed ? '是' : '否' }}</strong></div>
+            <div><span>故障</span><strong>{{ agentFault }}</strong></div>
+            <div><span>路由</span><strong>{{ agentRoute }}</strong></div>
+            <div><span>提案</span><strong>{{ agentProposal }}</strong></div>
+            <div><span>Authority</span><strong>{{ agentAuthority }}</strong></div>
+            <div><span>Verify</span><strong>{{ agentVerify }}</strong></div>
+            <div><span>已执行</span><strong>{{ agentCycle?.actually_executed ? '是' : '否' }}</strong></div>
+            <div class="agent-wide"><span>Control/Verify</span><strong>{{ agentExecDetail }}</strong></div>
+          </div>
+          <div class="agent-actions">
+            <button class="button" type="button" :disabled="busy || !canArmRecovery" @click="armRecovery">启用恢复授权</button>
+            <button class="button ghost" type="button" :disabled="busy || !canDisarmRecovery" @click="disarmRecovery">撤销恢复授权</button>
+          </div>
+          <p class="agent-note">开始检测仅开启监测；恢复授权需操作员显式启用，且仅当 Agent 以 execute_replay 运行（隔离 Replay）。停止检测会撤销授权并停止监测。</p>
         </article>
 
         <article class="panel stats-panel">
