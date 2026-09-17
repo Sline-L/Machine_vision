@@ -1,0 +1,51 @@
+{
+  "schema_version": "system-snapshot.v2",
+  "scenario": "L2_unknown_scratch",
+  "input_source": "SYNTHETIC",
+  "note": "Named UNKNOWN_SCRATCH_V5 has no L1 verb → L2. Does not change formal fault rules.",
+  "timestamp": 1720000099.0,
+  "camera": {
+    "opened": true,
+    "frame_seq": 2500,
+    "frame_age_ms": 40,
+    "health": 1.0,
+    "actual_fps": 30.0
+  },
+  "locator": {
+    "backend": "pt",
+    "latency_ms": 18.0,
+    "health": 1.0
+  },
+  "mission": {
+    "inspection_active": true,
+    "current_profile": "FULL",
+    "inspection_count": 88,
+    "utility": 0.5,
+    "emergency_hold": false
+  },
+  "serial": {
+    "connected": true,
+    "consecutive_failures": 0,
+    "health": 1.0
+  },
+  "system": {
+    "temperature_c": 65.0
+  },
+  "specialists": {
+    "scratch_v5": {
+      "loaded": true,
+      "health": 0.1,
+      "total_latency_ms": 80.0,
+      "error_count": 0
+    },
+    "missing_hole_v1": {
+      "loaded": true,
+      "health": 0.9,
+      "total_latency_ms": 45.0,
+      "error_count": 0
+    }
+  },
+  "inference": {
+    "pipeline": "dual_specialist"
+  }
+}
