@@ -99,6 +99,25 @@ class ScenarioDiagnosisTests(unittest.TestCase):
         self.assertIn("scratch_v5", norm)
         self.assertEqual(classify_fault(norm), None)
 
+    def test_live_l2_proposal_marked_live_not_executed(self):
+        snap = load_json(SCENARIO / "C_camera_stale.json")
+        mem = Memory()
+        mem.last_fire["CAMERA_STALE"] = mem.now()
+        report = diagnose(
+            snap,
+            memory=mem,
+            enable_memory=False,
+            live_l2_proposal={"tool": "restart_camera", "params": {}},
+            live_l2_meta={"latency_s": 1.2, "note": "LIVE INFERENCE (proposal only; not executed)"},
+            scenario="E_live_sim",
+            input_source="LIVE GET /api/state",
+        )
+        self.assertEqual(report["route"]["selected"], "L2")
+        self.assertTrue(report["l2"]["invoked_live"])
+        self.assertFalse(report["actually_executed"])
+        self.assertFalse(report["recovery_claimed"])
+        self.assertIn("LIVE", report["l2"]["note"])
+
 
 class DemoCliSafetyTests(unittest.TestCase):
     def test_demo_module_never_imports_mutating_runtime_loop(self):

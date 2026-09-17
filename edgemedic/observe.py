@@ -50,10 +50,16 @@ def diagnose(
     memory=None,
     enable_memory=True,
     historical_l2=None,
+    live_l2_proposal=None,
+    live_l2_meta=None,
     input_source="SYNTHETIC",
     scenario=None,
 ):
-    """Return a diagnosis report. Does not call Control, LLM, or mutate Runtime."""
+    """Return a diagnosis report. Does not call Control writes or mutate Runtime.
+
+    Optional live_l2_proposal is a pre-fetched {tool/name, params} from a caller that
+    already talked to the LLM. This module never opens HTTP to llama-server itself.
+    """
     started = time.perf_counter()
     snap = normalize_snapshot(snapshot)
     loop = memory if memory is not None else Memory()
@@ -76,8 +82,22 @@ def diagnose(
 
     proposed = l1 or mem_suggestion
     l2_used = False
+    l2_live = False
     l2_note = None
-    if proposed is None and historical_l2 is not None and fault:
+    if proposed is None and live_l2_proposal and fault:
+        tool = live_l2_proposal.get("tool") or live_l2_proposal.get("name")
+        if tool:
+            proposed = {
+                "name": tool,
+                "params": live_l2_proposal.get("params") or {},
+                "source": "reasoner",
+                "layer": "L2",
+                "rule": fault,
+                "request_id": f"L2-LIVE-{uuid.uuid4().hex[:8]}",
+            }
+            l2_live = True
+            l2_note = (live_l2_meta or {}).get("note") or "LIVE INFERENCE (proposal only; not executed)"
+    elif proposed is None and historical_l2 is not None and fault:
         proposed = {
             "name": historical_l2.get("tool") or historical_l2.get("name"),
             "params": historical_l2.get("params") or {},
@@ -99,7 +119,14 @@ def diagnose(
             confidence=0.8 if (proposed or {}).get("layer") == "MEM" else 1.0,
         )
 
-    route = _layers_trace(fault, l1, mem_suggestion, historical_l2 if l2_used else None)
+    route = _layers_trace(
+        fault,
+        l1,
+        mem_suggestion,
+        proposed if (l2_used or l2_live) and proposed and proposed.get("layer") == "L2" else None,
+    )
+    if l2_live:
+        route["L2"] = "live"
     elapsed_ms = round((time.perf_counter() - started) * 1000.0, 1)
     specialists = {
         "scratch_v5": (snap.get("scratch_v5") or {}),
@@ -131,9 +158,10 @@ def diagnose(
         "ACTUAL_EXECUTION_DISABLED": True,
         "recovery_claimed": False,
         "l2": {
-            "invoked_live": False,
+            "invoked_live": l2_live,
             "used_historical": l2_used,
             "note": l2_note,
+            "meta": live_l2_meta,
         },
         "evidence": None if incident is None else incident.get("evidence"),
         "system_view": {
@@ -144,6 +172,7 @@ def diagnose(
             "specialists": {
                 "scratch_loaded": specialists["scratch_v5"].get("loaded"),
                 "scratch_latency_ms": specialists["scratch_v5"].get("total_latency_ms"),
+                "scratch_health": specialists["scratch_v5"].get("health"),
                 "missing_loaded": specialists["missing_hole_v1"].get("loaded"),
                 "missing_latency_ms": specialists["missing_hole_v1"].get("total_latency_ms"),
             },

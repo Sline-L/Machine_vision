@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 """Midterm Agent observe-only demo.
 
-Does not mutate GearPro. Does not POST Control actions. Does not call live Qwen
-unless --live-l2 is explicitly requested (default: never).
+Does not mutate GearPro. Does not POST Control actions.
+Live L2 is optional (--live-l2) and never executes proposals.
 
-Usage (from repo root):
-  python tools/agent_midterm_demo.py
-  python tools/agent_midterm_demo.py --scenario A_healthy
-  python tools/agent_midterm_demo.py --scenario D_memory --memory on
-  python tools/agent_midterm_demo.py --scenario D_memory --memory off
-  python tools/agent_midterm_demo.py --show-frozen-abc
+Usage:
+  python tools/agent_midterm_demo.py --scenario all --show-frozen-abc
+  python tools/agent_midterm_demo.py --scenario E_live --control-url http://127.0.0.1:8787
+  python tools/agent_midterm_demo.py --scenario E_live --live-l2 --llm-url http://127.0.0.1:8080
 """
 
 from __future__ import annotations
@@ -27,6 +25,7 @@ if str(ROOT) not in sys.path:
 
 from edgemedic.memory import EpisodeStore
 from edgemedic.observe import diagnose, load_json, write_report
+from edgemedic.policy import Memory
 from edgemedic.readonly_client import ObserveOnlyViolation, ReadOnlyControlClient
 
 SCENARIO_DIR = ROOT / "docs" / "midterm" / "scenarios"
@@ -39,38 +38,72 @@ def _banner(title):
     print(f"\n{line}\n{title}\n{line}")
 
 
+def _panel(title, lines):
+    print(f"\n[{title}]")
+    for line in lines:
+        print(f"  {line}")
+
+
 def _print_report(report):
-    print(f"scenario:           {report.get('scenario')}")
-    print(f"input_source:       {report.get('input_source')}")
-    print(f"fault:              {report.get('fault')}")
-    print(f"diagnosis:          {report.get('diagnosis')}")
-    route = report.get("route") or {}
-    print(f"route.selected:     {route.get('selected')}")
-    print(f"route.L0/L1/MEM/L2: {route.get('L0')} / {route.get('L1')} / {route.get('MEM')} / {route.get('L2')}")
-    action = report.get("proposed_action")
-    if action:
-        print(f"proposed_action:    {action.get('name')} {action.get('params')}  [{action.get('layer')}]")
-    else:
-        print("proposed_action:    (none)")
-    print(f"execution_mode:     {report.get('execution_mode')}")
-    print(f"actually_executed:  {report.get('actually_executed')}")
-    print("ACTUAL EXECUTION DISABLED")
-    print(f"recovery_claimed:   {report.get('recovery_claimed')}  (must stay false in observe-only)")
-    l2 = report.get("l2") or {}
-    print(f"l2.live:            {l2.get('invoked_live')}  historical={l2.get('used_historical')}")
-    if l2.get("note"):
-        print(f"l2.note:            {l2.get('note')}")
     view = report.get("system_view") or {}
     cam = view.get("camera") or {}
     mission = view.get("mission") or {}
     specs = view.get("specialists") or {}
-    print(
-        f"state: camera opened={cam.get('opened')} age_ms={cam.get('frame_age_ms')} "
-        f"seq={cam.get('frame_seq')} | inspection_active={mission.get('inspection_active')} "
-        f"| T={view.get('temperature_c')}C | scratch_ms={specs.get('scratch_latency_ms')} "
-        f"missing_ms={specs.get('missing_latency_ms')}"
+    route = report.get("route") or {}
+    action = report.get("proposed_action")
+    auth = report.get("authority_decision") or {}
+    l2 = report.get("l2") or {}
+
+    _panel(
+        "1. System State",
+        [
+            f"input_source={report.get('input_source')}  scenario={report.get('scenario')}",
+            f"camera opened={cam.get('opened')} seq={cam.get('frame_seq')} age_ms={cam.get('frame_age_ms')} health={cam.get('health')}",
+            f"mission active={mission.get('inspection_active')} profile={view.get('profile')} T={view.get('temperature_c')}C",
+            f"scratch health={specs.get('scratch_health')} latency_ms={specs.get('scratch_latency_ms')} loaded={specs.get('scratch_loaded')}",
+            f"missing latency_ms={specs.get('missing_latency_ms')} loaded={specs.get('missing_loaded')}",
+        ],
     )
-    print(f"diagnose_ms:        {report.get('diagnose_ms')}")
+    _panel(
+        "2. Fault Diagnosis",
+        [
+            f"fault={report.get('fault')}",
+            f"diagnosis={report.get('diagnosis')}",
+            f"evidence={json.dumps(report.get('evidence') or {}, ensure_ascii=False)}",
+        ],
+    )
+    selected = route.get("selected")
+    marks = {
+        "L0": "*" if selected in ("L0",) else " ",
+        "L1": "*" if selected in ("L1", "L0") else " ",
+        "MEM": "*" if selected == "MEM" else " ",
+        "L2": "*" if selected == "L2" else " ",
+    }
+    _panel(
+        "3. Decision Path (*=selected)",
+        [
+            f"L0[{marks['L0']}]={route.get('L0')}  L1[{marks['L1']}]={route.get('L1')}  "
+            f"MEM[{marks['MEM']}]={route.get('MEM')}  L2[{marks['L2']}]={route.get('L2')}",
+            f"selected={selected}",
+        ],
+    )
+    _panel(
+        "4. Action & Safety",
+        [
+            f"proposed={None if not action else action.get('name')} {None if not action else action.get('params')} layer={None if not action else action.get('layer')}",
+            f"would_require_control_accept={auth.get('would_require_control_accept')}",
+            f"execution_mode={report.get('execution_mode')}  actually_executed={report.get('actually_executed')}",
+            "ACTUAL EXECUTION DISABLED",
+            f"recovery_claimed={report.get('recovery_claimed')} (must stay false here)",
+        ],
+    )
+    _panel(
+        "5. Result / Log",
+        [
+            f"l2.live={l2.get('invoked_live')} historical={l2.get('used_historical')} note={l2.get('note')}",
+            f"diagnose_ms={report.get('diagnose_ms')}  l2_meta={l2.get('meta')}",
+        ],
+    )
 
 
 def _load_scenario(name):
@@ -80,25 +113,107 @@ def _load_scenario(name):
     return load_json(path)
 
 
-def run_scenario(name, *, memory_mode="off", out_dir=None):
-    client = ReadOnlyControlClient()
+def _assert_readonly(client):
+    try:
+        client.post_action("restart_camera", {})
+    except ObserveOnlyViolation:
+        return
+    raise RuntimeError("ReadOnlyControlClient failed to block post_action")
+
+
+def _fetch_live_l2(llm_url, snapshot, overlay_paths, decode="grammar"):
+    """Call NX EdgeMedic reasoner if available. Never posts Control actions."""
+    saved_path = list(sys.path)
+    saved_mods = {k: sys.modules[k] for k in list(sys.modules) if k == "edgemedic" or k.startswith("edgemedic.")}
+    try:
+        for key in list(saved_mods):
+            del sys.modules[key]
+        overlays = [p for p in (overlay_paths or []) if p]
+        sys.path = overlays + [p for p in sys.path if p not in overlays and p != str(ROOT)]
+        try:
+            from edgemedic.reasoner import ReasonerError, complete_report  # type: ignore
+        except ImportError as exc:
+            return None, {"error": f"reasoner import failed: {exc}", "note": "LIVE L2 unavailable"}
+        try:
+            report = complete_report(
+                llm_url,
+                snapshot,
+                extra_note="If camera is stale prefer restart_camera. If unsure abstain with tool null.",
+                timeout=60.0,
+                decode=decode,
+            )
+        except ReasonerError as exc:
+            return None, {"error": str(exc), "note": "LIVE L2 failed"}
+        action = report.get("action")
+        meta = {
+            "note": "LIVE INFERENCE (proposal only; not executed)",
+            "latency_s": report.get("latency_s"),
+            "tokens": report.get("tokens"),
+            "decode": report.get("decode"),
+            "protocol_status": report.get("protocol_status") or report.get("invalid_class"),
+            "raw_preview": (report.get("raw") or "")[:240],
+        }
+        if not action:
+            meta["note"] = "LIVE INFERENCE returned abstain/invalid; no executable proposal"
+        return action, meta
+    finally:
+        sys.path[:] = saved_path
+        for key in list(sys.modules):
+            if key == "edgemedic" or key.startswith("edgemedic."):
+                del sys.modules[key]
+        sys.modules.update(saved_mods)
+
+
+def run_scenario(
+    name,
+    *,
+    memory_mode="off",
+    out_dir=None,
+    control_url=None,
+    live_l2=False,
+    llm_url=None,
+    overlay_paths=None,
+):
+    client = ReadOnlyControlClient(base_url=control_url)
+    overlay_paths = overlay_paths or []
+
+    if name == "E_live":
+        if not control_url:
+            raise SystemExit("E_live requires --control-url")
+        snap = client.get_state()
+        _assert_readonly(client)
+        live_prop = None
+        live_meta = None
+        # Pre-diagnose to see if L2 is needed, then optionally call LLM.
+        pre = diagnose(snap, enable_memory=False, input_source="LIVE GET /api/state", scenario="E_live_pre")
+        if live_l2 and pre.get("fault") and pre.get("proposed_action") is None:
+            live_prop, live_meta = _fetch_live_l2(llm_url, snap, overlay_paths)
+        elif live_l2:
+            live_meta = {
+                "note": "LIVE L2 skipped: no L2-needed fault (healthy or L1/MEM already proposed)",
+                "pre_fault": pre.get("fault"),
+                "pre_route": (pre.get("route") or {}).get("selected"),
+            }
+        report = diagnose(
+            snap,
+            enable_memory=False,
+            live_l2_proposal=live_prop,
+            live_l2_meta=live_meta,
+            input_source="LIVE GET /api/state",
+            scenario="E_live",
+        )
+        if out_dir:
+            write_report(Path(out_dir) / "E_live.json", report)
+        return report
+
     if name == "D_memory":
         snap = _load_scenario("C_camera_stale")
-        snap["scenario"] = f"D_memory_{memory_mode}"
-        historical = None
-        store = None
         enable_memory = memory_mode == "on"
         if enable_memory:
-            # Copy frozen episode file to a temp path so the demo never writes the original.
             with tempfile.TemporaryDirectory() as tmp:
                 dest = Path(tmp) / "episodes.json"
                 shutil.copy2(FROZEN_DIR / "episodes_camera_stale.json", dest)
                 store = EpisodeStore(dest)
-                # Force L1 miss by cooling? L1 will catch CAMERA_STALE first.
-                # For MEM demo we need L1 to miss: use a Memory that already fired CAMERA_STALE.
-                from edgemedic.policy import Memory
-                import time as _time
-
                 mem = Memory()
                 mem.last_fire["CAMERA_STALE"] = mem.now()
                 report = diagnose(
@@ -107,17 +222,14 @@ def run_scenario(name, *, memory_mode="off", out_dir=None):
                     memory=mem,
                     enable_memory=True,
                     input_source="SYNTHETIC+FROZEN_EPISODE",
-                    scenario=snap["scenario"],
+                    scenario="D_memory_on",
                 )
-                # EpisodeStore may try to save; isolate by discarding temp dir after.
                 client.bind_snapshot(snap)
                 _assert_readonly(client)
                 if out_dir:
-                    write_report(Path(out_dir) / f"{snap['scenario']}.json", report)
+                    write_report(Path(out_dir) / "D_memory_on.json", report)
                 return report
         historical = load_json(FROZEN_DIR / "l2_camera_stale_historical.json")
-        from edgemedic.policy import Memory
-
         mem = Memory()
         mem.last_fire["CAMERA_STALE"] = mem.now()
         report = diagnose(
@@ -127,7 +239,7 @@ def run_scenario(name, *, memory_mode="off", out_dir=None):
             enable_memory=False,
             historical_l2=historical,
             input_source="SYNTHETIC+FROZEN REPLAY",
-            scenario=f"D_memory_off",
+            scenario="D_memory_off",
         )
         client.bind_snapshot(snap)
         _assert_readonly(client)
@@ -149,14 +261,6 @@ def run_scenario(name, *, memory_mode="off", out_dir=None):
     return report
 
 
-def _assert_readonly(client):
-    try:
-        client.post_action("restart_camera", {})
-    except ObserveOnlyViolation:
-        return
-    raise RuntimeError("ReadOnlyControlClient failed to block post_action")
-
-
 def show_frozen_abc():
     data = load_json(FROZEN_DIR / "demo_abc_historical.json")
     _banner("FROZEN REPLAY — Demo A/B/C (NOT a live recovery run)")
@@ -167,13 +271,22 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description="EdgeMedic midterm observe-only Agent demo")
     parser.add_argument(
         "--scenario",
-        choices=("A_healthy", "B_inspection_paused", "C_camera_stale", "D_memory", "all"),
+        choices=("A_healthy", "B_inspection_paused", "C_camera_stale", "D_memory", "E_live", "all"),
         default="all",
     )
     parser.add_argument("--memory", choices=("on", "off"), default="on", help="for D_memory only")
     parser.add_argument("--show-frozen-abc", action="store_true")
     parser.add_argument("--json-out", type=Path, default=OUT_DIR)
     parser.add_argument("--quiet", action="store_true")
+    parser.add_argument("--control-url", default=None, help="e.g. http://127.0.0.1:8787 for E_live")
+    parser.add_argument("--live-l2", action="store_true", help="optional LIVE L2 proposal (never executes)")
+    parser.add_argument("--llm-url", default="http://127.0.0.1:8080")
+    parser.add_argument(
+        "--overlay-path",
+        action="append",
+        default=[],
+        help="path containing NX edgemedic reasoner (repeatable)",
+    )
     args = parser.parse_args(argv)
 
     _banner("EdgeMedic Midterm Demo — OBSERVE ONLY")
@@ -181,11 +294,15 @@ def main(argv=None):
     print("Control POST /api/action is structurally forbidden by ReadOnlyControlClient")
     print(f"repo: {ROOT}")
 
-    if args.show_frozen_abc:
+    if args.show_frozen_abc and args.scenario != "all":
         show_frozen_abc()
 
     out_dir = args.json_out
     out_dir.mkdir(parents=True, exist_ok=True)
+    overlays = args.overlay_path or [
+        "/home/jetson/Projects/edgemedic-live",
+        str(ROOT.parent / "Machine_vision"),
+    ]
 
     names = []
     if args.scenario == "all":
@@ -205,12 +322,20 @@ def main(argv=None):
     for name, mem in names:
         label = name if mem is None else f"{name} memory={mem}"
         _banner(f"Scenario {label}")
-        report = run_scenario(name, memory_mode=mem or "off", out_dir=out_dir)
+        report = run_scenario(
+            name,
+            memory_mode=mem or "off",
+            out_dir=out_dir,
+            control_url=args.control_url,
+            live_l2=args.live_l2,
+            llm_url=args.llm_url,
+            overlay_paths=overlays,
+        )
         reports.append(report)
         if not args.quiet:
             _print_report(report)
 
-    if args.scenario == "all" or args.show_frozen_abc:
+    if args.scenario == "all":
         show_frozen_abc()
 
     _banner("Summary")
