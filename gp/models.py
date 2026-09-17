@@ -12,27 +12,51 @@ from .types import GearObservation, InspectionResult
 class TwoStageInspector:
     """Locate gear ROIs, then run Scratch V5 and Missing Hole V1."""
 
-    def __init__(self, config):
+    def __init__(self, config, load_status=None):
+        self.config = config
+        self.last_stage_error = None
+        status = load_status if load_status is not None else {}
+        for key in ("locator", "scratch_v5", "missing_hole_v1"):
+            status.setdefault(key, "unknown")
         config.validate_models()
         from ultralytics import YOLO
 
-        self.config = config
-        # Locator is a Ultralytics `.pt` or NX-built `.engine` via GEARPRO_MODEL1.
-        self.locator = YOLO(str(config.locator_model), task="detect")
-        self.model2 = ScratchV5Runtime(config.model2_config)
-        self.missing_hole = MissingHoleRuntime(
-            config.missing_hole_config,
-            device=str(self.model2.device),
-        )
+        try:
+            # Locator is a Ultralytics `.pt` or NX-built `.engine` via GEARPRO_MODEL1.
+            self.locator = YOLO(str(config.locator_model), task="detect")
+            status["locator"] = "loaded"
+        except Exception:
+            status["locator"] = "failed"
+            raise
+        try:
+            self.model2 = ScratchV5Runtime(config.model2_config)
+            status["scratch_v5"] = "loaded"
+        except Exception:
+            status["scratch_v5"] = "failed"
+            raise
+        try:
+            self.missing_hole = MissingHoleRuntime(
+                config.missing_hole_config,
+                device=str(self.model2.device),
+            )
+            status["missing_hole_v1"] = "loaded"
+        except Exception:
+            status["missing_hole_v1"] = "failed"
+            raise
 
     def inspect(self, frame):
         started = time.perf_counter()
-        located = self.locator.predict(
-            source=frame,
-            conf=self.config.locator_confidence,
-            iou=self.config.locator_iou,
-            verbose=False,
-        )[0]
+        self.last_stage_error = None
+        try:
+            located = self.locator.predict(
+                source=frame,
+                conf=self.config.locator_confidence,
+                iou=self.config.locator_iou,
+                verbose=False,
+            )[0]
+        except Exception as exc:
+            self.last_stage_error = ("locator", str(exc))
+            raise
         locator_ms = (time.perf_counter() - started) * 1000
         observations = []
         annotated = frame.copy()
@@ -46,8 +70,16 @@ class TwoStageInspector:
                 crop, crop_box = self._crop_with_margin(frame, coordinates)
                 if crop.size == 0:
                     raise ValueError("Model1 生成了空齿轮 ROI")
-                scratch = self.model2.predict(crop)
-                missing = self.missing_hole.predict(crop)
+                try:
+                    scratch = self.model2.predict(crop)
+                except Exception as exc:
+                    self.last_stage_error = ("scratch_v5", str(exc))
+                    raise
+                try:
+                    missing = self.missing_hole.predict(crop)
+                except Exception as exc:
+                    self.last_stage_error = ("missing_hole_v1", str(exc))
+                    raise
                 cls1_ms += scratch.classifier1_latency_ms
                 cls2_ms += scratch.classifier2_latency_ms
                 det_ms += scratch.detector_latency_ms

@@ -21,6 +21,8 @@ class InspectionWorker:
         self._inspector = None
         self.inspect_count = 0
         self._inspect_lock = threading.Lock()
+        self.load_status = {"locator": "unknown", "scratch_v5": "unknown", "missing_hole_v1": "unknown"}
+        self.last_error_source = "unknown"
 
     def bump_inspect(self):
         with self._inspect_lock:
@@ -58,13 +60,30 @@ class InspectionWorker:
                 try:
                     if self._inspector is None:
                         self.on_status("正在加载定位与双专项模型…")
-                        self._inspector = TwoStageInspector(self.config)
+                        status = {
+                            "locator": "unknown",
+                            "scratch_v5": "unknown",
+                            "missing_hole_v1": "unknown",
+                        }
+                        self.load_status = status
+                        self._inspector = TwoStageInspector(self.config, load_status=status)
                     if self.config.video_path is not None:
                         self._inspect_video(self._inspector)
                     else:
                         self._inspect_camera(self._inspector)
                 except Exception as exc:
                     self._active_event.clear()
+                    source = "unknown"
+                    if self._inspector is not None:
+                        stage = getattr(self._inspector, "last_stage_error", None)
+                        if stage:
+                            source = stage[0]
+                    else:
+                        for name in ("missing_hole_v1", "scratch_v5", "locator"):
+                            if self.load_status.get(name) == "failed":
+                                source = name
+                                break
+                    self.last_error_source = source
                     self.on_error(f"{type(exc).__name__}: {exc}")
         finally:
             self.on_status("检测服务已停止")
@@ -110,7 +129,15 @@ class InspectionWorker:
                     return
                 self.frame_store.publish(frame)
                 self.bump_inspect()
-                self.on_result(inspector.inspect(frame))
+                result = inspector.inspect(frame)
+                ended = time.monotonic()
+                latest = self.frame_store.read()
+                result.source_frame_seq = latest.sequence
+                result.source_capture_ts = started
+                result.inspection_start_ts = started
+                result.inspection_end_ts = ended
+                result.latest_frame_seq_at_completion = latest.sequence
+                self.on_result(result)
                 remaining = frame_period - (time.monotonic() - started)
                 if remaining > 0:
                     self._interrupt_event.wait(remaining)
@@ -122,6 +149,7 @@ class InspectionWorker:
         self.pause()
         time.sleep(max(0.12, float(getattr(self.config, "inference_interval", 0.1)) + 0.05))
         self._inspector = None
+        self.load_status = {"locator": "unknown", "scratch_v5": "unknown", "missing_hole_v1": "unknown"}
 
     def stop_service(self):
         self._active_event.clear()

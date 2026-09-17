@@ -102,6 +102,9 @@ def build_snapshot(
     inspection_active=False,
     scratch_errors=0,
     schema_version="system-snapshot.v2",
+    specialist_status=None,
+    inspect_count=None,
+    last_error_source="unknown",
 ):
     if schema_version not in {"system-snapshot.v1", "system-snapshot.v2"}:
         raise ValueError(f"不支持的快照版本：{schema_version}")
@@ -164,6 +167,7 @@ def build_snapshot(
             "output_valid": last_result is not None,
             "inspection_rate_hz": None,
             "current_profile": getattr(config, "inference_profile", "FULL"),
+            "inspection_count": None if inspect_count is None else int(inspect_count),
             "utility": mission_utility(
                 getattr(config, "inference_profile", "FULL"),
                 last_result is not None,
@@ -171,39 +175,98 @@ def build_snapshot(
             ),
         },
     }
-    scratch = {
-        "profile": "FULL",
-        "classifier1_latency_ms": None if last_result is None else last_result.classifier1_latency_ms,
-        "classifier2_latency_ms": None if last_result is None else last_result.classifier2_latency_ms,
-        "detector_latency_ms": None if last_result is None else last_result.detector_latency_ms,
-        "fusion_latency_ms": None if last_result is None else last_result.fusion_latency_ms,
-        "total_latency_ms": v5_total,
-        "detector_enabled": True,
-        "classifiers_enabled": True,
-        "error_count": int(scratch_errors),
-        "health": round(v5_h, 4),
-    }
+    status = specialist_status or {}
+    scratch = _specialist_block(
+        "scratch_v5",
+        last_result,
+        v5_total,
+        v5_h,
+        status,
+        last_error_source,
+        scratch_errors,
+        include_shared_error_count=True,
+        latency_fields={
+            "classifier1_latency_ms": None if last_result is None else last_result.classifier1_latency_ms,
+            "classifier2_latency_ms": None if last_result is None else last_result.classifier2_latency_ms,
+            "detector_latency_ms": None if last_result is None else last_result.detector_latency_ms,
+            "fusion_latency_ms": None if last_result is None else last_result.fusion_latency_ms,
+        },
+    )
     if schema_version == "system-snapshot.v1":
         snapshot["scratch_v5"] = scratch
         return snapshot
 
-    missing = {
-        "profile": "FULL",
-        "classifier1_latency_ms": None if last_result is None else last_result.missing_hole_classifier1_latency_ms,
-        "classifier2_latency_ms": None if last_result is None else last_result.missing_hole_classifier2_latency_ms,
-        "detector_latency_ms": None if last_result is None else last_result.missing_hole_detector_latency_ms,
-        "fusion_latency_ms": None if last_result is None else last_result.missing_hole_fusion_latency_ms,
-        "total_latency_ms": missing_total,
-        "detector_enabled": True,
-        "classifiers_enabled": True,
-        "error_count": int(scratch_errors),
-        "health": round(missing_h, 4),
-    }
+    missing = _specialist_block(
+        "missing_hole_v1",
+        last_result,
+        missing_total,
+        missing_h,
+        status,
+        last_error_source,
+        scratch_errors,
+        include_shared_error_count=False,
+        latency_fields={
+            "classifier1_latency_ms": None if last_result is None else last_result.missing_hole_classifier1_latency_ms,
+            "classifier2_latency_ms": None if last_result is None else last_result.missing_hole_classifier2_latency_ms,
+            "detector_latency_ms": None if last_result is None else last_result.missing_hole_detector_latency_ms,
+            "fusion_latency_ms": None if last_result is None else last_result.missing_hole_fusion_latency_ms,
+        },
+    )
     total = None if last_result is None else v5_total + missing_total
     snapshot["specialists"] = {"scratch_v5": scratch, "missing_hole_v1": missing}
     snapshot["inference"] = {
         "total_specialist_latency_ms": total,
         "health": round(min(v5_h, missing_h), 4),
         "error_count": int(scratch_errors),
+        "error_attribution": "shared_worker" if last_error_source == "unknown" else last_error_source,
     }
     return snapshot
+
+
+def _specialist_block(
+    name,
+    last_result,
+    total_latency_ms,
+    health,
+    status,
+    last_error_source,
+    shared_worker_errors,
+    include_shared_error_count,
+    latency_fields,
+):
+    load = (status or {}).get(name, "unknown")
+    if load == "loaded":
+        loaded = True
+    elif load == "failed":
+        loaded = False
+    else:
+        loaded = None
+    infer_ok = None if last_result is None else total_latency_ms is not None
+    if loaded is False:
+        infer_ok = False
+    error_state = "unknown"
+    independent_count = None
+    if load == "failed":
+        error_state = "load_failed"
+        independent_count = 1
+    elif last_error_source == name:
+        error_state = "infer_failed"
+        independent_count = 1
+    elif loaded is True and last_result is not None:
+        error_state = "none"
+        independent_count = 0
+    block = {
+        "profile": "FULL",
+        **latency_fields,
+        "total_latency_ms": total_latency_ms,
+        "detector_enabled": True,
+        "classifiers_enabled": True,
+        "health": round(health, 4),
+        "loaded": loaded,
+        "infer_ok": infer_ok,
+        "last_valid_output": bool(last_result is not None and total_latency_ms is not None),
+        "last_output_frame_seq": None if last_result is None else last_result.source_frame_seq,
+        "error_state": error_state,
+        "error_count": int(shared_worker_errors) if include_shared_error_count else independent_count,
+    }
+    return block
