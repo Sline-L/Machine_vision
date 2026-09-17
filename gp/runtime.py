@@ -15,6 +15,7 @@ from .config import PERSISTED_FIELDS, RUNTIME_ROOT, load_last_known_good_snapsho
 from .control_view import as_control_view
 from .frames import LatestFrame
 from .guardian import thermal_alarm, thermal_stop_needed
+from .replay import ReplayCapture
 from .serial_io import SerialOutput
 from .telemetry import build_snapshot, camera_health, locator_backend
 from .types import InspectionStats
@@ -27,7 +28,7 @@ class GearProRuntime:
         self.config = config
         self.raw_frames = LatestFrame()
         self.annotated_frames = LatestFrame()
-        self.camera = CameraCapture(config, self.raw_frames)
+        self.camera = self._make_capture()
         self.serial = SerialOutput(config.serial_port, config.serial_baudrate)
         self.stats = InspectionStats()
         self.last_result = None
@@ -67,6 +68,13 @@ class GearProRuntime:
             self.config.serial_enabled = False
             self.status = "正在准备视频测试…"
             self.start_inspection()
+        elif self.config.replay_dir is not None:
+            self.config.serial_enabled = False
+            if self.camera.start():
+                self.status = "数据集回放已连接"
+                self.start_inspection()
+            else:
+                self.status = self.camera.error_message or "数据集回放失败"
         elif self.camera.start():
             self.status = "摄像头已连接"
         else:
@@ -92,9 +100,27 @@ class GearProRuntime:
     def inspection_active(self):
         return self.worker.active
 
+    def _make_capture(self):
+        if self.config.replay_dir is not None:
+            return ReplayCapture(self.config, self.raw_frames, on_complete=self._on_replay_complete)
+        return CameraCapture(self.config, self.raw_frames)
+
+    def _bind_capture(self):
+        previous = getattr(self, "camera", None)
+        if previous is not None:
+            previous.stop()
+        self.camera = self._make_capture()
+
+    def _on_replay_complete(self):
+        self.stop_inspection("数据集回放完成")
+
     @property
     def source(self):
-        return "video" if self.config.video_path is not None else "camera"
+        if self.config.video_path is not None:
+            return "video"
+        if self.config.replay_dir is not None:
+            return "replay"
+        return "camera"
 
     def start_inspection(self):
         self._reject_if_emergency("开始检测")
@@ -104,7 +130,7 @@ class GearProRuntime:
             self.assert_emergency_hold()
             raise RuntimeError("温度保护仍有效，不能开始检测")
         if self.config.video_path is None and not self.camera.opened:
-            raise RuntimeError(self.camera.error_message or "摄像头未连接")
+            raise RuntimeError(self.camera.error_message or "画面源未连接")
         if self.config.video_path is not None and not self.config.video_path.is_file():
             raise RuntimeError(f"找不到视频：{self.config.video_path}")
         with self._lock:

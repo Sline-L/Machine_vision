@@ -414,7 +414,7 @@ def assess_pause(params, before, after, extras):
 
 
 def assess_resume(params, before, after, extras):
-    del params, before
+    del before
     extras = extras or {}
     if extras.get("emergency_hold"):
         return "none", "紧急停机锁存或温度保护仍有效，拒绝 resume_inspection"
