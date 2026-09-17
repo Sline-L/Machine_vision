@@ -1,0 +1,14 @@
+{
+  "protocol": "p0-final-post-stop-disarm",
+  "observed_via": "GUI stop detection + GET http://127.0.0.1:8790/status",
+  "agent": {
+    "monitoring": false,
+    "recovery_armed": false,
+    "execution_mode": "execute_replay",
+    "llm_ready": true,
+    "pid": 76506
+  },
+  "gui_screenshot": "final-05-stopped-disarmed.png",
+  "note": "Stop检测 triggers monitor/stop which clears monitoring and recovery_armed. Agent ticks do not mutate while monitoring=false.",
+  "result": "PASS"
+}

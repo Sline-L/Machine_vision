@@ -1,0 +1,23 @@
+{
+  "freeze_id": "midterm-p0-final-system-2026-09-17",
+  "git_branch": "integration/dual-specialist-edgemedic",
+  "primary_request_id": "L2-725fb29d",
+  "evidence_dir": "docs/midterm/runs/p0/final_system",
+  "claims": {
+    "gui_start_monitoring": true,
+    "gui_explicit_arm": true,
+    "inject_only_no_run_once": true,
+    "resident_agent_l2_real_4b": true,
+    "authority_control_execute_verify": true,
+    "verify_level": "mission",
+    "gui_live_agent_panel": true,
+    "stop_auto_disarm": true
+  },
+  "not_done": [
+    "systemd /etc install",
+    "production :8787 mutate",
+    "9B",
+    "research-level ASR/MTTR"
+  ],
+  "note": "Mechanism demonstrated on isolated Replay; research-level effectiveness not claimed."
+}
