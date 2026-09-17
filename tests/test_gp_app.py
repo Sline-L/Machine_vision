@@ -1,3 +1,4 @@
+from pathlib import Path
 import unittest
 
 from gp.app import build_parser
@@ -13,7 +14,7 @@ class CommandLineTests(unittest.TestCase):
         args = build_parser().parse_args(
             ["--video", "fixtures/gears.mp4", "--host", "127.0.0.1", "--port", "9000"]
         )
-        self.assertEqual(str(args.video), "fixtures/gears.mp4")
+        self.assertEqual(Path(args.video), Path("fixtures/gears.mp4"))
         self.assertEqual((args.host, args.port), ("127.0.0.1", 9000))
 
 

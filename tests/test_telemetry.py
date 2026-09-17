@@ -78,6 +78,11 @@ class SnapshotTests(unittest.TestCase):
         self.assertEqual(snapshot["mission"]["current_profile"], "FULL")
         self.assertEqual(snapshot["mission"]["utility"], 0.8)
         self.assertEqual(snapshot["serial"]["consecutive_failures"], 2)
+        missing = snapshot["specialists"]["missing_hole_v1"]
+        self.assertIsNone(missing["error_count"])
+        self.assertEqual(missing["error_state"], "unknown")
+        self.assertIsNone(missing["loaded"])
+        self.assertIn("inspection_count", snapshot["mission"])
 
     def test_v1_snapshot_remains_available(self):
         snapshot = build_snapshot(
@@ -111,6 +116,32 @@ class SnapshotTests(unittest.TestCase):
         )
         self.assertEqual(snapshot["mission"]["current_profile"], "SPARSE")
         self.assertEqual(snapshot["mission"]["utility"], 0.45)
+
+    def test_missing_hole_load_failure_does_not_copy_scratch_errors(self):
+        snapshot = build_snapshot(
+            AppConfig(),
+            LatestFrame(),
+            camera_opened=True,
+            camera_device="/dev/video0",
+            read_failures=0,
+            actual_fps=12.0,
+            serial=None,
+            last_result=None,
+            inspection_active=False,
+            scratch_errors=3,
+            specialist_status={"scratch_v5": "loaded", "missing_hole_v1": "failed", "locator": "loaded"},
+            last_error_source="missing_hole_v1",
+            inspect_count=4,
+        )
+        scratch = snapshot["specialists"]["scratch_v5"]
+        missing = snapshot["specialists"]["missing_hole_v1"]
+        self.assertEqual(scratch["loaded"], True)
+        self.assertEqual(missing["loaded"], False)
+        self.assertEqual(missing["error_state"], "load_failed")
+        self.assertEqual(missing["error_count"], 1)
+        self.assertEqual(scratch["error_count"], 3)
+        self.assertNotEqual(scratch["error_count"], missing["error_count"])
+        self.assertEqual(snapshot["mission"]["inspection_count"], 4)
 
 
 class SerialStatsTests(unittest.TestCase):

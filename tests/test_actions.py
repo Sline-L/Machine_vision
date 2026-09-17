@@ -113,7 +113,7 @@ class ActionContractTests(unittest.TestCase):
             def control_extras(self):
                 return {"source": "agent"}
 
-            def execute_action(self, name, params):
+            def execute_action(self, name, params, authority=None):
                 del name, params
                 raise AssertionError("human-only action must not execute")
 
@@ -134,7 +134,7 @@ class ActionContractTests(unittest.TestCase):
             def control_extras(self):
                 return {"source": "reasoner"}
 
-            def execute_action(self, name, params):
+            def execute_action(self, name, params, authority=None):
                 del name, params
                 raise AssertionError("dry_run must not execute")
 

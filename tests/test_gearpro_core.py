@@ -21,6 +21,14 @@ from gp.scratch_v5 import (
 from gp.types import GearObservation, InspectionResult, InspectionStats
 
 
+def _torch_available():
+    try:
+        import torch  # noqa: F401
+    except ImportError:
+        return False
+    return True
+
+
 class ConfigTests(unittest.TestCase):
     def test_default_model_paths_use_project_model_directory(self):
         config = AppConfig()
@@ -57,7 +65,10 @@ class ConfigTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "model2.json"
             path.write_text(json.dumps({"default_threshold": 0.412345}), encoding="utf-8")
-            with patch.dict(os.environ, {"GEARPRO_MODEL2": str(path)}):
+            # Isolate from local var/settings.json (default args bind SETTINGS_FILE at import).
+            with patch.object(AppConfig, "load_persisted", return_value=set()), patch.dict(
+                os.environ, {"GEARPRO_MODEL2": str(path)}, clear=False
+            ):
                 config = AppConfig.from_environment()
         self.assertAlmostEqual(config.scratch_threshold, 0.412345)
         self.assertAlmostEqual(config.scratch_model_default_threshold, 0.412345)
@@ -121,12 +132,13 @@ class ScratchV5Tests(unittest.TestCase):
             config_path = root / "inference_config.json"
             config_path.write_text(json.dumps(config), encoding="utf-8")
             loaded = load_model2_config(config_path)
-            self.assertEqual(loaded["classifiers"][0]["weights"], root / "one.pt")
+            self.assertTrue(os.path.samefile(loaded["classifiers"][0]["weights"], root / "one.pt"))
             config["detector"]["sha256"] = "0" * 64
             config_path.write_text(json.dumps(config), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "权重校验失败"):
                 load_model2_config(config_path)
 
+    @unittest.skipUnless(_torch_available(), "PyTorch not installed in this environment")
     def test_real_model_bundle_loads_on_cpu(self):
         runtime = ScratchV5Runtime(
             PROJECT_ROOT / "model" / "model2" / "inference_config.json",
@@ -172,12 +184,13 @@ class MissingHoleV1Tests(unittest.TestCase):
             config_path = root / "inference_config.json"
             config_path.write_text(json.dumps(config), encoding="utf-8")
             loaded = load_missing_hole_config(config_path)
-            self.assertEqual(loaded["models"][0]["weights"], root / "one.pt")
+            self.assertTrue(os.path.samefile(loaded["models"][0]["weights"], root / "one.pt"))
             config["models"][2]["sha256"] = "0" * 64
             config_path.write_text(json.dumps(config), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "权重校验失败"):
                 load_missing_hole_config(config_path)
 
+    @unittest.skipUnless(_torch_available(), "PyTorch not installed in this environment")
     def test_real_model_bundle_loads_on_cpu(self):
         runtime = MissingHoleRuntime(
             PROJECT_ROOT / "model" / "missing_hole_v1" / "inference_config.json",

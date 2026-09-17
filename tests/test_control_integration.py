@@ -54,11 +54,14 @@ class ControlViewTests(unittest.TestCase):
         self.assertIn("scratch_v5", view)
         self.assertFalse(view["control_view"]["dual_specialist_mission_verified"])
         self.assertEqual(health["schema_version"], "system-snapshot.v2")
+        missing = health["specialists"]["missing_hole_v1"]
+        self.assertIsNone(missing["error_count"])
+        self.assertEqual(missing["error_state"], "unknown")
 
     def test_resume_is_not_marked_recovered(self):
         level, note = cap_verify_level("resume_inspection", {}, "mission")
         self.assertEqual(level, "config")
-        self.assertIn("6.3", note)
+        self.assertIn("证据不足", note)
         level, note = cap_verify_level("set_inference_profile", {"profile": "SAFE_STOP"}, "mission")
         self.assertEqual(level, "mission")
         self.assertIsNone(note)
@@ -110,8 +113,8 @@ class ControlServiceCapTests(unittest.TestCase):
             def control_extras(self):
                 return {"worker_failed": False, "inspection_can_run": True}
 
-            def execute_action(self, name, params):
-                del name, params
+            def execute_action(self, name, params, authority=None):
+                del name, params, authority
                 return {}
 
         result = ControlService(_Runtime()).run_action(
@@ -122,7 +125,7 @@ class ControlServiceCapTests(unittest.TestCase):
         self.assertTrue(result["executed"])
         self.assertFalse(result["recovery_success"])
         self.assertEqual(result["verify_level"], "config")
-        self.assertIn("6.3", result["error"] or "")
+        self.assertFalse(result["mission_verified"])
 
 
 class RuntimeHoldTests(unittest.TestCase):
