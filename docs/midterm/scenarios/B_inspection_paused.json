@@ -1,0 +1,25 @@
+{
+  "scenario": "B_inspection_paused",
+  "input_source": "SYNTHETIC",
+  "schema_version": "system-snapshot.v2",
+  "system": {"temperature_c": 64.0},
+  "camera": {
+    "opened": true,
+    "frame_seq": 1200,
+    "frame_age_ms": 40,
+    "read_failures": 0,
+    "health": 1.0
+  },
+  "locator": {"backend": "pt", "loaded": true, "latency_ms": 16.0, "health": 1.0},
+  "specialists": {
+    "scratch_v5": {"total_latency_ms": null, "error_count": 0, "loaded": true, "health": 0.5},
+    "missing_hole_v1": {"total_latency_ms": null, "error_count": null, "loaded": true, "error_state": "unknown", "health": 0.5}
+  },
+  "serial": {"connected": true, "consecutive_failures": 0, "health": 1.0},
+  "mission": {
+    "inspection_active": false,
+    "output_valid": false,
+    "current_profile": "FULL",
+    "utility": 0.3
+  }
+}

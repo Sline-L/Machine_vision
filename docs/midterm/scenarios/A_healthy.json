@@ -1,0 +1,39 @@
+{
+  "scenario": "A_healthy",
+  "input_source": "SYNTHETIC",
+  "schema_version": "system-snapshot.v2",
+  "system": {"temperature_c": 62.0, "cpu_percent": 30.0},
+  "camera": {
+    "device": "/dev/video0",
+    "opened": true,
+    "frame_seq": 2400,
+    "frame_age_ms": 35,
+    "read_failures": 0,
+    "health": 1.0
+  },
+  "locator": {"backend": "pt", "loaded": true, "latency_ms": 18.0, "health": 1.0},
+  "specialists": {
+    "scratch_v5": {
+      "total_latency_ms": 55.0,
+      "error_count": 0,
+      "loaded": true,
+      "last_valid_output": true,
+      "health": 0.9
+    },
+    "missing_hole_v1": {
+      "total_latency_ms": 48.0,
+      "error_count": null,
+      "loaded": true,
+      "last_valid_output": true,
+      "error_state": "none",
+      "health": 0.9
+    }
+  },
+  "serial": {"connected": true, "consecutive_failures": 0, "health": 1.0},
+  "mission": {
+    "inspection_active": true,
+    "output_valid": true,
+    "current_profile": "FULL",
+    "utility": 0.95
+  }
+}

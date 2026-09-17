@@ -13,3 +13,5 @@ web/node_modules/
 *.onnx
 .idea/
 .vscode/
+docs/midterm/runs/*.json
+
