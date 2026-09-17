@@ -1,0 +1,427 @@
+{
+  "protocol": "p0-natural-l2-stale-v1",
+  "control_url": "http://127.0.0.1:8788",
+  "live_fault": "CAMERA_STALE",
+  "camera": {
+    "device": "None",
+    "opened": true,
+    "frame_seq": 227,
+    "actual_fps": 0.0,
+    "frame_age_ms": 4108.489236999958,
+    "read_failures": 0,
+    "health": 0.0
+  },
+  "disable_l1": false,
+  "l1_on_cooldown": true,
+  "l1_would_fire_without_cooldown": true,
+  "cycle": {
+    "fault": "CAMERA_STALE",
+    "diagnosis": "camera stream is stale or closed",
+    "route": {
+      "selected": "L2",
+      "l1_hit": false,
+      "memory_hit": false,
+      "l2_invoked": true,
+      "why_l2": [
+        "no_l1_or_mem_proposal"
+      ],
+      "disable_l1": false
+    },
+    "proposed_action": {
+      "name": "restart_camera",
+      "params": {},
+      "layer": "L2",
+      "source": "reasoner"
+    },
+    "authority_decision": {
+      "action_risk_class": "AUTO_LOW_RISK",
+      "execution_authority": "AUTO_LOW_RISK",
+      "would_execute": true
+    },
+    "execution_mode": "execute_replay",
+    "actually_executed": true,
+    "control_result": {
+      "request_id": "L2-c8d9d2dd",
+      "accepted": true,
+      "executed": true,
+      "verified": true,
+      "config_verified": true,
+      "recovery_success": true,
+      "function_verified": true,
+      "mission_verified": false,
+      "verify_level": "function",
+      "authority": {
+        "action_risk_class": "AUTO_LOW_RISK",
+        "execution_authority": "AUTO_LOW_RISK",
+        "would_execute": true
+      },
+      "source": "reasoner",
+      "error": null,
+      "snapshot_before": {
+        "schema_version": "gearpro-control-view.v1",
+        "timestamp": "2026-09-17T14:21:40.388Z",
+        "system": {
+          "cpu_percent": 21.1,
+          "ram_used_mb": 12169.0859375,
+          "ram_percent": 77.7,
+          "gpu_util": null,
+          "gpu_mem_mb": null,
+          "temperature_c": 64.875,
+          "power_w": null
+        },
+        "camera": {
+          "device": "None",
+          "opened": true,
+          "frame_seq": 227,
+          "actual_fps": 0.0,
+          "frame_age_ms": 6850.117367999701,
+          "read_failures": 0,
+          "health": 0.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 40.29577399978734,
+          "gears_found": 1,
+          "confidence_mean": 0.7999,
+          "health": 0.9963
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": false,
+          "last_send_ok": null,
+          "consecutive_failures": 0,
+          "last_error": null,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "inspection_rate_hz": null,
+          "current_profile": "FULL",
+          "inspection_count": 3,
+          "utility": 1.0
+        },
+        "specialists": {
+          "scratch_v5": {
+            "profile": "FULL",
+            "classifier1_latency_ms": 52.75089399947319,
+            "classifier2_latency_ms": 28.251079999790818,
+            "detector_latency_ms": 66.20909999946889,
+            "fusion_latency_ms": 0.02620699979161145,
+            "total_latency_ms": 147.2372809985245,
+            "detector_enabled": true,
+            "classifiers_enabled": true,
+            "health": 0.4397,
+            "loaded": true,
+            "infer_ok": true,
+            "last_valid_output": true,
+            "last_output_frame_seq": 227,
+            "error_state": "none",
+            "error_count": 0
+          },
+          "missing_hole_v1": {
+            "profile": "FULL",
+            "classifier1_latency_ms": 40.71611800009123,
+            "classifier2_latency_ms": 37.245072999212425,
+            "detector_latency_ms": 73.81067000005714,
+            "fusion_latency_ms": 0.021855999875697307,
+            "total_latency_ms": 151.7937169992365,
+            "detector_enabled": true,
+            "classifiers_enabled": true,
+            "health": 0.4017,
+            "loaded": true,
+            "infer_ok": true,
+            "last_valid_output": true,
+            "last_output_frame_seq": 227,
+            "error_state": "none",
+            "error_count": 0
+          }
+        },
+        "inference": {
+          "total_specialist_latency_ms": 299.030997997761,
+          "health": 0.4017,
+          "error_count": 0,
+          "error_attribution": "shared_worker"
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "classifier1_latency_ms": 52.75089399947319,
+          "classifier2_latency_ms": 28.251079999790818,
+          "detector_latency_ms": 66.20909999946889,
+          "fusion_latency_ms": 0.02620699979161145,
+          "total_latency_ms": 147.2372809985245,
+          "detector_enabled": true,
+          "classifiers_enabled": true,
+          "health": 0.4397,
+          "loaded": true,
+          "infer_ok": true,
+          "last_valid_output": true,
+          "last_output_frame_seq": 227,
+          "error_state": "none",
+          "error_count": 0
+        },
+        "missing_hole_v1": {
+          "profile": "FULL",
+          "classifier1_latency_ms": 40.71611800009123,
+          "classifier2_latency_ms": 37.245072999212425,
+          "detector_latency_ms": 73.81067000005714,
+          "fusion_latency_ms": 0.021855999875697307,
+          "total_latency_ms": 151.7937169992365,
+          "detector_enabled": true,
+          "classifiers_enabled": true,
+          "health": 0.4017,
+          "loaded": true,
+          "infer_ok": true,
+          "last_valid_output": true,
+          "last_output_frame_seq": 227,
+          "error_state": "none",
+          "error_count": 0
+        },
+        "control_view": {
+          "dual_specialist_mission_verified": false,
+          "missing_hole_independent_health": true,
+          "dual_output_present": true,
+          "note": "Control view is not system-snapshot.v2"
+        }
+      },
+      "snapshot_after": {
+        "schema_version": "gearpro-control-view.v1",
+        "timestamp": "2026-09-17T14:21:48.291Z",
+        "system": {
+          "cpu_percent": 38.6,
+          "ram_used_mb": 12157.50390625,
+          "ram_percent": 77.7,
+          "gpu_util": null,
+          "gpu_mem_mb": null,
+          "temperature_c": 64.5,
+          "power_w": null
+        },
+        "camera": {
+          "device": "None",
+          "opened": true,
+          "frame_seq": 458,
+          "actual_fps": 0.0,
+          "frame_age_ms": 15.175746999375406,
+          "read_failures": 0,
+          "health": 1.0
+        },
+        "locator": {
+          "backend": "pt",
+          "loaded": true,
+          "latency_ms": 36.683388999335875,
+          "gears_found": 1,
+          "confidence_mean": 0.8838,
+          "health": 1.0
+        },
+        "serial": {
+          "port": "/dev/ttyHS1",
+          "connected": false,
+          "last_send_ok": null,
+          "consecutive_failures": 0,
+          "last_error": null,
+          "health": 1.0
+        },
+        "mission": {
+          "inspection_active": true,
+          "output_valid": true,
+          "inspection_rate_hz": null,
+          "current_profile": "FULL",
+          "inspection_count": 25,
+          "utility": 1.0
+        },
+        "specialists": {
+          "scratch_v5": {
+            "profile": "FULL",
+            "classifier1_latency_ms": 29.103099000167276,
+            "classifier2_latency_ms": 26.30202599993936,
+            "detector_latency_ms": 44.448378999732086,
+            "fusion_latency_ms": 0.01926400000229478,
+            "total_latency_ms": 99.87276799984102,
+            "detector_enabled": true,
+            "classifiers_enabled": true,
+            "health": 0.8344,
+            "loaded": true,
+            "infer_ok": true,
+            "last_valid_output": true,
+            "last_output_frame_seq": 445,
+            "error_state": "none",
+            "error_count": 0
+          },
+          "missing_hole_v1": {
+            "profile": "FULL",
+            "classifier1_latency_ms": 27.701905999492737,
+            "classifier2_latency_ms": 14.36353600001894,
+            "detector_latency_ms": 31.007003000013356,
+            "fusion_latency_ms": 0.018880000425269827,
+            "total_latency_ms": 73.0913249999503,
+            "detector_enabled": true,
+            "classifiers_enabled": true,
+            "health": 1.0,
+            "loaded": true,
+            "infer_ok": true,
+            "last_valid_output": true,
+            "last_output_frame_seq": 445,
+            "error_state": "none",
+            "error_count": 0
+          }
+        },
+        "inference": {
+          "total_specialist_latency_ms": 172.96409299979132,
+          "health": 0.8344,
+          "error_count": 0,
+          "error_attribution": "shared_worker"
+        },
+        "scratch_v5": {
+          "profile": "FULL",
+          "classifier1_latency_ms": 29.103099000167276,
+          "classifier2_latency_ms": 26.30202599993936,
+          "detector_latency_ms": 44.448378999732086,
+          "fusion_latency_ms": 0.01926400000229478,
+          "total_latency_ms": 99.87276799984102,
+          "detector_enabled": true,
+          "classifiers_enabled": true,
+          "health": 0.8344,
+          "loaded": true,
+          "infer_ok": true,
+          "last_valid_output": true,
+          "last_output_frame_seq": 445,
+          "error_state": "none",
+          "error_count": 0
+        },
+        "missing_hole_v1": {
+          "profile": "FULL",
+          "classifier1_latency_ms": 27.701905999492737,
+          "classifier2_latency_ms": 14.36353600001894,
+          "detector_latency_ms": 31.007003000013356,
+          "fusion_latency_ms": 0.018880000425269827,
+          "total_latency_ms": 73.0913249999503,
+          "detector_enabled": true,
+          "classifiers_enabled": true,
+          "health": 1.0,
+          "loaded": true,
+          "infer_ok": true,
+          "last_valid_output": true,
+          "last_output_frame_seq": 445,
+          "error_state": "none",
+          "error_count": 0
+        },
+        "control_view": {
+          "dual_specialist_mission_verified": false,
+          "missing_hole_independent_health": true,
+          "dual_output_present": true,
+          "note": "Control view is not system-snapshot.v2"
+        }
+      },
+      "duration_ms": 8000.8,
+      "control_latency_ms": 8003.5
+    },
+    "verify_level": "function",
+    "recovery_outcome": "RECOVERED",
+    "l2": {
+      "invoked": true,
+      "error": null,
+      "invalid": false,
+      "protocol_status": "valid_structured",
+      "latency_s": 2.729,
+      "latency_ms": 2729.0,
+      "prompt_tokens": 981,
+      "completion_tokens": 19,
+      "tokens": 1000,
+      "decode": "grammar",
+      "model": "qwen3-4b",
+      "raw_preview": "{\n  \"tool\": \"restart_camera\",\n  \"params\": {\n    }}\n ",
+      "action": {
+        "name": "restart_camera",
+        "params": {},
+        "layer": "L2",
+        "source": "reasoner"
+      }
+    },
+    "specialists": {
+      "scratch_v5": {
+        "loaded": true,
+        "load_status": null,
+        "health": 0.4397,
+        "total_latency_ms": 147.2372809985245,
+        "error_count": 0,
+        "last_error": null
+      },
+      "missing_hole_v1": {
+        "loaded": true,
+        "load_status": null,
+        "health": 0.4017,
+        "total_latency_ms": 151.7937169992365,
+        "error_count": 0,
+        "last_error": null
+      },
+      "camera": {
+        "opened": true,
+        "frame_seq": 227,
+        "frame_age_ms": 4114.6897419994275,
+        "health": 0.0
+      },
+      "mission": {
+        "inspection_active": true,
+        "current_profile": "FULL",
+        "inspection_count": 3,
+        "emergency_hold": null
+      },
+      "system": {
+        "temperature_c": 63.531
+      },
+      "schema_version": "gearpro-control-view.v1",
+      "timestamp": "2026-09-17T14:21:37.653Z"
+    },
+    "evidence": {
+      "frame_age_ms": 4114.6897419994275,
+      "frame_seq": 227,
+      "camera_opened": true,
+      "locator_latency_ms": 40.29577399978734,
+      "locator_backend": "pt",
+      "scratch_latency_ms": 147.2372809985245,
+      "scratch_error_count": 0,
+      "serial_connected": false,
+      "serial_failures": 0,
+      "gpu_util": null,
+      "gpu_mem_mb": null,
+      "power_w": null,
+      "temperature_c": 63.531,
+      "current_profile": "FULL",
+      "utility": 1.0
+    },
+    "metrics": {
+      "e2e_latency_ms": 10746.0,
+      "l2_latency_ms": 2729.0,
+      "control_latency_ms": 8003.5
+    },
+    "snapshot_schema": "gearpro-control-view.v1",
+    "ACTUAL_EXECUTION_DISABLED": false
+  },
+  "claims": {
+    "route_is_l2": true,
+    "disable_l1_flag": false,
+    "why_l2": [
+      "no_l1_or_mem_proposal"
+    ],
+    "l2_invoked": true,
+    "model": "qwen3-4b",
+    "raw_preview": "{\n  \"tool\": \"restart_camera\",\n  \"params\": {\n    }}\n ",
+    "proposed": {
+      "name": "restart_camera",
+      "params": {},
+      "layer": "L2",
+      "source": "reasoner"
+    },
+    "authority": {
+      "action_risk_class": "AUTO_LOW_RISK",
+      "execution_authority": "AUTO_LOW_RISK",
+      "would_execute": true
+    },
+    "actually_executed": true,
+    "verify_level": "function",
+    "recovery_outcome": "RECOVERED",
+    "control_error": null
+  },
+  "result": "PASS"
+}

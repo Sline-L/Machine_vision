@@ -1,0 +1,2 @@
+DUP_EXIT=1
+EdgeMedic Agent already running (pid=59354). Refusing duplicate start.

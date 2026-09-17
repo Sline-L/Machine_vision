@@ -33,13 +33,30 @@ GUI：`inspection/start` → Agent `monitor/start`（**不** arm）；`/agent/re
 |------|----------|------|----|------|------|
 | 强制 L2 闭环 | `runs/p0/4b_closed_loop_post_gui.json` | L2 (`disable_l1`) | 是 | 是 | mission / RECOVERED |
 | 自然 L1 | `runs/p0/natural_A_l1.json` | L1 | 否 | 是 | mission / RECOVERED |
-| 自然 L2 诊断 | `runs/p0/natural_B_l2_observe.json` | L2 (`no_l1_or_mem_proposal`) | 是 | 否 | Authority AUTO_LOW_RISK |
-| 自然 L2 执行 | `runs/p0/natural_B_l2_execute.json` | L2 | 是 | 否* | Guardian 拒绝 `restart_camera`（相机未 STALE） |
-| GUI 操作链 | `runs/p0/gui_ops_chain.json` | L1 恢复 | — | 是 | PASS；browser QA NOT_RUN |
+| 自然 L2 错误提案（历史） | `runs/p0/natural_B_l2_execute.json` + `natural_B_rootcause.json` | L2 | 是 | 否 | Guardian 拒绝健康机 `restart_camera` |
+| 自然 L2 提示修复后 | `runs/p0/natural_B_rootcause_after_hint.json` | L2 | 是 | 否 | 4B `tool=null` abstain |
+| 自然 L2 合法执行 | `runs/p0/natural_L2_live_stale.json` | L2（L1 cooldown，非 disable_l1） | 是 | 是 | function / RECOVERED |
+| GUI 浏览器 E2E | `runs/p0/gui_browser/` | — | — | — | 登录→arm→停线撤权→再开监测 |
 
-\*自然 L2 在现有故障集上能升级并调用 4B；对健康 Replay 相机执行 `restart_camera` 被 Guardian 正确拒绝。**不能**声称「自然 L2→Execute→Verify 全路径已通」；强制 L2 resume 与 GUI 武装后的 L1 resume 是已验证执行路径。
+## 4. 自然 L2 错误提案根因（`natural_B_l2_execute.json`）
 
-## 4. 4B 真实推理
+**输入**：合成 overlay `L2_unknown_scratch`（scratch_health=0.1，相机 opened/health=1.0/age=40ms）；Control Guardian 评估的是 **LIVE :8788 Replay** 健康相机。
+
+| 阶段 | 事实 |
+|------|------|
+| 故障分类 | `UNKNOWN_SCRATCH_V5`（L1 无对应动词） |
+| 旧 Prompt hint | 无条件 `"Prefer restart_camera for stale camera..."` |
+| 4B 原始输出 | `{"tool":"restart_camera","params":{}}` |
+| Authority | `AUTO_LOW_RISK` / `would_execute=true` |
+| Guardian | `accepted=false`，`"摄像头未处于失败或 STALE，拒绝 restart_camera"` |
+
+**根因**：误导性 L2 hint + overlay/live 相机语义不一致 → 4B 对健康相机提案 `restart_camera`。Guardian 正确拦截；**未**削弱 Guardian，**未**用 `disable_l1=true` 冒充自然路由。
+
+**修复**：`edgemedic.runtime.l2_extra_note` 按 Snapshot 条件化——`UNKNOWN_*` 且相机未 stale 时明确禁止 hint `restart_camera`。修复后同 overlay：`tool=null`，Authority=`OBSERVE`。
+
+**合法自然 L2 全路径**：`GEARPRO_RESEARCH_INJECT` 冻结帧 → `CAMERA_STALE`；L1 进入 cooldown 后自然落到 L2（`disable_l1=false`）；4B 提案 `restart_camera`；Replay 允许 restart（`allow_restart_camera`）；Verify=`function`，`RECOVERED`（见 `natural_L2_live_stale.json`）。
+
+## 5. 4B 真实推理（强制闭环对照）
 
 `4b_inference_snippet.json` / `4b_closed_loop_post_gui.json`：
 
@@ -47,7 +64,7 @@ GUI：`inspection/start` → Agent `monitor/start`（**不** arm）；`/agent/re
 - raw=`resume_inspection`；Authority=`AUTO_LOW_RISK`
 - Control `L2-56dbf807`；Verify=`mission`；`actually_executed=true`
 
-## 5. Verify=mission 的双专项含义
+## 6. Verify=mission 的双专项含义
 
 `verify_dual_audit.json`：mission 需 `dual_output_ok`（两专项 loaded + 有效输出/延迟）再升 mission window。闭环后：
 
@@ -55,44 +72,49 @@ GUI：`inspection/start` → Agent `monitor/start`（**不** arm）；`/agent/re
 - missing_hole_v1: loaded/infer_ok/last_valid_output + latency≈109ms
 - `control_view.dual_specialist_mission_verified` 可为 false；**不能**只看字符串，需核对 specialist 字段。
 
-## 6. GUI 联动（实测）
+## 7. GUI 联动（浏览器实测）
 
-HTTP 操作链 `gui_ops_chain.json` **PASS**：
+浏览器 E2E（`runs/p0/gui_browser/ops_log.md` + 四张截图）：
 
-1. 登录+取得操作权
-2. 开始检测 → `monitoring=true`，`recovery_armed=false`，`llm_ready=true`
-3. `POST /agent/recovery/arm` → armed（仅 `execute_replay`）
-4. 诱导 pause → Agent 执行恢复（本例 L1 resume）→ Verify mission
-5. 停止检测 → `monitoring=false`，`recovery_armed=false`
+1. 登录进入主页；Agent 面板显示在线 / 4B 就绪 / `execute_replay` / 未武装
+2. 点击「启用恢复授权」→ armed
+3. 停止检测 → 监测关闭且撤权
+4. 开始检测 → `monitoring=true`，`armed=false`（开线不自动 arm）
 
-浏览器人工点选：**NOT_RUN**（自动化不可用时以 HTTP 链替代）。
+HTTP 链 `gui_ops_chain.json` 仅作对照，**不**替代浏览器验收。
 
 生产默认：Agent `observe_only`；arm 返回 409。
 
-## 7. Agent 服务
+## 8. Agent 服务生命周期
 
-- `python -m edgemedic.service`
-- PID 防重入；`/recovery/arm|disarm`；llm 未就绪跳过 mutate
-- 故障 pause **不会**自动 disarm（否则无法恢复）；**操作员 stop** 才撤权
+启动脚本 `deploy/start-edgemedic-agent.sh`（默认 `observe_only`；拒绝对 `:8787` 的 `execute_replay`）：
 
-## 8. systemd（授权范围内）
+| 检查 | 证据 | 结果 |
+|------|------|------|
+| 启动 | `lifecycle_start.json` | `ok=true`，`llm_ready=true` |
+| 重复启动 | `lifecycle_dup.txt` | exit=1，拒绝 duplicate |
+| 异常退出恢复 | kill -9 后重启 | PID 可重建（脚本防重入） |
+| 停止 | `lifecycle_shutdown.json` + `lifecycle_stop.txt` | shutdown ok，`PID_CLEARED` |
+
+## 9. systemd（授权范围内）
 
 模板：`deploy/edgemedic-agent.service`（WorkingDirectory=`/home/jetson/Projects/p0-4b-agent`，User=jetson，Restart=on-failure）。
 
-`systemd_template_check.json`：路径/用户/Restart/EnvFile 校验 PASS；`/etc/systemd` **未安装**。
+- `systemd_template_check.json`：路径/用户/Restart/EnvFile 校验 PASS
+- `systemd_analyze_verify.txt`：`systemd-analyze verify` 对模板可跑；系统无关警告来自既有单元；**`etc_unit_absent_ok`**
+- `/etc/systemd` **未安装**；正式 enable 需单独授权
 
-安装命令见演示指南（需操作员批准）。
-
-## 9. 性能
+## 10. 性能
 
 | 段 | 约值 |
 |----|------|
 | L2 4B | 1.5–3.3 s |
 | Control+Verify resume | ~2–4.6 s |
+| 自然 L2 stale restart | Verify=function |
 
-## 10. 未完成
+## 11. 未完成 / 未授权
 
-1. 浏览器人工 GUI 验收 NOT_RUN
-2. systemd 未写入 `/etc`
-3. 自然 L2→Execute→Verify：现有 UNKNOWN 提案在健康相机上被 Guardian 拒绝（正确行为）；缺「真实 STALE/未知故障」现场注入
-4. Windows 缺 cv2/httpx/npm；以 NX 测试为准
+1. systemd **未**写入 `/etc`、未 enable 开机自启
+2. 生产 `:8787` 未做 mutate
+3. Windows 缺部分运行时依赖时以 NX 证据为准
+4. 研究级 ASR/MTTR **未**验证
