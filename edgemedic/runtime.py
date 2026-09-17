@@ -95,7 +95,7 @@ class LoopState:
 
 def make_client(control_url, execution_mode=EXECUTE_OBSERVE):
     if execution_mode == EXECUTE_REPLAY:
-        return ControlClient(control_url)
+        return ControlClient(control_url, timeout=30.0)
     return ReadOnlyControlClient(base_url=control_url)
 
 
@@ -161,17 +161,26 @@ def run_once(
                         "dry_run": True,
                         "verify_level": "none",
                         "error": "authority_blocked",
-                        "authority": authority_gate,
+                        "authority": dict(authority_gate),
                     }
                 actually_executed = False
                 return
         if not allow_mutate:
-            authority_gate = {
-                "action_risk_class": "OBSERVE",
-                "execution_authority": EXECUTE_OBSERVE,
-                "would_execute": False,
-                "note": "observe_only mode: proposal recorded, Control POST skipped",
-            }
+            # Keep Authority decision visible even when POST is structurally disabled.
+            if via_authority:
+                authority_gate = {
+                    **authority_gate,
+                    "would_execute_if_armed": bool(authority_gate.get("would_execute")),
+                    "would_execute": False,
+                    "note": "observe_only: Authority approved but Control POST skipped",
+                }
+            else:
+                authority_gate = {
+                    "action_risk_class": "OBSERVE",
+                    "execution_authority": EXECUTE_OBSERVE,
+                    "would_execute": False,
+                    "note": "observe_only mode: proposal recorded, Control POST skipped",
+                }
             result = {
                 "accepted": False,
                 "executed": False,
@@ -179,11 +188,14 @@ def run_once(
                 "verify_level": "none",
                 "error": None,
                 "note": "observe_only",
+                "authority": dict(authority_gate),
             }
             actually_executed = False
             return
         result = _execute(client, action, source)
         actually_executed = bool(result.get("executed"))
+        if via_authority:
+            result["authority"] = dict(authority_gate)
 
     # L0/L1
     if l1 is not None:
