@@ -11,7 +11,7 @@ from edgemedic.authority import decide_execution
 from edgemedic.observe import load_json
 from edgemedic.policy import Memory, classify_fault, decide
 from edgemedic.readonly_client import ObserveOnlyViolation, ReadOnlyControlClient
-from edgemedic.runtime import EXECUTE_OBSERVE, LoopState, run_once
+from edgemedic.runtime import EXECUTE_OBSERVE, LoopState, l2_extra_note, run_once
 
 ROOT = Path(__file__).resolve().parents[1]
 SCENARIO = ROOT / "docs" / "midterm" / "scenarios"
@@ -38,6 +38,12 @@ class L2RouteTests(unittest.TestCase):
         fault = classify_fault(snap, Memory())
         self.assertEqual(fault, "UNKNOWN_SCRATCH_V5")
         self.assertIsNone(decide(snap, Memory()))
+
+    def test_l2_hint_does_not_steer_healthy_camera_restart(self):
+        snap = adapt_snapshot(load_json(SCENARIO / "L2_unknown_scratch.json"))
+        note = l2_extra_note(snap, "UNKNOWN_SCRATCH_V5")
+        self.assertNotIn("Prefer restart_camera", note)
+        self.assertIn("do not propose restart_camera", note)
 
     def test_run_once_observe_invokes_l2_mock(self):
         snap = load_json(SCENARIO / "L2_unknown_scratch.json")

@@ -40,6 +40,25 @@ def _config_ok(result):
     return _verify_level(result) in ("function", "mission", "config")
 
 
+def l2_extra_note(snap, fault, stuck_note=""):
+    """Hint only. Must not tell 4B to restart a healthy camera."""
+    if stuck_note:
+        return stuck_note
+    camera = snap.get("camera") or {}
+    age = camera.get("frame_age_ms")
+    camera_stale = (not camera.get("opened")) or (age is not None and float(age) > 1000)
+    if fault == "INSPECTION_PAUSED":
+        return "Mission is paused. Prefer resume_inspection. Do not restart_camera if the camera is healthy."
+    if fault == "CAMERA_STALE" or camera_stale:
+        return "Camera is stale or closed. Prefer restart_camera. Abstain if unsure."
+    if fault and str(fault).startswith("UNKNOWN_"):
+        return (
+            "A named L1 rule did not match. Camera is not stale; do not propose restart_camera. "
+            "If scratch error_count increased prefer restart_worker. Otherwise abstain with tool null."
+        )
+    return "Abstain if unsure. Do not restart_camera unless camera is stale or closed."
+
+
 def recovery_outcome(result=None, l2_error=None):
     if l2_error:
         text = str(l2_error).lower()
@@ -250,7 +269,7 @@ def run_once(
             l2_report = complete_report(
                 llm_url,
                 snap,
-                extra_note=note or "Prefer restart_camera for stale camera; resume_inspection for paused mission; abstain if unsure.",
+                extra_note=l2_extra_note(snap, fault, note),
                 timeout=l2_timeout,
                 fault=fault,
                 experience=[],

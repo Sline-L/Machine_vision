@@ -15,6 +15,7 @@ from .config import PERSISTED_FIELDS, RUNTIME_ROOT, load_last_known_good_snapsho
 from .control_view import as_control_view
 from .frames import LatestFrame
 from .guardian import thermal_alarm, thermal_stop_needed
+from .research_inject import allow_restart_camera
 from .replay import ReplayCapture
 from .serial_io import SerialOutput
 from .telemetry import build_snapshot, camera_health, locator_backend
@@ -549,11 +550,13 @@ class GearProRuntime:
         if name in ("set_inference_profile", "set_locator_profile", "reload_config", "apply_settings"):
             self._remember_config()
         if name == "restart_camera":
-            if self.source != "camera":
+            # File-video stays blocked. Live camera and dataset Replay are allowed
+            # (ReplayCapture.restart clears research freeze).
+            if not allow_restart_camera(self.source):
                 raise RuntimeError("视频模式下不能重启摄像头")
             if not self.camera.restart():
                 raise RuntimeError(self.camera.error_message or "摄像头重启失败")
-            return {"camera_index": self.config.camera_index}
+            return {"camera_index": self.config.camera_index, "source": self.source}
         if name == "restart_worker":
             self.rebuild_inspector(resume=self.config.inference_profile != "SAFE_STOP")
             return {}
