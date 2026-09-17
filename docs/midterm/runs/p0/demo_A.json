@@ -1,0 +1,41 @@
+{
+  "demo": "A",
+  "title": "dual-specialist live snapshot",
+  "input_source": "LIVE GET /api/state",
+  "specialists": {
+    "scratch_v5": {
+      "loaded": true,
+      "load_status": null,
+      "health": 1.0,
+      "total_latency_ms": 0.0,
+      "error_count": 2,
+      "last_error": null
+    },
+    "missing_hole_v1": {
+      "loaded": true,
+      "load_status": null,
+      "health": 1.0,
+      "total_latency_ms": 0.0,
+      "error_count": 0,
+      "last_error": null
+    },
+    "camera": {
+      "opened": true,
+      "frame_seq": 7433,
+      "frame_age_ms": 26.919094999811932,
+      "health": 1.0
+    },
+    "mission": {
+      "inspection_active": true,
+      "current_profile": "FULL",
+      "inspection_count": 207,
+      "emergency_hold": null
+    },
+    "system": {
+      "temperature_c": 64.562
+    },
+    "schema_version": "gearpro-control-view.v1",
+    "timestamp": "2026-09-17T13:24:41.734Z"
+  },
+  "schema_version": "gearpro-control-view.v1"
+}

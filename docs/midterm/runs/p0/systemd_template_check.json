@@ -1,0 +1,7 @@
+{
+  "workdir_p0": true,
+  "user_jetson": true,
+  "restart_on_failure": true,
+  "envfile": true,
+  "etc_unit_absent": true
+}

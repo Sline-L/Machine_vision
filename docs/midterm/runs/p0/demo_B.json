@@ -1,0 +1,69 @@
+{
+  "fault": null,
+  "diagnosis": null,
+  "route": {
+    "selected": null,
+    "l1_hit": false,
+    "memory_hit": false,
+    "l2_invoked": false,
+    "why_l2": null,
+    "disable_l1": false
+  },
+  "proposed_action": null,
+  "authority_decision": {
+    "action_risk_class": null,
+    "execution_authority": null,
+    "would_execute": false,
+    "note": null
+  },
+  "execution_mode": "observe_only",
+  "actually_executed": false,
+  "control_result": null,
+  "verify_level": "none",
+  "recovery_outcome": null,
+  "l2": null,
+  "specialists": {
+    "scratch_v5": {
+      "loaded": null,
+      "load_status": null,
+      "health": 0.3914,
+      "total_latency_ms": 153.0336350001562,
+      "error_count": 0,
+      "last_error": null
+    },
+    "missing_hole_v1": {
+      "loaded": null,
+      "load_status": null,
+      "health": null,
+      "total_latency_ms": null,
+      "error_count": null,
+      "last_error": null
+    },
+    "camera": {
+      "opened": true,
+      "frame_seq": 67041,
+      "frame_age_ms": 2.456267000070511,
+      "health": 1.0
+    },
+    "mission": {
+      "inspection_active": true,
+      "current_profile": "FULL",
+      "inspection_count": null,
+      "emergency_hold": null
+    },
+    "system": {
+      "temperature_c": 59.125
+    },
+    "schema_version": "system-snapshot.v1",
+    "timestamp": "2026-09-17T13:15:25.335Z"
+  },
+  "evidence": null,
+  "metrics": {
+    "e2e_latency_ms": 23.9,
+    "l2_latency_ms": null,
+    "control_latency_ms": null
+  },
+  "snapshot_schema": "system-snapshot.v1",
+  "ACTUAL_EXECUTION_DISABLED": true,
+  "demo": "B"
+}

@@ -1,0 +1,25 @@
+{
+  "source": "docs/midterm/runs/p0/4b_closed_loop_post_gui.json",
+  "verify_level": "mission",
+  "mission_verified": true,
+  "function_verified": true,
+  "recovery_success": true,
+  "scratch_after": {
+    "loaded": true,
+    "infer_ok": true,
+    "last_valid_output": true,
+    "total_latency_ms": 95.40021900011197,
+    "health": 0.8717,
+    "last_output_frame_seq": 7042
+  },
+  "missing_after": {
+    "loaded": true,
+    "infer_ok": true,
+    "last_valid_output": true,
+    "total_latency_ms": 108.77500599963241,
+    "health": 0.7602,
+    "last_output_frame_seq": 7042
+  },
+  "control_view_flag": false,
+  "interpretation": "mission means dual_output_ok then mission window; both specialist loaded/infer_ok/latency/last_valid_output shown"
+}
