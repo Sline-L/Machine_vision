@@ -1,62 +1,44 @@
-# P0 4B 证据索引
+# 4B / Agent P0 证据索引
 
-## Git（本地，未 push）
+根目录：`docs/midterm/runs/p0/`
+NX：`/home/jetson/Projects/p0-4b-agent/docs/midterm/runs/p0/`
 
-| 项 | 值 |
-|---|---|
-| 分支 | `integration/dual-specialist-edgemedic` |
-| 基线（冲刺前） | `9472832` |
-| 仓库 | `G:\CODE\Machine_vision-dual-specialist` |
+## 主证据
 
-## NX 部署（未覆盖 overlay）
+| ID | 路径 | 证明 | 判定 |
+|----|------|------|------|
+| CL2 | `4b_closed_loop_post_gui.json` | 强制 L2→Authority→Execute→Verify | PASS |
+| SNIP | `4b_inference_snippet.json` | 4B raw/latency/Authority | PASS |
+| GUI | `gui_ops_chain.json` | GUI HTTP 操作链；browser NOT_RUN | PASS |
+| A | `natural_A_l1.json` | 自然 L1 + mission Verify | PASS |
+| Bobs | `natural_B_l2_observe.json` | 自然 L2 + 真实 4B + Authority | PASS |
+| Bexe | `natural_B_l2_execute.json` | 自然 L2 执行被 Guardian 拒绝 | FAIL（预期行为） |
+| VFY | `verify_dual_audit.json` | mission 双专项字段审计 | PASS |
+| SYS | `systemd_template_check.json` | unit 字段校验；未装 /etc | PASS |
+| AGX | `agent_status_execute_replay.json` | 隔离 Agent execute_replay 未 arm | PASS |
 
-| 路径 | 用途 |
-|---|---|
-| `/home/jetson/Projects/p0-4b-agent` | P0 Agent |
-| `/home/jetson/Projects/p0-gearpro-dual` | 双专项 GearPro 隔离实例（`:8001`/`:8788`） |
-| `/home/jetson/Projects/edgemedic-live` | 原始 overlay（只读参考） |
-| `/home/jetson/Projects/Machine_vision` pid 14179 | 原 Control `:8787`（保留） |
+## 案例分离
 
-### Overlay 参考 SHA256（`_overlay_ref/`）
+| 文件 | 说明 |
+|------|------|
+| `demo_C_4b_diagnose.json` | 4B 诊断，未执行 |
+| `demo_E_l1_recover.json` | L1 恢复，无 4B |
 
-```
-0CE97FBC79B6E53E0DD51FB022A4AB15C2536C96AA1BEC27F2B9F40E2FAD761E  authority.py
-D65737C88AC52EC329A3197D1886E91BA89181F4017008FEE77AE71E5F1CAFC1  client.py
-2CC14221F985991BAAC13885C1B5DAE9D736572FD297014FA0523F2DA901C1CF  reasoner.py
-AC6D4E7F7FC3B81E1B78B10EBA4CBAA17C5C41ECD6B3C9FC54584200A6F17E4F  runtime.py
-```
+## 源码
 
-## 测试
+| 路径 | 作用 |
+|------|------|
+| `edgemedic/service.py` | Agent 服务 + arm/disarm |
+| `edgemedic/runtime.py` | 路由 / Authority 保留 |
+| `gp/web.py` | Agent 代理与产线通知 |
+| `web/src/App.vue` | Agent 面板 |
+| `tools/nx_p0_4b_closed_loop.py` | 强制 L2 闭环 |
+| `tools/nx_p0_natural_routing.py` | 自然 L1/L2 |
+| `tools/nx_p0_gui_ops_chain.py` | GUI HTTP 链 |
+| `deploy/edgemedic-agent.service` | systemd 模板 |
 
-```bat
-set PYTHONPATH=G:\CODE\Machine_vision-dual-specialist
-python -m unittest tests.test_agent_p0_4b tests.test_agent_midterm_demo -v
-```
+## 明确缺口
 
-NX：`python3 -m unittest tests.test_agent_p0_4b -v` → 8 OK。
-
-## 运行产物（NX，部分已拷贝）
-
-- `docs/midterm/runs/p0/demo_A.json` — 双专项 loaded
-- `docs/midterm/runs/p0/demo_C.json` — 真实 4B
-- `docs/midterm/runs/p0/demo_E.json` — Replay L1 RECOVERED
-
-## 4B 调用证据（Demo C）
-
-- model: `qwen3-4b`
-- endpoint: `http://127.0.0.1:8080`
-- decode: grammar / `valid_structured`
-- latency_ms ≈ 2050–2660
-- proposed: `restart_camera`
-- `actually_executed`: false（observe-only）
-- why L2: `UNKNOWN_SCRATCH_V5` 无 L1 动词
-
-## 恢复证据（Demo E，双专项 `:8788`）
-
-- induced `pause_inspection` → mission
-- Agent L1 `resume_inspection` → `executed=true`，`verify_level=mission`，`RECOVERED`
-- 路由：**L1**，不是 4B
-
-## 历史研究证据
-
-勿与本次集成混淆：`docs/midterm/frozen/`、edgemedic-live final_demo。
+- 浏览器人工 GUI：**NOT_RUN**
+- 自然 L2→Execute→Verify 全路径：无合适现场故障（Guardian 拒健康机 `restart_camera`）
+- systemd：**未** enable 到开机自启
