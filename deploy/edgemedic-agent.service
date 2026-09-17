@@ -1,0 +1,26 @@
+[Unit]
+Description=EdgeMedic Agent (Qwen3-4B bounded autonomy)
+After=network.target
+# Do NOT hard-require production GearPro. Bind Control URL via EnvironmentFile.
+
+[Service]
+Type=simple
+User=jetson
+WorkingDirectory=/home/jetson/Projects/p0-4b-agent
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONPATH=/home/jetson/Projects/p0-4b-agent
+EnvironmentFile=-/home/jetson/Projects/p0-4b-agent/deploy/edgemedic-agent.env
+# Prefer venv if present; operators may override ExecStart after install.
+ExecStart=/usr/bin/python3 -m edgemedic.service
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+
+# Isolation defaults in edgemedic-agent.env:
+#   EDGEMEDIC_CONTROL_URL=http://127.0.0.1:8788
+#   EDGEMEDIC_EXECUTION_MODE=observe_only   # production-safe default
+#   # execute_replay only on isolated Replay Control — never :8787
+# Never enable WantedBy without operator review of EnvironmentFile.
+
+[Install]
+WantedBy=multi-user.target
