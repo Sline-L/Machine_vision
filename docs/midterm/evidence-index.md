@@ -86,9 +86,35 @@ Step 6.3 基线：90 tests OK，skipped=2（无 torch）。
 
 ---
 
-## 8. 明确不在证据包中的内容
+## 9. NX 实测记录（2026-09-17，SSH `jetson-nx` / 192.168.55.2）
 
-- 模型权重 / 数据集  
-- NX overlay 二进制与原始日志（本机不可访问）  
-- fresh holdout 任何结果  
-- 「本次 live L2」日志（未调用）
+主机：`yahboom`，用户 `jetson`。
+
+| 检查 | 结果 |
+|---|---|
+| 中期 Demo 同步目录 | `/home/jetson/Projects/midterm-agent-demo` |
+| `unittest tests.test_agent_midterm_demo` | **9 OK** |
+| `python3 tools/agent_midterm_demo.py --scenario all` | A/B/C/D 路由正确；全部 `executed=False` |
+| Qwen `127.0.0.1:8080` | HTTP 200，模型 `qwen3-4b` |
+| GearPro Control `127.0.0.1:8787` | **未监听**（未做恢复执行） |
+| 冻结 `results/final_demo/demo_{a,b,c}.json` | SHA256 见下；e2e 与答辩引用 **一致** |
+| Live `reasoner.complete` | 服务可达；本次合成 CAMERA_STALE 返回 `None`（模型把内容写进 `reasoning_content`，`content` 为空 / finish=length）。**不能**把这次 live 调用记成 Demo C OFF 复现 |
+
+### 冻结文件 SHA256（NX 路径）
+
+```
+dcfa9bf49679bd37eec690befcec8c1929a0188970955a5726ebda08640eace8  .../final_demo/demo_a.json
+bf40e7daaec862449c0c78205484761dd9e47d66c104290b2f5eb0c29fb82b84  .../final_demo/demo_b.json
+f7367f41bb7fa878d2c151628df468347cc7a00b7a022ba0f21d1f82c11b3754  .../final_demo/demo_c.json
+```
+
+### 冻结数值核对
+
+| 项 | 文件内 | 答辩引用 | 匹配 |
+|---|---|---|---|
+| Demo A e2e | 2152.7 → 2153 | 2153 | Yes |
+| Demo B e2e | 2136.3 → 2136 | 2136 | Yes |
+| Demo C ON | route=MEM, e2e=2240.9, l2=false | 2241 / MEM | Yes |
+| Demo C OFF | route=L2, e2e=4928.5, l2_ms=2704 | 4929 / 2704 | Yes |
+
+未重跑 `tools/nx_final_demo.py`（会 `post_action` 改 Runtime）。
