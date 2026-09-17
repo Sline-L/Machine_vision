@@ -86,15 +86,18 @@ def summarize_cycles(samples):
     valid = [item for item in samples if item.get("valid")]
     locator = latency_stats([item.get("locator_ms") for item in valid])
     v5 = latency_stats([item.get("v5_ms") for item in valid])
+    missing = latency_stats([item.get("missing_ms") for item in valid])
     elapsed = latency_stats([item.get("elapsed_ms") for item in valid])
     return {
         "n": n,
         "output_valid_ratio": 0.0 if n == 0 else len(valid) / n,
         "locator": locator,
         "scratch_v5": v5,
+        "missing_hole_v1": missing,
         "elapsed": elapsed,
         "locator_p95_ms": locator["p95"],
         "v5_p95_ms": v5["p95"],
+        "missing_p95_ms": missing["p95"],
         "elapsed_p95_ms": elapsed["p95"],
         "locator_mean_ms": locator["mean"],
         "v5_mean_ms": v5["mean"],
@@ -111,7 +114,11 @@ def _locator(after):
 
 
 def _scratch(after):
-    return after.get("scratch_v5") or {}
+    return after.get("scratch_v5") or (after.get("specialists") or {}).get("scratch_v5") or {}
+
+
+def _missing(after):
+    return after.get("missing_hole_v1") or (after.get("specialists") or {}).get("missing_hole_v1") or {}
 
 
 def _camera(after):
@@ -130,6 +137,41 @@ def infer_ok(after, extras=None):
     if locator_ms is None and v5_ms is None:
         return False
     return True
+
+
+def specialist_loaded(block):
+    loaded = block.get("loaded")
+    if loaded is True:
+        return True
+    if loaded is False:
+        return False
+    return None
+
+
+def dual_output_ok(after, extras=None):
+    extras = extras or {}
+    if extras.get("worker_failed") or extras.get("emergency_hold"):
+        return False
+    if extras.get("output_fresh") is False:
+        return False
+    scratch = _scratch(after)
+    missing = _missing(after)
+    if specialist_loaded(scratch) is False or specialist_loaded(missing) is False:
+        return False
+    if not scratch.get("last_valid_output") and scratch.get("total_latency_ms") is None:
+        return False
+    if not missing.get("last_valid_output") and missing.get("total_latency_ms") is None:
+        return False
+    if extras.get("dual_specialist_evidence"):
+        return True
+    if specialist_loaded(scratch) is True and specialist_loaded(missing) is True:
+        if scratch.get("total_latency_ms") is None or missing.get("total_latency_ms") is None:
+            return False
+        if extras.get("output_fresh") is True:
+            return True
+        if extras.get("output_fresh") is None and infer_ok(after, extras):
+            return False
+    return False
 
 
 def can_reach_function(extras):
@@ -208,6 +250,9 @@ def evaluate_mission_window(name, params, after, extras):
     v5_p95 = stats.get("v5_p95_ms")
     if v5_p95 is not None and v5_p95 > float(spec["v5_p95_ms"]):
         return False, f"v5 p95 {v5_p95:.1f} ms 超过 {spec['v5_p95_ms']}"
+    missing_p95 = stats.get("missing_p95_ms")
+    if missing_p95 is not None and missing_p95 > float(spec["v5_p95_ms"]):
+        return False, f"missing hole p95 {missing_p95:.1f} ms 超过 {spec['v5_p95_ms']}"
     elapsed_p95 = stats.get("elapsed_p95_ms")
     if elapsed_p95 is not None and elapsed_p95 > float(spec["elapsed_p95_ms"]):
         return False, f"elapsed p95 {elapsed_p95:.1f} ms 超过 {spec['elapsed_p95_ms']}"
@@ -234,6 +279,15 @@ def _promote(name, params, after, extras, function_reason=None):
     return "function", why or function_reason
 
 
+def _promote_dual(name, params, after, extras, function_reason=None):
+    extras = extras or {}
+    if extras.get("emergency_hold"):
+        return "none", "紧急停机中断恢复"
+    if not dual_output_ok(after, extras):
+        return "config", function_reason or "双专项尚未同时给出新输出"
+    return _promote(name, params, after, extras, function_reason)
+
+
 def _ok_snapshot(snapshot):
     if not isinstance(snapshot, dict):
         return False
@@ -250,6 +304,8 @@ def assess_get_state(params, before, after, extras):
 
 def assess_restart_camera(params, before, after, extras):
     extras = extras or {}
+    if extras.get("emergency_hold"):
+        return "none", "紧急停机中断恢复"
     before_cam = _camera(before)
     after_cam = _camera(after)
     if not after_cam.get("opened"):
@@ -258,19 +314,23 @@ def assess_restart_camera(params, before, after, extras):
     after_seq = int(after_cam.get("frame_seq") or 0)
     age = after_cam.get("frame_age_ms")
     if after_seq > before_seq and age is not None and age < 500:
-        return _promote("restart_camera", params, after, extras)
+        return _promote_dual("restart_camera", params, after, extras, "摄像头已恢复，双专项输出待验证")
     return "config", "摄像头已打开但画面尚未恢复"
 
 
 def assess_restart_worker(params, before, after, extras):
     del before
     extras = extras or {}
+    if extras.get("emergency_hold"):
+        return "none", "紧急停机中断恢复"
     if extras.get("worker_failed"):
         return "none", "worker 仍异常"
+    scratch = _scratch(after)
+    missing = _missing(after)
+    if specialist_loaded(scratch) is False or specialist_loaded(missing) is False:
+        return "none", "双专项未能全部加载"
     if _mission(after).get("inspection_active"):
-        if infer_ok(after, extras):
-            return _promote("restart_worker", params, after, extras)
-        return "config", "worker 已运行但尚无成功 infer"
+        return _promote_dual("restart_worker", params, after, extras, "worker 已运行但尚无双专项新输出")
     return "none", "worker 未在运行"
 
 
@@ -294,14 +354,14 @@ def assess_set_profile(params, before, after, extras):
         if _mission(after).get("inspection_active"):
             return "none", "SAFE_STOP 后检测仍在运行"
         return "mission", None
+    if extras.get("emergency_hold"):
+        return "none", "紧急停机中断恢复"
     if wanted == "TRT_FAST" and _locator(after).get("backend") != "engine":
         return "none", "TRT_FAST 后 locator 不是 engine"
     previous = _mission(before).get("current_profile")
     if wanted == "FULL" and previous == "TRT_FAST" and _locator(after).get("backend") != "pt":
         return "none", "回 FULL 后 locator 不是 pt"
-    if infer_ok(after, extras):
-        return _promote("set_inference_profile", params, after, extras)
-    return "config", "档位已切换，尚无成功 infer"
+    return _promote_dual("set_inference_profile", params, after, extras, "档位已切换，尚无双专项新输出")
 
 
 def assess_set_locator(params, before, after, extras):
@@ -317,9 +377,7 @@ def assess_set_locator(params, before, after, extras):
     loaded = bool(_locator(after).get("loaded"))
     if extras.get("inspection_can_run") and not loaded:
         return "none", "locator 未加载"
-    if infer_ok(after, extras):
-        return _promote("set_locator_profile", params, after, extras)
-    return "config", "定位权重已切换，尚无成功 infer"
+    return _promote_dual("set_locator_profile", params, after, extras, "定位权重已切换，尚无双专项新输出")
 
 
 def assess_reload(params, before, after, extras):
@@ -331,9 +389,7 @@ def assess_reload(params, before, after, extras):
     expected = extras.get("config_profile")
     if expected and current != expected:
         return "none", f"档位仍为 {current}，期望 {expected}"
-    if infer_ok(after, extras):
-        return _promote("reload_config", {}, after, extras)
-    return "config", "配置已重载，尚无成功 infer"
+    return _promote_dual("reload_config", {}, after, extras, "配置已重载，尚无双专项新输出")
 
 
 def assess_rollback(params, before, after, extras):
@@ -347,9 +403,7 @@ def assess_rollback(params, before, after, extras):
         return "none", f"回滚后档位为 {current}，期望 {expected_profile}"
     if expected_backend and backend != expected_backend:
         return "none", f"回滚后 locator 为 {backend}，期望 {expected_backend}"
-    if infer_ok(after, extras):
-        return _promote("rollback_config", {}, after, extras)
-    return "config", "配置已回滚，尚无成功 infer"
+    return _promote_dual("rollback_config", {}, after, extras, "配置已回滚，尚无双专项新输出")
 
 
 def assess_pause(params, before, after, extras):
@@ -362,11 +416,11 @@ def assess_pause(params, before, after, extras):
 def assess_resume(params, before, after, extras):
     del params, before
     extras = extras or {}
+    if extras.get("emergency_hold"):
+        return "none", "紧急停机锁存或温度保护仍有效，拒绝 resume_inspection"
     if not _mission(after).get("inspection_active"):
         return "none", "检测未恢复运行"
-    if infer_ok(after, extras):
-        return _promote("resume_inspection", params, after, extras)
-    return "config", "检测已恢复但尚无成功 infer"
+    return _promote_dual("resume_inspection", params, after, extras, "检测已恢复但尚无双专项新输出")
 
 
 def assess_apply_settings(params, before, after, extras):
@@ -381,7 +435,7 @@ def assess_apply_settings(params, before, after, extras):
     wanted_profile = (params or {}).get("inference_profile")
     if wanted_profile and extras.get("config_profile") != wanted_profile:
         return "none", f"档位仍为 {extras.get('config_profile')}，期望 {wanted_profile}"
-    return "function", None
+    return "config", "配置已应用"
 
 
 def assess_use_camera(params, before, after, extras):
@@ -389,10 +443,8 @@ def assess_use_camera(params, before, after, extras):
     extras = extras or {}
     if extras.get("video_mode"):
         return "none", "仍在视频模式"
-    if infer_ok(after, extras):
-        return _promote("use_camera", {}, after, extras)
     if _camera(after).get("opened"):
-        return "config", "已切回相机"
+        return _promote_dual("use_camera", {}, after, extras, "已切回相机")
     return "none", "相机未打开"
 
 
@@ -400,7 +452,9 @@ def assess_use_video(params, before, after, extras):
     del params, before, after
     extras = extras or {}
     if extras.get("video_mode"):
-        return "mission", None
+        if dual_output_ok(after, extras):
+            return _promote("use_video", {}, after, extras)
+        return "config", "已进入视频模式，双专项输出待验证"
     return "none", "未进入视频模式"
 
 

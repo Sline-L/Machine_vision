@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 from .actions import LKG_ACTIONS, SPECS, ActionError, accept, bind_source, parse_request
 from .control_view import cap_verify_level
-from .verify import assess, can_reach_function, can_reach_mission, config_verified, recovery_success
+from .verify import assess, can_reach_function, can_reach_mission, config_verified
 
 
 class ControlService:
@@ -22,7 +22,7 @@ class ControlService:
         return self.runtime.control_extras()
 
     def execute(self, name, params):
-        return self.runtime.execute_action(name, params)
+        return self.runtime.execute_action(name, params, authority=getattr(self, "_authority", None))
 
     def rollback(self, name, token):
         return self.runtime.rollback_action(name, token)
@@ -34,6 +34,7 @@ class ControlService:
         request = parse_request(body)
         request["authority"] = authority
         request["source"] = bind_source(request.get("declared_source"), authority)
+        self._authority = authority
         name = request["name"]
         params = request["params"]
         meta = SPECS[name]
@@ -64,11 +65,11 @@ class ControlService:
                 "duration_ms": round((time.monotonic() - started) * 1000.0, 1),
             }
         if not allowed:
-            return _response(request, False, False, "none", reason, before, before, started)
+            return _response(request, False, False, "none", reason, before, before, started, extras)
         if name == "get_state":
             after = before
             level, verify_reason = _assess(name, params, before, after, extras)
-            return _response(request, True, True, level, None if config_verified(level) else verify_reason, before, after, started)
+            return _response(request, True, True, level, None if config_verified(level) else verify_reason, before, after, started, extras)
 
         timeout_s = float(meta["timeout_s"])
         attempts = int(meta["retry"]) + 1
@@ -90,26 +91,21 @@ class ControlService:
             after, extras, level, last_error = self._poll_verify(name, params, before, deadline)
             if config_verified(level):
                 self._maybe_promote_lkg(name, level)
-                return _response(request, True, True, level, last_error, before, after, started)
+                return _response(request, True, True, level, last_error, before, after, started, extras)
             if token is not None:
                 try:
                     self.rollback(name, token)
                 except Exception as exc:
                     last_error = f"verify 失败且 rollback 失败：{exc}"
         error = last_error or "动作未通过 verify"
-        return _response(request, True, executed, level, error, before, after, started)
+        return _response(request, True, executed, level, error, before, after, started, extras)
 
     def _poll_verify(self, name, params, before, deadline):
-        from .control_view import DUAL_SPECIALIST_MISSION_DEFERRED
-
         last = before
         extras = self.extras()
         reason = "verify 超时"
         best_level = "none"
         best_reason = reason
-        deferred = name in DUAL_SPECIALIST_MISSION_DEFERRED and not (
-            name == "set_inference_profile" and (params or {}).get("profile") == "SAFE_STOP"
-        )
         while time.monotonic() < deadline:
             last = self.snapshot()
             extras = self.extras()
@@ -117,14 +113,30 @@ class ControlService:
             if _better(level, best_level):
                 best_level = level
                 best_reason = reason
-            if deferred and config_verified(level):
-                return last, extras, level, reason
+            if extras.get("emergency_hold") and name not in ("pause_inspection",) and not (
+                name == "set_inference_profile" and (params or {}).get("profile") == "SAFE_STOP"
+            ):
+                held = best_level if config_verified(best_level) else "none"
+                return last, extras, held, reason or "紧急停机中断恢复"
             if level == "mission":
                 return last, extras, level, None
-            if config_verified(level) and not can_reach_function(extras) and not can_reach_mission(name, params, extras):
-                return last, extras, level, reason
             if level == "function" and not can_reach_mission(name, params, extras):
                 return last, extras, level, None
+            if config_verified(level):
+                waiting_for_dual = (
+                    can_reach_function(extras)
+                    and extras.get("specialists_loaded")
+                    and not extras.get("dual_specialist_evidence")
+                    and name not in ("pause_inspection", "apply_settings", "get_state", "reset_stats", "reconnect_serial")
+                    and not (name == "set_inference_profile" and (params or {}).get("profile") == "SAFE_STOP")
+                )
+                waiting_for_window = (
+                    level == "function"
+                    and can_reach_mission(name, params, extras)
+                    and extras.get("dual_specialist_evidence")
+                )
+                if not waiting_for_dual and not waiting_for_window:
+                    return last, extras, level, reason
             remaining = deadline - time.monotonic()
             if remaining <= 0:
                 break
@@ -147,10 +159,10 @@ class ControlService:
 
 def _assess(name, params, before, after, extras):
     level, reason = assess(name, params, before, after, extras)
-    capped, note = cap_verify_level(name, params, level)
+    capped, note = cap_verify_level(name, params, level, extras)
     if note:
         return capped, note
-    return level, reason
+    return capped, reason
 
 
 def _overlay_snapshot(base, overlay):
@@ -181,8 +193,11 @@ def _better(left, right):
     return order.get(left, 0) > order.get(right, 0)
 
 
-def _response(request, accepted, executed, verify_level, error, before, after, started):
-    recovered = recovery_success(verify_level)
+def _response(request, accepted, executed, verify_level, error, before, after, started, extras=None):
+    from .control_view import inspection_recovery_success
+
+    extras = extras or {}
+    recovered = inspection_recovery_success(request.get("name"), request.get("params"), verify_level, extras)
     configured = config_verified(verify_level)
     return {
         "request_id": request["request_id"],
@@ -191,6 +206,8 @@ def _response(request, accepted, executed, verify_level, error, before, after, s
         "verified": recovered,
         "config_verified": configured,
         "recovery_success": recovered,
+        "function_verified": verify_level in ("function", "mission"),
+        "mission_verified": verify_level == "mission",
         "verify_level": verify_level,
         "authority": request.get("authority"),
         "source": request.get("source"),

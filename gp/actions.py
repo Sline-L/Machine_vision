@@ -164,7 +164,7 @@ def _pre_set_profile(params, snapshot, extras):
     if not profile.get("implemented"):
         return False, f"档位 {name} 尚未实现"
     if extras.get("emergency_hold") and name != "SAFE_STOP":
-        if extras.get("thermal_stop_needed") or extras.get("authority") != "human":
+        if extras.get("thermal_stop_needed") or extras.get("thermal_alarm") or extras.get("authority") != "human":
             return False, "紧急停机锁存中，拒绝离开 SAFE_STOP"
     return True, None
 
