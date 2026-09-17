@@ -93,12 +93,15 @@ Step 6.3 基线：90 tests OK，skipped=2（无 torch）。
 | 检查 | 结果 |
 |---|---|
 | 中期 Demo 同步目录 | `/home/jetson/Projects/midterm-agent-demo` |
-| `unittest tests.test_agent_midterm_demo` | **9 OK** |
-| `python3 tools/agent_midterm_demo.py --scenario all` | A/B/C/D 路由正确；全部 `executed=False` |
+| `unittest tests.test_agent_midterm_demo` | **10 OK**（含 live_l2 提案标记） |
+| `python3 tools/agent_midterm_demo.py --scenario all` | A/B/C/D 路由正确；全部 `executed=False`；五面板输出 |
 | Qwen `127.0.0.1:8080` | HTTP 200，模型 `qwen3-4b` |
-| GearPro Control `127.0.0.1:8787` | **未监听**（未做恢复执行） |
+| GearPro Control `127.0.0.1:8787` | **已起**（replay + Control）；仅做 GET /api/state，**未** POST /api/action |
+| `E_live` | 健康 replay：`fault=None`，`executed=False`，`input_source=LIVE GET /api/state`；五面板可见 |
+| `--live-l2` on healthy | **正确跳过** L2（无 L2-needed fault）；meta 记录 skip 原因 |
+| Live L2 wiring probe | 合成 `C_camera_stale` + L1 cooldown + overlay reasoner → `route=L2`，`propose=restart_camera`，`l2_live=True`，`executed=False`，latency≈2.5s，`protocol_status=valid_structured`。产物：`docs/midterm/runs/E_live_l2_wiring_probe.json`（NX）。**不是** Demo C OFF 历史数字复现 |
 | 冻结 `results/final_demo/demo_{a,b,c}.json` | SHA256 见下；e2e 与答辩引用 **一致** |
-| Live `reasoner.complete` | 服务可达；本次合成 CAMERA_STALE 返回 `None`（模型把内容写进 `reasoning_content`，`content` 为空 / finish=length）。**不能**把这次 live 调用记成 Demo C OFF 复现 |
+| Live `reasoner.complete`（合成探针） | 服务可达；合成 CAMERA_STALE 曾返回 `None`（`reasoning_content` 非空、`content` 空）。**不能**记成 Demo C OFF 复现 |
 
 ### 冻结文件 SHA256（NX 路径）
 

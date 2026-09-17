@@ -55,6 +55,23 @@ JSON 输出目录：`docs/midterm/runs/`（可展示给老师看 `actually_execu
 
 无 Web 地址（本交付为 CLI；P2 Web 未做）。
 
+### 可选：NX 只读 LIVE（GET /api/state，禁止 POST）
+
+在 NX 上先确保 GearPro Control 已起（replay 即可），且 **不要** 跑 `python -m edgemedic` 常驻环：
+
+```bash
+cd /home/jetson/Projects/midterm-agent-demo
+export PYTHONPATH=/home/jetson/Projects/midterm-agent-demo
+# 只读拉取真实 Snapshot + 五面板诊断（不执行）
+python3 tools/agent_midterm_demo.py --scenario E_live --control-url http://127.0.0.1:8787
+# 可选：在 L1/MEM 无提案时调用本机 Qwen 生成提案（仍不 POST）
+python3 tools/agent_midterm_demo.py --scenario E_live --control-url http://127.0.0.1:8787 \
+  --live-l2 --llm-url http://127.0.0.1:8080 \
+  --overlay-path /home/jetson/Projects/edgemedic-live
+```
+
+讲解：`input_source=LIVE GET /api/state`；`actually_executed` 必须为 false；live L2 标注为 **LIVE INFERENCE (proposal only)**，不是历史 Demo C OFF。
+
 ---
 
 ## 4. 建议演示顺序与讲解词
@@ -120,9 +137,13 @@ python tools/agent_midterm_demo.py --show-frozen-abc --scenario A_healthy --quie
 
 指出 JSON 中 Demo A/B e2e、Demo C ON/OFF；口头强调：replay ≠ 真机；两边历史 RECOVERED ≠ 本次 RECOVERED。
 
-### 第七部分（45s）— 成果与局限
+### 第七部分（可选 60s）— LIVE GET（NX）
 
-已完成：双专项 Runtime 集成到 6.3、Control/Guardian/Verify、只读 Agent Demo、文档。  
+若答辩现场能 SSH NX：跑 `E_live`，指出五面板中 `input_source=LIVE GET /api/state`，并强调仍是 observe-only。有故障且无 L1 时才可选 `--live-l2`。
+
+### 第八部分（45s）— 成果与局限
+
+已完成：双专项 Runtime 集成到 6.3、Control/Guardian/Verify、只读 Agent Demo、LIVE GET 接线、文档。  
 未完成：自动恢复、真机、NX overlay 入库、调用者认证、实模型加载（本机 skip）。
 
 ---
