@@ -359,7 +359,7 @@ onBeforeUnmount(() => {
             <div><span>服务</span><strong>{{ agent?.available === false ? '离线' : '在线' }}</strong></div>
             <div><span>4B</span><strong>{{ agent?.llm_ready ? '就绪' : '未就绪' }}</strong></div>
             <div><span>执行模式</span><strong>{{ agent?.execution_mode || '—' }}</strong></div>
-            <div><span>恢复武装</span><strong>{{ agent?.recovery_armed ? '是' : '否' }}</strong></div>
+            <div><span>允许自动恢复</span><strong>{{ agent?.recovery_armed ? '已开启' : '未开启' }}</strong></div>
             <div><span>故障</span><strong>{{ agentFault }}</strong></div>
             <div><span>路由</span><strong>{{ agentRoute }}</strong></div>
             <div><span>提案</span><strong>{{ agentProposal }}</strong></div>
@@ -369,10 +369,10 @@ onBeforeUnmount(() => {
             <div class="agent-wide"><span>Control/Verify</span><strong>{{ agentExecDetail }}</strong></div>
           </div>
           <div class="agent-actions">
-            <button class="button" type="button" :disabled="busy || !canArmRecovery" @click="armRecovery">启用恢复授权</button>
-            <button class="button ghost" type="button" :disabled="busy || !canDisarmRecovery" @click="disarmRecovery">撤销恢复授权</button>
+            <button class="button" type="button" :disabled="busy || !canArmRecovery" @click="armRecovery">开启自动恢复</button>
+            <button class="button ghost" type="button" :disabled="busy || !canDisarmRecovery" @click="disarmRecovery">关闭自动恢复</button>
           </div>
-          <p class="agent-note">开始检测仅开启监测；恢复授权需操作员显式启用，且仅当 Agent 以 execute_replay 运行（隔离 Replay）。停止检测会撤销授权并停止监测。</p>
+          <p class="agent-note">开始检测只让 Agent 监视状态，不会自动动手。需要自动恢复时，请点「开启自动恢复」（仅隔离 Replay 的 execute_replay 可用）。停止检测会关掉监视并关闭自动恢复。</p>
         </article>
 
         <article class="panel stats-panel">
