@@ -1,0 +1,12 @@
+{
+  "nx_host": "yahboom",
+  "ts": "2026-09-17T21:38:47+0800",
+  "agent_tree": "/home/jetson/Projects/p0-4b-agent",
+  "dual_tree": "/home/jetson/Projects/p0-gearpro-dual",
+  "control": "http://127.0.0.1:8788",
+  "web": "http://127.0.0.1:8001",
+  "llm": "http://127.0.0.1:8080",
+  "llama_model": "/home/jetson/srtp-agent/models/qwen3-4b-q4.gguf",
+  "local_worktree_head_at_sync": "f1150783e33237ec355e30e9dc79d4e48697261a",
+  "note": "NX trees are overlay copies without .git; source of truth is Windows worktree integration/dual-specialist-edgemedic"
+}

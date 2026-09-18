@@ -1,5 +1,6 @@
 # GearPro 文档索引
 
+- [Qwen3-4B Agent 中期文档](midterm/README.md)：技术报告、答辩问答、演示步骤和证据。阅读本分支即可，实现代码在 `integration/dual-specialist-edgemedic`。
 - [系统架构](architecture.md)：运行结构、双模型数据流、线程边界、配置和硬件接口。
 - [Web API](web-api.md)：浏览器登录、控制锁、状态推送、视频流和控制接口。
 - [模型格式](model-formats.md)：`.pt` 与 `.engine` 的取舍和 NX 上板步骤。

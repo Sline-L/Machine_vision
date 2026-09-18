@@ -1,0 +1,62 @@
+{
+  "case": "overlay_UNKNOWN_SCRATCH_after_hint_fix",
+  "input": {
+    "scenario": "docs/midterm/scenarios/L2_unknown_scratch.json",
+    "camera": {
+      "opened": true,
+      "frame_seq": 2500,
+      "frame_age_ms": 40,
+      "health": 1.0,
+      "actual_fps": 30.0
+    },
+    "scratch_health": 0.1,
+    "fault": "UNKNOWN_SCRATCH_V5",
+    "l1_proposal": null,
+    "l2_extra_note": "A named L1 rule did not match. Camera is not stale; do not propose restart_camera. If scratch error_count increased prefer restart_worker. Otherwise abstain with tool null."
+  },
+  "guardian_precheck_on_overlay_camera": {
+    "ok": false,
+    "reason": "摄像头未处于失败或 STALE，拒绝 restart_camera"
+  },
+  "cycle": {
+    "route": {
+      "selected": "L2",
+      "l1_hit": false,
+      "memory_hit": false,
+      "l2_invoked": true,
+      "why_l2": [
+        "no_l1_or_mem_proposal"
+      ],
+      "disable_l1": false
+    },
+    "proposed": null,
+    "l2": {
+      "invoked": true,
+      "error": null,
+      "invalid": false,
+      "protocol_status": "valid_structured",
+      "latency_s": 1.951,
+      "latency_ms": 1951.0,
+      "prompt_tokens": 896,
+      "completion_tokens": 18,
+      "tokens": 914,
+      "decode": "grammar",
+      "model": "qwen3-4b",
+      "raw_preview": "{\n  \"tool\": null,\n  \"params\": {\n    }}\n  ",
+      "action": null
+    },
+    "authority_decision": {
+      "action_risk_class": "OBSERVE",
+      "execution_authority": "OBSERVE",
+      "would_execute": false,
+      "note": "L2 abstain/invalid"
+    },
+    "actually_executed": false,
+    "control_result": null
+  },
+  "authority_on_proposed": {
+    "action_risk_class": "OBSERVE",
+    "execution_authority": "OBSERVE",
+    "would_execute": false
+  }
+}

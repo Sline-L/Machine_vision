@@ -1,0 +1,47 @@
+{
+  "closed_loop": "PASS",
+  "claims": {
+    "l2_invoked": true,
+    "route_is_l2": true,
+    "authority_would_execute": true,
+    "actually_executed": true,
+    "verify_level": "mission",
+    "recovery_outcome": "RECOVERED",
+    "proposed": {
+      "name": "resume_inspection",
+      "params": {},
+      "layer": "L2",
+      "source": "reasoner"
+    },
+    "l1_was_disabled": true,
+    "not_l1_recovery": true
+  },
+  "l2": {
+    "invoked": true,
+    "error": null,
+    "invalid": false,
+    "protocol_status": "valid_structured",
+    "latency_s": 2.721,
+    "latency_ms": 2721.0,
+    "prompt_tokens": 979,
+    "completion_tokens": 19,
+    "tokens": 998,
+    "decode": "grammar",
+    "model": "qwen3-4b",
+    "raw_preview": "{\n  \"tool\": \"resume_inspection\",\n  \"params\": {\n    }}\n\n",
+    "action": {
+      "name": "resume_inspection",
+      "params": {},
+      "layer": "L2",
+      "source": "reasoner"
+    }
+  },
+  "authority": {
+    "action_risk_class": "AUTO_LOW_RISK",
+    "execution_authority": "AUTO_LOW_RISK",
+    "would_execute": true
+  },
+  "verify_level": "mission",
+  "recovery_outcome": "RECOVERED",
+  "request_id": "L2-56dbf807"
+}

@@ -1,0 +1,40 @@
+{
+  "demo": "F",
+  "title": "post-recovery dual-specialist view",
+  "specialists": {
+    "scratch_v5": {
+      "loaded": null,
+      "load_status": null,
+      "health": 0.2021,
+      "total_latency_ms": 175.7428679993609,
+      "error_count": 0,
+      "last_error": null
+    },
+    "missing_hole_v1": {
+      "loaded": null,
+      "load_status": null,
+      "health": null,
+      "total_latency_ms": null,
+      "error_count": null,
+      "last_error": null
+    },
+    "camera": {
+      "opened": true,
+      "frame_seq": 67167,
+      "frame_age_ms": 27.26527899994835,
+      "health": 1.0
+    },
+    "mission": {
+      "inspection_active": true,
+      "current_profile": "FULL",
+      "inspection_count": null,
+      "emergency_hold": null
+    },
+    "system": {
+      "temperature_c": 59.468
+    },
+    "schema_version": "system-snapshot.v1",
+    "timestamp": "2026-09-17T13:15:29.713Z"
+  },
+  "note": "Verify levels appear on control_result of Demo E"
+}

@@ -1,0 +1,32 @@
+{
+  "label": "HISTORICAL_DEMO_ABC",
+  "input_source": "FROZEN REPLAY",
+  "note": "Values cited from midterm review brief / prior NX Demo A/B/C acceptance. This workstation could not access /home/jetson/Projects/edgemedic-live to re-hash artifacts. Do not present as a new live recovery run.",
+  "demo_a": {
+    "fault": "INSPECTION_PAUSED",
+    "e2e_ms": 2153,
+    "pipeline": "replay",
+    "recovered_claim": "historical RECOVERED on NX replay; not re-verified here"
+  },
+  "demo_b": {
+    "fault": "CAMERA_STALE",
+    "e2e_ms": 2136,
+    "pipeline": "replay",
+    "recovered_claim": "historical RECOVERED on NX replay; not re-verified here"
+  },
+  "demo_c_memory_on": {
+    "route": "MEM",
+    "l2_invoked": false,
+    "e2e_ms": 2241
+  },
+  "demo_c_memory_off": {
+    "route": "L2",
+    "l2_invoked": true,
+    "l2_ms": 2704,
+    "e2e_ms": 4929
+  },
+  "rq_boundaries": {
+    "rq2": "mechanism demo only; does not prove recovery-rate improvement",
+    "rq3": "replay pipeline, not physical device fault injection"
+  }
+}

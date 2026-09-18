@@ -1,0 +1,14 @@
+{
+  "label": "HISTORICAL_L2_CAMERA_STALE",
+  "input_source": "FROZEN REPLAY",
+  "note": "HISTORICAL REPLAY of frozen L2 proposal; not LIVE INFERENCE. NX overlay /home/jetson/Projects/edgemedic-live was unreachable from the Windows integration host.",
+  "tool": "restart_camera",
+  "params": {},
+  "historical_metrics": {
+    "route": "L2",
+    "l2_invoked": true,
+    "l2_ms": 2704,
+    "e2e_ms": 4929,
+    "source_claim": "RQ2 Demo C Memory OFF (reviewer-cited frozen run; not re-executed here)"
+  }
+}

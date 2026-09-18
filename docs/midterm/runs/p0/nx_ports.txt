@@ -1,0 +1,6 @@
+LISTEN 0      512         127.0.0.1:8080       0.0.0.0:*    users:(("llama-server",pid=1702,fd=7))    
+LISTEN 0      2048        127.0.0.1:8001       0.0.0.0:*    users:(("python3",pid=43771,fd=15))       
+LISTEN 0      2048        127.0.0.1:8000       0.0.0.0:*    users:(("python3",pid=14179,fd=14))       
+LISTEN 0      5           127.0.0.1:8790       0.0.0.0:*    users:(("python3",pid=44862,fd=3))        
+LISTEN 0      5           127.0.0.1:8788       0.0.0.0:*    users:(("python3",pid=43771,fd=14))       
+LISTEN 0      5           127.0.0.1:8787       0.0.0.0:*    users:(("python3",pid=14179,fd=13))       

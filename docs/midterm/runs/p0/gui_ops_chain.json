@@ -1,0 +1,105 @@
+{
+  "protocol": "p0-gui-ops-chain-v1",
+  "web_url": "http://127.0.0.1:8001",
+  "agent_url": "http://127.0.0.1:8790",
+  "browser_manual_qa": "NOT_RUN",
+  "steps": {
+    "login": {
+      "http": 200,
+      "authenticated": true
+    },
+    "acquire": {
+      "http": 200,
+      "is_owner": true
+    },
+    "inspection_start": {
+      "http": 200,
+      "ok": true
+    },
+    "agent_status_after_start": {
+      "http": 200,
+      "monitoring": true,
+      "recovery_armed": false,
+      "llm_ready": true,
+      "execution_mode": "execute_replay",
+      "last_cycle_route": {
+        "selected": null,
+        "l1_hit": false,
+        "memory_hit": false,
+        "l2_invoked": false,
+        "why_l2": null,
+        "disable_l1": false
+      }
+    },
+    "arm": {
+      "http": 200,
+      "recovery_armed": true,
+      "execution_mode": "execute_replay",
+      "error": null
+    },
+    "induced_pause": {
+      "accepted": true,
+      "executed": true,
+      "verify_level": "mission",
+      "error": null,
+      "request_id": "gui-ops-pause-bbf63b62"
+    },
+    "wait_cycle": {
+      "recovered": true,
+      "monitoring": true,
+      "recovery_armed": true,
+      "last_cycle": {
+        "fault": "INSPECTION_PAUSED",
+        "route": {
+          "selected": "L1",
+          "l1_hit": true,
+          "memory_hit": false,
+          "l2_invoked": false,
+          "why_l2": null,
+          "disable_l1": false
+        },
+        "proposed_action": {
+          "name": "resume_inspection",
+          "params": {},
+          "layer": "L1",
+          "source": "reflex"
+        },
+        "authority_decision": {
+          "action_risk_class": null,
+          "execution_authority": null,
+          "would_execute": false,
+          "note": null
+        },
+        "actually_executed": true,
+        "verify_level": "mission",
+        "recovery_outcome": "RECOVERED",
+        "l2": null,
+        "control_result": {
+          "request_id": "L1-INSPECTION_PAUSED-e0647328",
+          "executed": true,
+          "verify_level": "mission",
+          "recovery_success": true,
+          "error": null
+        }
+      }
+    },
+    "inspection_stop": {
+      "http": 200,
+      "ok": true
+    },
+    "agent_status_after_stop": {
+      "http": 200,
+      "monitoring": false,
+      "recovery_armed": false
+    }
+  },
+  "result": "PASS",
+  "execute_path": "execute_replay_armed",
+  "recovery_seen": true,
+  "claims": {
+    "monitor_on_start_without_arm": true,
+    "llm_ready_visible": true,
+    "stop_disarms_and_stops_monitor": true,
+    "browser_manual_qa": "NOT_RUN"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "label": "FROZEN_EPISODE_CAMERA_STALE",
+  "note": "Synthetic episode counts for midterm MEM demo only. Not the NX live EpisodeStore. Do not treat as production recovery statistics.",
+  "successes": {
+    "CAMERA_STALE|restart_camera|{}": 3
+  },
+  "failures": {},
+  "suggests": 0,
+  "harms": 0,
+  "misguided": 0,
+  "executed": 0,
+  "executed_harms": 0,
+  "harmful": 0,
+  "caught": 0
+}

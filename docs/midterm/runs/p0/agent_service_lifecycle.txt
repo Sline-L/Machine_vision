@@ -1,0 +1,6 @@
+duplicate_start_exit=1
+duplicate_msg=agent already running pid=42669
+shutdown_api_ok=true
+pidfile_cleared=true
+monitor_default_recovery_armed=false
+observe_only_on_auto_monitor=true

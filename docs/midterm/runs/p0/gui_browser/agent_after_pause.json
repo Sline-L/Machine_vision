@@ -1,0 +1,26 @@
+{
+  "recovery_armed": true,
+  "last_cycle": {
+    "fault": null,
+    "route": {
+      "selected": null,
+      "l1_hit": false,
+      "memory_hit": false,
+      "l2_invoked": false,
+      "why_l2": null,
+      "disable_l1": false
+    },
+    "proposed_action": null,
+    "authority_decision": {
+      "action_risk_class": null,
+      "execution_authority": null,
+      "would_execute": false,
+      "note": null
+    },
+    "actually_executed": false,
+    "verify_level": "none",
+    "recovery_outcome": null,
+    "control_result": null,
+    "l2": null
+  }
+}

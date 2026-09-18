@@ -1,0 +1,119 @@
+{
+  "fault": "UNKNOWN_SCRATCH_V5",
+  "diagnosis": "subsystem health collapsed without a named rule",
+  "route": {
+    "selected": "L2",
+    "l1_hit": false,
+    "memory_hit": false,
+    "l2_invoked": true,
+    "why_l2": [
+      "no_l1_or_mem_proposal"
+    ],
+    "disable_l1": false
+  },
+  "proposed_action": {
+    "name": "restart_camera",
+    "params": {},
+    "layer": "L2",
+    "source": "reasoner"
+  },
+  "authority_decision": {
+    "action_risk_class": "OBSERVE",
+    "execution_authority": "observe_only",
+    "would_execute": false,
+    "note": "observe_only mode: proposal recorded, Control POST skipped"
+  },
+  "execution_mode": "observe_only",
+  "actually_executed": false,
+  "control_result": {
+    "accepted": false,
+    "executed": false,
+    "dry_run": true,
+    "verify_level": "none",
+    "error": null,
+    "note": "observe_only"
+  },
+  "verify_level": "none",
+  "recovery_outcome": "FAILED",
+  "l2": {
+    "invoked": true,
+    "error": null,
+    "invalid": false,
+    "protocol_status": "valid_structured",
+    "latency_s": 2.05,
+    "latency_ms": 2050.0,
+    "prompt_tokens": 879,
+    "completion_tokens": 20,
+    "tokens": 899,
+    "decode": "grammar",
+    "model": "qwen3-4b",
+    "raw_preview": "{\n  \"tool\": \"restart_camera\",\n  \"params\": {\n    \n    \n  }}\n",
+    "action": {
+      "name": "restart_camera",
+      "params": {},
+      "layer": "L2",
+      "source": "reasoner"
+    }
+  },
+  "specialists": {
+    "scratch_v5": {
+      "loaded": true,
+      "load_status": null,
+      "health": 0.1,
+      "total_latency_ms": 80.0,
+      "error_count": 0,
+      "last_error": null
+    },
+    "missing_hole_v1": {
+      "loaded": true,
+      "load_status": null,
+      "health": 0.9,
+      "total_latency_ms": 45.0,
+      "error_count": 0,
+      "last_error": null
+    },
+    "camera": {
+      "opened": true,
+      "frame_seq": 2500,
+      "frame_age_ms": 40,
+      "health": 1.0
+    },
+    "mission": {
+      "inspection_active": true,
+      "current_profile": "FULL",
+      "inspection_count": 88,
+      "emergency_hold": false
+    },
+    "system": {
+      "temperature_c": 65.0
+    },
+    "schema_version": "system-snapshot.v2",
+    "timestamp": 1720000099.0
+  },
+  "evidence": {
+    "frame_age_ms": 40,
+    "frame_seq": 2500,
+    "camera_opened": true,
+    "locator_latency_ms": 18.0,
+    "locator_backend": "pt",
+    "scratch_latency_ms": 80.0,
+    "scratch_error_count": 0,
+    "serial_connected": true,
+    "serial_failures": 0,
+    "gpu_util": null,
+    "gpu_mem_mb": null,
+    "power_w": null,
+    "temperature_c": 65.0,
+    "current_profile": "FULL",
+    "utility": 0.5
+  },
+  "metrics": {
+    "e2e_latency_ms": 2050.9,
+    "l2_latency_ms": 2050.0,
+    "control_latency_ms": null
+  },
+  "snapshot_schema": "system-snapshot.v2",
+  "ACTUAL_EXECUTION_DISABLED": true,
+  "demo": "C",
+  "input_source": "SYNTHETIC L2_unknown_scratch"
+}

@@ -1,5 +1,7 @@
 # GearPro 齿轮视觉检测系统
 
+Qwen3-4B Agent 中期文档在本分支：[docs/midterm/README.md](docs/midterm/README.md)。
+
 GearPro 是运行在 Jetson 或 Linux 工控机上的齿轮在线视觉检测系统。当前 `main-web`
 版本使用 FastAPI 提供后端服务、Vue 3 提供局域网浏览器界面，不再依赖 Qt 桌面环境。
 模型首先定位齿轮，再通过 Scratch V5 三模型融合判断划痕，并把结果显示、统计和发送给
