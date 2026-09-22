@@ -1,0 +1,50 @@
+{
+  "version": "scratch_v5",
+  "classes": {
+    "0": "normal",
+    "1": "scratch"
+  },
+  "classifiers": [
+    {
+      "name": "f_efficientnet_b0_384_w1_s20260911",
+      "family": "efficientnet_b0",
+      "weights": "classifier_1.pt",
+      "sha256": "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438",
+      "imgsz": 384,
+      "tta": "none",
+      "temperature": 0.7
+    },
+    {
+      "name": "p_resnet18_384_w1",
+      "family": "resnet18",
+      "weights": "classifier_2.pt",
+      "sha256": "d07678a6da421c4edc00ac24b8c5052b0b8b7f8b1614b9d82563ecefbf59360d",
+      "imgsz": 384,
+      "tta": "none",
+      "temperature": 2.05
+    }
+  ],
+  "detector": {
+    "name": "p_detector_p2_960",
+    "weights": "detector.pt",
+    "sha256": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3",
+    "imgsz": 960,
+    "temperature": 2.125,
+    "conf_floor": 0.001,
+    "display_confidence": 0.05,
+    "iou": 0.7
+  },
+  "fusion": {
+    "type": "weighted",
+    "alpha": 0.25,
+    "classifier": {
+      "type": "classifier_mean",
+      "models": [
+        "f_efficientnet_b0_384_w1_s20260911",
+        "p_resnet18_384_w1"
+      ]
+    }
+  },
+  "default_threshold": 0.300273610279458,
+  "decision": "REJECT when fused scratch probability >= threshold"
+}

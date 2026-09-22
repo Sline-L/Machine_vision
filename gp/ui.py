@@ -26,7 +26,9 @@ from PyQt5.QtWidgets import (
 )
 
 from .camera import CameraView, LatestFrame, frame_to_pixmap
+from .profiles import IMPLEMENTED, ProfileError, SPECS, apply_to_config
 from .serial_io import SerialOutput
+from .telemetry import build_snapshot
 from .types import InspectionStats
 from .worker import InspectionThread
 
@@ -79,12 +81,17 @@ class SettingsDialog(QDialog):
         self.duration.setRange(1, 1440)
         self.duration.setValue(config.duration_minutes)
         self.locator_conf = self._double_spin(config.locator_confidence)
-        self.defect_threshold = self._double_spin(config.defect_threshold)
+        self.defect_threshold = self._double_spin(config.defect_threshold, decimals=6, step=0.01)
         self.interval = QDoubleSpinBox()
         self.interval.setRange(0.03, 5.0)
         self.interval.setDecimals(2)
         self.interval.setSingleStep(0.05)
         self.interval.setValue(config.inference_interval)
+        self.profile = QComboBox()
+        self.profile.addItems(IMPLEMENTED)
+        current_profile = config.inference_profile if config.inference_profile in IMPLEMENTED else "FULL"
+        self.profile.setCurrentText(current_profile)
+        self.profile.currentTextChanged.connect(self._sync_interval_from_profile)
         self.camera = QSpinBox()
         self.camera.setRange(0, 32)
         self.camera.setValue(config.camera_index)
@@ -98,6 +105,7 @@ class SettingsDialog(QDialog):
         form.addRow("运行时长（分钟）", self.duration)
         form.addRow("齿轮定位阈值", self.locator_conf)
         form.addRow("缺陷判定阈值", self.defect_threshold)
+        form.addRow("推理档位", self.profile)
         form.addRow("推理间隔（秒）", self.interval)
         form.addRow("摄像头索引", self.camera)
         form.addRow("串口", self.serial_port)
@@ -107,12 +115,17 @@ class SettingsDialog(QDialog):
         buttons.rejected.connect(self.reject)
         form.addRow(buttons)
 
+    def _sync_interval_from_profile(self, name):
+        interval = SPECS.get(name, {}).get("inference_interval")
+        if interval is not None:
+            self.interval.setValue(interval)
+
     @staticmethod
-    def _double_spin(value):
+    def _double_spin(value, decimals=2, step=0.05):
         spin = QDoubleSpinBox()
         spin.setRange(0.01, 0.99)
-        spin.setDecimals(2)
-        spin.setSingleStep(0.05)
+        spin.setDecimals(decimals)
+        spin.setSingleStep(step)
         spin.setValue(value)
         return spin
 
@@ -123,7 +136,12 @@ class SettingsDialog(QDialog):
         self.config.locator_confidence = self.locator_conf.value()
         self.config.defect_threshold = self.defect_threshold.value()
         self.config.inference_interval = self.interval.value()
-        return self.camera.value(), self.serial_port.text().strip(), self.serial_baudrate.value()
+        return (
+            self.profile.currentText(),
+            self.camera.value(),
+            self.serial_port.text().strip(),
+            self.serial_baudrate.value(),
+        )
 
 
 class MainWindow(QMainWindow):
@@ -136,6 +154,8 @@ class MainWindow(QMainWindow):
         self.started_at = None
         self.last_counted_at = 0.0
         self.serial_output = SerialOutput(config.serial_port, config.serial_baudrate)
+        self.last_result = None
+        self.scratch_errors = 0
         self.setWindowTitle("GearPro 齿轮视觉检测系统")
         self.setMinimumSize(960, 640)
         self.resize(1280, 800)
@@ -192,7 +212,7 @@ class MainWindow(QMainWindow):
         self.result_details = QLabel()
         self.result_details.setAlignment(Qt.AlignLeft | Qt.AlignTop)
         self.result_details.setWordWrap(True)
-        self.result_details.setMaximumHeight(50)
+        self.result_details.setMaximumHeight(110)
         self.result_details.setStyleSheet("background:#f8fafc; padding:5px; border-radius:5px;")
         self.result_image = QLabel("等待检测画面")
         self.result_image.setAlignment(Qt.AlignCenter)
@@ -225,6 +245,8 @@ class MainWindow(QMainWindow):
 
         self.camera_timer = QTimer(self)
         self.camera_timer.timeout.connect(self.camera_view.capture_frame)
+        self.preview_timer = QTimer(self)
+        self.preview_timer.timeout.connect(self._refresh_preview)
         self.mode_timer = QTimer(self)
         self.mode_timer.timeout.connect(self._check_mode_limit)
         self.mode_timer.start(500)
@@ -244,9 +266,22 @@ class MainWindow(QMainWindow):
         grid.addWidget(frame, 0, column)
         return value
 
+    def _preview_interval_ms(self):
+        hz = max(1.0, float(self.config.ui_refresh_hz))
+        return max(1, int(1000 / hz))
+
+    def _refresh_preview(self):
+        if self.config.video_path is not None:
+            return
+        packet = self.frame_store.read()
+        if packet.frame is None:
+            return
+        self.camera_view.setPixmap(frame_to_pixmap(packet.frame, self.camera_view.size()))
+
     def _start_source(self):
         if self.config.video_path is not None:
             self.camera_timer.stop()
+            self.preview_timer.stop()
             self.camera_view.stop()
             self.camera_view.setText(f"视频测试：{self.config.video_path.name}")
             self.status_label.setText("正在准备视频测试…")
@@ -254,12 +289,14 @@ class MainWindow(QMainWindow):
             return True
         if self.camera_view.start():
             self.camera_timer.start(max(1, int(1000 / self.config.camera_fps)))
+            self.preview_timer.start(self._preview_interval_ms())
             self.status_label.setText("摄像头已连接")
             self.camera_button.setVisible(False)
             return True
-        else:
-            self.status_label.setText(self.camera_view.error_message or "摄像头连接失败，请检查设置和设备")
-            return False
+        self.camera_timer.stop()
+        self.preview_timer.stop()
+        self.status_label.setText(self.camera_view.error_message or "摄像头连接失败，请检查设置和设备")
+        return False
 
     def toggle_inspection(self):
         if self.worker is not None and self.worker.isRunning():
@@ -268,6 +305,11 @@ class MainWindow(QMainWindow):
             self.start_inspection()
 
     def start_inspection(self):
+        if self.worker is not None and self.worker.isRunning():
+            return
+        if self.config.inference_profile == "SAFE_STOP":
+            apply_to_config(self.config, "FULL")
+            self._refresh_settings_summary()
         if self.config.video_path is None and self.camera_view.capture is None:
             self.status_label.setText("无法开始：摄像头未连接")
             return
@@ -287,6 +329,18 @@ class MainWindow(QMainWindow):
         self.camera_button.setEnabled(False)
         self.worker.start()
 
+    def set_inference_profile(self, name):
+        try:
+            plan = apply_to_config(self.config, name)
+        except ProfileError as exc:
+            return False, str(exc)
+        if plan["stop_worker"]:
+            self.stop_inspection()
+        elif plan["start_worker"]:
+            self.start_inspection()
+        self._refresh_settings_summary()
+        return True, f"已切换到 {name}"
+
     def stop_inspection(self):
         if self.worker is not None and self.worker.isRunning():
             self.worker.request_stop()
@@ -300,6 +354,7 @@ class MainWindow(QMainWindow):
         self.camera_button.setEnabled(True)
 
     def show_result(self, result):
+        self.last_result = result
         self.result_image.setPixmap(frame_to_pixmap(result.annotated_frame, self.result_image.size()))
         if self.config.video_path is not None:
             self.camera_view.setPixmap(frame_to_pixmap(result.annotated_frame, self.camera_view.size()))
@@ -308,10 +363,19 @@ class MainWindow(QMainWindow):
         self.verdict_label.setProperty("state", state)
         self.verdict_label.style().unpolish(self.verdict_label)
         self.verdict_label.style().polish(self.verdict_label)
-        lines = [f"推理耗时：{result.elapsed_ms:.1f} ms", f"定位数量：{len(result.observations)}"]
+        lines = [
+            f"模型：{result.model_version or '未知'}，推理耗时：{result.elapsed_ms:.1f} ms",
+            (
+                f"定位 {result.locator_latency_ms:.1f} ms，"
+                f"分类 {result.classifier1_latency_ms:.1f}+{result.classifier2_latency_ms:.1f} ms，"
+                f"检测 {result.detector_latency_ms:.1f} ms"
+            ),
+            f"定位数量：{len(result.observations)}",
+        ]
         for index, item in enumerate(result.observations, 1):
             lines.append(
-                f"齿轮 {index}：定位 {item.location_confidence:.1%}，缺陷概率 {item.defect_score:.1%}"
+                f"齿轮 {index}：定位 {item.location_confidence:.1%}，缺陷 {item.defect_score:.1%}，"
+                f"分类 {item.classifier_probability:.1%}，检测 {item.detector_probability:.1%}"
             )
         self.result_details.setText("\n".join(lines))
 
@@ -326,8 +390,24 @@ class MainWindow(QMainWindow):
             self._check_mode_limit()
 
     def show_failure(self, message):
+        self.scratch_errors += 1
         self.status_label.setText("检测错误：" + message)
         self.result_details.setText(message)
+
+    def current_snapshot(self):
+        worker_running = self.worker is not None and self.worker.isRunning()
+        return build_snapshot(
+            self.config,
+            self.frame_store,
+            self.camera_view.opened,
+            self.camera_view.device_path,
+            self.camera_view.read_failures,
+            self.camera_view.actual_fps,
+            self.serial_output,
+            last_result=self.last_result,
+            inspection_active=worker_running,
+            scratch_errors=self.scratch_errors,
+        )
 
     def choose_video(self):
         path, _selected_filter = QFileDialog.getOpenFileName(
@@ -340,6 +420,7 @@ class MainWindow(QMainWindow):
             return
         self.stop_inspection()
         self.camera_timer.stop()
+        self.preview_timer.stop()
         self.camera_view.stop()
         self.config.video_path = Path(path).resolve()
         self.config.mode = "视频测试模式"
@@ -373,9 +454,13 @@ class MainWindow(QMainWindow):
         dialog = SettingsDialog(self.config, self)
         if dialog.exec_() != QDialog.Accepted:
             return
-        new_camera_index, serial_port, serial_baudrate = dialog.apply()
+        profile_name, new_camera_index, serial_port, serial_baudrate = dialog.apply()
+        ok, message = self.set_inference_profile(profile_name)
+        if not ok:
+            self.status_label.setText(message)
         if new_camera_index != self.config.camera_index:
             self.camera_timer.stop()
+            self.preview_timer.stop()
             self.camera_view.stop()
             self.config.camera_index = new_camera_index
             self._start_source()
@@ -389,9 +474,10 @@ class MainWindow(QMainWindow):
         details = [
             f"模式：{self.config.mode}",
             f"模型 1：{self.config.locator_model.name}（齿轮定位）",
-            f"模型 2：{self.config.classifier_model.name}（缺陷分类）",
+            f"模型 2：{self.config.model2_config.parent.name}（Scratch V5 融合）",
             f"定位阈值：{self.config.locator_confidence:.2f}",
-            f"缺陷阈值：{self.config.defect_threshold:.2f}",
+            f"缺陷阈值：{self.config.defect_threshold:.6f}",
+            f"推理档位：{self.config.inference_profile}",
             f"推理间隔：{self.config.inference_interval:.2f} 秒",
             (
                 "串口：已禁用（视频测试）"
@@ -425,6 +511,7 @@ class MainWindow(QMainWindow):
             self.worker.request_stop()
             self.worker.wait()
         self.camera_timer.stop()
+        self.preview_timer.stop()
         self.camera_view.stop()
         self.serial_output.close()
         event.accept()

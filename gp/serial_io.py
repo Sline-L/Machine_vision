@@ -12,6 +12,13 @@ class SerialOutput:
         self.baudrate = baudrate
         self._serial = None
         self._lock = threading.Lock()
+        self.last_send_ok = None
+        self.consecutive_failures = 0
+        self.last_error = None
+
+    @property
+    def is_open(self):
+        return self._serial is not None and self._serial.is_open
 
     def send_verdict(self, defective):
         return self.send(self.DEFECTIVE_CODE if defective else self.GOOD_CODE)
@@ -23,8 +30,14 @@ class SerialOutput:
                     import serial
                     self._serial = serial.Serial(self.port, self.baudrate, timeout=1)
                 self._serial.write(text.encode("ascii"))
+                self.last_send_ok = True
+                self.consecutive_failures = 0
+                self.last_error = None
                 return True, f"串口已发送 {text}"
             except Exception as exc:
+                self.last_send_ok = False
+                self.consecutive_failures += 1
+                self.last_error = str(exc)
                 return False, f"串口发送失败：{exc}"
 
     def reconfigure(self, port, baudrate):

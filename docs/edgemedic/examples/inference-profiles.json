@@ -1,0 +1,80 @@
+[
+  {
+    "name": "FULL",
+    "implemented": true,
+    "locator": "keep",
+    "classifiers_enabled": true,
+    "detector_enabled": true,
+    "detector_imgsz": 960,
+    "inference_interval_s": 0.1,
+    "ui_refresh_hz": 15,
+    "mission_quality": 1.0,
+    "rollback_target": "FULL",
+    "notes": "Current default pipeline."
+  },
+  {
+    "name": "TRT_FAST",
+    "implemented": false,
+    "locator": "engine",
+    "classifiers_enabled": true,
+    "detector_enabled": true,
+    "detector_imgsz": 960,
+    "inference_interval_s": 0.1,
+    "ui_refresh_hz": null,
+    "mission_quality": 1.0,
+    "rollback_target": "FULL",
+    "notes": "Requires inspector rebuild when engine file exists. Not a field assignment."
+  },
+  {
+    "name": "SPARSE",
+    "implemented": true,
+    "locator": "keep",
+    "classifiers_enabled": true,
+    "detector_enabled": true,
+    "detector_imgsz": 960,
+    "inference_interval_s": 0.2,
+    "ui_refresh_hz": 15,
+    "mission_quality": 0.9,
+    "rollback_target": null,
+    "notes": "Named switch sets AppConfig.inference_interval to 0.20."
+  },
+  {
+    "name": "CLASSIFY_ONLY",
+    "implemented": false,
+    "locator": "keep",
+    "classifiers_enabled": true,
+    "detector_enabled": false,
+    "detector_imgsz": 960,
+    "inference_interval_s": 0.2,
+    "ui_refresh_hz": null,
+    "mission_quality": 0.65,
+    "rollback_target": "FULL",
+    "notes": "Blocked until ScratchV5Runtime can skip detector and fuse classifiers only."
+  },
+  {
+    "name": "LOCATE_ONLY",
+    "implemented": false,
+    "locator": "keep",
+    "classifiers_enabled": false,
+    "detector_enabled": false,
+    "detector_imgsz": 960,
+    "inference_interval_s": 0.3,
+    "ui_refresh_hz": null,
+    "mission_quality": 0.2,
+    "rollback_target": "FULL",
+    "notes": "Blocked until inspect() can skip Model2."
+  },
+  {
+    "name": "SAFE_STOP",
+    "implemented": true,
+    "locator": "off",
+    "classifiers_enabled": false,
+    "detector_enabled": false,
+    "detector_imgsz": 960,
+    "inference_interval_s": null,
+    "ui_refresh_hz": 15,
+    "mission_quality": 0.0,
+    "rollback_target": null,
+    "notes": "Stops the inspection worker; camera preview may continue."
+  }
+]

@@ -6,3 +6,8 @@ tmp/
 .cache/
 *.log
 .DS_Store
+*.engine
+*.engine.cache
+*.onnx
+.idea/
+.vscode/

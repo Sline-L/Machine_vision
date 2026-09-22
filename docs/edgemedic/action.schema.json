@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gearpro.local/edgemedic/action.schema.json",
+  "title": "GearPro Control Action v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "params", "source", "request_id"],
+  "properties": {
+    "name": {
+      "enum": [
+        "get_state",
+        "restart_camera",
+        "restart_worker",
+        "reconnect_serial",
+        "set_inference_profile",
+        "set_locator_profile",
+        "pause_inspection",
+        "resume_inspection",
+        "reload_config",
+        "rollback_config"
+      ]
+    },
+    "params": { "type": "object" },
+    "source": { "enum": ["human", "reflex", "reasoner"] },
+    "request_id": { "type": "string", "minLength": 1 }
+  }
+}
