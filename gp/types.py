@@ -97,13 +97,24 @@ class InspectionStats:
     total: int = 0
     good: int = 0
     defective: int = 0
+    scratch: int = 0
+    missing_hole: int = 0
+    combined: int = 0
 
-    def add(self, is_defective):
+    def add(self, is_defective, reject_reasons=()):
         self.total += 1
         if is_defective:
             self.defective += 1
+            reasons = set(reject_reasons)
+            if {"scratch", "missing_hole"}.issubset(reasons):
+                self.combined += 1
+            elif "scratch" in reasons:
+                self.scratch += 1
+            elif "missing_hole" in reasons:
+                self.missing_hole += 1
         else:
             self.good += 1
 
     def clear(self):
         self.total = self.good = self.defective = 0
+        self.scratch = self.missing_hole = self.combined = 0

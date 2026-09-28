@@ -223,11 +223,17 @@ class ResultTests(unittest.TestCase):
 
     def test_stats_count_and_clear(self):
         stats = InspectionStats()
-        stats.add(False)
-        stats.add(True)
-        self.assertEqual((stats.total, stats.good, stats.defective), (2, 1, 1))
+        stats.add(False, [])
+        stats.add(True, ["scratch"])
+        stats.add(True, ["missing_hole"])
+        stats.add(True, ["scratch", "missing_hole"])
+        self.assertEqual((stats.total, stats.good, stats.defective), (4, 1, 3))
+        self.assertEqual((stats.scratch, stats.missing_hole, stats.combined), (1, 1, 1))
         stats.clear()
-        self.assertEqual((stats.total, stats.good, stats.defective), (0, 0, 0))
+        self.assertEqual(
+            (stats.total, stats.good, stats.defective, stats.scratch, stats.missing_hole, stats.combined),
+            (0, 0, 0, 0, 0, 0),
+        )
 
 
 if __name__ == "__main__":

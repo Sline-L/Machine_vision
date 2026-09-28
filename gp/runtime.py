@@ -168,7 +168,9 @@ class GearProRuntime:
             scratch_errors=self.error_count,
             schema_version="system-snapshot.v1" if api_version == "api.v1" else "system-snapshot.v2",
         )
-        stats["good_rate"] = 0.0 if not stats["total"] else stats["good"] / stats["total"]
+        total = stats["total"]
+        for name in ("good", "defective", "scratch", "missing_hole", "combined"):
+            stats[f"{name}_rate"] = 0.0 if not total else stats[name] / total
         return {
             "version": api_version,
             "status": status,
@@ -259,7 +261,7 @@ class GearProRuntime:
             self.error = None
             if result.has_gear and now - getattr(self, "_last_counted_at", 0.0) >= self.config.result_cooldown:
                 self._last_counted_at = now
-                self.stats.add(result.is_defective)
+                self.stats.add(result.is_defective, result.reject_reasons)
                 if self.config.serial_enabled:
                     _ok, message = self.serial.send_verdict(result.is_defective)
                     self.status = message

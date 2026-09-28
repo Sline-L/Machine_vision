@@ -26,10 +26,14 @@ const verdictClass = computed(() => {
   return result.value.is_defective ? 'bad' : 'good'
 })
 const goodRateValue = computed(() => Math.max(0, Math.min(100, (state.value?.stats?.good_rate || 0) * 100)))
-const defectiveRateValue = computed(() => {
+const statRateValue = (name) => {
   const stats = state.value?.stats
-  return stats?.total ? Math.max(0, Math.min(100, (stats.defective / stats.total) * 100)) : 0
-})
+  return stats?.total ? Math.max(0, Math.min(100, ((stats[name] || 0) / stats.total) * 100)) : 0
+}
+const defectShareValue = (name) => {
+  const stats = state.value?.stats
+  return stats?.defective ? Math.max(0, Math.min(100, ((stats[name] || 0) / stats.defective) * 100)) : 0
+}
 const goodRate = computed(() => `${goodRateValue.value.toFixed(1)}%`)
 const specialistMaximum = (name, field = 'probability') => {
   const values = result.value?.observations?.map(item => item.specialists?.[name]?.[field]).filter(Number.isFinite) || []
@@ -310,11 +314,25 @@ onBeforeUnmount(() => {
           </div>
           <div class="rate-row">
             <div><span>综合合格率</span><strong>{{ goodRate }}</strong></div>
-            <svg class="quality-chart" viewBox="0 0 100 7" preserveAspectRatio="none" role="img" :aria-label="`合格率 ${goodRate}，不合格 ${state.stats.defective} 个`">
+            <svg class="quality-chart" viewBox="0 0 100 7" preserveAspectRatio="none" role="img" :aria-label="`合格 ${state.stats.good}，划痕 ${state.stats.scratch || 0}，缺齿 ${state.stats.missing_hole || 0}，同时命中 ${state.stats.combined || 0}`">
               <rect class="chart-track" width="100" height="7" rx="1" />
               <rect class="chart-good" :width="goodRateValue" height="7" rx="1" />
-              <rect class="chart-bad" :x="goodRateValue" :width="defectiveRateValue" height="7" rx="1" />
+              <rect class="chart-scratch" :x="goodRateValue" :width="statRateValue('scratch')" height="7" />
+              <rect class="chart-missing" :x="goodRateValue + statRateValue('scratch')" :width="statRateValue('missing_hole')" height="7" />
+              <rect class="chart-combined" :x="goodRateValue + statRateValue('scratch') + statRateValue('missing_hole')" :width="statRateValue('combined')" height="7" rx="1" />
             </svg>
+          </div>
+          <div class="defect-breakdown">
+            <div class="breakdown-heading"><span>缺陷分类</span><small>占不合格件比例</small></div>
+            <div class="breakdown-row scratch">
+              <span>划痕</span><svg viewBox="0 0 100 5" preserveAspectRatio="none" aria-hidden="true"><rect class="chart-track" width="100" height="5" rx="1" /><rect class="breakdown-value" :width="defectShareValue('scratch')" height="5" rx="1" /></svg><strong>{{ state.stats.scratch || 0 }}</strong>
+            </div>
+            <div class="breakdown-row missing">
+              <span>缺齿</span><svg viewBox="0 0 100 5" preserveAspectRatio="none" aria-hidden="true"><rect class="chart-track" width="100" height="5" rx="1" /><rect class="breakdown-value" :width="defectShareValue('missing_hole')" height="5" rx="1" /></svg><strong>{{ state.stats.missing_hole || 0 }}</strong>
+            </div>
+            <div class="breakdown-row combined">
+              <span>同时命中</span><svg viewBox="0 0 100 5" preserveAspectRatio="none" aria-hidden="true"><rect class="chart-track" width="100" height="5" rx="1" /><rect class="breakdown-value" :width="defectShareValue('combined')" height="5" rx="1" /></svg><strong>{{ state.stats.combined || 0 }}</strong>
+            </div>
           </div>
         </article>
       </aside>

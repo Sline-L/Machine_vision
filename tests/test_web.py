@@ -172,6 +172,22 @@ class RuntimeSafetyTests(unittest.TestCase):
         self.assertEqual(runtime.error, "CUDA OOM")
         send.assert_not_called()
 
+    def test_runtime_counts_combined_defects_separately(self):
+        config = AppConfig()
+        config.result_cooldown = 0
+        config.serial_enabled = False
+        runtime = GearProRuntime(config)
+        observation = GearObservation(
+            (1, 2, 30, 40), 0.9, 0.8,
+            scratch_reject=True,
+            missing_hole_probability=0.8,
+            missing_hole_reject=True,
+        )
+        runtime._on_result(InspectionResult(np.zeros((8, 8, 3), dtype=np.uint8), [observation]))
+        self.assertEqual(runtime.stats.defective, 1)
+        self.assertEqual(runtime.stats.combined, 1)
+        self.assertEqual((runtime.stats.scratch, runtime.stats.missing_hole), (0, 0))
+
 
 if __name__ == "__main__":
     unittest.main()
