@@ -67,29 +67,27 @@
 \makeatletter
 \setbeamertemplate{frametitle}{%
   \nointerlineskip
-  \begin{beamercolorbox}[wd=\paperwidth,ht=3.15ex,dp=1.15ex,leftskip=.55cm,rightskip=.38cm]{frametitle}%
+  \begin{beamercolorbox}[wd=\paperwidth,ht=3.15ex,dp=1.15ex,leftskip=.55cm,rightskip=.55cm]{frametitle}%
     \usebeamerfont{frametitle}\insertframetitle%
     \ifx\insertframesubtitle\@empty\else%
       \hspace{.65em}{\usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}\insertframesubtitle}%
     \fi%
-    \hfill\raisebox{-.48ex}{\includegraphics[height=2.65ex]{pic/Southeast_University_Logo.pdf}}%
   \end{beamercolorbox}%
 }
 
 \setbeamertemplate{footline}{%
   \leavevmode%
-  \begin{beamercolorbox}[wd=\paperwidth,ht=.65pt,dp=0pt]{palette tertiary}\end{beamercolorbox}\par%
-  \hbox{%
-    \begin{beamercolorbox}[wd=.23\paperwidth,ht=2.75ex,dp=1.1ex,leftskip=.45cm]{palette secondary}%
-      \usebeamerfont{footline}\insertshortauthor
-    \end{beamercolorbox}%
-    \begin{beamercolorbox}[wd=.60\paperwidth,ht=2.75ex,dp=1.1ex,leftskip=.35cm]{palette primary}%
-      \usebeamerfont{footline}\insertshorttitle
-    \end{beamercolorbox}%
-    \begin{beamercolorbox}[wd=.17\paperwidth,ht=2.75ex,dp=1.1ex,rightskip=.45cm plus1fil]{palette tertiary}%
-      \usebeamerfont{footline}\hfill\insertframenumber\,/\,\inserttotalframenumber
-    \end{beamercolorbox}%
-  }%
+  \begin{beamercolorbox}[wd=\paperwidth]{palette primary}%
+    \vbox to 3.65ex{%
+      \vfil
+      \hbox to \paperwidth{%
+        \hskip.45cm\usebeamerfont{footline}\insertshorttitle%
+        \hfill%
+        \usebeamerfont{footline}\insertframenumber\,/\,\inserttotalframenumber\hskip.45cm%
+      }%
+      \vfil
+    }%
+  \end{beamercolorbox}%
 }
 
 \setbeamertemplate{title page}{%
