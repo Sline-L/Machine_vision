@@ -1064,12 +1064,12 @@
 \begin{frame}{系统工作流程}
   \centering
   \begin{tikzpicture}[node distance=.27cm]
-    \node[flow,text width=1.45cm,minimum height=.92cm] (feed) {齿轮输送};
-    \node[flow,text width=1.55cm,minimum height=.92cm,right=of feed] (capture) {双相机采集};
-    \node[flow,text width=1.45cm,minimum height=.92cm,right=of capture] (infer) {Jetson检测};
-    \node[flow,text width=1.8cm,minimum height=.92cm,right=of infer] (web) {结果处理\\Web显示};
-    \node[flow,text width=1.55cm,minimum height=.92cm,right=of web] (control) {控制信号};
-    \node[flow,text width=1.7cm,minimum height=.92cm,right=of control] (sort) {分拣与收集};
+    \node[flow,text width=1.55cm] (feed) {齿轮输送};
+    \node[flow,text width=1.55cm,right=of feed] (capture) {双相机采集};
+    \node[flow,text width=1.55cm,right=of capture] (infer) {Jetson检测};
+    \node[flow,text width=1.55cm,right=of infer] (web) {结果处理\\Web显示};
+    \node[flow,text width=1.55cm,right=of web] (control) {控制信号};
+    \node[flow,text width=1.55cm,right=of control] (sort) {分拣与收集};
     \draw[line] (feed) -- (capture);
     \draw[line] (capture) -- (infer);
     \draw[line] (infer) -- (web);
@@ -1303,7 +1303,13 @@
 \begin{frame}{整体结构优化设计}
   \small
   \centering
-  \begin{tikzpicture}[node distance=.11cm]
+  \begin{tikzpicture}[
+      node distance=.18cm,
+      scale=.92,
+      transform shape,
+      optline/.style={-{Latex[length=1.8mm]},thick,draw=seugreen,
+        shorten <=1.5pt,shorten >=1.5pt}
+    ]
     \node[flowwide,minimum height=.58cm,inner sep=2pt] (base) {稳定基座 / 立柱};
     \node[flowwide,minimum height=.58cm,inner sep=2pt,below=of base] (clamp) {独立可调相机支架};
     \node[flowwide,minimum height=.58cm,inner sep=2pt,below=of clamp] (camera) {顶部主相机};
@@ -1312,11 +1318,11 @@
     \node[flowwide,minimum height=.58cm,inner sep=2pt,below=of glass] (backlight) {独立可调背光};
     \node[flow,minimum height=.70cm,inner sep=2pt,left=1.25cm of gear] (second) {第二相机\\预留位置};
     \node[flow,minimum height=.70cm,inner sep=2pt,right=1.25cm of gear] (surface) {低角度光\\独立调节};
-    \draw[line] (base) -- (clamp);
-    \draw[line] (clamp) -- (camera);
-    \draw[line] (camera) -- (gear);
-    \draw[line] (gear) -- (glass);
-    \draw[line] (backlight) -- (glass);
+    \draw[optline] (base) -- (clamp);
+    \draw[optline] (clamp) -- (camera);
+    \draw[optline] (camera) -- (gear);
+    \draw[optline] (gear) -- (glass);
+    \draw[optline] (backlight) -- (glass);
     \draw[dashed,very thick,draw=seugreen] (second) -- (gear);
     \draw[dashed,very thick,draw=seugreen] (surface) -- (gear);
   \end{tikzpicture}
