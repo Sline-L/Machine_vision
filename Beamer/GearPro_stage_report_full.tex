@@ -9,9 +9,9 @@
 \usepackage{SoutheastUniversity}
 
 \author{夏秋桐}
-\title{GearPro 齿轮视觉检测系统阶段汇报}
+\title{工业零件缺陷检测系统阶段汇报}
 \subtitle{软件、结构与联合验证进展}
-\date{2026-09-28}
+\date{2026-09-29}
 \titlegraphic{\includegraphics[width=.145\paperwidth]{pic/Southeast_University_Logo.pdf}}
 
 \newcommand{\OverviewNav}{%
@@ -21,7 +21,7 @@
 
 \newcommand{\SoftwareNav}[1]{%
   \GearProSetMajor{软件}%
-  \GearProSetMinorNavFive{阶段现状}{流程与数据}{架构决策}{双专项}{结果分析}{#1}%
+  \GearProSetMinorNavFive{阶段现状}{流程与数据}{架构决策}{双专项}{结果与工程}{#1}%
 }
 
 \newcommand{\HardwareNav}[1]{%
@@ -133,6 +133,7 @@
 % 4. Current state
 \subsection{阶段现状}
 \SoftwareNav{1}
+\GearProSetMinorProgressRange{4}{2}
 \begin{frame}{软件阶段现状}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.46\textwidth}
@@ -204,6 +205,7 @@
 % 6. Pipeline
 \subsection{流程与数据}
 \SoftwareNav{2}
+\GearProSetMinorProgressRange{6}{3}
 \begin{frame}{当前视觉处理流程}
   \centering
   \resizebox{.96\textwidth}{!}{%
@@ -323,6 +325,7 @@
 % 9. ROI
 \subsection{架构决策}
 \SoftwareNav{3}
+\GearProSetMinorProgressRange{9}{2}
 \begin{frame}{关键决策一：先定位，再识别缺陷}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.45\textwidth}
@@ -400,6 +403,7 @@
 % 11. Scratch architecture
 \subsection{双专项}
 \SoftwareNav{4}
+\GearProSetMinorProgressRange{11}{5}
 \begin{frame}{Scratch V5：整体分类与局部检测互补}
   \centering
   \resizebox{.92\textwidth}{!}{%
@@ -597,8 +601,9 @@
 \end{frame}
 
 % 16. Core results
-\subsection{结果分析}
+\subsection{结果与工程}
 \SoftwareNav{5}
+\GearProSetMinorProgressRange{16}{13}
 \begin{frame}{核心锁定测试结果}
   \centering
   \renewcommand{\arraystretch}{1.3}
@@ -733,8 +738,8 @@
 \end{frame}
 
 % 20. Runtime architecture
-\subsection{架构决策}
-\SoftwareNav{3}
+\subsection{结果与工程}
+\SoftwareNav{5}
 \begin{frame}{实时软件架构}
   \centering
   \begin{tikzpicture}[node distance=.35cm]
@@ -879,7 +884,7 @@
 \end{frame}
 
 % 25. Imaging and data optimization
-\subsection{结果分析}
+\subsection{结果与工程}
 \SoftwareNav{5}
 \begin{frame}{优化路线一：成像、数据与实验设计}
   \begin{columns}[T,onlytextwidth]
@@ -996,6 +1001,7 @@
 \section{硬件}
 \subsection{平台目标}
 \HardwareNav{1}
+\GearProSetMinorProgressRange{29}{2}
 \begin{frame}{第一代可调视觉实验平台}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.47\textwidth}
@@ -1047,6 +1053,7 @@
 % 31. Camera
 \subsection{相机与载台}
 \HardwareNav{2}
+\GearProSetMinorProgressRange{31}{2}
 \begin{frame}{主相机视角与工作距离}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.43\textwidth}
@@ -1104,6 +1111,7 @@
 % 33. Lighting
 \subsection{照明方案}
 \HardwareNav{3}
+\GearProSetMinorProgressRange{33}{1}
 \begin{frame}{背光与低角度表面照明}
   \renewcommand{\arraystretch}{1.2}
   \begin{tabularx}{\linewidth}{>{\bfseries}l X X}
@@ -1126,6 +1134,7 @@
 % 34. Clamp stability
 \subsection{扩展视角}
 \HardwareNav{4}
+\GearProSetMinorProgressRange{34}{2}
 \begin{frame}{万向夹调节与重复性检查}
   \scriptsize
   \renewcommand{\arraystretch}{1.2}
@@ -1184,6 +1193,7 @@
 % 36. Experiment record
 \subsection{实验验证}
 \HardwareNav{5}
+\GearProSetMinorProgressRange{36}{3}
 \begin{frame}{实验参数与三层评价}
   \scriptsize
   \renewcommand{\arraystretch}{1.15}
@@ -1271,6 +1281,7 @@
 \section{联合}
 \subsection{接口关系}
 \JointNav{1}
+\GearProSetMinorProgressRange{39}{1}
 \begin{frame}{软件问题与硬件实验变量}
   \scriptsize
   \renewcommand{\arraystretch}{1.15}
@@ -1296,6 +1307,7 @@
 % 40. Acceptance path
 \subsection{端到端验收}
 \JointNav{2}
+\GearProSetMinorProgressRange{40}{2}
 \begin{frame}{端到端验收路径}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.48\textwidth}
@@ -1363,6 +1375,7 @@
 % 42. Final conclusion
 \subsection{阶段结论}
 \JointNav{3}
+\GearProSetMinorProgressRange{42}{1}
 \begin{frame}{阶段结论与讨论重点}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.46\textwidth}

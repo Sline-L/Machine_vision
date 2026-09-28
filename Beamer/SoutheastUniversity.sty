@@ -82,9 +82,16 @@
 \newcommand{\gearpro@navthree}{}
 \newcommand{\gearpro@navfour}{}
 \newcommand{\gearpro@navfive}{}
+\newcommand{\gearpro@progresscurrent}{0}
+\newcommand{\gearpro@progresstotal}{0}
+\newcount\gearpro@dotindex
 
 \newcommand{\GearProSetMajor}[1]{\renewcommand{\gearpro@majorlabel}{#1}}
 \newcommand{\GearProHideMinorNav}{\gearpro@shownavfalse}
+\newcommand{\GearProSetMinorProgressRange}[2]{%
+  \def\gearpro@progresscurrent{\number\numexpr\insertframenumber-#1+1\relax}%
+  \renewcommand{\gearpro@progresstotal}{#2}%
+}
 \newcommand{\GearProSetMinorNavFive}[6]{%
   \renewcommand{\gearpro@navcount}{5}%
   \renewcommand{\gearpro@navone}{#1}%
@@ -104,13 +111,31 @@
   \gearpro@shownavtrue
 }
 
+\newcommand{\gearpro@progressdots}{%
+  \ifnum\gearpro@progresstotal>0\relax
+    \hspace{.45em}%
+    \begingroup
+      \gearpro@dotindex=1\relax
+      \loop\ifnum\gearpro@dotindex<\numexpr\gearpro@progresstotal+1\relax
+        \ifnum\gearpro@dotindex<\numexpr\gearpro@progresscurrent+1\relax
+          {\fontsize{4.2}{4.2}\selectfont$\bullet$}%
+        \else
+          {\fontsize{4.2}{4.2}\selectfont$\circ$}%
+        \fi
+        \kern-.04em
+        \advance\gearpro@dotindex by 1\relax
+      \repeat
+    \endgroup
+  \fi
+}
+
 \newcommand{\gearpro@navitem}[3]{%
   \ifnum\gearpro@active=#1\relax
-    \begin{beamercolorbox}[wd=#2,ht=2.65ex,dp=1.05ex,center]{minor navigation active}%
-      \usebeamerfont{minor navigation active}\strut #3%
+    \begin{beamercolorbox}[wd=#2,ht=2.75ex,dp=1.10ex,center]{minor navigation active}%
+      \usebeamerfont{minor navigation active}\strut #3\gearpro@progressdots%
     \end{beamercolorbox}%
   \else
-    \begin{beamercolorbox}[wd=#2,ht=2.65ex,dp=1.05ex,center]{minor navigation}%
+    \begin{beamercolorbox}[wd=#2,ht=2.75ex,dp=1.10ex,center]{minor navigation}%
       \usebeamerfont{minor navigation}\strut #3%
     \end{beamercolorbox}%
   \fi
