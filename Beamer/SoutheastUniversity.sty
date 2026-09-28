@@ -1,0 +1,131 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{SoutheastUniversity}[2026/09/28 Southeast University Beamer theme]
+
+\mode<presentation>
+
+\RequirePackage{graphicx}
+\RequirePackage{xcolor}
+
+% Colors sampled from pic/原配色.svg.
+\definecolor{seugreen}{HTML}{3D6016}
+\definecolor{seugreendark}{HTML}{29450F}
+\definecolor{seugreenlight}{HTML}{E8EFE0}
+\definecolor{seuyellow}{HTML}{FFCC00}
+\definecolor{seuyellowlight}{HTML}{FFF3B5}
+\definecolor{seugold}{HTML}{E6B800}
+\definecolor{seuink}{HTML}{20251B}
+\definecolor{seugray}{HTML}{66705D}
+\definecolor{seubackground}{HTML}{FAFBF7}
+
+\useoutertheme[subsection=false]{smoothbars}
+\useinnertheme{circles}
+
+\setbeamercolor{normal text}{fg=seuink,bg=seubackground}
+\setbeamercolor{structure}{fg=seugreen}
+\setbeamercolor{alerted text}{fg=seugreendark}
+
+\setbeamercolor{palette primary}{fg=white,bg=seugreen}
+\setbeamercolor{palette secondary}{fg=white,bg=seugreendark}
+\setbeamercolor{palette tertiary}{fg=seugreendark,bg=seuyellow}
+\setbeamercolor{palette quaternary}{fg=white,bg=seugreendark}
+
+\setbeamercolor{title}{fg=white,bg=seugreen}
+\setbeamercolor{subtitle}{fg=seuyellow}
+\setbeamercolor{author}{fg=seugreendark}
+\setbeamercolor{institute}{fg=seugray}
+\setbeamercolor{date}{fg=seugray}
+\setbeamercolor{frametitle}{fg=white,bg=seugreen}
+\setbeamercolor{framesubtitle}{fg=seuyellow}
+
+\setbeamercolor{block title}{fg=white,bg=seugreen}
+\setbeamercolor{block body}{fg=seuink,bg=seugreenlight}
+\setbeamercolor{block title example}{fg=seugreendark,bg=seuyellow}
+\setbeamercolor{block body example}{fg=seuink,bg=seuyellowlight}
+\setbeamercolor{block title alerted}{fg=seugreendark,bg=seuyellow}
+\setbeamercolor{block body alerted}{fg=seuink,bg=seuyellowlight}
+
+\setbeamercolor{item projected}{fg=white,bg=seugreen}
+\setbeamercolor{subitem projected}{fg=seugreendark,bg=seuyellow}
+\setbeamercolor{section in toc}{fg=seugreen}
+\setbeamercolor{subsection in toc}{fg=seugray}
+\setbeamercolor{section in toc shaded}{fg=seugray!55}
+\setbeamercolor{subsection in toc shaded}{fg=seugray!45}
+
+\setbeamerfont{title}{size=\LARGE,series=\bfseries}
+\setbeamerfont{subtitle}{size=\large}
+\setbeamerfont{frametitle}{size=\large,series=\bfseries}
+\setbeamerfont{framesubtitle}{size=\small,series=\mdseries}
+\setbeamerfont{block title}{series=\bfseries}
+\setbeamerfont{footline}{size=\scriptsize}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{bibliography item}[text]
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{itemize item}{\color{seugreen}\small$\bullet$}
+\setbeamertemplate{itemize subitem}{\color{seugold}\scriptsize$\blacktriangleright$}
+
+\makeatletter
+\setbeamertemplate{frametitle}{%
+  \nointerlineskip
+  \begin{beamercolorbox}[wd=\paperwidth,ht=3.15ex,dp=1.15ex,leftskip=.55cm,rightskip=.38cm]{frametitle}%
+    \usebeamerfont{frametitle}\insertframetitle%
+    \ifx\insertframesubtitle\@empty\else%
+      \hspace{.65em}{\usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}\insertframesubtitle}%
+    \fi%
+    \hfill\raisebox{-.48ex}{\includegraphics[height=2.65ex]{pic/Southeast_University_Logo.pdf}}%
+  \end{beamercolorbox}%
+}
+
+\setbeamertemplate{footline}{%
+  \leavevmode%
+  \begin{beamercolorbox}[wd=\paperwidth,ht=.65pt,dp=0pt]{palette tertiary}\end{beamercolorbox}\par%
+  \hbox{%
+    \begin{beamercolorbox}[wd=.23\paperwidth,ht=2.75ex,dp=1.1ex,leftskip=.45cm]{palette secondary}%
+      \usebeamerfont{footline}\insertshortauthor
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.60\paperwidth,ht=2.75ex,dp=1.1ex,leftskip=.35cm]{palette primary}%
+      \usebeamerfont{footline}\insertshorttitle
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.17\paperwidth,ht=2.75ex,dp=1.1ex,rightskip=.45cm plus1fil]{palette tertiary}%
+      \usebeamerfont{footline}\hfill\insertframenumber\,/\,\inserttotalframenumber
+    \end{beamercolorbox}%
+  }%
+}
+
+\setbeamertemplate{title page}{%
+  \vbox{}
+  \vfill
+  \begin{centering}
+    \inserttitlegraphic\par
+    \vskip1.0em
+    \begin{beamercolorbox}[sep=1.0em,center]{title}
+      \usebeamerfont{title}\inserttitle\par
+      \ifx\insertsubtitle\@empty\else
+        \vskip.55em
+        {\usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par}
+      \fi
+    \end{beamercolorbox}
+    \vskip1.0em
+    {\usebeamerfont{author}\usebeamercolor[fg]{author}\insertauthor\par}
+    \vskip.25em
+    {\usebeamerfont{institute}\usebeamercolor[fg]{institute}\insertinstitute\par}
+    \vskip.25em
+    {\usebeamerfont{date}\usebeamercolor[fg]{date}\insertdate\par}
+  \end{centering}
+  \vfill
+}
+\makeatother
+
+\setbeamertemplate{section page}{%
+  \begin{centering}
+    \vfill
+    \includegraphics[width=.13\paperwidth]{pic/Southeast_University_Logo.pdf}\par
+    \vskip1em
+    \begin{beamercolorbox}[sep=1em,center]{title}
+      \usebeamerfont{title}\insertsectionhead
+    \end{beamercolorbox}
+    \vfill
+  \end{centering}
+}
+
+\mode<all>
