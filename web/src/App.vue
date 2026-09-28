@@ -246,7 +246,7 @@ onBeforeUnmount(() => {
 
       <aside class="side-stack">
         <article class="panel important-panel">
-          <div class="panel-head"><div><span class="eyebrow">INSPECTION STATUS</span><h2>检测判定</h2></div><b>{{ active ? '检测运行中' : '检测已停止' }}</b></div>
+          <div class="panel-head"><div><span class="eyebrow">INSPECTION STATUS</span><h2>检测状态</h2></div><b>{{ active ? '检测运行中' : '检测已停止' }}</b></div>
           <div :class="['important-verdict', verdictClass]">
             <span>当前判定</span>
             <strong>{{ result?.verdict || (active ? '检测中' : '等待开始') }}</strong>
@@ -259,10 +259,10 @@ onBeforeUnmount(() => {
         </article>
 
         <article class="panel secondary-panel">
-          <div class="panel-head"><div><span class="eyebrow">INFERENCE DETAILS</span><h2>推理明细</h2></div><b>{{ modelVersions }}</b></div>
+          <div class="panel-head"><div><span class="eyebrow">INFERENCE DETAILS</span><h2>推理细节</h2></div><b>{{ modelVersions }}</b></div>
           <div class="probability-list">
-            <div><span>划痕融合概率</span><strong>{{ scratchProbability === null ? '—' : (scratchProbability*100).toFixed(2)+'%' }}</strong><small>阈值 {{ state.settings.scratch_threshold.toFixed(6) }}</small></div>
-            <div><span>缺齿/缺口概率</span><strong>{{ missingHoleProbability === null ? '—' : (missingHoleProbability*100).toFixed(2)+'%' }}</strong><small>阈值 {{ state.settings.missing_hole_threshold.toFixed(6) }}</small></div>
+            <div><span>划痕</span><strong>{{ scratchProbability === null ? '—' : (scratchProbability*100).toFixed(2)+'%' }}</strong><small>阈值 {{ state.settings.scratch_threshold.toFixed(6) }}</small></div>
+            <div><span>缺齿</span><strong>{{ missingHoleProbability === null ? '—' : (missingHoleProbability*100).toFixed(2)+'%' }}</strong><small>阈值 {{ state.settings.missing_hole_threshold.toFixed(6) }}</small></div>
           </div>
           <div class="detail-grid">
             <span>总耗时<b>{{ result ? result.elapsed_ms.toFixed(1)+' ms' : '—' }}</b></span>
@@ -273,7 +273,7 @@ onBeforeUnmount(() => {
         </article>
 
         <article class="panel stats-panel">
-          <div class="panel-head"><div><span class="eyebrow">QUALITY OVERVIEW</span><h2>检测统计</h2></div></div>
+          <div class="panel-head"><div><span class="eyebrow">QUALITY OVERVIEW</span><h2>统计信息</h2></div></div>
           <div class="stats-summary">
             <div><span>已检测</span><strong>{{ state.stats.total }}</strong></div>
             <div class="good"><span>合格</span><strong>{{ state.stats.good }}</strong></div>
