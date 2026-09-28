@@ -558,10 +558,12 @@
   \begin{tikzpicture}[node distance=1.1cm and 1.05cm]
     \node[flowwide,text width=3.75cm] (scratch) {Scratch 概率\\{\scriptsize$\geq 0.300273610279458$}};
     \node[flowwide,text width=3.75cm,below=of scratch] (missing) {Missing Hole 概率\\{\scriptsize$\geq 0.3413327979078584$}};
-    \node[decision,right=1.8cm of $(scratch)!0.5!(missing)$] (or) {逻辑 OR};
+    \coordinate (join) at ($(scratch.east)!0.5!(missing.east)+(0.75cm,0)$);
+    \node[decision,right=1.0cm of join] (or) {逻辑 OR};
     \node[flowwide,right=1.25cm of or] (final) {最终结果\\合格或不合格};
-    \draw[line] (scratch.east) -- (or.west);
-    \draw[line] (missing.east) -- (or.west);
+    \draw[very thick,draw=seugreen] (scratch.east) -| (join);
+    \draw[very thick,draw=seugreen] (missing.east) -| (join);
+    \draw[line] (join) -- (or.west);
     \draw[line] (or) -- (final);
   \end{tikzpicture}
 
