@@ -26,7 +26,7 @@
 
 \newcommand{\HardwareNav}[1]{%
   \GearProSetMajor{硬件}%
-  \GearProSetMinorNavFive{平台目标}{相机与载台}{照明方案}{扩展视角}{实验验证}{#1}%
+  \GearProSetMinorNavFive{系统总览}{平台目标}{硬件模块}{优化设计}{实验验证}{#1}%
 }
 
 \newcommand{\JointNav}[1]{%
@@ -69,10 +69,10 @@
     \end{column}
     \begin{column}{.32\textwidth}
       \begin{exampleblock}{硬件}
-        \textbf{当前方案}
+        \textbf{第一代实物与优化设计}
 
         \vspace{.45em}
-        平台目标、相机与载台、照明、视角和实验验证
+        整机流程、六个模块、结构与成像优化、实验验证
       \end{exampleblock}
     \end{column}
     \begin{column}{.32\textwidth}
@@ -113,8 +113,8 @@
   \vspace{1em}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.31\textwidth}
-      \textbf{硬件提供稳定输入}\par
-      工作距离、载台、照明和视角决定缺陷是否清晰可见。
+      \textbf{第一代整机已经完成}\par
+      输送、双相机、Jetson、Web和分拣已经形成实物链路。
     \end{column}
     \begin{column}{.31\textwidth}
       \textbf{软件完成整套检测流程}\par
@@ -127,7 +127,7 @@
   \end{columns}
 
   \vfill
-  \small 当前离线结果仅用于比较模型方案，最终结论仍需真实相机和结构条件下的整机测试。
+  \small 第一代实物已经验证完整路线；优化结构的成像质量、重复性和整机效果仍需实验确认。
 \end{frame}
 
 \section{软件}
@@ -1026,46 +1026,292 @@
   \end{block}
 \end{frame}
 
-% 29. Hardware goals
+% 29. First-generation system overview
 \section{硬件}
-\subsection{平台目标}
+\subsection{系统总览}
 \HardwareNav{1}
 \GearProSetMinorProgressRange{29}{2}
-\begin{frame}{第一代可调视觉实验平台}
+\begin{frame}{第一代系统总览}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.58\textwidth}
+      \centering
+      \includegraphics[width=\linewidth,height=.64\textheight,keepaspectratio]{pic/gearpro/hardware_system_overview.jpeg}
+      \smallnote{第一代整机实物：输送机构、检测区、Jetson与监控端}
+    \end{column}
+    \begin{column}{.38\textwidth}
+      \textbf{已经完成}
+      \begin{itemize}
+        \item 齿轮自动输送
+        \item 双相机图像采集
+        \item Jetson现场检测
+        \item Web显示与结果统计
+        \item 分类分拣与收集
+      \end{itemize}
+
+      \vspace{.45em}
+      \begin{block}{完成状态}
+        第一代整机已有实物；后续结构与成像优化仍处于设计阶段。
+      \end{block}
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \centering
+  \textcolor{seugreen}{\large 已经完成从上料、检测到分拣的完整实物原型}
+\end{frame}
+
+% 30. System workflow
+\begin{frame}{系统工作流程}
+  \centering
+  \begin{tikzpicture}[node distance=.27cm]
+    \node[flow,text width=1.45cm,minimum height=.92cm] (feed) {齿轮输送};
+    \node[flow,text width=1.55cm,minimum height=.92cm,right=of feed] (capture) {双相机采集};
+    \node[flow,text width=1.45cm,minimum height=.92cm,right=of capture] (infer) {Jetson检测};
+    \node[flow,text width=1.8cm,minimum height=.92cm,right=of infer] (web) {结果处理\\Web显示};
+    \node[flow,text width=1.55cm,minimum height=.92cm,right=of web] (control) {控制信号};
+    \node[flow,text width=1.7cm,minimum height=.92cm,right=of control] (sort) {分拣与收集};
+    \draw[line] (feed) -- (capture);
+    \draw[line] (capture) -- (infer);
+    \draw[line] (infer) -- (web);
+    \draw[line] (web) -- (control);
+    \draw[line] (control) -- (sort);
+  \end{tikzpicture}
+
+  \vspace{1.15em}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.31\textwidth}
+      \textbf{工件流}\par\vspace{.3em}
+      齿轮从输送带进入检测区，完成检测后进入分拣机构。
+    \end{column}
+    \begin{column}{.31\textwidth}
+      \textbf{图像与结果流}\par\vspace{.3em}
+      相机把图像送入 Jetson，检测结果进入 Web 页面和统计模块。
+    \end{column}
+    \begin{column}{.31\textwidth}
+      \textbf{控制流}\par\vspace{.3em}
+      STM32、Jetson和执行机构之间传递启停、速度与分拣信号。
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \begin{block}{系统关系}
+    工件、检测结果和控制信号在同一流程中相互配合。
+  \end{block}
+\end{frame}
+
+% 31. Platform goals
+\subsection{平台目标}
+\HardwareNav{2}
+\GearProSetMinorProgressRange{31}{1}
+\begin{frame}{平台目标}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.47\textwidth}
-      \begin{block}{阶段定位}
-        拟用万向夹固定玻璃载台、相机和光源。先验证位置、照明与摆放条件，再依据实验结果确定固定结构。
-      \end{block}
-      \textbf{当前状态：方案明确，实物和重复性数据待补充。}
+      \textbf{验证完整检测过程}
+      \begin{itemize}
+        \item 自动输送并稳定放置齿轮
+        \item 获取齿轮不同表面的图像
+        \item 在 Jetson 上完成现场检测
+        \item 实时显示图像、结果和统计
+        \item 按检测结果完成分类收集
+      \end{itemize}
     \end{column}
     \begin{column}{.47\textwidth}
-      \textbf{设计目标}
+      \textbf{支持后续实验}
       \begin{itemize}
-        \item 完整拍摄齿轮并保留微小缺陷细节
-        \item 分别验证背光轮廓和低角度表面照明
-        \item 检查锁紧、重复放件和参数恢复稳定性
-        \item 判断固定位置及第二相机或转台需求
+        \item 比较相机位置与工作距离
+        \item 比较轮廓光和表面光
+        \item 检查重复放件与结构稳定性
+        \item 判断第二相机或转台是否必要
       \end{itemize}
     \end{column}
   \end{columns}
 
   \vfill
-  阶段交付包括结构照片或草图、器材参数表、空载与放件对照图，以及有实验依据的初步结构结论。
+  \begin{exampleblock}{平台作用}
+    平台既验证从工件进入到分类收集的完整过程，也为下一步成像和结构实验提供基础。
+  \end{exampleblock}
 \end{frame}
 
-% 30. Hardware layout
-\begin{frame}{总体结构与空间布局}
+% 32. Conveyor module
+\subsection{硬件模块}
+\HardwareNav{3}
+\GearProSetMinorProgressRange{32}{6}
+\begin{frame}{物体输送模块}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.55\textwidth}
+      \centering
+      \includegraphics[width=\linewidth,height=.62\textheight,keepaspectratio]{pic/gearpro/hardware_conveyor.jpeg}
+      \smallnote{第一代输送机构实物}
+    \end{column}
+    \begin{column}{.40\textwidth}
+      \textbf{已实现}
+      \begin{itemize}
+        \item 输送带将齿轮送入检测区
+        \item STM32控制启停和运行速度
+        \item 输送动作与采集、检测和分拣配合
+      \end{itemize}
+
+      \vspace{.55em}
+      \textbf{仍需改善}
+      \begin{itemize}
+        \item 工件进入视野时的位置和姿态
+        \item 运行速度与图像清晰度的配合
+      \end{itemize}
+    \end{column}
+  \end{columns}
+
+  \vfill
   \centering
-  \begin{tikzpicture}[node distance=.18cm]
-    \node[flowwide,minimum height=.62cm,inner sep=2pt] (base) {稳定基座 / 立柱};
-    \node[flowwide,minimum height=.62cm,inner sep=2pt,below=of base] (clamp) {万向夹 A};
-    \node[flowwide,minimum height=.62cm,inner sep=2pt,below=of clamp] (camera) {顶部主相机};
-    \node[decision,minimum height=.62cm,inner sep=2pt,below=of camera] (gear) {待测齿轮};
-    \node[flowwide,minimum height=.72cm,inner sep=2pt,below=of gear] (glass) {玻璃载台\\边缘支撑与夹持};
-    \node[flowwide,minimum height=.62cm,inner sep=2pt,below=of glass] (backlight) {独立支撑背光};
-    \node[flow,minimum height=.72cm,inner sep=2pt,left=1.25cm of gear] (second) {第二相机\\预留区};
-    \node[flow,minimum height=.72cm,inner sep=2pt,right=1.25cm of gear] (surface) {可调低角度光\\万向夹 B};
+  \textcolor{seugreen}{输送功能已经实现，下一步重点提高重复定位精度}
+\end{frame}
+
+% 33. Acquisition module
+\begin{frame}{数据采集模块}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.42\textwidth}
+      \centering
+      \includegraphics[width=\linewidth,height=.65\textheight,keepaspectratio]{pic/gearpro/hardware_camera_stage.jpeg}
+      \smallnote{工业相机与透明载台实物}
+    \end{column}
+    \begin{column}{.53\textwidth}
+      \textbf{已实现}
+      \begin{itemize}
+        \item 两台工业相机采集齿轮不同表面
+        \item 透明亚克力板支撑工件，并为下方视角留出光路
+        \item 图像传入 Jetson 进行检测
+      \end{itemize}
+
+      \vspace{.45em}
+      \textbf{现有结构的边界}
+      \begin{itemize}
+        \item 相机位置和工作距离不便精细调节
+        \item 亚克力板可能产生反光、污染和划伤
+        \item 双相机减少盲区，但不能保证覆盖全部侧面缺陷
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% 34. Edge inference module
+\begin{frame}{智能检测模块}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.48\textwidth}
+      \textbf{Jetson承担现场计算}
+      \begin{itemize}
+        \item 接收工业相机图像
+        \item 完成齿轮定位与缺陷识别
+        \item 输出检测结果和控制信息
+        \item 不依赖远程服务器完成检测
+      \end{itemize}
+
+      \vspace{.65em}
+      \begin{block}{与软件部分的边界}
+        本页只说明 Jetson 在硬件链路中的作用；模型结构、阈值和检测指标不再重复。
+      \end{block}
+    \end{column}
+    \begin{column}{.46\textwidth}
+      \centering
+      \includegraphics[width=\linewidth,height=.62\textheight,keepaspectratio]{pic/gearpro/hardware_jetson.jpeg}
+      \smallnote{第一代系统使用的 NVIDIA Jetson}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% 35. Data processing and monitoring
+\begin{frame}{数据处理与实时监控模块}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.56\textwidth}
+      \centering
+      \includegraphics[width=\linewidth,height=.60\textheight,keepaspectratio]{pic/gearpro/web_console.png}
+      \smallnote{当前 GearPro Web 控制台}
+    \end{column}
+    \begin{column}{.39\textwidth}
+      \textbf{当前功能}
+      \begin{itemize}
+        \item 显示实时画面和检测结果
+        \item 汇总合格、剔除和异常数量
+        \item 保存必要的结果记录
+        \item 查看运行状态并执行控制操作
+      \end{itemize}
+
+      \vspace{.55em}
+      \begin{block}{版本说明}
+        当前监控端采用 Web 页面，旧版 Qt 界面不再作为现阶段成果展示。
+      \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% 36. Sorting module
+\begin{frame}{分拣与收集模块}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.55\textwidth}
+      \centering
+      \includegraphics[width=\linewidth,height=.63\textheight,keepaspectratio]{pic/gearpro/hardware_sorter.jpeg}
+      \smallnote{旋转分拣平台与收集结构实物}
+    \end{column}
+    \begin{column}{.40\textwidth}
+      \textbf{已实现}
+      \begin{itemize}
+        \item 步进电机驱动旋转平台
+        \item 多个工位承接不同检测结果
+        \item 挡板将齿轮引导到对应位置
+        \item 平滑加减速降低齿轮甩出风险
+      \end{itemize}
+
+      \vspace{.7em}
+      \begin{exampleblock}{闭环结果}
+        检测结果能够转换为实际分拣动作。
+      \end{exampleblock}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% 37. First-generation summary
+\begin{frame}{第一代平台总结与现有不足}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.46\textwidth}
+      \textbf{已经验证}
+      \begin{itemize}
+        \item 完成整机实物搭建
+        \item 打通输送、采集、检测、Web显示和分拣流程
+        \item 验证双相机、边缘计算和自动分拣路线可行
+      \end{itemize}
+    \end{column}
+    \begin{column}{.50\textwidth}
+      \textbf{现有不足}
+      \begin{itemize}
+        \item 相机和光源的调节能力有限
+        \item 亚克力载台容易产生反光和污染
+        \item 重复放件的位置精度不足
+        \item 固定照明难以兼顾轮廓和表面缺陷
+        \item 斜向及侧面缺陷仍可能被遮挡
+      \end{itemize}
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \begin{block}{下一步}
+    保留已经打通的系统链路，重点改进成像条件和结构重复性。
+  \end{block}
+\end{frame}
+
+% 38. Overall optimization design
+\subsection{优化设计}
+\HardwareNav{4}
+\GearProSetMinorProgressRange{38}{4}
+\begin{frame}{整体结构优化设计}
+  \small
+  \centering
+  \begin{tikzpicture}[node distance=.11cm]
+    \node[flowwide,minimum height=.58cm,inner sep=2pt] (base) {稳定基座 / 立柱};
+    \node[flowwide,minimum height=.58cm,inner sep=2pt,below=of base] (clamp) {独立可调相机支架};
+    \node[flowwide,minimum height=.58cm,inner sep=2pt,below=of clamp] (camera) {顶部主相机};
+    \node[decision,minimum height=.58cm,inner sep=2pt,below=of camera] (gear) {待测齿轮};
+    \node[flowwide,minimum height=.70cm,inner sep=2pt,below=of gear] (glass) {透明载台\\边缘支撑与定位};
+    \node[flowwide,minimum height=.58cm,inner sep=2pt,below=of glass] (backlight) {独立可调背光};
+    \node[flow,minimum height=.70cm,inner sep=2pt,left=1.25cm of gear] (second) {第二相机\\预留位置};
+    \node[flow,minimum height=.70cm,inner sep=2pt,right=1.25cm of gear] (surface) {低角度光\\独立调节};
     \draw[line] (base) -- (clamp);
     \draw[line] (clamp) -- (camera);
     \draw[line] (camera) -- (gear);
@@ -1075,242 +1321,170 @@
     \draw[dashed,very thick,draw=seugreen] (surface) -- (gear);
   \end{tikzpicture}
 
-  \vspace{.35em}
-  \small 相机采用短悬臂，光源独立调节，夹具避开齿圈检测区；同时预留放件、清洁、走线和第二视角空间。未知型号、尺寸与载荷统一标为待确认。
-\end{frame}
-
-% 31. Camera
-\subsection{相机与载台}
-\HardwareNav{2}
-\GearProSetMinorProgressRange{31}{2}
-\begin{frame}{主相机视角与工作距离}
+  \vspace{.15em}
   \begin{columns}[T,onlytextwidth]
-    \begin{column}{.43\textwidth}
-      \begin{block}{基线视角}
-        顶部正视，光轴基本垂直载台并平行于平放齿轮轴线。该视角便于观察完整轮廓、估计中心和尺度。
-      \end{block}
-      \begin{alertblock}{边界}
-        顶部相机不能保证看清侧齿、遮挡区域和全部 oblique 缺口。
-      \end{alertblock}
+    \begin{column}{.48\textwidth}
+      相机、载台和光源分别调节，减少改变一个部件时对其他部件的影响。
     \end{column}
-    \begin{column}{.52\textwidth}
-      \textbf{确定方法}
-      \begin{enumerate}
-        \item 纳入最大齿轮并保留摆放余量
-        \item 调整距离与对焦，检查中心和边缘清晰度
-        \item 核对最小缺陷在原图、齿轮裁剪图和模型输入中占多少像素
-        \item 记录位置和参数，锁紧后复拍
-      \end{enumerate}
-      \textbf{必须记录：}镜头、测距基准、分辨率、曝光、增益、焦距、光圈、对焦状态和单位长度像素数。
+    \begin{column}{.48\textwidth}
+      通过位置标记、标尺和限位恢复参数，实验确定后再固定关键位置。
     \end{column}
   \end{columns}
+
+  \vfill
+  \begin{alertblock}{完成状态}
+    本页及后续三页均为下一代平台设计方案，尚未完成实物搭建。
+  \end{alertblock}
 \end{frame}
 
-% 32. Glass stage
-\begin{frame}{玻璃载台与工件夹持}
+% 39. Camera and stage optimization
+\begin{frame}{相机与载台优化设计}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.47\textwidth}
-      \textbf{结构要求}
+      \textbf{相机}
       \begin{itemize}
-        \item 分散边缘支撑并使用合适软垫
-        \item 避免长距离悬空和单点集中压紧
-        \item 检测区外设置基准标记或限位件
-        \item 夹持部件不得遮挡孔、端面和齿圈
-        \item 玻璃规格、跨度和载荷依据实物确认
+        \item 主相机优先采用顶部正视
+        \item 按最大齿轮确定视野和工作距离
+        \item 比较中心与边缘清晰度
+        \item 缩短悬臂，降低振动和位置漂移
       \end{itemize}
     \end{column}
     \begin{column}{.47\textwidth}
-      \textbf{光学风险}
+      \textbf{载台}
       \begin{itemize}
-        \item 上下表面反射可能形成高光
-        \item 灰尘、油污和划伤可能成为伪缺陷
-        \item 每组实验保留空载台图作为对照
-        \item 记录清洁与更换情况
-        \item 持续干扰时比较光路、玻璃或替代支撑
+        \item 比较光学表现更稳定的透明材料
+        \item 采用分散式边缘支撑
+        \item 增加工件定位基准
+        \item 保存空载台图，检查反光、灰尘和划伤
       \end{itemize}
     \end{column}
   \end{columns}
 
   \vfill
-  \begin{block}{载台作用}
-    玻璃同时承担工件支撑和背光透射，结构稳定与背景洁净需要同时验证。
-  \end{block}
+  \begin{exampleblock}{设计目标}
+    在完整拍摄齿轮的前提下保留微小缺陷细节，并提高重复放件后的成像一致性。
+  \end{exampleblock}
 \end{frame}
 
-% 33. Lighting
-\subsection{照明方案}
-\HardwareNav{3}
-\GearProSetMinorProgressRange{33}{1}
-\begin{frame}{背光与低角度表面照明}
-  \renewcommand{\arraystretch}{1.2}
-  \begin{tabularx}{\linewidth}{>{\bfseries}l X X}
+% 40. Lighting optimization
+\begin{frame}{照明优化设计}
+  \renewcommand{\arraystretch}{1.22}
+  \begin{tabularx}{\linewidth}{>{\bfseries}p{2.2cm} X X}
     \toprule
     & 背光 & 低角度表面光 \\
     \midrule
-    主要信息 & 齿轮投影轮廓，适合观察改变外轮廓的缺齿或贯通开口 & 表面高低和反光变化，适合观察浅划痕 \\
-    关键变量 & 覆盖范围、距离、过曝与支撑阴影 & 高度、水平距离、仰角、方位与亮度 \\
-    主要风险 & 未改变投影的局部缺口仍可能不可见 & 加工纹、灰尘、玻璃划伤和高光同步增强 \\
-    验证对象 & 缺口件、正常轮廓，以及 Model1 是否仍能正常定位 & 真实划痕与加工纹明显的正常件 \\
+    主要作用 & 形成清晰轮廓，观察缺齿、贯通缺口和齿形变化 & 增强划痕及表面起伏带来的明暗变化 \\
+    需要比较 & 覆盖范围、距离、过曝和支撑阴影 & 高度、角度、方向和亮度 \\
+    同时检查 & 载台污染是否破坏轮廓，Model1 能否正常定位 & 正常加工纹、高光和灰尘是否同步增强 \\
     \bottomrule
   \end{tabularx}
 
-  \vspace{.8em}
-  \begin{block}{初期采集规则}
-    同一静止工件分别采集两种照明，切换时保持相机和工件不动，并用唯一工件编号关联。自动切灯、曝光切换、跨帧配对和缺帧处理尚未实现。
+  \vspace{1em}
+  \begin{block}{验证顺序}
+    两种照明先分别验证，再决定是否组合使用。切换照明时保持相机和工件位置不变。
   \end{block}
 \end{frame}
 
-% 34. Clamp stability
-\subsection{扩展视角}
-\HardwareNav{4}
-\GearProSetMinorProgressRange{34}{2}
-\begin{frame}{万向夹调节与重复性检查}
-  \scriptsize
-  \renewcommand{\arraystretch}{1.2}
-  \begin{tabularx}{\linewidth}{>{\bfseries}l X X}
-    \toprule
-    模块 & 主要调节项目 & 锁紧后重点检查 \\
-    \midrule
-    主相机 & 高度、水平位置、俯仰、横滚 & 下垂、画面漂移、清晰度变化 \\
-    玻璃载台 & 高度、水平度、夹持位置 & 晃动、倾斜、局部受力、遮挡 \\
-    表面光源 & 高度、距离、仰角、方位 & 光照方向变化、关节松动 \\
-    背光 & 水平位置、距离 & 覆盖范围、支撑阴影 \\
-    \bottomrule
-  \end{tabularx}
-
-  \normalsize
-  \vspace{.8em}
-  \begin{columns}[T,onlytextwidth]
-    \begin{column}{.58\textwidth}
-      \textbf{重复性检查}
-      \begin{enumerate}
-        \item 结构不动时连续拍摄
-        \item 取下并重新放置同一工件后复拍
-        \item 调开夹具，再按记录恢复参数后复拍
-      \end{enumerate}
-    \end{column}
-    \begin{column}{.37\textwidth}
-      标尺、位置标记、角度记录和结构照片用于恢复配置。稳定性不足时先缩短悬臂、加强基座和线缆固定。
-    \end{column}
-  \end{columns}
-\end{frame}
-
-% 35. Extra viewpoint
-\begin{frame}{第二相机与转台预留}
+% 41. Additional viewpoint design
+\begin{frame}{补充视角优化设计}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.47\textwidth}
       \begin{block}{第二相机}
-        从斜向或侧向观察顶部相机不易看到的区域。预留位置需检查玻璃边缘、夹具和光源遮挡，并保留独立对焦与调光空间。
+        从斜向或侧向观察顶部相机难以看到的区域。预留位置需要避开载台边缘、夹具和光源。
       \end{block}
+      \textbf{优势：}可以直接获得新的观察方向。
     \end{column}
     \begin{column}{.47\textwidth}
       \begin{block}{转台}
-        改变齿面相对侧相机或定向光的方位。沿轴线俯视时，平面旋转不会产生真正侧视；不透明转台还可能阻断背光。
+        改变齿面相对侧相机或定向光的方向，但平面旋转不能替代真正的侧视。
       \end{block}
+      \textbf{限制：}可能阻挡背光，并增加定位与时间成本。
     \end{column}
   \end{columns}
 
-  \vspace{.9em}
-  \begin{exampleblock}{决策方法}
-    先手动改变代表性工件的观察方向，确认是否获得新增信息，再比较识别收益、采集时间、重复性和结构复杂度。
+  \vspace{.75em}
+  \begin{exampleblock}{判断方法}
+    先人工改变代表性工件的观察方向，确认是否获得新增缺陷信息，再比较识别收益、检测时间和结构复杂度。
   \end{exampleblock}
 
   \vfill
-  多个视角只要有一个报缺陷，就判为缺陷，这是初步方案。拍摄次数增加也会累积误报，最终结果必须按实际齿轮统计。
+  \small 多个视角会补充信息，也可能累积误报；最终结果需要按单个齿轮统计。
 \end{frame}
 
-% 36. Experiment record
+% 42. Staged validation
 \subsection{实验验证}
 \HardwareNav{5}
-\GearProSetMinorProgressRange{36}{3}
-\begin{frame}{实验记录与评价方法}
-  \scriptsize
-  \renewcommand{\arraystretch}{1.15}
-  \begin{tabularx}{\linewidth}{>{\bfseries}l X}
-    \toprule
-    类别 & 必须记录的主要内容 \\
-    \midrule
-    工件 & 唯一编号、尺寸、缺陷类型、位置与确认依据 \\
-    相机 & 镜头、工作距离、姿态、分辨率、曝光、增益与对焦 \\
-    载台与夹具 & 玻璃规格、支撑位置、悬臂状态与清洁情况 \\
-    照明 & 类型、亮度、距离、仰角、方位与环境光 \\
-    数据与软件 & 原图名称、配置编号、模型版本、阈值与处理规则 \\
-    \bottomrule
-  \end{tabularx}
+\GearProSetMinorProgressRange{42}{2}
+\begin{frame}{分阶段实验验证}
+  \centering
+  \begin{tikzpicture}[node distance=.34cm]
+    \node[flow,text width=2.25cm,minimum height=1.15cm] (base) {1 建立基准\\固定第一代配置};
+    \node[flow,text width=2.25cm,minimum height=1.15cm,right=of base] (single) {2 逐项验证\\相机、载台、光照、视角};
+    \node[flow,text width=2.25cm,minimum height=1.15cm,right=of single] (combo) {3 组合验证\\只组合有效参数};
+    \node[flow,text width=2.25cm,minimum height=1.15cm,right=of combo] (system) {4 整机验证\\连续运行与分拣};
+    \draw[line] (base) -- (single);
+    \draw[line] (single) -- (combo);
+    \draw[line] (combo) -- (system);
+  \end{tikzpicture}
 
-  \normalsize
-  \vspace{.7em}
+  \vspace{1em}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.47\textwidth}
+      \textbf{实验控制}
+      \begin{itemize}
+        \item 每次只改变一个主要条件
+        \item 固定模型、阈值和判断标准
+        \item 保存原图、配置和失败案例
+      \end{itemize}
+    \end{column}
+    \begin{column}{.47\textwidth}
+      \textbf{整机记录}
+      \begin{itemize}
+        \item 漏检、误报和重复定位误差
+        \item 采集、检测和分拣用时
+        \item 长时间运行后的结构变化
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% 43. Validation questions and conclusion
+\begin{frame}{验证问题与阶段结论}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.31\textwidth}
-      \textbf{图像质量}\par
-      缺陷可见性、正常纹理、轮廓、过曝和遮挡。
+      \textbf{相机与载台}
+      \begin{itemize}
+        \item 哪个位置兼顾完整视野和微小缺陷？
+        \item 透明载台是否产生明显伪缺陷？
+      \end{itemize}
     \end{column}
     \begin{column}{.31\textwidth}
-      \textbf{结构重复性}\par
-      连拍、重新放件和恢复夹具后的尺度、位置与清晰度。
+      \textbf{照明与视角}
+      \begin{itemize}
+        \item 哪种照明分别适合轮廓和划痕？
+        \item 第二相机或转台是否带来足够收益？
+      \end{itemize}
     \end{column}
     \begin{column}{.31\textwidth}
-      \textbf{模型结果}\par
-      固定模型与阈值，报告 Recall、FPR 和原始计数。
+      \textbf{系统效果}
+      \begin{itemize}
+        \item 优化结构能否降低漏检和误报？
+        \item 能否重新接入现有完整链路？
+      \end{itemize}
     \end{column}
   \end{columns}
 
-  \vfill
-  \small 同一工件的连续帧、不同照明和不同视角不得跨集合，也不能按多张图片重复计作多个工件。
-\end{frame}
-
-% 37. Hardware risks
-\begin{frame}{结构与成像风险}
-  \scriptsize
-  \renewcommand{\arraystretch}{1.16}
-  \begin{tabularx}{\linewidth}{>{\bfseries}p{3.3cm} X X}
-    \toprule
-    风险或局限 & 可能影响 & 应对方向 \\
-    \midrule
-    夹具松动或悬臂下垂 & 视野、焦点变化 & 缩短悬臂、加强基座，必要时固定化 \\
-    玻璃受力不合理 & 载台不稳或损坏 & 分散支撑、软垫夹持、确认载荷 \\
-    玻璃反光、污染与划伤 & 伪缺陷或背景变化 & 空载对照、清洁、更换或调整光路 \\
-    加工纹被低角度光增强 & 正常件误报增加 & 用真实正常件共同选择照明 \\
-    背光只提供投影 & 局部缺陷仍不可见 & 检查样本覆盖并验证补充视角 \\
-    新照明改变图像外观 & 定位或缺陷识别性能下降 & 保留原图，单独验证，必要时更新模型 \\
-    多次采集增加时间 & 影响未来检测节拍 & 记录切灯、拍摄、配对和处理耗时 \\
-    \bottomrule
-  \end{tabularx}
-
-  \vfill
-  \normalsize
-  当前平台先验证静态、限定工件与位置下的采集效果。运动模糊、连续上料、长期稳定性和执行机构配合仍待后续验证。
-\end{frame}
-
-% 38. Hardware plan
-\begin{frame}{下一阶段结构实施顺序}
-  \scriptsize
-  \renewcommand{\arraystretch}{1.18}
-  \begin{tabularx}{\linewidth}{>{\bfseries}c X X}
-    \toprule
-    顺序 & 主要工作 & 交付内容 \\
-    \midrule
-    1 & 确认器材规格、工件尺寸与质量，完成基本搭建 & 部件表、布局图、实物照片 \\
-    2 & 确定主相机距离、姿态、对焦和曝光 & 基线配置及原始图像 \\
-    3 & 分别开展背光与低角度光对照 & 缺口、划痕和正常纹理对照图 \\
-    4 & 检查连续拍摄、重新放件和夹具恢复 & 重复性记录与结构改进项 \\
-    5 & 用固定模型版本评估新图像 & 定位、专项结果与失败案例 \\
-    6 & 验证补充视角，决定扩展与固定化 & 第二相机或转台决策、固定支架需求 \\
-    \bottomrule
-  \end{tabularx}
-
-  \vfill
-  \normalsize
-  \begin{block}{当前说明}
-    尚无实物、照片和记录的内容标为“拟采用”“计划验证”或“预留扩展”；有可核对的实验结果后再写“已完成”或“已改善”。
+  \vspace{1em}
+  \begin{block}{阶段结论}
+    第一代整机已经证明完整路线可行。下一阶段保留现有链路，通过可控实验改善成像质量、结构重复性和特殊视角覆盖。
   \end{block}
 \end{frame}
 
-% 39. Joint interface
+% 44. Joint interface
 \section{联合}
 \subsection{接口关系}
 \JointNav{1}
-\GearProSetMinorProgressRange{39}{1}
+\GearProSetMinorProgressRange{44}{1}
 \begin{frame}{软件问题与硬件实验变量}
   \scriptsize
   \renewcommand{\arraystretch}{1.15}
@@ -1333,10 +1507,10 @@
   \end{block}
 \end{frame}
 
-% 40. Acceptance path
+% 45. Acceptance path
 \subsection{整机验收}
 \JointNav{2}
-\GearProSetMinorProgressRange{40}{2}
+\GearProSetMinorProgressRange{45}{2}
 \begin{frame}{整套系统的验收流程}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.48\textwidth}
@@ -1363,7 +1537,7 @@
   \end{alertblock}
 \end{frame}
 
-% 41. Acceptance evidence
+% 46. Acceptance evidence
 \begin{frame}{联合验收输出}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.31\textwidth}
@@ -1401,10 +1575,10 @@
   \end{block}
 \end{frame}
 
-% 42. Final conclusion
+% 47. Final conclusion
 \subsection{阶段结论}
 \JointNav{3}
-\GearProSetMinorProgressRange{42}{1}
+\GearProSetMinorProgressRange{47}{1}
 \begin{frame}{阶段结论与讨论重点}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.46\textwidth}
@@ -1413,14 +1587,15 @@
         \item 避免相似图片跨集合的锁定测试方法
         \item 先定位齿轮，再由两个模型识别缺陷
         \item 结果可核对的软件完整流程
-        \item 面向三类主要错误的硬件实验方案
+        \item 第一代实物整机与完整工作链路
+        \item 面向主要错误的硬件优化方案
       \end{itemize}
     \end{column}
     \begin{column}{.49\textwidth}
       \textbf{当前仍未完成}
       \begin{itemize}
         \item Recall $\geq 0.95$ 且 FPR $\leq 0.20$
-        \item 第一代平台实物与重复性数据
+        \item 优化平台实物与结构重复性数据
         \item 多照明、多视角自动控制，以及按实际齿轮合并结果
         \item Jetson NX 整套流程的速度与长期稳定性验收
       \end{itemize}
