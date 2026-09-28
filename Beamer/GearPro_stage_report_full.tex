@@ -5,7 +5,7 @@
 \usepackage{amsmath,booktabs,array,colortbl,tabularx}
 \usepackage{graphicx}
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta,positioning,calc}
+\usetikzlibrary{arrows.meta,positioning,calc,decorations.markings}
 \usepackage{SoutheastUniversity}
 
 \author{夏秋桐}
@@ -1211,7 +1211,7 @@
     \end{column}
     \begin{column}{.46\textwidth}
       \centering
-      \includegraphics[width=\linewidth,height=.62\textheight,keepaspectratio]{pic/gearpro/hardware_jetson.jpeg}
+      \includegraphics[width=\linewidth,height=.62\textheight,keepaspectratio]{pic/gearpro/hardware_jetson}
       \smallnote{第一代系统使用的 NVIDIA Jetson}
     \end{column}
   \end{columns}
@@ -1304,11 +1304,13 @@
   \small
   \centering
   \begin{tikzpicture}[
-      node distance=.18cm,
-      scale=.92,
+      node distance=.28cm,
+      scale=.88,
       transform shape,
-      optline/.style={-{Latex[length=1.8mm]},thick,draw=seugreen,
-        shorten <=1.5pt,shorten >=1.5pt}
+      optline/.style={thick,draw=seugreen,
+        postaction={decorate},
+        decoration={markings,mark=at position .5 with
+          {\arrow{Latex[length=1.8mm]}}}}
     ]
     \node[flowwide,minimum height=.58cm,inner sep=2pt] (base) {稳定基座 / 立柱};
     \node[flowwide,minimum height=.58cm,inner sep=2pt,below=of base] (clamp) {独立可调相机支架};
