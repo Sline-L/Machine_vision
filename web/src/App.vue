@@ -25,7 +25,12 @@ const verdictClass = computed(() => {
   if (!result.value?.has_gear) return 'idle'
   return result.value.is_defective ? 'bad' : 'good'
 })
-const goodRate = computed(() => `${((state.value?.stats?.good_rate || 0) * 100).toFixed(1)}%`)
+const goodRateValue = computed(() => Math.max(0, Math.min(100, (state.value?.stats?.good_rate || 0) * 100)))
+const defectiveRateValue = computed(() => {
+  const stats = state.value?.stats
+  return stats?.total ? Math.max(0, Math.min(100, (stats.defective / stats.total) * 100)) : 0
+})
+const goodRate = computed(() => `${goodRateValue.value.toFixed(1)}%`)
 const specialistMaximum = (name, field = 'probability') => {
   const values = result.value?.observations?.map(item => item.specialists?.[name]?.[field]).filter(Number.isFinite) || []
   return values.length ? Math.max(...values) : null
@@ -244,8 +249,13 @@ onBeforeUnmount(() => {
         <article class="panel important-panel">
           <div class="section-heading"><h2>当前检测结果</h2><span>实时判定</span></div>
           <div :class="['important-verdict', verdictClass]" aria-live="polite">
-            <span>RESULT</span>
-            <strong>{{ result?.verdict || (active ? '检测中' : '等待开始') }}</strong>
+            <span>当前判定</span>
+            <div class="verdict-reading">
+              <svg v-if="verdictClass === 'good'" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.2 4.2L19 7" /></svg>
+              <svg v-else-if="verdictClass === 'bad'" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17" /></svg>
+              <svg v-else viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6" /></svg>
+              <strong>{{ result?.verdict || (active ? '检测中' : '等待开始') }}</strong>
+            </div>
           </div>
           <div class="important-values">
             <div><span>缺陷类型</span><strong class="reason-value">{{ result?.observations?.length ? rejectReason : '—' }}</strong></div>
@@ -257,8 +267,24 @@ onBeforeUnmount(() => {
         <article class="panel secondary-panel">
           <div class="section-heading"><h2>推理详情</h2><span>{{ modelVersions }}</span></div>
           <div class="probability-list">
-            <div><span>划痕</span><strong>{{ scratchProbability === null ? '—' : (scratchProbability*100).toFixed(2)+'%' }}</strong><small>阈值 {{ state.settings.scratch_threshold.toFixed(6) }}</small></div>
-            <div><span>缺齿</span><strong>{{ missingHoleProbability === null ? '—' : (missingHoleProbability*100).toFixed(2)+'%' }}</strong><small>阈值 {{ state.settings.missing_hole_threshold.toFixed(6) }}</small></div>
+            <div>
+              <span>划痕</span><strong>{{ scratchProbability === null ? '—' : (scratchProbability*100).toFixed(2)+'%' }}</strong>
+              <svg class="probability-chart" viewBox="0 0 100 5" preserveAspectRatio="none" aria-hidden="true">
+                <rect class="chart-track" width="100" height="5" rx="1" />
+                <rect class="chart-value" :width="scratchProbability === null ? 0 : Math.min(100, scratchProbability * 100)" height="5" rx="1" />
+                <line class="chart-threshold" :x1="state.settings.scratch_threshold * 100" :x2="state.settings.scratch_threshold * 100" y1="0" y2="5" />
+              </svg>
+              <small>阈值 {{ state.settings.scratch_threshold.toFixed(6) }}</small>
+            </div>
+            <div>
+              <span>缺齿</span><strong>{{ missingHoleProbability === null ? '—' : (missingHoleProbability*100).toFixed(2)+'%' }}</strong>
+              <svg class="probability-chart" viewBox="0 0 100 5" preserveAspectRatio="none" aria-hidden="true">
+                <rect class="chart-track" width="100" height="5" rx="1" />
+                <rect class="chart-value" :width="missingHoleProbability === null ? 0 : Math.min(100, missingHoleProbability * 100)" height="5" rx="1" />
+                <line class="chart-threshold" :x1="state.settings.missing_hole_threshold * 100" :x2="state.settings.missing_hole_threshold * 100" y1="0" y2="5" />
+              </svg>
+              <small>阈值 {{ state.settings.missing_hole_threshold.toFixed(6) }}</small>
+            </div>
           </div>
           <div class="detail-grid">
             <span>总耗时<b>{{ result ? result.elapsed_ms.toFixed(1)+' ms' : '—' }}</b></span>
@@ -277,9 +303,11 @@ onBeforeUnmount(() => {
           </div>
           <div class="rate-row">
             <div><span>综合合格率</span><strong>{{ goodRate }}</strong></div>
-            <div class="rate-track" role="progressbar" aria-label="综合合格率" aria-valuemin="0" aria-valuemax="100" :aria-valuenow="Math.round(state.stats.good_rate * 100)">
-              <i :style="{ width: goodRate }"></i>
-            </div>
+            <svg class="quality-chart" viewBox="0 0 100 7" preserveAspectRatio="none" role="img" :aria-label="`合格率 ${goodRate}，不合格 ${state.stats.defective} 个`">
+              <rect class="chart-track" width="100" height="7" rx="1" />
+              <rect class="chart-good" :width="goodRateValue" height="7" rx="1" />
+              <rect class="chart-bad" :x="goodRateValue" :width="defectiveRateValue" height="7" rx="1" />
+            </svg>
           </div>
         </article>
       </aside>

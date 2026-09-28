@@ -270,7 +270,7 @@ select:focus-visible {
 
 .important-verdict {
   display: flex;
-  min-height: 104px;
+  min-height: 92px;
   align-items: center;
   justify-content: space-between;
   margin: 0 16px;
@@ -280,8 +280,11 @@ select:focus-visible {
   color: var(--brand);
 }
 
-.important-verdict span { color: currentColor; font-size: 10px; font-weight: 800; letter-spacing: .16em; opacity: .72; }
-.important-verdict strong { font-size: clamp(30px, 3vw, 46px); line-height: 1; font-weight: 850; letter-spacing: -.03em; }
+.important-verdict > span { color: currentColor; font-size: 10px; font-weight: 700; opacity: .72; }
+.verdict-reading { display: flex; align-items: center; gap: 10px; }
+.verdict-reading svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
+.important-verdict strong { font-size: clamp(26px, 2.2vw, 34px); line-height: 1; font-weight: 780; letter-spacing: -.02em; }
+.important-verdict.bad strong { font-size: clamp(25px, 2vw, 31px); }
 .important-verdict.good { background: var(--green-soft); color: var(--green); }
 .important-verdict.bad { background: var(--red-soft); color: var(--red); }
 .important-verdict.idle { background: var(--blue-soft); color: #1d4ed8; }
@@ -302,6 +305,10 @@ select:focus-visible {
 .probability-list div + div { padding-right: 0; padding-left: 12px; border-left: 1px solid var(--border); }
 .probability-list span { display: block; color: var(--muted); font-size: 10px; }
 .probability-list strong { display: block; margin-top: 3px; color: var(--ink); font-size: 20px; font-variant-numeric: tabular-nums; }
+.probability-chart { display: block; width: 100%; height: 5px; margin-top: 8px; overflow: visible; }
+.chart-track { fill: #e7edf2; }
+.chart-value { fill: var(--blue); transition: width .3s ease-out; }
+.chart-threshold { stroke: var(--amber); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
 .probability-list small { display: block; margin-top: 3px; overflow: hidden; color: var(--muted); font-size: 10px; font-variant-numeric: tabular-nums; text-overflow: ellipsis; white-space: nowrap; }
 
 .detail-grid { display: grid; grid-template-columns: 1fr 1fr; margin-top: 2px; border-top: 1px solid var(--border); }
@@ -322,8 +329,9 @@ select:focus-visible {
 .rate-row > div:first-child { display: flex; align-items: baseline; justify-content: space-between; }
 .rate-row span { color: var(--muted); font-size: 10px; }
 .rate-row strong { color: var(--green); font-size: 18px; font-variant-numeric: tabular-nums; }
-.rate-track { height: 7px; margin-top: 9px; overflow: hidden; border-radius: 2px; background: #e7edf2; }
-.rate-track i { display: block; height: 100%; max-width: 100%; background: var(--green); transition: width .3s ease-out; }
+.quality-chart { display: block; width: 100%; height: 7px; margin-top: 9px; }
+.chart-good { fill: var(--green); transition: width .3s ease-out; }
+.chart-bad { fill: var(--red); transition: x .3s ease-out, width .3s ease-out; }
 
 footer {
   display: flex;
@@ -409,8 +417,10 @@ footer {
   .control-row .button { flex: 1 1 calc(50% - 7px); }
   .control-row .button.primary { flex-basis: 100%; }
   .status-text { width: 100%; margin: 3px 0 0; padding: 3px; }
-  .important-verdict { min-height: 92px; padding: 15px 16px; }
-  .important-verdict strong { font-size: 34px; }
+  .important-verdict { min-height: 84px; padding: 14px 16px; }
+  .important-verdict strong { font-size: 28px; }
+  .important-verdict.bad strong { font-size: 26px; }
+  .verdict-reading svg { width: 24px; height: 24px; }
   .section-heading span { max-width: 52%; }
   .form-grid { grid-template-columns: 1fr; }
   .settings-card { padding: 20px 16px; }
