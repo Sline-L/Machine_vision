@@ -31,7 +31,7 @@
 
 \newcommand{\JointNav}[1]{%
   \GearProSetMajor{联合}%
-  \GearProSetMinorNavThree{接口关系}{端到端验收}{阶段结论}{#1}%
+  \GearProSetMinorNavThree{接口关系}{整机验收}{阶段结论}{#1}%
 }
 
 \newcommand{\smallnote}[1]{%
@@ -80,7 +80,7 @@
         \textbf{验收路线}
 
         \vspace{.45em}
-        软硬件接口、端到端验收和阶段结论
+        软硬件接口、整机验收和阶段结论
       \end{exampleblock}
     \end{column}
   \end{columns}
@@ -117,7 +117,7 @@
       工作距离、载台、照明和补充视角决定缺陷是否清晰可见。
     \end{column}
     \begin{column}{.31\textwidth}
-      \textbf{软件完成检测闭环}\par
+      \textbf{软件完成整套检测流程}\par
       定位、双专项判断、解释信息和输出链路已经连通。
     \end{column}
     \begin{column}{.31\textwidth}
@@ -145,14 +145,14 @@
         \item Scratch V5 与 Missing Hole V1
         \item 独立阈值、最终 OR 与拒绝原因
         \item Web 控制台、统计和串口输出
-        \item 模型哈希校验与有限安全停机
+        \item 模型文件完整性检查，异常时停止检测
       \end{itemize}
 
       \vspace{.25em}
       \textbf{仍待验收}
       \begin{itemize}
         \item Jetson NX 的延迟、功耗和稳定性
-        \item 真实结构与照明下的端到端指标
+        \item 真实结构与照明下的完整流程结果
       \end{itemize}
     \end{column}
     \begin{column}{.51\textwidth}
@@ -165,7 +165,7 @@
 
   \vfill
   \centering
-  \textcolor{seugreen}{\large 结论：软件闭环已运行，模型和真实设备尚未完成生产验收}
+  \textcolor{seugreen}{\large 结论：整套软件流程已运行，模型和真实设备尚未完成生产验收}
 \end{frame}
 
 % 5. Tasks and metrics
@@ -266,7 +266,7 @@
   \begin{tikzpicture}[node distance=1.15cm]
     \node[flowwide] (train) {训练集\\更新模型参数};
     \node[flowwide,right=of train] (val) {验证集\\选择结构、校准与阈值};
-    \node[decision,right=of val] (test) {锁定测试\\配置冻结后只使用一次};
+    \node[decision,right=of val] (test) {锁定测试\\配置确定后只使用一次};
     \draw[line] (train) -- (val);
     \draw[line] (val) -- (test);
   \end{tikzpicture}
@@ -323,8 +323,8 @@
       \textbf{统一评价}
       \begin{itemize}
         \item 验证集和测试集保留完整真值
-        \item 不同训练策略使用同一评价口径
-        \item 结果显示 oblique 视角才是主要瓶颈
+        \item 不同训练方法使用相同的评价方式
+        \item 结果显示斜视角度才是主要问题
       \end{itemize}
     \end{column}
   \end{columns}
@@ -364,10 +364,10 @@
   \vfill
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.48\textwidth}
-      \textbf{收益：}减少背景和姿态干扰，把输入分辨率集中到齿轮区域。
+      \textbf{好处：}减少背景和摆放角度的干扰，让更多像素用于显示齿轮。
     \end{column}
     \begin{column}{.48\textwidth}
-      \textbf{边界：}Model1 漏定位仍属于端到端漏检，4\% 外扩需要真实设备继续验证。
+      \textbf{需要注意：}Model1 没找到齿轮仍算漏检，4\% 外扩还要在真实设备上验证。
     \end{column}
   \end{columns}
 \end{frame}
@@ -386,7 +386,7 @@
       \end{tabular}
 
       \vspace{1.0em}
-      同时学习微小纹理和结构缺口，当前数据下监督信号分散。
+      同时识别细小划痕和结构缺口，两类特征差别较大，当前模型难以兼顾。
     \end{column}
     \begin{column}{.12\textwidth}
       \centering\vspace{2em}{\color{seugold}\Huge$\Rightarrow$}
@@ -402,13 +402,13 @@
       \end{tabular}
 
       \vspace{1.0em}
-      两类缺陷分别选择输入、检测头、概率校准和发布阈值。
+      两类缺陷分别选择输入尺寸、检测结构和判断阈值。
     \end{column}
   \end{columns}
 
   \vfill
-  \begin{block}{拆分依据}
-    划痕表现为小面积、低对比纹理变化；缺齿缺口表现为轮廓和结构变化。当前结果支持专项化，但不排除未来在更多数据下重新评估统一模型。
+  \begin{block}{为什么分成两个模型}
+    划痕主要是小面积、低对比的纹理变化，缺齿缺口主要改变轮廓。当前分开识别效果更好，数据增加后仍可重新比较统一模型。
   \end{block}
 \end{frame}
 
@@ -424,8 +424,8 @@
       \node[flowwide,above right=.15cm and 1.2cm of roi] (eff) {EfficientNet-B0\\384 输入};
       \node[flowwide,right=1.2cm of roi] (res) {ResNet18\\384 输入};
       \node[flowwide,below right=.15cm and 1.2cm of roi] (det) {YOLO26-P2\\960 输入};
-      \node[decision,right=1.25cm of res] (cal) {逐路温度校准};
-      \node[decision,right=1.0cm of cal] (fuse) {专项融合概率};
+      \node[decision,right=1.25cm of res] (cal) {校正三路分数};
+      \node[decision,right=1.0cm of cal] (fuse) {得到综合分数};
       \draw[line] (roi) -- (eff);
       \draw[line] (roi) -- (res);
       \draw[line] (roi) -- (det);
@@ -437,7 +437,7 @@
   }
 
   \vspace{.7em}
-  \begin{exampleblock}{发布公式}
+  \begin{exampleblock}{最终分数计算}
     \centering
     $p_{\mathrm{scratch}} = 0.25\,p_{\mathrm{cls}} + 0.75\,p_{\mathrm{det}}$
     \qquad
@@ -447,10 +447,10 @@
   \vfill
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.48\textwidth}
-      分类器判断整张 ROI 的整体外观，P2 检测器强化细小局部划痕。
+      两个分类器判断整张齿轮图像，P2 检测器重点寻找细小划痕。
     \end{column}
     \begin{column}{.48\textwidth}
-      弱检测概率参与融合；辅助框使用更高显示门槛，只服务人工复核。
+      较低的检测分数也参与最终计算；画框使用更高门槛，只供人工查看。
     \end{column}
   \end{columns}
 \end{frame}
@@ -465,6 +465,7 @@
       \smallnote{现有划痕检测示例}
     \end{column}
     \begin{column}{.57\textwidth}
+      \vspace{.3em}
       \begin{columns}[T,onlytextwidth]
         \begin{column}{.32\textwidth}
           \centering {\color{seugreen}\LARGE\bfseries 0.8065}\\Recall
@@ -489,15 +490,15 @@
 
       \vspace{1em}
       \begin{itemize}
-        \item FN：低对比、小面积或外观不稳定划痕
-        \item FP：侧齿高光和正常加工纹
+        \item 漏检（FN）：颜色浅、面积小或形态不稳定的划痕
+        \item 误报（FP）：侧齿高光和正常加工纹
       \end{itemize}
     \end{column}
   \end{columns}
 
   \vfill
   \centering
-  \textcolor{seugreen}{检测器增强局部敏感性，但高光与加工纹仍限制泛化}
+  \textcolor{seugreen}{局部检测器更容易发现细小划痕，但仍会把高光和正常加工纹看成缺陷}
 \end{frame}
 
 % 13. Missing architecture
@@ -509,8 +510,8 @@
       \node[flowwide,above right=.15cm and 1.2cm of roi] (eff) {EfficientNet-B0\\512 输入};
       \node[flowwide,right=1.2cm of roi] (res) {ResNet18\\384 输入};
       \node[flowwide,below right=.15cm and 1.2cm of roi] (det) {标准 YOLO26n\\960 输入};
-      \node[decision,right=1.25cm of res] (cal) {逐路温度校准};
-      \node[decision,right=1.0cm of cal] (fuse) {专项融合概率};
+      \node[decision,right=1.25cm of res] (cal) {校正三路分数};
+      \node[decision,right=1.0cm of cal] (fuse) {得到综合分数};
       \draw[line] (roi) -- (eff);
       \draw[line] (roi) -- (res);
       \draw[line] (roi) -- (det);
@@ -522,7 +523,7 @@
   }
 
   \vspace{.7em}
-  \begin{exampleblock}{发布公式}
+  \begin{exampleblock}{最终分数计算}
     \centering
     $p_{\mathrm{missing}} = 0.50\,p_{\mathrm{cls}} + 0.50\,p_{\mathrm{det}}$
     \qquad
@@ -531,7 +532,7 @@
 
   \vfill
   \begin{block}{为什么没有使用 P2}
-    P2 在 Missing Hole 验证实验中没有稳定胜过标准检测头。模型结构由任务和数据决定，不能只根据“目标可能较小”直接保留 P2。
+    在 Missing Hole 验证中，P2 没有稳定优于标准检测结构，因此采用结果更稳定、结构更简单的方案。
   \end{block}
 \end{frame}
 
@@ -542,7 +543,7 @@
       \centering
       % TODO: replace with the original high-resolution oblique image when available.
       \includegraphics[width=.9\linewidth,height=.54\textheight,keepaspectratio]{pic/gearpro/oblique_missing.jpg}
-      \smallnote{oblique 缺口示例}
+      \smallnote{斜视（oblique）缺口示例}
     \end{column}
     \begin{column}{.6\textwidth}
       \begin{columns}[T,onlytextwidth]
@@ -558,7 +559,7 @@
       \end{columns}
 
       \vspace{.8em}
-      \textbf{位置子组 Recall}
+      \textbf{不同位置的 Recall}
 
       \vspace{.35em}
       \begin{tabular}{@{}l@{\hspace{.8em}}l@{\hspace{.8em}}r@{}}
@@ -573,19 +574,19 @@
   \end{columns}
 
   \vfill
-  \begin{alertblock}{主要瓶颈}
-    difficult 统计口径变化很小，oblique 视角下的结构可见性才是当前最明确的问题。
+  \begin{alertblock}{当前主要问题}
+    是否计入 difficult 样本对结果影响很小。斜视角度下缺口不够清楚，才是当前最明显的问题。
   \end{alertblock}
 \end{frame}
 
 % 15. OR decision
-\begin{frame}{关键决策三：独立阈值后执行 OR}
+\begin{frame}{关键决策三：两个模型分别判断后再合并}
   \centering
   \begin{tikzpicture}[node distance=1.1cm and 1.05cm]
     \node[flowwide,text width=3.75cm] (scratch) {Scratch 概率\\{\scriptsize$\geq 0.300273610279458$}};
     \node[flowwide,text width=3.75cm,below=of scratch] (missing) {Missing Hole 概率\\{\scriptsize$\geq 0.3413327979078584$}};
     \coordinate (join) at ($(scratch.east)!0.5!(missing.east)+(0.75cm,0)$);
-    \node[decision,right=1.0cm of join] (or) {逻辑 OR};
+    \node[decision,right=1.0cm of join] (or) {任一模型判为缺陷};
     \node[flowwide,right=1.25cm of or] (final) {最终结果\\合格或不合格};
     \draw[very thick,draw=seugreen] (scratch.east) -| (join);
     \draw[very thick,draw=seugreen] (missing.east) -| (join);
@@ -596,14 +597,14 @@
   \vspace{1em}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.47\textwidth}
-      \textbf{为什么独立过阈值}
+      \textbf{为什么分别判断}
 
-      两个专项的任务、温度校准和概率分布不同，没有证据支持直接相加后使用统一阈值。
+      两个模型识别的缺陷不同，分数范围也不同，不能直接相加后使用同一个阈值。
     \end{column}
     \begin{column}{.47\textwidth}
-      \textbf{OR 的代价}
+      \textbf{合并后的影响}
 
-      可以补回另一专项漏掉的缺陷，也会合并两个专项的误报集合。
+      一个模型可以补回另一个模型漏掉的缺陷，但两个模型的误报也会累积。
     \end{column}
   \end{columns}
 
@@ -634,14 +635,14 @@
   \vspace{1.2em}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.47\textwidth}
-      \textbf{同口径结论}
+      \textbf{同一批数据下的结果}
 
-      双专项 OR 相比统一模型提高任意缺陷 Recall，并显著降低 FPR。
+      两个模型合并后比统一模型少漏检，正常件误报也明显减少。
     \end{column}
     \begin{column}{.47\textwidth}
-      \textbf{不能直接比较的数字}
+      \textbf{需要注意的数字}
 
-      两个专项的负样本定义不同，专项 FPR 不能简单相加。
+      两个模型使用的正常样本范围不同，各自的 FPR 不能直接相加。
     \end{column}
   \end{columns}
 
@@ -651,7 +652,7 @@
 \end{frame}
 
 % 17. Target gap
-\begin{frame}{目标差距与阈值纪律}
+\begin{frame}{目标差距与阈值使用规则}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.48\textwidth}
       \centering
@@ -676,30 +677,30 @@
   \end{columns}
 
   \vspace{1em}
-  \begin{alertblock}{不能继续用当前 test 调阈值}
-    锁定测试已经参与最终评价。根据其结果重新选择阈值，会破坏测试独立性，并可能用显著增加误报的方式换取表面召回提升。
+  \begin{alertblock}{不能继续用当前测试集调整阈值}
+    这批数据已经用于最终检查。如果看过结果后继续调阈值，得到的提升可能只适用于这批数据，还可能明显增加误报。
   \end{alertblock}
 
   \vfill
   \centering
-  下一轮优化应在新数据上完成模型与阈值选择，配置冻结后建立新的 blind test。
+  下一轮应使用新数据选择模型和阈值，确定后再建立一批从未用于调整的新测试数据。
 \end{frame}
 
 % 18. Error patterns
 \begin{frame}{主要错误模式}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.31\textwidth}
-      \textbf{低对比划痕 FN}
+      \textbf{浅划痕漏检}
 
       缺陷纹理接近正常加工纹。优先稳定低角度照明，并补采真实弱划痕。
     \end{column}
     \begin{column}{.31\textwidth}
-      \textbf{oblique 缺口 FN}
+      \textbf{斜视缺口漏检}
 
       单一视角下结构变化不稳定。优先验证背光、第二相机或转台。
     \end{column}
     \begin{column}{.31\textwidth}
-      \textbf{高光正常样本 FP}
+      \textbf{高光正常件误报}
 
       侧齿反光和加工纹触发划痕分支。需要调整光源并扩充真实负样本。
     \end{column}
@@ -720,7 +721,7 @@
       {\color{seugreen}\Large\bfseries 实验}
 
       \vspace{.5em}
-      已建立按组隔离、标签治理、锁定测试和 Recall/FPR 双约束。
+      已避免相似图片跨集合，并建立锁定测试和 Recall/FPR 双重要求。
     \end{column}
     \begin{column}{.31\textwidth}
       \centering
@@ -739,8 +740,8 @@
   \end{columns}
 
   \vspace{1.1em}
-  \begin{block}{当前技术判断}
-    低对比划痕、oblique 缺口和高光误报都与输入可见性和数据覆盖密切相关。下一阶段应先验证成像条件，再决定模型复杂度。
+  \begin{block}{当前判断}
+    浅划痕、斜视缺口和高光误报都与图像是否看得清、样本是否覆盖充分有关。下一阶段先验证成像条件，再决定是否需要更复杂的模型。
   \end{block}
 
   \vfill
@@ -752,7 +753,7 @@
 % 20. Runtime architecture
 \subsection{结果与工程}
 \SoftwareNav{5}
-\begin{frame}{实时软件架构}
+\begin{frame}{软件如何持续处理实时画面}
   \centering
   \begin{tikzpicture}[node distance=.35cm]
     \node[flow,text width=1.9cm,inner sep=3pt] (camera) {Camera\\Capture\\只保留最新帧};
@@ -769,15 +770,15 @@
   \vspace{1.1em}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.47\textwidth}
-      \textbf{线程边界}
+      \textbf{后台处理方式}
       \begin{itemize}
-        \item OpenCV 采集与模型推理不进入 FastAPI 事件循环
+        \item 图像采集和模型计算在独立后台线程运行
         \item 暂停、恢复和浏览器重连复用已加载模型
-        \item 原图与标注图分别缓存 JPEG，多客户端共享
+        \item 原图与标注图各保存一份，多台浏览器直接共用
       \end{itemize}
     \end{column}
     \begin{column}{.47\textwidth}
-      \textbf{运行语义}
+      \textbf{页面使用方式}
       \begin{itemize}
         \item 最新帧优先，避免排队造成结果滞后
         \item 浏览器只负责查看和控制，不拥有检测任务
@@ -788,7 +789,7 @@
 \end{frame}
 
 % 21. Bounded modes
-\begin{frame}{有界运行档位与安全边界}
+\begin{frame}{运行档位与异常保护}
   \renewcommand{\arraystretch}{1.25}
   \begin{tabularx}{\linewidth}{>{\bfseries}l X X}
     \toprule
@@ -801,34 +802,34 @@
   \end{tabularx}
 
   \vspace{1em}
-  \begin{block}{必须显式拒绝的状态}
-    必要专项失败、空 ROI、权重哈希错误、NaN/Inf 或 CUDA OOM 时停止检测。未实现的 TRT\_FAST、CLASSIFY\_ONLY 和 LOCATE\_ONLY 必须报告不可用。
+  \begin{block}{出现这些异常时停止检测}
+    必要模型未加载、没有有效齿轮区域、模型文件校验失败、计算结果异常或显存不足时停止检测。尚未实现的档位必须明确显示“不可用”。
   \end{block}
 
   \vfill
-  SystemSnapshot v2 统一暴露系统、相机、定位、专项、整体推理、串口与任务状态。当前只具备遥测和有限安全控制基础，不宣称完整自治恢复已经实现。
+  SystemSnapshot v2 汇总系统、相机、模型、串口和任务状态。当前可以查看状态并在部分异常下安全停机，但还不能自动处理所有故障。
 \end{frame}
 
 % 22. Model package
-\begin{frame}{自描述、可审计的模型包}
+\begin{frame}{模型发布包：配置与文件一一对应}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.44\textwidth}
-      \begin{block}{Manifest 固化内容}
+      \begin{block}{配置清单记录的内容}
         \begin{itemize}
           \item 版本、模型类型与输入尺寸
           \item 预处理、温度与融合权重
-          \item 发布阈值和相对权重路径
-          \item 权重 SHA256 与研究来源提交
+          \item 判断阈值和模型文件位置
+          \item 模型文件校验值与对应代码版本
         \end{itemize}
       \end{block}
     \end{column}
     \begin{column}{.51\textwidth}
-      \begin{exampleblock}{运行时校验}
+      \begin{exampleblock}{启动时检查}
         \begin{itemize}
           \item 配置与权重不匹配时拒绝启动
-          \item 分类器以本地结构加载 checkpoint，不依赖在线下载
-          \item 加载后预热，启动阶段暴露错误
-          \item 温度、融合权重和阈值作为冻结发布配置
+          \item 分类器从本地加载模型文件，不依赖在线下载
+          \item 加载后先试运行一次，尽早发现错误
+          \item 分数校正参数、融合比例和阈值固定在版本内
         \end{itemize}
       \end{exampleblock}
     \end{column}
@@ -836,11 +837,11 @@
 
   \vfill
   \centering
-  \textcolor{seugreen}{\large 研究结果只有能够追溯到配置与权重，才能成为可复现的部署资产}
+  \textcolor{seugreen}{\large 每次结果都能对应到具体配置和模型文件，才能稳定复现}
 \end{frame}
 
 % 23. Single source of truth
-\begin{frame}{一次推理形成唯一结果源}
+\begin{frame}{一次检测，页面、统计和串口共用同一结果}
   \centering
   \begin{tikzpicture}[node distance=.75cm]
     \node[decision,text width=3.6cm] (obs) {Observation\\定位置信度、专项概率、实际阈值\\分支概率、辅助框、拒绝原因、耗时};
@@ -855,23 +856,23 @@
   \vspace{.8em}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.47\textwidth}
-      \textbf{一致性}
+      \textbf{结果保持一致}
 
-      Web、统计和串口不重新计算判定。阈值变化不会静默改写历史结果。
+      页面、统计和串口不各自重复判断。阈值改变后，已有记录保持不变。
     \end{column}
     \begin{column}{.47\textwidth}
-      \textbf{控制权}
+      \textbf{谁可以操作}
 
-      多终端可查看，单会话持有 30 秒操作员租约。设置、数据源、启停和清空统计需要登录与控制权。
+      多台设备可以同时查看，但一次只允许一个已登录会话操作，操作权保持 30 秒。修改设置、切换数据源和启停检测都需要操作权。
     \end{column}
   \end{columns}
 
   \vfill
-  \small 内置 HTTP 只面向可信隔离局域网，跨网段或公网部署需要 HTTPS 反向代理。
+  \small 当前网页服务只适合可信的独立局域网；如果跨网段或接入公网，需要额外配置 HTTPS 和访问保护。
 \end{frame}
 
 % 24. Demo
-\begin{frame}{现场演示流程与证明边界}
+\begin{frame}{现场演示流程与能说明的范围}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.58\textwidth}
       \renewcommand{\arraystretch}{1.18}
@@ -889,7 +890,7 @@
         录屏、截图和本地固定视频。
       \end{block}
       \begin{alertblock}{边界}
-        演示只证明功能闭环，不代表生产性能验收。现场不调阈值、不修改模型。
+        演示只能说明整套功能可以运行，不能代替生产条件下的性能验收。现场不调阈值、不修改模型。
       \end{alertblock}
     \end{column}
   \end{columns}
@@ -909,10 +910,10 @@
       \end{itemize}
     \end{column}
     \begin{column}{.47\textwidth}
-      \textbf{再控制实验口径}
+      \textbf{再统一实验方法}
       \begin{itemize}
-        \item 同一实体的连续帧、照明和视角归入同一 group
-        \item 增强只模拟现场可能变化，并检查最小缺陷仍可见
+        \item 同一工件的连续帧、不同照明和视角归入同一组
+        \item 图像增强只模拟现场可能变化，并确保最小缺陷仍看得见
         \item 每轮只改变一个主要变量，同时报告总体与关键子组
       \end{itemize}
     \end{column}
@@ -925,24 +926,24 @@
 \end{frame}
 
 % 26. Geometry and model experiments
-\begin{frame}{优化路线二：几何归一化与模型消融}
+\begin{frame}{优化路线二：齿轮位置校正与模型对比}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.45\textwidth}
-      \begin{block}{几何归一化}
+      \begin{block}{统一齿轮位置和方向}
         \begin{itemize}
           \item 在 ROI 后估计齿轮中心和直径
           \item 比较不校正、旋转校正与极坐标展开
-          \item 检查齿圈划痕和缺口能否形成更稳定特征
+          \item 检查校正后是否更容易稳定识别划痕和缺口
         \end{itemize}
       \end{block}
     \end{column}
     \begin{column}{.5\textwidth}
-      \begin{block}{结构实验}
+      \begin{block}{逐项比较模型结构}
         \begin{itemize}
           \item Scratch 比较完整 P2、减通道 P2 与轻量分支
-          \item 分别评估融合深度、输出通道与有限注意力
-          \item P5 删除需同时满足精度与端侧性能证据
-          \item 硬件预算不足时再评估知识蒸馏
+          \item 分别比较融合层数、输出通道数和注意力模块
+          \item 只有精度不下降且速度提高时才删除 P5
+          \item 设备算力仍不足时，再尝试用大模型指导小模型训练
         \end{itemize}
       \end{block}
     \end{column}
@@ -953,13 +954,13 @@
 \end{frame}
 
 % 27. Jetson deployment
-\begin{frame}{优化路线三：Jetson 性能与部署}
+\begin{frame}{优化路线三：Jetson 运行速度与部署}
   \centering
   \begin{tikzpicture}[node distance=.38cm]
-    \node[flow,text width=2.0cm] (pt) {.pt\\精度与性能基线};
+    \node[flow,text width=2.0cm] (pt) {.pt\\当前精度与速度};
     \node[decision,text width=2.05cm,right=of pt] (m1) {Model1\\FP16 TensorRT};
     \node[flow,text width=2.0cm,right=of m1] (retest) {分项性能复测};
-    \node[flow,text width=2.05cm,right=of retest] (special) {按瓶颈转换\\专项模型};
+    \node[flow,text width=2.05cm,right=of retest] (special) {优先转换\\最耗时的模型};
     \node[flow,text width=2.05cm,right=of special] (later) {必要时评估 INT8\\剪枝与复制优化};
     \draw[line] (pt) -- (m1);
     \draw[line] (m1) -- (retest);
@@ -970,14 +971,14 @@
   \vspace{1em}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.47\textwidth}
-      \textbf{性能剖析}
+      \textbf{分步骤记录耗时}
 
-      分开记录取帧、定位、分类器、检测器、融合、绘图、JPEG 与 Web 传输耗时，同时记录吞吐、显存、利用率、功耗和温度。
+      分开记录取帧、定位、分类、检测、结果合并、绘图和网页传输的耗时，同时记录每秒处理量、显存、功耗和温度。
     \end{column}
     \begin{column}{.47\textwidth}
-      \textbf{部署边界}
+      \textbf{部署时需要注意}
 
-      TensorRT engine 与 GPU、JetPack 和 TensorRT 版本绑定，必须在目标 NX 构建。INT8 需要独立校准集和完整精度回归。
+      TensorRT 文件与 GPU、JetPack 和 TensorRT 版本相关，必须在目标 NX 上生成。使用 INT8 前要准备独立校准数据，并完整比较转换前后的精度。
     \end{column}
   \end{columns}
 \end{frame}
@@ -987,15 +988,15 @@
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.23\textwidth}
       \centering\textbf{实验}\par\vspace{.4em}
-      分组隔离、标签治理、锁定测试和 Recall/FPR 双约束已建立。
+      已避免相似图片跨集合，并建立锁定测试和 Recall/FPR 双重要求。
     \end{column}
     \begin{column}{.23\textwidth}
       \centering\textbf{模型}\par\vspace{.4em}
-      Model1 与 Scratch、Missing Hole 双专项已经形成基线。
+      Model1 与 Scratch、Missing Hole 两个专项已经形成当前对照方案。
     \end{column}
     \begin{column}{.23\textwidth}
       \centering\textbf{工程}\par\vspace{.4em}
-      模型包、线程、Web、统计和串口形成可追溯闭环。
+      模型文件、后台处理、网页、统计和串口已经连通，结果可以追溯。
     \end{column}
     \begin{column}{.23\textwidth}
       \centering\textbf{差距}\par\vspace{.4em}
@@ -1005,7 +1006,7 @@
 
   \vspace{1.1em}
   \begin{block}{进入硬件实验的理由}
-    当前主要错误与输入可见性和数据覆盖密切相关。下一阶段先建立稳定、可复现的成像条件，再重新评估模型与阈值。
+    当前主要错误与缺陷是否拍得清楚、样本是否覆盖充分有关。下一阶段先固定成像条件，再重新比较模型和阈值。
   \end{block}
 \end{frame}
 
@@ -1081,7 +1082,7 @@
       \begin{enumerate}
         \item 纳入最大齿轮并保留摆放余量
         \item 调整距离与对焦，检查中心和边缘清晰度
-        \item 核对最小缺陷在原图、ROI 与模型输入中的像素表现
+        \item 核对最小缺陷在原图、齿轮裁剪图和模型输入中占多少像素
         \item 记录位置和参数，锁紧后复拍
       \end{enumerate}
       \textbf{必须记录：}镜头、测距基准、分辨率、曝光、增益、焦距、光圈、对焦状态和单位长度像素数。
@@ -1130,10 +1131,10 @@
     \toprule
     & 背光 & 低角度表面光 \\
     \midrule
-    主要信息 & 齿轮投影轮廓，适合改变外轮廓的缺齿或贯通开口 & 表面起伏和反射变化，面向低对比划痕 \\
+    主要信息 & 齿轮投影轮廓，适合观察改变外轮廓的缺齿或贯通开口 & 表面高低和反光变化，适合观察浅划痕 \\
     关键变量 & 覆盖范围、距离、过曝与支撑阴影 & 高度、水平距离、仰角、方位与亮度 \\
     主要风险 & 未改变投影的局部缺口仍可能不可见 & 加工纹、灰尘、玻璃划伤和高光同步增强 \\
-    验证对象 & 缺口件、正常轮廓与 Model1 适配 & 真实划痕与加工纹明显的正常件 \\
+    验证对象 & 缺口件、正常轮廓，以及 Model1 是否仍能正常定位 & 真实划痕与加工纹明显的正常件 \\
     \bottomrule
   \end{tabularx}
 
@@ -1199,14 +1200,14 @@
   \end{exampleblock}
 
   \vfill
-  多视角 OR 只作为候选基线。观察次数增加可能累积误报，最终必须按实体工件评价。
+  多个视角只要有一个报缺陷，就判为缺陷，这是初步方案。拍摄次数增加也会累积误报，最终结果必须按实际齿轮统计。
 \end{frame}
 
 % 36. Experiment record
 \subsection{实验验证}
 \HardwareNav{5}
 \GearProSetMinorProgressRange{36}{3}
-\begin{frame}{实验参数与三层评价}
+\begin{frame}{实验记录与评价方法}
   \scriptsize
   \renewcommand{\arraystretch}{1.15}
   \begin{tabularx}{\linewidth}{>{\bfseries}l X}
@@ -1255,7 +1256,7 @@
     玻璃反光、污染与划伤 & 伪缺陷或背景变化 & 空载对照、清洁、更换或调整光路 \\
     加工纹被低角度光增强 & 正常件误报增加 & 用真实正常件共同选择照明 \\
     背光只提供投影 & 局部缺陷仍不可见 & 检查样本覆盖并验证补充视角 \\
-    新照明改变图像分布 & 定位或专项性能下降 & 保留原图，独立验证并适配模型 \\
+    新照明改变图像外观 & 定位或缺陷识别性能下降 & 保留原图，单独验证，必要时更新模型 \\
     多次采集增加时间 & 影响未来检测节拍 & 记录切灯、拍摄、配对和处理耗时 \\
     \bottomrule
   \end{tabularx}
@@ -1284,8 +1285,8 @@
 
   \vfill
   \normalsize
-  \begin{block}{表述边界}
-    尚无实物、照片和记录时使用“拟采用”“计划验证”“预留扩展”；获得可核对证据后再使用“已完成”“已改善”。
+  \begin{block}{当前说明}
+    尚无实物、照片和记录的内容标为“拟采用”“计划验证”或“预留扩展”；有可核对的实验结果后再写“已完成”或“已改善”。
   \end{block}
 \end{frame}
 
@@ -1305,28 +1306,28 @@
     高光正常样本误报 & 光源方位、偏振或遮光条件、玻璃背景 & 高光正常负样本 FPR \\
     oblique 缺口漏检 & 背光、侧视相机、工件方位或转台 & oblique 子组与工件级 Recall \\
     ROI 不稳定 & 相机高度、姿态、载台定位与夹具刚度 & Model1 漏定位率与 ROI 覆盖 \\
-    实时性不足 & 采集次数、切灯过程和相机数量 & 端到端节拍与 Jetson 负载 \\
+    实时性不足 & 采集次数、切灯过程和相机数量 & 整套流程用时与 Jetson 负载 \\
     \bottomrule
   \end{tabularx}
 
   \vspace{.8em}
   \normalsize
-  \begin{block}{变量隔离顺序}
-    先只改变结构或光学条件并冻结模型；成像条件确定后再训练或校准；最后调整 Jetson 推理格式和性能配置。
+  \begin{block}{实验顺序}
+    先保持模型不变，只调整结构或照明；成像条件确定后再训练模型或调整分数；最后优化 Jetson 的运行格式和速度。
   \end{block}
 \end{frame}
 
 % 40. Acceptance path
-\subsection{端到端验收}
+\subsection{整机验收}
 \JointNav{2}
 \GearProSetMinorProgressRange{40}{2}
-\begin{frame}{端到端验收路径}
+\begin{frame}{整套系统的验收流程}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.48\textwidth}
       \begin{enumerate}
         \item 固定结构、相机、照明与放件规则
-        \item 按实体工件和拍摄批次建立新 blind test
-        \item 从原始帧运行定位、ROI、双专项、统计和串口
+        \item 按实际齿轮和拍摄批次建立一批全新的测试数据
+        \item 从原始画面开始运行定位、齿轮裁剪、缺陷判断、统计和串口输出
         \item 记录缺陷、视角、照明、定位、概率与硬件输出
       \end{enumerate}
     \end{column}
@@ -1334,15 +1335,15 @@
       \begin{enumerate}
         \setcounter{enumi}{4}
         \item 报告总体和 scratch、bottom、oblique、side、高光正常子组
-        \item 在目标 Jetson NX 记录性能、功耗、温度与稳定性
+        \item 在目标 Jetson NX 记录速度、功耗、温度与稳定性
         \item 多视角或双照明按工件统计，并记录缺帧、错配和节拍成本
       \end{enumerate}
     \end{column}
   \end{columns}
 
   \vfill
-  \begin{alertblock}{验收口径}
-    Recall 必须包含 Model1 漏定位、ROI 偏移、专项判断和输出链路失败。离线预裁 ROI 指标不能替代这一结果。
+  \begin{alertblock}{最终结果怎样统计}
+    从原始画面到输出的任何一步失败都算失败，包括没找到齿轮、裁剪位置偏移、缺陷判断错误或结果没有送出。只测试提前裁好的齿轮图片不能代替整套系统结果。
   \end{alertblock}
 \end{frame}
 
@@ -1350,7 +1351,7 @@
 \begin{frame}{联合验收输出}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.31\textwidth}
-      \textbf{精度证据}
+      \textbf{识别结果}
       \begin{itemize}
         \item Recall、Precision、FPR
         \item TP、FP、TN、FN
@@ -1359,16 +1360,16 @@
       \end{itemize}
     \end{column}
     \begin{column}{.31\textwidth}
-      \textbf{运行证据}
+      \textbf{运行记录}
       \begin{itemize}
-        \item 端到端延迟与吞吐
+        \item 整套流程用时与每秒处理量
         \item 峰值显存与利用率
         \item 功耗、温度和长期稳定性
         \item 切灯与多次采集成本
       \end{itemize}
     \end{column}
     \begin{column}{.31\textwidth}
-      \textbf{追溯证据}
+      \textbf{结果对应信息}
       \begin{itemize}
         \item 工件和批次编号
         \item 结构及照明配置
@@ -1380,7 +1381,7 @@
 
   \vfill
   \begin{block}{生产目标}
-    在固定结构和全链路口径下验证 Recall $\geq 0.95$、FPR $\leq 0.20$，同时满足目标 Jetson 的节拍与稳定性要求。
+    在结构和照明固定后，从原始画面开始验证 Recall $\geq 0.95$、FPR $\leq 0.20$，同时满足 Jetson 的处理速度和稳定性要求。
   \end{block}
 \end{frame}
 
@@ -1393,9 +1394,9 @@
     \begin{column}{.46\textwidth}
       \textbf{当前已经具备}
       \begin{itemize}
-        \item 可信的数据隔离与锁定测试方法
-        \item 两阶段双专项视觉路线
-        \item 可追溯、可校验的软件闭环
+        \item 避免相似图片跨集合的锁定测试方法
+        \item 先定位齿轮，再由两个模型识别缺陷
+        \item 结果可核对的软件完整流程
         \item 面向三类主要错误的硬件实验方案
       \end{itemize}
     \end{column}
@@ -1404,20 +1405,20 @@
       \begin{itemize}
         \item Recall $\geq 0.95$ 且 FPR $\leq 0.20$
         \item 第一代平台实物与重复性数据
-        \item 多照明、多视角自动控制和工件级融合
-        \item Jetson NX 端到端性能与长期稳定性验收
+        \item 多照明、多视角自动控制，以及按实际齿轮合并结果
+        \item Jetson NX 整套流程的速度与长期稳定性验收
       \end{itemize}
     \end{column}
   \end{columns}
 
   \vspace{.7em}
   \begin{exampleblock}{需要讨论的优先级}
-    第一轮先验证低角度光、背光还是补充视角；万向夹达到何种重复性后固定化；完成成像基线后先重训模型还是先建立 Jetson 性能基线。
+    第一轮先验证低角度光、背光还是补充视角；万向夹重复到什么程度后改为固定支架；固定成像条件后，先重训模型还是先测试 Jetson 速度。
   \end{exampleblock}
 
   \vfill
   \centering
-  \textcolor{seugreen}{先建立稳定、可复现的输入，再完成新盲测与端到端验收。}
+  \textcolor{seugreen}{先把成像条件固定并稳定复现，再用全新数据验收整套系统。}
 \end{frame}
 
 \end{document}
