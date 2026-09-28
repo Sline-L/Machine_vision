@@ -90,42 +90,44 @@
   \textcolor{seugreen}{\large 从软件结果追溯成像条件，并形成软硬件联合验收路线}
 \end{frame}
 
-% 3. Overall status
-\begin{frame}{项目阶段总述}
+% 3. Project introduction and framework
+\begin{frame}{项目介绍与总体框架}
+  \textbf{GearPro 面向齿轮外观检测：}从真实成像中定位齿轮，识别划痕与缺齿缺口，并将合格或剔除结果送入页面、统计和执行机构。
+
+  \vspace{.9em}
+  \centering
+  \begin{tikzpicture}[node distance=.30cm]
+    \node[decision,text width=1.75cm,inner sep=3pt] (hardware) {载台、相机\\照明与视角};
+    \node[flow,text width=1.65cm,inner sep=3pt,right=of hardware] (capture) {相机取帧};
+    \node[flow,text width=1.75cm,inner sep=3pt,right=of capture] (locate) {Model1 定位\\裁剪 ROI};
+    \node[flow,text width=2.05cm,inner sep=3pt,right=of locate] (specialists) {Scratch / Missing Hole\\独立阈值后 OR};
+    \node[flow,text width=1.85cm,inner sep=3pt,right=of specialists] (output) {Web、统计\\串口输出};
+    \node[decision,text width=1.8cm,inner sep=3pt,right=of output] (acceptance) {整机验收\\精度、速度、稳定性};
+    \draw[line] (hardware) -- (capture);
+    \draw[line] (capture) -- (locate);
+    \draw[line] (locate) -- (specialists);
+    \draw[line] (specialists) -- (output);
+    \draw[line] (output) -- (acceptance);
+  \end{tikzpicture}
+
+  \vspace{1em}
   \begin{columns}[T,onlytextwidth]
-    \begin{column}{.3\textwidth}
-      \centering
-      {\color{seugreen}\LARGE\bfseries 软件}
-
-      \vspace{.5em}
-      输入、推理、判定、统计、Web 与串口已经连通
+    \begin{column}{.31\textwidth}
+      \textbf{硬件提供稳定输入}\par
+      工作距离、载台、照明和补充视角决定缺陷是否清晰可见。
     \end{column}
-    \begin{column}{.04\textwidth}
-      \centering\vspace{1.2em}{\color{seugold}\Large$+$}
+    \begin{column}{.31\textwidth}
+      \textbf{软件完成检测闭环}\par
+      定位、双专项判断、解释信息和输出链路已经连通。
     \end{column}
-    \begin{column}{.3\textwidth}
-      \centering
-      {\color{seugreen}\LARGE\bfseries 硬件}
-
-      \vspace{.5em}
-      相机、载台、照明和补充视角仍需实验定型
-    \end{column}
-    \begin{column}{.04\textwidth}
-      \centering\vspace{1.2em}{\color{seugold}\Large$=$}
-    \end{column}
-    \begin{column}{.3\textwidth}
-      \centering
-      {\color{seugreen}\LARGE\bfseries 联合}
-
-      \vspace{.5em}
-      最终从原始相机帧开始验收 Recall、FPR 与运行稳定性
+    \begin{column}{.31\textwidth}
+      \textbf{联合验证最终能力}\par
+      在固定设备条件下检查漏检、误报、节拍和长期运行。
     \end{column}
   \end{columns}
 
   \vfill
-  \begin{alertblock}{当前边界}
-    离线锁定测试用于比较方案，不能替代真实相机、照明、传送结构和执行机构条件下的端到端结果。
-  \end{alertblock}
+  \small 当前离线结果用于比较模型方案，最终结论仍需真实相机和结构条件下的整机测试。
 \end{frame}
 
 \section{软件}
@@ -170,19 +172,29 @@
 \begin{frame}{任务与评价标准}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.49\textwidth}
-      \textbf{三个视觉任务}
-      \begin{description}
-        \item[定位] Model1 判断齿轮在哪里，并产生 ROI
-        \item[划痕] 识别低对比、局部纹理型缺陷
-        \item[缺口] 识别齿形和轮廓的结构变化
-      \end{description}
+      {\large\bfseries 三个视觉任务}
+
+      \vspace{.55em}
+      \textbf{定位}\par
+      Model1 找到齿轮位置，并产生 ROI。
+
+      \vspace{.45em}
+      \textbf{划痕}\par
+      识别低对比、局部纹理型缺陷。
+
+      \vspace{.45em}
+      \textbf{缺口}\par
+      识别齿形和轮廓的结构变化。
 
       \vspace{.5em}
-      \begin{exampleblock}{端到端口径}
-        Model1 漏定位、ROI 偏移和输出链路失败都必须计入最终结果。
+      \begin{exampleblock}{最终结果怎样计算}
+        从原始画面开始统计。没找到齿轮、裁剪位置偏了，或结果没有成功送出，都算检测失败。
       \end{exampleblock}
     \end{column}
     \begin{column}{.47\textwidth}
+      {\large\bfseries 评价指标}
+
+      \vspace{.55em}
       \renewcommand{\arraystretch}{1.35}
       \begin{tabularx}{\linewidth}{>{\bfseries\color{seugreen}}l X}
         Recall & 真实缺陷中被检出的比例，反映漏检风险 \\
@@ -281,21 +293,21 @@
   \end{columns}
 
   \vfill
-  \begin{alertblock}{测试纪律}
-    查看锁定测试结果后，不能再依据该测试集修改温度、融合权重或阈值。
+  \begin{alertblock}{锁定测试的使用规则}
+    锁定测试只用于最终检查。结果一旦查看，就不再用这批数据调整温度、融合权重或阈值。
   \end{alertblock}
 \end{frame}
 
 % 8. Difficult labels
-\begin{frame}{Difficult 标签治理}
+\begin{frame}{Difficult 样本处理}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.46\textwidth}
-      \begin{block}{include 训练口径}
+      \begin{block}{保留 difficult 样本}
         保留 difficult 框，让训练集包含全部已标注缺陷。
       \end{block}
 
       \vspace{.55em}
-      \begin{block}{exclude 训练口径}
+      \begin{block}{排除 difficult 样本}
         删除 difficult 框；若一张图片只剩 difficult 缺陷，则整张图片退出训练。
       \end{block}
     \end{column}
@@ -319,7 +331,7 @@
 
   \vfill
   \centering
-  \textcolor{seugreen}{\large 数据治理同时控制图像泄漏和标签语义污染}
+  \textcolor{seugreen}{\large 数据处理同时避免图像泄漏和错误标签含义}
 \end{frame}
 
 % 9. ROI
@@ -331,8 +343,8 @@
     \begin{column}{.45\textwidth}
       \centering
       \begin{tikzpicture}
-        \node[flowwide,minimum height=2.1cm] (full) {整帧缩放\\背景占用像素预算\\微小划痕继续缩小};
-        \node[decision,below=1.0cm of full,minimum height=1.55cm] (loss) {连续下采样后\\缺陷可能不足有效网格};
+        \node[flowwide,text width=3.8cm,minimum height=2.1cm] (full) {整张图直接缩放\\背景占去大量像素\\划痕细节随之变少};
+        \node[decision,text width=3.8cm,below=1.0cm of full,minimum height=1.55cm] (loss) {多次下采样后\\缺陷特征可能丢失};
         \draw[line] (full) -- (loss);
       \end{tikzpicture}
     \end{column}
@@ -342,8 +354,8 @@
     \begin{column}{.45\textwidth}
       \centering
       \begin{tikzpicture}
-        \node[flowwide,minimum height=2.1cm] (loc) {Model1 定位\\宽高方向各外扩 4\%};
-        \node[flowwide,below=1.0cm of loc,minimum height=1.55cm] (roi) {高分辨率 ROI\\保留齿轮表面与边缘上下文};
+        \node[flowwide,text width=3.8cm,minimum height=2.1cm] (loc) {先用 Model1 定位\\四周外扩 4\%};
+        \node[flowwide,text width=3.8cm,below=1.0cm of loc,minimum height=1.55cm] (roi) {只裁出齿轮区域\\保留表面和边缘细节};
         \draw[line] (loc) -- (roi);
       \end{tikzpicture}
     \end{column}
