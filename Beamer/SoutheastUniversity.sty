@@ -6,16 +6,18 @@
 \RequirePackage{graphicx}
 \RequirePackage{xcolor}
 
-% Colors sampled from pic/原配色.svg.
-\definecolor{seugreen}{HTML}{3D6016}
-\definecolor{seugreendark}{HTML}{29450F}
-\definecolor{seugreenlight}{HTML}{E8EFE0}
-\definecolor{seuyellow}{HTML}{FFCC00}
-\definecolor{seuyellowlight}{HTML}{FFF3B5}
-\definecolor{seugold}{HTML}{E6B800}
-\definecolor{seuink}{HTML}{20251B}
-\definecolor{seugray}{HTML}{66705D}
-\definecolor{seubackground}{HTML}{FAFBF7}
+% Blue-gray palette requested for the GearPro report.
+\definecolor{seugreendark}{HTML}{27374D}
+\definecolor{seugreen}{HTML}{526D82}
+\definecolor{seubluegray}{HTML}{9DB2BF}
+\definecolor{seugreenlight}{HTML}{DDE6ED}
+% Warm amber is reserved for active states and key data.
+\definecolor{seuyellow}{HTML}{F0A202}
+\definecolor{seuyellowlight}{HTML}{DDE6ED}
+\definecolor{seugold}{HTML}{C97812}
+\definecolor{seuink}{HTML}{27374D}
+\definecolor{seugray}{HTML}{526D82}
+\definecolor{seubackground}{HTML}{F8FAFC}
 
 \useoutertheme[subsection=false]{smoothbars}
 \useinnertheme{circles}
@@ -24,28 +26,28 @@
 \setbeamercolor{structure}{fg=seugreen}
 \setbeamercolor{alerted text}{fg=seugreendark}
 
-\setbeamercolor{palette primary}{fg=white,bg=seugreen}
-\setbeamercolor{palette secondary}{fg=white,bg=seugreendark}
-\setbeamercolor{palette tertiary}{fg=seugreendark,bg=seuyellow}
+\setbeamercolor{palette primary}{fg=white,bg=seugreendark}
+\setbeamercolor{palette secondary}{fg=white,bg=seugreen}
+\setbeamercolor{palette tertiary}{fg=seugreendark,bg=seubluegray}
 \setbeamercolor{palette quaternary}{fg=white,bg=seugreendark}
 
-\setbeamercolor{title}{fg=white,bg=seugreen}
+\setbeamercolor{title}{fg=white,bg=seugreendark}
 \setbeamercolor{subtitle}{fg=seuyellow}
 \setbeamercolor{author}{fg=seugreendark}
 \setbeamercolor{institute}{fg=seugray}
 \setbeamercolor{date}{fg=seugray}
-\setbeamercolor{frametitle}{fg=white,bg=seugreen}
-\setbeamercolor{framesubtitle}{fg=seuyellow}
+\setbeamercolor{frametitle}{fg=white,bg=seugreendark}
+\setbeamercolor{framesubtitle}{fg=seugreenlight}
 
-\setbeamercolor{block title}{fg=white,bg=seugreen}
+\setbeamercolor{block title}{fg=seugreendark,bg=seubluegray}
 \setbeamercolor{block body}{fg=seuink,bg=seugreenlight}
-\setbeamercolor{block title example}{fg=seugreendark,bg=seuyellow}
-\setbeamercolor{block body example}{fg=seuink,bg=seuyellowlight}
-\setbeamercolor{block title alerted}{fg=seugreendark,bg=seuyellow}
-\setbeamercolor{block body alerted}{fg=seuink,bg=seuyellowlight}
+\setbeamercolor{block title example}{fg=seugreendark,bg=seubluegray}
+\setbeamercolor{block body example}{fg=seuink,bg=seugreenlight}
+\setbeamercolor{block title alerted}{fg=seugreendark,bg=seubluegray}
+\setbeamercolor{block body alerted}{fg=seuink,bg=seugreenlight}
 
 \setbeamercolor{item projected}{fg=white,bg=seugreen}
-\setbeamercolor{subitem projected}{fg=seugreendark,bg=seuyellow}
+\setbeamercolor{subitem projected}{fg=seugreendark,bg=seubluegray}
 \setbeamercolor{section in toc}{fg=seugreen}
 \setbeamercolor{subsection in toc}{fg=seugray}
 \setbeamercolor{section in toc shaded}{fg=seugray!55}
