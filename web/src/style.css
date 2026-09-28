@@ -118,6 +118,10 @@ select:focus-visible {
 .top-actions { display: flex; justify-content: flex-end; align-items: center; gap: 7px; }
 
 .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   min-height: 34px;
   border: 1px solid var(--border-strong);
   border-radius: 5px;
@@ -138,6 +142,17 @@ select:focus-visible {
 .button.quiet:hover:not(:disabled) { border-color: var(--border); background: var(--surface); color: var(--brand); }
 .button.ghost { border-color: transparent; background: transparent; color: var(--muted); }
 .button.large { min-width: 116px; min-height: 38px; padding: 9px 18px; font-weight: 750; }
+
+.ui-icon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.75;
+}
 
 .alert {
   display: flex;
@@ -196,6 +211,8 @@ select:focus-visible {
 .panel-title { display: flex; min-width: 0; align-items: baseline; gap: 12px; }
 .panel-title h2,
 .section-heading h2 { margin: 0; color: var(--brand); font-size: 14px; font-weight: 750; letter-spacing: -.01em; }
+.section-heading h2 { display: inline-flex; align-items: center; gap: 7px; }
+.section-heading h2 .ui-icon { color: var(--slate); }
 .panel-title span,
 .section-heading span { overflow: hidden; color: var(--muted); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
 

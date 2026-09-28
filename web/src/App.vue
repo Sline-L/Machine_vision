@@ -213,8 +213,12 @@ onBeforeUnmount(() => {
       <div class="top-actions">
         <button v-if="!ownsControl" class="button primary" :disabled="busy" @click="acquire">接管控制</button>
         <button v-else class="button subtle" @click="release">释放控制</button>
-        <button class="button quiet" :disabled="!ownsControl" @click="openSettings">设置</button>
-        <button class="button quiet" @click="logout">退出</button>
+        <button class="button quiet" :disabled="!ownsControl" @click="openSettings">
+          <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10m4 0h2M14 4v6M4 17h2m4 0h10M8 14v6" /></svg>设置
+        </button>
+        <button class="button quiet" @click="logout">
+          <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H5v14h5m4-11 4 4-4 4M9 12h9" /></svg>退出
+        </button>
       </div>
     </header>
 
@@ -235,10 +239,13 @@ onBeforeUnmount(() => {
         </div>
         <div class="control-row">
           <button class="button primary large" :disabled="!ownsControl || busy" @click="action(active ? '/inspection/stop' : '/inspection/start')">
+            <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect v-if="active" x="7" y="7" width="10" height="10" rx="1" /><path v-else d="m8 6 10 6-10 6Z" /></svg>
             {{ active ? '停止检测' : '开始检测' }}
           </button>
           <input ref="uploadInput" hidden type="file" accept="video/*,.mkv" @change="chooseVideo" />
-          <button class="button" :disabled="!ownsControl || busy" @click="uploadInput.click()">上传测试视频</button>
+          <button class="button" :disabled="!ownsControl || busy" @click="uploadInput.click()">
+            <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V5m0 0L8 9m4-4 4 4M5 14v5h14v-5" /></svg>上传测试视频
+          </button>
           <button v-if="state.source.type === 'video'" class="button" :disabled="!ownsControl || busy" @click="action('/source/camera')">返回实时相机</button>
           <button class="button ghost" :disabled="!ownsControl || busy" @click="action('/stats/reset')">清空统计</button>
           <span class="status-text"><i :class="{ running: active }"></i>{{ state.status }}</span>
@@ -247,7 +254,7 @@ onBeforeUnmount(() => {
 
       <aside class="side-stack">
         <article class="panel important-panel">
-          <div class="section-heading"><h2>当前检测结果</h2><span>实时判定</span></div>
+          <div class="section-heading"><h2><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" /><path d="m8.5 12 2.3 2.3 4.8-5" /></svg>当前检测结果</h2><span>实时判定</span></div>
           <div :class="['important-verdict', verdictClass]" aria-live="polite">
             <span>当前判定</span>
             <div class="verdict-reading">
@@ -265,7 +272,7 @@ onBeforeUnmount(() => {
         </article>
 
         <article class="panel secondary-panel">
-          <div class="section-heading"><h2>推理详情</h2><span>{{ modelVersions }}</span></div>
+          <div class="section-heading"><h2><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h3l2-6 4 11 2-7 2 2h3" /></svg>推理详情</h2><span>{{ modelVersions }}</span></div>
           <div class="probability-list">
             <div>
               <span>划痕</span><strong>{{ scratchProbability === null ? '—' : (scratchProbability*100).toFixed(2)+'%' }}</strong>
@@ -295,7 +302,7 @@ onBeforeUnmount(() => {
         </article>
 
         <article class="panel stats-panel">
-          <div class="section-heading"><h2>质量概览</h2><span>本次运行</span></div>
+          <div class="section-heading"><h2><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V11m7 8V5m7 14v-6" /></svg>质量概览</h2><span>本次运行</span></div>
           <div class="stats-summary">
             <div><span>已检测</span><strong>{{ state.stats.total }}</strong></div>
             <div class="good"><span>合格</span><strong>{{ state.stats.good }}</strong></div>
