@@ -14,6 +14,7 @@
 % Warm amber is reserved for active states and key data.
 \definecolor{seuyellow}{HTML}{F0A202}
 \definecolor{seuyellowlight}{HTML}{DDE6ED}
+\definecolor{seuaccentlight}{HTML}{F4E5CC}
 \definecolor{seugold}{HTML}{C97812}
 \definecolor{seuink}{HTML}{27374D}
 \definecolor{seugray}{HTML}{526D82}
@@ -105,11 +106,11 @@
 
 \newcommand{\gearpro@navitem}[3]{%
   \ifnum\gearpro@active=#1\relax
-    \begin{beamercolorbox}[wd=#2,ht=2.45ex,dp=.9ex,center]{minor navigation active}%
+    \begin{beamercolorbox}[wd=#2,ht=2.65ex,dp=1.05ex,center]{minor navigation active}%
       \usebeamerfont{minor navigation active}\strut #3%
     \end{beamercolorbox}%
   \else
-    \begin{beamercolorbox}[wd=#2,ht=2.45ex,dp=.9ex,center]{minor navigation}%
+    \begin{beamercolorbox}[wd=#2,ht=2.65ex,dp=1.05ex,center]{minor navigation}%
       \usebeamerfont{minor navigation}\strut #3%
     \end{beamercolorbox}%
   \fi
@@ -138,7 +139,7 @@
 
 \setbeamertemplate{frametitle}{%
   \nointerlineskip
-  \begin{beamercolorbox}[wd=\paperwidth,ht=3.15ex,dp=1.15ex,leftskip=.55cm,rightskip=.55cm]{frametitle}%
+  \begin{beamercolorbox}[wd=\paperwidth,ht=2.85ex,dp=1.15ex,leftskip=.55cm,rightskip=.55cm]{frametitle}%
     \usebeamerfont{frametitle}\insertframetitle%
     \ifx\insertframesubtitle\@empty\else%
       \hspace{.65em}{\usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}\insertframesubtitle}%
