@@ -21,7 +21,7 @@
 
 \newcommand{\SoftwareNav}[1]{%
   \GearProSetMajor{软件}%
-  \GearProSetMinorNavFive{阶段现状}{流程与数据}{架构决策}{双专项}{结果与工程}{#1}%
+  \GearProSetMinorNavEight{阶段现状}{流程数据}{架构决策}{双专项}{结果分析}{工程实现}{优化路线}{阶段结论}{#1}%
 }
 
 \newcommand{\HardwareNav}[1]{%
@@ -97,7 +97,7 @@
   \vspace{.9em}
   \centering
   \begin{tikzpicture}[node distance=.30cm]
-    \node[decision,text width=1.75cm,inner sep=3pt] (hardware) {载台、相机\\照明与视角};
+    \node[decision,text width=1.75cm,inner sep=3pt] (hardware) {载台、照明\\与相机视角};
     \node[flow,text width=1.65cm,inner sep=3pt,right=of hardware] (capture) {相机取帧};
     \node[flow,text width=1.75cm,inner sep=3pt,right=of capture] (locate) {Model1 定位\\裁剪 ROI};
     \node[flow,text width=2.05cm,inner sep=3pt,right=of locate] (specialists) {Scratch / Missing Hole\\独立阈值后 OR};
@@ -114,7 +114,7 @@
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.31\textwidth}
       \textbf{硬件提供稳定输入}\par
-      工作距离、载台、照明和补充视角决定缺陷是否清晰可见。
+      工作距离、载台、照明和视角决定缺陷是否清晰可见。
     \end{column}
     \begin{column}{.31\textwidth}
       \textbf{软件完成整套检测流程}\par
@@ -122,12 +122,12 @@
     \end{column}
     \begin{column}{.31\textwidth}
       \textbf{联合验证最终能力}\par
-      在固定设备条件下检查漏检、误报、节拍和长期运行。
+      在固定设备条件下检查漏检、误报、节拍和长期运行情况。
     \end{column}
   \end{columns}
 
   \vfill
-  \small 当前离线结果用于比较模型方案，最终结论仍需真实相机和结构条件下的整机测试。
+  \small 当前离线结果仅用于比较模型方案，最终结论仍需真实相机和结构条件下的整机测试。
 \end{frame}
 
 \section{软件}
@@ -143,15 +143,14 @@
       \begin{itemize}
         \item Model1 定位与 4\% ROI 外扩
         \item Scratch V5 与 Missing Hole V1
-        \item 独立阈值、最终 OR 与拒绝原因
-        \item Web 控制台、统计和串口输出
-        \item 模型文件完整性检查，异常时停止检测
+        \item 独立阈值与最终 OR 
+        \item Web 控制台、数据统计和串口输出
+        \item 模型文件完整性检查，异常判断
       \end{itemize}
 
       \vspace{.25em}
       \textbf{仍待验收}
       \begin{itemize}
-        \item Jetson NX 的延迟、功耗和稳定性
         \item 真实结构与照明下的完整流程结果
       \end{itemize}
     \end{column}
@@ -176,7 +175,7 @@
 
       \vspace{.55em}
       \textbf{定位}\par
-      Model1 找到齿轮位置，并产生 ROI。
+      Model1 找到齿轮位置，从而得到 ROI。
 
       \vspace{.45em}
       \textbf{划痕}\par
@@ -188,7 +187,7 @@
 
       \vspace{.5em}
       \begin{exampleblock}{最终结果怎样计算}
-        从原始画面开始统计。没找到齿轮、裁剪位置偏了，或结果没有成功送出，都算检测失败。
+        从原始画面开始统计，没找到齿轮、ROI 偏移，或结果输出失败，都算作检测失败。
       \end{exampleblock}
     \end{column}
     \begin{column}{.47\textwidth}
@@ -302,6 +301,7 @@
 \begin{frame}{Difficult 样本处理}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.46\textwidth}
+      \vspace{.35em}
       \begin{block}{保留 difficult 样本}
         保留 difficult 框，让训练集包含全部已标注缺陷。
       \end{block}
@@ -324,21 +324,21 @@
       \begin{itemize}
         \item 验证集和测试集保留完整真值
         \item 不同训练方法使用相同的评价方式
-        \item 结果显示斜视角度才是主要问题
+        \item 结果显示 oblique 缺陷类型才是主要问题
       \end{itemize}
     \end{column}
   \end{columns}
 
   \vfill
   \centering
-  \textcolor{seugreen}{\large 数据处理同时避免图像泄漏和错误标签含义}
+  \textcolor{seugreen}{\large 数据处理同时避免图像泄漏和标签含义错误}
 \end{frame}
 
 % 9. ROI
 \subsection{架构决策}
 \SoftwareNav{3}
 \GearProSetMinorProgressRange{9}{2}
-\begin{frame}{关键决策一：先定位，再识别缺陷}
+\begin{frame}{决策一：先定位，再识别缺陷}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.45\textwidth}
       \centering
@@ -364,16 +364,16 @@
   \vfill
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.48\textwidth}
-      \textbf{好处：}减少背景和摆放角度的干扰，让更多像素用于显示齿轮。
+      \textbf{优点：}减少背景和摆放角度的干扰，把输入分辨率集中到齿轮区域。
     \end{column}
     \begin{column}{.48\textwidth}
-      \textbf{需要注意：}Model1 没找到齿轮仍算漏检，4\% 外扩还要在真实设备上验证。
+      \textbf{缺点：}Model1 漏定位仍算作漏检，4\% 外扩还要在真实设备上验证。
     \end{column}
   \end{columns}
 \end{frame}
 
 % 10. Unified versus specialists
-\begin{frame}{关键决策二：统一模型转向双专项}
+\begin{frame}{决策二：统一模型转向双专项}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.43\textwidth}
       \centering
@@ -408,7 +408,7 @@
 
   \vfill
   \begin{block}{为什么分成两个模型}
-    划痕主要是小面积、低对比的纹理变化，缺齿缺口主要改变轮廓。当前分开识别效果更好，数据增加后仍可重新比较统一模型。
+    划痕主要是小面积、低对比的纹理变化，缺齿缺口主要改变轮廓。当前分开识别效果更好，数据集增加后仍可重新测试统一模型。
   \end{block}
 \end{frame}
 
@@ -441,7 +441,7 @@
     \centering
     $p_{\mathrm{scratch}} = 0.25\,p_{\mathrm{cls}} + 0.75\,p_{\mathrm{det}}$
     \qquad
-    阈值 $= 0.300273610279458$
+    阈值 $= 0.3003$
   \end{exampleblock}
 
   \vfill
@@ -450,7 +450,7 @@
       两个分类器判断整张齿轮图像，P2 检测器重点寻找细小划痕。
     \end{column}
     \begin{column}{.48\textwidth}
-      较低的检测分数也参与最终计算；画框使用更高门槛，只供人工查看。
+      较低的检测分数也参与最终计算；标识框使用更高显示门槛，只供人工查看。
     \end{column}
   \end{columns}
 \end{frame}
@@ -465,7 +465,7 @@
       \smallnote{现有划痕检测示例}
     \end{column}
     \begin{column}{.57\textwidth}
-      \vspace{.3em}
+      \vspace{.5em}
       \begin{columns}[T,onlytextwidth]
         \begin{column}{.32\textwidth}
           \centering {\color{seugreen}\LARGE\bfseries 0.8065}\\Recall
@@ -527,7 +527,7 @@
     \centering
     $p_{\mathrm{missing}} = 0.50\,p_{\mathrm{cls}} + 0.50\,p_{\mathrm{det}}$
     \qquad
-    阈值 $= 0.3413327979078584$
+    阈值 $= 0.3413$
   \end{exampleblock}
 
   \vfill
@@ -543,7 +543,7 @@
       \centering
       % TODO: replace with the original high-resolution oblique image when available.
       \includegraphics[width=.9\linewidth,height=.54\textheight,keepaspectratio]{pic/gearpro/oblique_missing.jpg}
-      \smallnote{斜视（oblique）缺口示例}
+      \smallnote{边角缺齿（oblique）示例}
     \end{column}
     \begin{column}{.6\textwidth}
       \begin{columns}[T,onlytextwidth]
@@ -559,7 +559,7 @@
       \end{columns}
 
       \vspace{.8em}
-      \textbf{不同位置的 Recall}
+      \textbf{不同位置缺齿的 Recall}
 
       \vspace{.35em}
       \begin{tabular}{@{}l@{\hspace{.8em}}l@{\hspace{.8em}}r@{}}
@@ -575,16 +575,16 @@
 
   \vfill
   \begin{alertblock}{当前主要问题}
-    是否计入 difficult 样本对结果影响很小。斜视角度下缺口不够清楚，才是当前最明显的问题。
+    是否计入 difficult 样本对结果影响很小；oblique 类型不够清楚，难以检测。
   \end{alertblock}
 \end{frame}
 
 % 15. OR decision
-\begin{frame}{关键决策三：两个模型分别判断后再合并}
+\begin{frame}{决策三：两个模型分别判断后再合并}
   \centering
   \begin{tikzpicture}[node distance=1.1cm and 1.05cm]
-    \node[flowwide,text width=3.75cm] (scratch) {Scratch 概率\\{\scriptsize$\geq 0.300273610279458$}};
-    \node[flowwide,text width=3.75cm,below=of scratch] (missing) {Missing Hole 概率\\{\scriptsize$\geq 0.3413327979078584$}};
+    \node[flowwide,text width=3.75cm] (scratch) {Scratch 概率\\{\scriptsize$p_{\mathrm{scratch}} \geq 0.3003$}};
+    \node[flowwide,text width=3.75cm,below=of scratch] (missing) {Missing Hole 概率\\{\scriptsize$p_{\mathrm{missing}} \geq 0.3413$}};
     \coordinate (join) at ($(scratch.east)!0.5!(missing.east)+(0.75cm,0)$);
     \node[decision,right=1.0cm of join] (or) {任一模型判为缺陷};
     \node[flowwide,right=1.25cm of or] (final) {最终结果\\合格或不合格};
@@ -614,9 +614,9 @@
 \end{frame}
 
 % 16. Core results
-\subsection{结果与工程}
+\subsection{结果分析}
 \SoftwareNav{5}
-\GearProSetMinorProgressRange{16}{13}
+\GearProSetMinorProgressRange{16}{4}
 \begin{frame}{核心锁定测试结果}
   \centering
   \renewcommand{\arraystretch}{1.3}
@@ -637,7 +637,7 @@
     \begin{column}{.47\textwidth}
       \textbf{同一批数据下的结果}
 
-      两个模型合并后比统一模型少漏检，正常件误报也明显减少。
+      两个模型合并后相比统一模型漏检率明显降低，正常件误报率也明显减少。
     \end{column}
     \begin{column}{.47\textwidth}
       \textbf{需要注意的数字}
@@ -692,21 +692,40 @@
     \begin{column}{.31\textwidth}
       \textbf{浅划痕漏检}
 
-      缺陷纹理接近正常加工纹。优先稳定低角度照明，并补采真实弱划痕。
+      缺陷纹理接近正常加工纹。
     \end{column}
     \begin{column}{.31\textwidth}
-      \textbf{斜视缺口漏检}
+      \textbf{oblique 漏检}
 
-      单一视角下结构变化不稳定。优先验证背光、第二相机或转台。
+      单一视角下结构变化不稳定。
     \end{column}
     \begin{column}{.31\textwidth}
       \textbf{高光正常件误报}
 
-      侧齿反光和加工纹触发划痕分支。需要调整光源并扩充真实负样本。
+      侧齿反光和加工纹触发划痕分支。
     \end{column}
   \end{columns}
 
-  \vspace{.85em}
+  \vspace{.65em}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.31\textwidth}
+      \textcolor{seugreen}{\bfseries 优化方法}\par
+      \vspace{.2em}
+      优先稳定低角度照明，并补采真实弱划痕。
+    \end{column}
+    \begin{column}{.31\textwidth}
+      \textcolor{seugreen}{\bfseries 优化方法}\par
+      \vspace{.2em}
+      优先验证背光、第二相机或转台。
+    \end{column}
+    \begin{column}{.31\textwidth}
+      \textcolor{seugreen}{\bfseries 优化方法}\par
+      \vspace{.2em}
+      需要调整光源并扩充真实负样本。
+    \end{column}
+  \end{columns}
+
+  \vspace{.55em}
   \centering
   % TODO: replace this montage with original full-resolution error cases when available.
   \includegraphics[width=.88\linewidth,height=.42\textheight,keepaspectratio]{pic/gearpro/error_cases.jpg}
@@ -714,7 +733,7 @@
 \end{frame}
 
 % 19. Error-analysis conclusion
-\begin{frame}{软件结果的当前判断}
+\begin{frame}{软件结果的分析}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.31\textwidth}
       \centering
@@ -751,8 +770,9 @@
 \end{frame}
 
 % 20. Runtime architecture
-\subsection{结果与工程}
-\SoftwareNav{5}
+\subsection{工程实现}
+\SoftwareNav{6}
+\GearProSetMinorProgressRange{20}{4}
 \begin{frame}{软件如何持续处理实时画面}
   \centering
   \begin{tikzpicture}[node distance=.35cm]
@@ -872,33 +892,24 @@
 \end{frame}
 
 % 24. Demo
-\begin{frame}{现场演示流程与能说明的范围}
-  \begin{columns}[T,onlytextwidth]
-    \begin{column}{.58\textwidth}
-      \renewcommand{\arraystretch}{1.18}
-      \begin{tabular}{>{\bfseries\color{seugreen}}r p{6.1cm}}
-        1 & 启动 Jetson 服务并完成模型预热 \\
-        2 & 检查服务、相机、模型和串口状态 \\
-        3 & 获取操作权，启动实时相机 \\
-        4 & 上传固定视频，依次展示正常与两类缺陷 \\
-        5 & 核对概率、阈值、拒绝原因、耗时和统计 \\
-        6 & 验证视频模式禁用串口，再返回实时相机 \\
-      \end{tabular}
-    \end{column}
-    \begin{column}{.37\textwidth}
-      \begin{block}{现场备份}
-        录屏、截图和本地固定视频。
-      \end{block}
-      \begin{alertblock}{边界}
-        演示只能说明整套功能可以运行，不能代替生产条件下的性能验收。现场不调阈值、不修改模型。
-      \end{alertblock}
-    \end{column}
-  \end{columns}
+\subsection{优化路线}
+\SoftwareNav{7}
+\GearProSetMinorProgressRange{24}{4}
+\begin{frame}{现场演示流程}
+  \vspace{.8em}
+  \centering
+  \renewcommand{\arraystretch}{1.55}
+  \begin{tabular}{>{\bfseries\color{seugreen}}r p{11.2cm}}
+    1 & 启动 Jetson 服务并完成模型预热 \\
+    2 & 检查服务、相机、模型和串口状态 \\
+    3 & 获取操作权，启动实时相机 \\
+    4 & 上传固定视频，依次展示正常与两类缺陷 \\
+    5 & 核对概率、阈值、拒绝原因、耗时和统计 \\
+    6 & 验证视频模式禁用串口，再返回实时相机 \\
+  \end{tabular}
 \end{frame}
 
 % 25. Imaging and data optimization
-\subsection{结果与工程}
-\SoftwareNav{5}
 \begin{frame}{优化路线一：成像、数据与实验设计}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.47\textwidth}
@@ -930,6 +941,7 @@
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.45\textwidth}
       \begin{block}{统一齿轮位置和方向}
+        \setlength{\rightskip}{.6em}
         \begin{itemize}
           \item 在 ROI 后估计齿轮中心和直径
           \item 比较不校正、旋转校正与极坐标展开
@@ -939,6 +951,7 @@
     \end{column}
     \begin{column}{.5\textwidth}
       \begin{block}{逐项比较模型结构}
+        \setlength{\rightskip}{.6em}
         \begin{itemize}
           \item Scratch 比较完整 P2、减通道 P2 与轻量分支
           \item 分别比较融合层数、输出通道数和注意力模块
@@ -984,6 +997,9 @@
 \end{frame}
 
 % 28. Software conclusion
+\subsection{阶段结论}
+\SoftwareNav{8}
+\GearProSetMinorProgressRange{28}{1}
 \begin{frame}{软件阶段结论}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{.23\textwidth}

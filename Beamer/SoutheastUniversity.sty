@@ -82,6 +82,9 @@
 \newcommand{\gearpro@navthree}{}
 \newcommand{\gearpro@navfour}{}
 \newcommand{\gearpro@navfive}{}
+\newcommand{\gearpro@navsix}{}
+\newcommand{\gearpro@navseven}{}
+\newcommand{\gearpro@naveight}{}
 \newcommand{\gearpro@progresscurrent}{0}
 \newcommand{\gearpro@progresstotal}{0}
 \newcount\gearpro@dotindex
@@ -100,6 +103,19 @@
   \renewcommand{\gearpro@navfour}{#4}%
   \renewcommand{\gearpro@navfive}{#5}%
   \renewcommand{\gearpro@active}{#6}%
+  \gearpro@shownavtrue
+}
+\newcommand{\GearProSetMinorNavEight}[9]{%
+  \renewcommand{\gearpro@navcount}{8}%
+  \renewcommand{\gearpro@navone}{#1}%
+  \renewcommand{\gearpro@navtwo}{#2}%
+  \renewcommand{\gearpro@navthree}{#3}%
+  \renewcommand{\gearpro@navfour}{#4}%
+  \renewcommand{\gearpro@navfive}{#5}%
+  \renewcommand{\gearpro@navsix}{#6}%
+  \renewcommand{\gearpro@navseven}{#7}%
+  \renewcommand{\gearpro@naveight}{#8}%
+  \renewcommand{\gearpro@active}{#9}%
   \gearpro@shownavtrue
 }
 \newcommand{\GearProSetMinorNavThree}[4]{%
@@ -144,7 +160,18 @@
 \setbeamertemplate{headline}{%
   \ifgearpro@shownav
     \leavevmode%
-    \ifnum\gearpro@navcount=5\relax
+    \ifnum\gearpro@navcount=8\relax
+      \hbox{%
+        \gearpro@navitem{1}{.125\paperwidth}{\gearpro@navone}%
+        \gearpro@navitem{2}{.125\paperwidth}{\gearpro@navtwo}%
+        \gearpro@navitem{3}{.125\paperwidth}{\gearpro@navthree}%
+        \gearpro@navitem{4}{.125\paperwidth}{\gearpro@navfour}%
+        \gearpro@navitem{5}{.125\paperwidth}{\gearpro@navfive}%
+        \gearpro@navitem{6}{.125\paperwidth}{\gearpro@navsix}%
+        \gearpro@navitem{7}{.125\paperwidth}{\gearpro@navseven}%
+        \gearpro@navitem{8}{.125\paperwidth}{\gearpro@naveight}%
+      }%
+    \else\ifnum\gearpro@navcount=5\relax
       \hbox{%
         \gearpro@navitem{1}{.2\paperwidth}{\gearpro@navone}%
         \gearpro@navitem{2}{.2\paperwidth}{\gearpro@navtwo}%
@@ -158,7 +185,7 @@
         \gearpro@navitem{2}{.333333\paperwidth}{\gearpro@navtwo}%
         \gearpro@navitem{3}{.333334\paperwidth}{\gearpro@navthree}%
       }%
-    \fi
+    \fi\fi
   \fi
 }
 
