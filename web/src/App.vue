@@ -208,8 +208,8 @@ onBeforeUnmount(() => {
       <div class="top-actions">
         <button v-if="!ownsControl" class="button primary" :disabled="busy" @click="acquire">接管控制</button>
         <button v-else class="button subtle" @click="release">释放控制</button>
-        <button class="icon-button" title="设置" :disabled="!ownsControl" @click="openSettings">⚙</button>
-        <button class="icon-button" title="退出" @click="logout">↪</button>
+        <button class="button quiet" :disabled="!ownsControl" @click="openSettings">设置</button>
+        <button class="button quiet" @click="logout">退出</button>
       </div>
     </header>
 
@@ -218,19 +218,15 @@ onBeforeUnmount(() => {
     <section class="workspace">
       <article class="panel vision-panel">
         <div class="panel-head">
-          <div><span class="eyebrow">LIVE INSPECTION</span><h2>实时检测画面</h2></div>
-          <div class="segmented">
+          <div class="panel-title"><h2>实时检测画面</h2><span>{{ state.source.type === 'video' ? `测试视频 · ${state.source.video_name}` : `相机 ${state.settings.camera_index}` }}</span></div>
+          <div class="segmented" aria-label="画面显示模式">
             <button v-for="view in [['auto','自动'],['raw','原图'],['annotated','结果']]" :key="view[0]"
-              :class="{ active: streamView === view[0] }" @click="streamView = view[0]">{{ view[1] }}</button>
+              type="button" :aria-pressed="streamView === view[0]" :class="{ active: streamView === view[0] }" @click="streamView = view[0]">{{ view[1] }}</button>
           </div>
         </div>
         <div class="video-stage">
           <img :key="streamNonce" :src="streamUrl" alt="GearPro 实时检测画面" />
-          <div :class="['verdict', verdictClass]">
-            <span>{{ result?.verdict || (active ? '检测中' : '等待开始') }}</span>
-            <strong v-if="result?.observations?.length">{{ rejectReason }}</strong>
-          </div>
-          <div class="source-tag">{{ state.source.type === 'video' ? `测试视频 · ${state.source.video_name}` : `CAM ${state.settings.camera_index}` }}</div>
+          <div class="frame-status"><i :class="{ running: active }"></i>{{ active ? '检测运行中' : '检测已停止' }}</div>
         </div>
         <div class="control-row">
           <button class="button primary large" :disabled="!ownsControl || busy" @click="action(active ? '/inspection/stop' : '/inspection/start')">
@@ -246,20 +242,20 @@ onBeforeUnmount(() => {
 
       <aside class="side-stack">
         <article class="panel important-panel">
-          <div class="panel-head"><div><span class="eyebrow">INSPECTION STATUS</span><h2>检测状态</h2></div><b>{{ active ? '检测运行中' : '检测已停止' }}</b></div>
-          <div :class="['important-verdict', verdictClass]">
-            <span>当前判定</span>
+          <div class="section-heading"><h2>当前检测结果</h2><span>实时判定</span></div>
+          <div :class="['important-verdict', verdictClass]" aria-live="polite">
+            <span>RESULT</span>
             <strong>{{ result?.verdict || (active ? '检测中' : '等待开始') }}</strong>
           </div>
           <div class="important-values">
-            <div><span>命中原因</span><strong class="reason-value">{{ result?.observations?.length ? rejectReason : '—' }}</strong></div>
-            <div><span>定位数量</span><strong>{{ result?.observations?.length ?? 0 }}<small> 个</small></strong></div>
+            <div><span>缺陷类型</span><strong class="reason-value">{{ result?.observations?.length ? rejectReason : '—' }}</strong></div>
+            <div><span>缺陷数量</span><strong>{{ result?.observations?.length ?? 0 }}<small> 个</small></strong></div>
           </div>
           <div class="runtime-status"><i :class="{ running: active }"></i><span>{{ state.status }}</span></div>
         </article>
 
         <article class="panel secondary-panel">
-          <div class="panel-head"><div><span class="eyebrow">INFERENCE DETAILS</span><h2>推理细节</h2></div><b>{{ modelVersions }}</b></div>
+          <div class="section-heading"><h2>推理详情</h2><span>{{ modelVersions }}</span></div>
           <div class="probability-list">
             <div><span>划痕</span><strong>{{ scratchProbability === null ? '—' : (scratchProbability*100).toFixed(2)+'%' }}</strong><small>阈值 {{ state.settings.scratch_threshold.toFixed(6) }}</small></div>
             <div><span>缺齿</span><strong>{{ missingHoleProbability === null ? '—' : (missingHoleProbability*100).toFixed(2)+'%' }}</strong><small>阈值 {{ state.settings.missing_hole_threshold.toFixed(6) }}</small></div>
@@ -273,15 +269,17 @@ onBeforeUnmount(() => {
         </article>
 
         <article class="panel stats-panel">
-          <div class="panel-head"><div><span class="eyebrow">QUALITY OVERVIEW</span><h2>统计信息</h2></div></div>
+          <div class="section-heading"><h2>质量概览</h2><span>本次运行</span></div>
           <div class="stats-summary">
             <div><span>已检测</span><strong>{{ state.stats.total }}</strong></div>
             <div class="good"><span>合格</span><strong>{{ state.stats.good }}</strong></div>
             <div class="bad"><span>不合格</span><strong>{{ state.stats.defective }}</strong></div>
           </div>
-          <div class="stats-visual">
-            <div class="donut" :style="{ '--rate': state.stats.good_rate * 360 + 'deg' }"><span>{{ goodRate }}<small>合格率</small></span></div>
-            <div class="legend"><span><i class="good"></i>合格 {{ state.stats.good }}</span><span><i class="bad"></i>不合格 {{ state.stats.defective }}</span></div>
+          <div class="rate-row">
+            <div><span>综合合格率</span><strong>{{ goodRate }}</strong></div>
+            <div class="rate-track" role="progressbar" aria-label="综合合格率" aria-valuemin="0" aria-valuemax="100" :aria-valuenow="Math.round(state.stats.good_rate * 100)">
+              <i :style="{ width: goodRate }"></i>
+            </div>
           </div>
         </article>
       </aside>
@@ -292,7 +290,7 @@ onBeforeUnmount(() => {
 
   <main v-else class="login-page">
     <form class="login-card" @submit.prevent="login">
-      <div class="brand-mark large">GP</div><span class="eyebrow">GEARPRO CONTROL</span><h1>欢迎回来</h1><p>登录齿轮视觉检测控制台</p>
+      <div class="brand-mark large">GP</div><h1>欢迎回来</h1><p>登录 GearPro 齿轮视觉检测控制台</p>
       <label>终端名称<input v-model="label" required maxlength="64" /></label>
       <label v-if="passwordRequired">访问密码<input v-model="password" type="password" required autofocus /></label>
       <div v-if="error" class="form-error">{{ error }}</div>
@@ -302,7 +300,7 @@ onBeforeUnmount(() => {
 
   <div v-if="settingsOpen" class="modal" @click.self="settingsOpen = false">
     <form class="settings-card" @submit.prevent="saveSettings">
-      <div class="settings-title"><div><span class="eyebrow">RUNTIME SETTINGS</span><h2>运行设置</h2></div><button type="button" class="icon-button" @click="settingsOpen = false">×</button></div>
+      <div class="settings-title"><div><h2>运行设置</h2><p>调整检测流程、阈值与设备参数</p></div><button type="button" class="button quiet" @click="settingsOpen = false">关闭</button></div>
       <div class="form-grid">
         <label>运行模式<select v-model="settings.mode"><option>自由模式</option><option>定量模式</option><option>定时模式</option><option v-if="settings.mode === '视频测试模式'">视频测试模式</option></select></label>
         <label>推理档位<select v-model="settings.inference_profile"><option>FULL</option><option>SPARSE</option><option>SAFE_STOP</option></select></label>
