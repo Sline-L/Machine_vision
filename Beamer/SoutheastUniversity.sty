@@ -50,6 +50,8 @@
 \setbeamercolor{subsection in toc}{fg=seugray}
 \setbeamercolor{section in toc shaded}{fg=seugray!55}
 \setbeamercolor{subsection in toc shaded}{fg=seugray!45}
+\setbeamercolor{minor navigation}{fg=white,bg=seugreen}
+\setbeamercolor{minor navigation active}{fg=seuyellow,bg=seugreendark}
 
 \setbeamerfont{title}{size=\LARGE,series=\bfseries}
 \setbeamerfont{subtitle}{size=\large}
@@ -57,6 +59,8 @@
 \setbeamerfont{framesubtitle}{size=\small,series=\mdseries}
 \setbeamerfont{block title}{series=\bfseries}
 \setbeamerfont{footline}{size=\scriptsize}
+\setbeamerfont{minor navigation}{size=\scriptsize}
+\setbeamerfont{minor navigation active}{size=\scriptsize,series=\bfseries}
 
 \setbeamertemplate{navigation symbols}{}
 \setbeamertemplate{bibliography item}[text]
@@ -65,6 +69,71 @@
 \setbeamertemplate{itemize subitem}{\color{seugold}\scriptsize$\blacktriangleright$}
 
 \makeatletter
+\newif\ifgearpro@shownav
+\gearpro@shownavfalse
+\newcommand{\gearpro@majorlabel}{阶段汇报}
+\newcommand{\gearpro@navcount}{0}
+\newcommand{\gearpro@active}{0}
+\newcommand{\gearpro@navone}{}
+\newcommand{\gearpro@navtwo}{}
+\newcommand{\gearpro@navthree}{}
+\newcommand{\gearpro@navfour}{}
+\newcommand{\gearpro@navfive}{}
+
+\newcommand{\GearProSetMajor}[1]{\renewcommand{\gearpro@majorlabel}{#1}}
+\newcommand{\GearProHideMinorNav}{\gearpro@shownavfalse}
+\newcommand{\GearProSetMinorNavFive}[6]{%
+  \renewcommand{\gearpro@navcount}{5}%
+  \renewcommand{\gearpro@navone}{#1}%
+  \renewcommand{\gearpro@navtwo}{#2}%
+  \renewcommand{\gearpro@navthree}{#3}%
+  \renewcommand{\gearpro@navfour}{#4}%
+  \renewcommand{\gearpro@navfive}{#5}%
+  \renewcommand{\gearpro@active}{#6}%
+  \gearpro@shownavtrue
+}
+\newcommand{\GearProSetMinorNavThree}[4]{%
+  \renewcommand{\gearpro@navcount}{3}%
+  \renewcommand{\gearpro@navone}{#1}%
+  \renewcommand{\gearpro@navtwo}{#2}%
+  \renewcommand{\gearpro@navthree}{#3}%
+  \renewcommand{\gearpro@active}{#4}%
+  \gearpro@shownavtrue
+}
+
+\newcommand{\gearpro@navitem}[3]{%
+  \ifnum\gearpro@active=#1\relax
+    \begin{beamercolorbox}[wd=#2,ht=2.45ex,dp=.9ex,center]{minor navigation active}%
+      \usebeamerfont{minor navigation active}\strut #3%
+    \end{beamercolorbox}%
+  \else
+    \begin{beamercolorbox}[wd=#2,ht=2.45ex,dp=.9ex,center]{minor navigation}%
+      \usebeamerfont{minor navigation}\strut #3%
+    \end{beamercolorbox}%
+  \fi
+}
+
+\setbeamertemplate{headline}{%
+  \ifgearpro@shownav
+    \leavevmode%
+    \ifnum\gearpro@navcount=5\relax
+      \hbox{%
+        \gearpro@navitem{1}{.2\paperwidth}{\gearpro@navone}%
+        \gearpro@navitem{2}{.2\paperwidth}{\gearpro@navtwo}%
+        \gearpro@navitem{3}{.2\paperwidth}{\gearpro@navthree}%
+        \gearpro@navitem{4}{.2\paperwidth}{\gearpro@navfour}%
+        \gearpro@navitem{5}{.2\paperwidth}{\gearpro@navfive}%
+      }%
+    \else
+      \hbox{%
+        \gearpro@navitem{1}{.333333\paperwidth}{\gearpro@navone}%
+        \gearpro@navitem{2}{.333333\paperwidth}{\gearpro@navtwo}%
+        \gearpro@navitem{3}{.333334\paperwidth}{\gearpro@navthree}%
+      }%
+    \fi
+  \fi
+}
+
 \setbeamertemplate{frametitle}{%
   \nointerlineskip
   \begin{beamercolorbox}[wd=\paperwidth,ht=3.15ex,dp=1.15ex,leftskip=.55cm,rightskip=.55cm]{frametitle}%
@@ -81,7 +150,7 @@
     \vbox to 3.65ex{%
       \vfil
       \hbox to \paperwidth{%
-        \hskip.45cm\usebeamerfont{footline}\insertshorttitle%
+        \hskip.45cm\usebeamerfont{footline}\gearpro@majorlabel%
         \hfill%
         \usebeamerfont{footline}\insertframenumber\,/\,\inserttotalframenumber\hskip.45cm%
       }%
