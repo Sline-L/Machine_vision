@@ -2,6 +2,7 @@ __pycache__/
 tmp/
 var/
 web/node_modules/
+output/presentation/
 *.pyc
 .venv/
 .env
