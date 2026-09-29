@@ -50,9 +50,19 @@ GearPro 是运行在 Jetson 或 Linux 工控机上的齿轮在线视觉检测系
 ├── model/                 # Model1 与两个专项模型包
 ├── docs/                  # 架构、API 和模型文档
 ├── tests/                 # 无硬件测试
+├── artifacts/             # 评估指标、图表和实验快照
+├── reports/               # 汇报源文件、讲稿、模板和正式成品
 ├── legacy/                # 历史程序和资产
-└── ultralytics/           # 项目内置 Ultralytics
+├── ultralytics/           # 项目内置 Ultralytics
+└── var/                   # 运行时设置和上传文件，Git 忽略
 ```
+
+### 文件管理约定
+
+- `model/` 只保存运行所需的部署权重；评估目录通过路径和 SHA256 引用它们，不再复制权重。
+- `artifacts/evaluations/` 保存可追溯的评估结果，不作为运行时输入。
+- `reports/` 保存汇报源文件与正式成品；LaTeX 中间文件和本地参考资料由 Git 忽略。
+- `var/` 和 `.cache/` 仅存放运行时或机器相关数据，不应提交。
 
 ## 安装
 
@@ -150,6 +160,8 @@ cd web && npm run build
 - [Scratch V5](docs/scratch-v5.md)
 - [Missing Hole V1](docs/missing-hole-v1.md)
 - [模型格式与 Jetson 部署](docs/model-formats.md)
+- [汇报与交付资料](reports/README.md)
+- [Scratch V5 评估快照](artifacts/evaluations/scratch-v5/README.md)
 
 双专项 OR 在锁定 test 上的任意缺陷 Recall 为 `0.8873`、FPR 为 `0.2278`，仍是可运行
 基线，尚未达到 Recall `0.95` 且 FPR 不超过 `0.20` 的生产目标。

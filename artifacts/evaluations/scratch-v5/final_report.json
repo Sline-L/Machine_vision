@@ -43,98 +43,98 @@
       {
         "split": "train",
         "stem": "train_008",
-        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_008.jpg",
-        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_008.jpg"
+        "source": "external://dataset/dataset_defects/images/train/train_008.jpg",
+        "destination": "external://dataset/dataset_defects/images/train_scratch/train_008.jpg"
       },
       {
         "split": "train",
         "stem": "train_010",
-        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_010.jpg",
-        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_010.jpg"
+        "source": "external://dataset/dataset_defects/images/train/train_010.jpg",
+        "destination": "external://dataset/dataset_defects/images/train_scratch/train_010.jpg"
       },
       {
         "split": "train",
         "stem": "train_017",
-        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_017.jpg",
-        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_017.jpg"
+        "source": "external://dataset/dataset_defects/images/train/train_017.jpg",
+        "destination": "external://dataset/dataset_defects/images/train_scratch/train_017.jpg"
       },
       {
         "split": "train",
         "stem": "train_099",
-        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_099.jpg",
-        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_099.jpg"
+        "source": "external://dataset/dataset_defects/images/train/train_099.jpg",
+        "destination": "external://dataset/dataset_defects/images/train_scratch/train_099.jpg"
       },
       {
         "split": "train",
         "stem": "train_100",
-        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_100.jpg",
-        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_100.jpg"
+        "source": "external://dataset/dataset_defects/images/train/train_100.jpg",
+        "destination": "external://dataset/dataset_defects/images/train_scratch/train_100.jpg"
       },
       {
         "split": "train",
         "stem": "train_118",
-        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_118.jpg",
-        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_118.jpg"
+        "source": "external://dataset/dataset_defects/images/train/train_118.jpg",
+        "destination": "external://dataset/dataset_defects/images/train_scratch/train_118.jpg"
       },
       {
         "split": "train",
         "stem": "train_120",
-        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_120.jpg",
-        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_120.jpg"
+        "source": "external://dataset/dataset_defects/images/train/train_120.jpg",
+        "destination": "external://dataset/dataset_defects/images/train_scratch/train_120.jpg"
       },
       {
         "split": "train",
         "stem": "train_209",
-        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_209.jpg",
-        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_209.jpg"
+        "source": "external://dataset/dataset_defects/images/train/train_209.jpg",
+        "destination": "external://dataset/dataset_defects/images/train_scratch/train_209.jpg"
       },
       {
         "split": "train",
         "stem": "train_210",
-        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_210.jpg",
-        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_210.jpg"
+        "source": "external://dataset/dataset_defects/images/train/train_210.jpg",
+        "destination": "external://dataset/dataset_defects/images/train_scratch/train_210.jpg"
       },
       {
         "split": "train",
         "stem": "train_361",
-        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_361.jpg",
-        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_361.jpg"
+        "source": "external://dataset/dataset_defects/images/train/train_361.jpg",
+        "destination": "external://dataset/dataset_defects/images/train_scratch/train_361.jpg"
       },
       {
         "split": "train",
         "stem": "train_378",
-        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_378.jpg",
-        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_378.jpg"
+        "source": "external://dataset/dataset_defects/images/train/train_378.jpg",
+        "destination": "external://dataset/dataset_defects/images/train_scratch/train_378.jpg"
       },
       {
         "split": "train",
         "stem": "train_399",
-        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_399.jpg",
-        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_399.jpg"
+        "source": "external://dataset/dataset_defects/images/train/train_399.jpg",
+        "destination": "external://dataset/dataset_defects/images/train_scratch/train_399.jpg"
       },
       {
         "split": "train",
         "stem": "train_469",
-        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_469.jpg",
-        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_469.jpg"
+        "source": "external://dataset/dataset_defects/images/train/train_469.jpg",
+        "destination": "external://dataset/dataset_defects/images/train_scratch/train_469.jpg"
       },
       {
         "split": "train",
         "stem": "train_495",
-        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_495.jpg",
-        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_495.jpg"
+        "source": "external://dataset/dataset_defects/images/train/train_495.jpg",
+        "destination": "external://dataset/dataset_defects/images/train_scratch/train_495.jpg"
       },
       {
         "split": "train",
         "stem": "train_496",
-        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train\\train_496.jpg",
-        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\train_scratch\\train_496.jpg"
+        "source": "external://dataset/dataset_defects/images/train/train_496.jpg",
+        "destination": "external://dataset/dataset_defects/images/train_scratch/train_496.jpg"
       },
       {
         "split": "val",
         "stem": "val_059",
-        "source": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\val\\val_059.jpg",
-        "destination": "F:\\Work\\VSCode\\Projects\\DATASET\\dataset_defects\\images\\val_scratch\\val_059.jpg"
+        "source": "external://dataset/dataset_defects/images/val/val_059.jpg",
+        "destination": "external://dataset/dataset_defects/images/val_scratch/val_059.jpg"
       }
     ],
     "cross_split_near_duplicate_pairs": 0

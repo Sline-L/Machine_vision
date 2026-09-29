@@ -8,7 +8,7 @@
     "defect_weight": 1.0,
     "epochs": 30,
     "seed": 20260911,
-    "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\runs\\scratch_v5\\p_resnet18_384_w1\\best.pt",
+    "weights": "external://dataset/runs/scratch_v5/p_resnet18_384_w1/best.pt",
     "tta": "none",
     "temperature": 2.05,
     "operating_points": {
@@ -73,7 +73,7 @@
     "defect_weight": 2.0,
     "epochs": 30,
     "seed": 20260911,
-    "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\runs\\scratch_v5\\p_resnet18_512_w2\\best.pt",
+    "weights": "external://dataset/runs/scratch_v5/p_resnet18_512_w2/best.pt",
     "tta": "none",
     "temperature": 2.9,
     "operating_points": {
@@ -138,7 +138,7 @@
     "defect_weight": 1.0,
     "epochs": 30,
     "seed": 20260911,
-    "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\runs\\scratch_v5\\p_efficientnet_b0_384_w1\\best.pt",
+    "weights": "external://dataset/runs/scratch_v5/p_efficientnet_b0_384_w1/best.pt",
     "tta": "none",
     "temperature": 0.5,
     "operating_points": {
@@ -203,7 +203,7 @@
     "defect_weight": 2.0,
     "epochs": 30,
     "seed": 20260911,
-    "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\runs\\scratch_v5\\p_efficientnet_b0_512_w2\\best.pt",
+    "weights": "external://dataset/runs/scratch_v5/p_efficientnet_b0_512_w2/best.pt",
     "tta": "none",
     "temperature": 1.9249999999999998,
     "operating_points": {
@@ -268,7 +268,7 @@
     "defect_weight": 1.0,
     "epochs": 30,
     "seed": 20260911,
-    "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\runs\\scratch_v5\\p_yolo_cls_384_w1\\weights\\best.pt",
+    "weights": "external://dataset/runs/scratch_v5/p_yolo_cls_384_w1/weights/best.pt",
     "tta": "none",
     "temperature": 2.275,
     "operating_points": {
@@ -333,7 +333,7 @@
     "defect_weight": 2.0,
     "epochs": 30,
     "seed": 20260911,
-    "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\runs\\scratch_v5\\p_yolo_cls_512_w2\\weights\\best.pt",
+    "weights": "external://dataset/runs/scratch_v5/p_yolo_cls_512_w2/weights/best.pt",
     "tta": "none",
     "temperature": 4.0,
     "operating_points": {
@@ -396,7 +396,7 @@
     "architecture": "standard",
     "epochs": 35,
     "seed": 20260911,
-    "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\runs\\scratch_v5\\p_detector_standard_960\\weights\\best.pt",
+    "weights": "external://dataset/runs/scratch_v5/p_detector_standard_960/weights/best.pt",
     "temperature": 1.525,
     "operating_points": {
       "0.1": {
@@ -476,7 +476,7 @@
     "architecture": "p2",
     "epochs": 35,
     "seed": 20260911,
-    "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\runs\\scratch_v5\\p_detector_p2_960\\weights\\best.pt",
+    "weights": "external://dataset/runs/scratch_v5/p_detector_p2_960/weights/best.pt",
     "temperature": 2.125,
     "operating_points": {
       "0.1": {
@@ -558,7 +558,7 @@
     "defect_weight": 1.0,
     "epochs": 100,
     "seed": 20260911,
-    "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\runs\\scratch_v5\\f_resnet18_384_w1_s20260911\\best.pt",
+    "weights": "external://dataset/runs/scratch_v5/f_resnet18_384_w1_s20260911/best.pt",
     "tta": "none",
     "temperature": 1.25,
     "operating_points": {
@@ -623,7 +623,7 @@
     "defect_weight": 1.0,
     "epochs": 100,
     "seed": 20260911,
-    "weights": "F:\\Work\\VSCode\\Projects\\DATASET\\runs\\scratch_v5\\f_efficientnet_b0_384_w1_s20260911\\best.pt",
+    "weights": "external://dataset/runs/scratch_v5/f_efficientnet_b0_384_w1_s20260911/best.pt",
     "tta": "none",
     "temperature": 0.7,
     "operating_points": {

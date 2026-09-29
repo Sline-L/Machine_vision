@@ -10,11 +10,13 @@
 使用 XeLaTeX 编译：
 
 ```bash
-cd Beamer
+cd reports/stage-report/beamer
 latexmk -xelatex slide.tex
+latexmk -xelatex GearPro_stage_report_full.tex
 ```
 
-`slide.tex` 是五页测试稿，覆盖封面、图文分栏、流程列表、数据表和强调块。
+`slide.tex` 是五页测试稿，`GearPro_stage_report_full.tex` 是 GearPro 阶段汇报。
+对应的正式 PDF 继续跟踪，`.aux`、`.fls`、`.nav` 等编译中间文件不提交。
 
 ## 原模板来源
 

@@ -26,6 +26,8 @@ Runtime behavior lives in `gp/`:
 - `gp/serial_io.py` for serial output
 - `gp/config.py` and `gp/types.py` for settings and result objects
 - `web/` for Vue source and `gp/static/` for deployable assets
+- `artifacts/evaluations/` for versioned evaluation results without duplicate runtime weights
+- `reports/` for presentation sources, notes, templates, and final deliverables
 
 Old `gp_*.py` scripts, `new1`, and `aicode.py` live under `legacy/` unless
 the user says otherwise. Jetson NX checkout: `/home/jetson/Projects/Machine_vision`

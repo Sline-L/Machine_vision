@@ -188,10 +188,10 @@ Scratch V5 和 Missing Hole V1 分别使用自己的融合概率和发布阈值�
 
 已经生成并校验以下材料：
 
-- `output/presentation/GearPro软件阶段汇报_v3.pptx`
-- `output/document/GearPro软件阶段汇报讲稿与备问_v2.docx`
-- `output/GearPro软件阶段汇报讲稿与备问.md`
-- `output/GearPro软件阶段汇报对话整理.md`
+- `reports/stage-report/deliverables/presentation/GearPro软件阶段汇报_v3.pptx`
+- `reports/stage-report/deliverables/document/GearPro软件阶段汇报讲稿与备问_v2.docx`
+- `reports/stage-report/notes/GearPro软件阶段汇报讲稿与备问.md`
+- `reports/stage-report/notes/GearPro软件阶段汇报对话整理.md`
 
 PPT 共 16 页，包含可编辑指标图表、实验样本、系统架构和演示流程。讲稿文档包含逐页讲稿、衔接与指示、备问、现场演示检查清单和事实核对表。
 
@@ -203,4 +203,4 @@ PPT 共 16 页，包含可编辑指标图表、实验样本、系统架构和演
 - DOCX 逐页渲染检查。
 - DOCX 文件完整性检查。
 
-本次没有修改软件 API、模型配置和运行代码，也没有覆盖现有技术报告或 `docs/MineTemplate`。
+本次没有修改软件 API、模型配置和运行代码，也没有覆盖现有技术报告或 `reports/templates/mine-report`。

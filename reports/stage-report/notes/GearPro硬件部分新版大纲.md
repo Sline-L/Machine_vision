@@ -1,6 +1,6 @@
 # GearPro 硬件部分新版大纲
 
-> 参考资料：`output/presentation/20260428 SRTP国省创.pptx`、现有硬件阶段大纲与当前 GearPro Web 系统。
+> 参考资料：`reports/references/20260428 SRTP国省创.pptx`、现有硬件阶段大纲与当前 GearPro Web 系统。
 >
 > 内容边界：第一代整机为已经完成的实物成果；相机、载台、照明和补充视角的改进为下一代设计方案，尚未完成实物搭建。监控端按当前 Web 系统介绍，不再把旧 Qt 界面作为当前成果。
 

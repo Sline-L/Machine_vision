@@ -1,6 +1,6 @@
 # GearPro 阶段汇报逐页讲稿
 
-对应文件：`Beamer/GearPro_stage_report_full.pdf`，共 47 页。
+对应文件：`reports/stage-report/beamer/GearPro_stage_report_full.pdf`，共 47 页。
 
 使用说明：标注“重点讲”的页面建议按稿子完整说明；标注“快讲”的页面用于交代背景和过渡，可以根据导师反应继续压缩。讲稿采用一对一汇报语气，不需要逐字背诵，现场可以围绕页面内容自然展开。
 

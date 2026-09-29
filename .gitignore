@@ -2,7 +2,10 @@ __pycache__/
 tmp/
 var/
 web/node_modules/
-output/presentation/
+reports/references/*
+!reports/references/README.md
+reports/templates/**/Output/*
+!reports/templates/**/Output/*.pdf
 *.pyc
 .venv/
 .env
