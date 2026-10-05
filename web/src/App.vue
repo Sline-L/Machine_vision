@@ -1,312 +1,130 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref } from 'vue'
+import { useGearPro } from './composables/useGearPro.js'
+import DialogShell from './components/DialogShell.vue'
+import CameraView from './components/CameraView.vue'
+import DetectionPage from './pages/DetectionPage.vue'
+import StatisticsPage from './pages/StatisticsPage.vue'
+import VideoPage from './pages/VideoPage.vue'
+import SettingsPage from './pages/SettingsPage.vue'
 
-const API = '/api/v1'
-const state = ref(null)
-const authenticated = ref(false)
-const passwordRequired = ref(true)
-const password = ref('')
-const label = ref(localStorage.getItem('gearpro-terminal') || `终端 ${location.hostname}`)
-const error = ref('')
-const busy = ref(false)
-const settingsOpen = ref(false)
-const streamView = ref('auto')
-const streamNonce = ref(Date.now())
-const uploadInput = ref(null)
-const settings = reactive({})
-let socket
-let reconnectTimer
-let heartbeatTimer
+const controller = reactive(useGearPro())
+const page = ref('detection')
+const settingsDirty = ref(false)
+const confirmation = ref(null)
+const enlarged = ref(false)
+const pendingFile = ref(null)
+const destination = ref(null)
+const navigation = [
+  ['detection', '检测', '▣'],
+  ['statistics', '统计', '▥'],
+  ['video', '视频测试', '▷'],
+  ['settings', '设置', '⚙'],
+]
+const pageTitle = computed(() => navigation.find(item => item[0] === page.value)?.[1])
+const dialogTitle = computed(() => ({
+  video: '切换到测试视频？',
+  reset: '清空检测统计？',
+  discard: '放弃未保存修改？',
+})[confirmation.value])
 
-const ownsControl = computed(() => state.value?.control?.is_owner === true)
-const active = computed(() => state.value?.inspection?.active === true)
-const result = computed(() => state.value?.result)
-const verdictClass = computed(() => {
-  if (!result.value?.has_gear) return 'idle'
-  return result.value.is_defective ? 'bad' : 'good'
-})
-const goodRate = computed(() => `${((state.value?.stats?.good_rate || 0) * 100).toFixed(1)}%`)
-const streamUrl = computed(() => `${API}/stream?view=${streamView.value}&v=${streamNonce.value}`)
-const offlineSource = computed(() => {
-  const type = state.value?.source?.type
-  return type === 'video' || type === 'replay'
-})
-const sourceLabel = computed(() => {
-  const source = state.value?.source
-  if (source?.type === 'video') return `测试视频 · ${source.video_name}`
-  if (source?.type === 'replay') return '数据集回放'
-  return `CAM ${state.value?.settings?.camera_index}`
-})
-const healthItems = computed(() => [
-  ['服务', true],
-  ['相机', offlineSource.value || state.value?.health?.camera?.opened],
-  ['模型', state.value?.inspection?.model_loaded],
-  ['串口', offlineSource.value || state.value?.health?.serial?.connected],
-])
-
-async function request(path, options = {}) {
-  const response = await fetch(`${API}${path}`, {
-    credentials: 'same-origin',
-    headers: options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' },
-    ...options,
-  })
-  const payload = await response.json().catch(() => ({}))
-  if (!response.ok) throw new Error(payload.detail || `请求失败 (${response.status})`)
-  return payload
-}
-
-async function session() {
-  const info = await request('/session')
-  passwordRequired.value = info.password_required
-  authenticated.value = info.authenticated
-  if (!info.authenticated && !info.password_required) await login()
-  else if (info.authenticated) connect()
-}
-
-async function login() {
-  error.value = ''
-  busy.value = true
-  try {
-    await request('/session/login', {
-      method: 'POST',
-      body: JSON.stringify({ password: password.value, label: label.value }),
-    })
-    localStorage.setItem('gearpro-terminal', label.value)
-    authenticated.value = true
-    password.value = ''
-    connect()
-  } catch (exc) {
-    error.value = exc.message
-  } finally {
-    busy.value = false
+function navigate(target) {
+  if (target === page.value || controller.busy) return
+  if (page.value === 'settings' && settingsDirty.value) {
+    destination.value = target
+    confirmation.value = 'discard'
+    return
   }
+  switchPage(target)
 }
-
-async function logout() {
-  await request('/session/logout', { method: 'POST' }).catch(() => {})
-  authenticated.value = false
-  state.value = null
-  socket?.close()
+function switchPage(target) {
+  settingsDirty.value = false
+  if (target === 'logout') { controller.logout(); page.value = 'detection' }
+  else page.value = target
 }
-
-function connect() {
-  clearTimeout(reconnectTimer)
-  socket?.close()
-  const scheme = location.protocol === 'https:' ? 'wss' : 'ws'
-  socket = new WebSocket(`${scheme}://${location.host}${API}/events`)
-  socket.onmessage = (event) => {
-    state.value = JSON.parse(event.data)
+function selectVideo(file) {
+  if (!controller.canControl) return
+  pendingFile.value = file
+  confirmation.value = 'video'
+}
+function closeConfirmation() {
+  if (controller.busy) return
+  confirmation.value = null
+  pendingFile.value = null
+  destination.value = null
+}
+async function confirmAction() {
+  const kind = confirmation.value
+  if (kind !== 'discard' && !controller.canControl) return
+  if (kind === 'discard') {
+    const target = destination.value
+    closeConfirmation()
+    switchPage(target)
+    return
   }
-  socket.onclose = (event) => {
-    if (event.code === 4401) {
-      authenticated.value = false
-      return
-    }
-    if (authenticated.value) reconnectTimer = setTimeout(connect, 1500)
-  }
+  if (kind === 'video' && await controller.uploadVideo(pendingFile.value)) {
+    closeConfirmation()
+    switchPage('detection')
+  } else if (kind === 'reset' && await controller.action('/stats/reset')) closeConfirmation()
 }
-
-async function action(path, body) {
-  error.value = ''
-  busy.value = true
-  try {
-    const payload = await request(path, {
-      method: body === undefined ? 'POST' : 'PUT',
-      body: body === undefined ? undefined : JSON.stringify(body),
-    })
-    if (payload?.version) state.value = payload
-  } catch (exc) {
-    error.value = exc.message
-  } finally {
-    busy.value = false
-  }
+async function returnToCamera() {
+  if (await controller.action('/source/camera')) switchPage('detection')
 }
-
-async function acquire() {
-  await action('/control/acquire')
-}
-
-async function release() {
-  await action('/control/release')
-}
-
-async function chooseVideo(event) {
-  const file = event.target.files?.[0]
-  if (!file) return
-  error.value = ''
-  busy.value = true
-  const form = new FormData()
-  form.append('file', file)
-  try {
-    state.value = await request('/source/video', { method: 'POST', body: form })
-    streamView.value = 'auto'
-    streamNonce.value = Date.now()
-  } catch (exc) {
-    error.value = exc.message
-  } finally {
-    event.target.value = ''
-    busy.value = false
-  }
-}
-
-function openSettings() {
-  Object.assign(settings, state.value?.settings || {})
-  settingsOpen.value = true
-}
-
-async function saveSettings() {
-  await action('/settings', { ...settings })
-  if (!error.value) settingsOpen.value = false
-}
-
-watch(ownsControl, (owns) => {
-  clearInterval(heartbeatTimer)
-  if (owns) {
-    heartbeatTimer = setInterval(() => {
-      if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify({ type: 'control_heartbeat' }))
-    }, 10000)
-  }
-})
-
-watch(() => settings.inference_profile, (profile, previous) => {
-  if (!settingsOpen.value || profile === previous) return
-  if (profile === 'FULL' || profile === 'TRT_FAST') settings.inference_interval = 0.10
-  if (profile === 'SPARSE') settings.inference_interval = 0.20
-})
-
-onMounted(() => session().catch((exc) => { error.value = exc.message }))
-onBeforeUnmount(() => {
-  clearTimeout(reconnectTimer)
-  clearInterval(heartbeatTimer)
-  socket?.close()
-})
 </script>
 
 <template>
-  <main v-if="authenticated && state" class="shell">
-    <header class="topbar">
-      <div class="brand">
-        <div class="brand-mark">GP</div>
-        <div><h1>GearPro</h1><p>齿轮视觉检测系统</p></div>
+  <main v-if="controller.authenticated && controller.state" class="console-shell" :inert="!!confirmation || enlarged">
+    <aside class="function-rail">
+      <div class="rail-brand"><span class="brand-mark">GP</span><strong>GearPro</strong></div>
+      <div class="inspection-controls" aria-label="检测控制">
+        <button class="rail-button start-button" :disabled="!controller.canControl || !!controller.startBlocked" :title="controller.startBlocked" @click="controller.action('/inspection/start')"><span aria-hidden="true">▶</span>开始检测</button>
+        <button class="rail-button stop-button" :disabled="!controller.canControl || !controller.active" @click="controller.action('/inspection/stop')"><span aria-hidden="true">■</span>停止检测</button>
       </div>
-      <div class="health-strip">
-        <span v-for="item in healthItems" :key="item[0]" :class="['health-chip', { ok: item[1] }]">
-          <i></i>{{ item[0] }}
-        </span>
+      <nav class="page-navigation" aria-label="功能导航">
+        <button v-for="[key, title, icon] in navigation" :key="key" :class="['rail-button', { selected: page === key }]" :aria-current="page === key ? 'page' : undefined" :disabled="controller.busy" @click="navigate(key)"><span aria-hidden="true">{{ icon }}</span>{{ title }}</button>
+      </nav>
+      <div class="rail-account">
+        <p class="owner-label">控制权：{{ controller.ownsControl ? '当前终端' : controller.state.control.owner_label || '无人控制' }}</p>
+        <button class="rail-button" :disabled="!controller.connected || controller.busy" @click="controller.action(controller.ownsControl ? '/control/release' : '/control/acquire')">{{ controller.ownsControl ? '释放控制' : '接管控制' }}</button>
+        <button class="rail-button exit-button" :disabled="controller.busy" @click="navigate('logout')">退出登录</button>
       </div>
-      <div class="top-actions">
-        <button v-if="!ownsControl" class="button primary" :disabled="busy" @click="acquire">接管控制</button>
-        <button v-else class="button subtle" @click="release">释放控制</button>
-        <button class="icon-button" title="设置" :disabled="!ownsControl" @click="openSettings">⚙</button>
-        <button class="icon-button" title="退出" @click="logout">↪</button>
+    </aside>
+
+    <div class="console-main">
+      <header class="system-header">
+        <div class="runtime-reading"><strong :class="{ running: controller.connected && controller.active, fault: controller.state.error || !controller.connected }"><i></i>{{ controller.runtimeLabel }}</strong><span>{{ controller.state.settings.mode }}</span></div>
+        <div class="device-strip" aria-label="设备状态"><span v-for="[device, status] in controller.healthItems" :key="device" :class="{ warning: status === '未连接' || status === '未知' }">{{ device }}：{{ status }}</span></div>
+        <div class="source-line"><span>{{ controller.sourceLabel }}</span><span>{{ pageTitle }}</span></div>
+      </header>
+      <div v-if="!controller.connected || controller.state.error || controller.error" class="alert-stack" role="alert">
+        <p v-if="!controller.connected"><strong>{{ controller.connectionLabel }}</strong> · 数据可能过期，连接恢复后可操作。</p>
+        <p v-if="controller.state.error"><strong>运行故障：</strong>{{ controller.state.error }}</p>
+        <div v-if="controller.error"><p><strong>操作失败：</strong>{{ controller.error }}</p><button class="button" @click="controller.error = ''">关闭</button></div>
       </div>
-    </header>
-
-    <div v-if="error || state.error" class="alert"><strong>运行提示</strong>{{ error || state.error }}</div>
-
-    <section class="workspace">
-      <article class="panel vision-panel">
-        <div class="panel-head">
-          <div><span class="eyebrow">LIVE INSPECTION</span><h2>实时检测画面</h2></div>
-          <div class="segmented">
-            <button v-for="view in [['auto','自动'],['raw','原图'],['annotated','结果']]" :key="view[0]"
-              :class="{ active: streamView === view[0] }" @click="streamView = view[0]">{{ view[1] }}</button>
-          </div>
-        </div>
-        <div class="video-stage">
-          <img :key="streamNonce" :src="streamUrl" alt="GearPro 实时检测画面" />
-          <div :class="['verdict', verdictClass]">
-            <span>{{ result?.verdict || (active ? '检测中' : '等待开始') }}</span>
-            <strong v-if="result?.observations?.length">{{ (Math.max(...result.observations.map(x => x.defect_score)) * 100).toFixed(1) }}%</strong>
-          </div>
-          <div class="source-tag">{{ sourceLabel }}</div>
-        </div>
-        <div class="control-row">
-          <button class="button primary large" :disabled="!ownsControl || busy" @click="action(active ? '/inspection/stop' : '/inspection/start')">
-            {{ active ? '停止检测' : '开始检测' }}
-          </button>
-          <input ref="uploadInput" hidden type="file" accept="video/*,.mkv" @change="chooseVideo" />
-          <button class="button" :disabled="!ownsControl || busy" @click="uploadInput.click()">上传测试视频</button>
-          <button v-if="offlineSource" class="button" :disabled="!ownsControl || busy" @click="action('/source/camera')">返回实时相机</button>
-          <button class="button ghost" :disabled="!ownsControl || busy" @click="action('/stats/reset')">清空统计</button>
-          <span class="status-text"><i :class="{ running: active }"></i>{{ state.status }}</span>
-        </div>
-      </article>
-
-      <aside class="side-stack">
-        <article class="panel important-panel">
-          <div class="panel-head"><div><span class="eyebrow">INSPECTION STATUS</span><h2>检测判定</h2></div><b>{{ active ? '检测运行中' : '检测已停止' }}</b></div>
-          <div :class="['important-verdict', verdictClass]">
-            <span>当前判定</span>
-            <strong>{{ result?.verdict || (active ? '检测中' : '等待开始') }}</strong>
-          </div>
-          <div class="important-values">
-            <div><span>缺陷融合概率</span><strong>{{ result?.observations?.length ? (Math.max(...result.observations.map(x => x.defect_score))*100).toFixed(2)+'%' : '—' }}</strong></div>
-            <div><span>定位数量</span><strong>{{ result?.observations?.length ?? 0 }}<small> 个</small></strong></div>
-          </div>
-          <div class="runtime-status"><i :class="{ running: active }"></i><span>{{ state.status }}</span></div>
-        </article>
-
-        <article class="panel secondary-panel">
-          <div class="panel-head"><div><span class="eyebrow">INFERENCE DETAILS</span><h2>推理明细</h2></div><b>{{ result?.model_version || '模型待加载' }}</b></div>
-          <div class="probability-list">
-            <div><span>分类器均值</span><strong>{{ result?.observations?.length ? (Math.max(...result.observations.map(x => x.classifier_probability))*100).toFixed(2)+'%' : '—' }}</strong></div>
-            <div><span>检测器概率</span><strong>{{ result?.observations?.length ? (Math.max(...result.observations.map(x => x.detector_probability))*100).toFixed(2)+'%' : '—' }}</strong></div>
-          </div>
-          <div class="detail-grid">
-            <span>总耗时<b>{{ result ? result.elapsed_ms.toFixed(1)+' ms' : '—' }}</b></span>
-            <span>定位阶段<b>{{ result ? result.locator_latency_ms.toFixed(1)+' ms' : '—' }}</b></span>
-            <span>分类阶段<b>{{ result ? (result.classifier1_latency_ms + result.classifier2_latency_ms).toFixed(1)+' ms' : '—' }}</b></span>
-            <span>划痕阶段<b>{{ result ? (result.classifier1_latency_ms + result.classifier2_latency_ms + result.detector_latency_ms).toFixed(1)+' ms' : '—' }}</b></span>
-          </div>
-        </article>
-
-        <article class="panel stats-panel">
-          <div class="panel-head"><div><span class="eyebrow">QUALITY OVERVIEW</span><h2>检测统计</h2></div></div>
-          <div class="stats-summary">
-            <div><span>已检测</span><strong>{{ state.stats.total }}</strong></div>
-            <div class="good"><span>合格</span><strong>{{ state.stats.good }}</strong></div>
-            <div class="bad"><span>不合格</span><strong>{{ state.stats.defective }}</strong></div>
-          </div>
-          <div class="stats-visual">
-            <div class="donut" :style="{ '--rate': state.stats.good_rate * 360 + 'deg' }"><span>{{ goodRate }}<small>合格率</small></span></div>
-            <div class="legend"><span><i class="good"></i>合格 {{ state.stats.good }}</span><span><i class="bad"></i>不合格 {{ state.stats.defective }}</span></div>
-          </div>
-        </article>
-      </aside>
-    </section>
-
-    <footer><span>操作权限：{{ ownsControl ? '当前终端' : (state.control.owner_label || '无人控制') }}</span><span>推理档位：{{ state.settings.inference_profile }}</span><span>缺陷阈值：{{ state.settings.defect_threshold.toFixed(6) }}</span></footer>
+      <div class="page-content">
+        <DetectionPage v-if="page === 'detection'" :controller="controller" :enlarged="enlarged" @enlarge="enlarged = true" />
+        <StatisticsPage v-else-if="page === 'statistics'" :controller="controller" @reset="confirmation = 'reset'" />
+        <VideoPage v-else-if="page === 'video'" :controller="controller" @video="selectVideo" @camera="returnToCamera" />
+        <SettingsPage v-else :controller="controller" @dirty="settingsDirty = $event" />
+      </div>
+      <p class="operation-hint" role="status">{{ controller.busy ? (controller.operation === '/source/video' ? '正在上传并准备测试视频…' : '正在处理操作…') : controller.active ? controller.state.status : controller.startBlocked || controller.state.status }}</p>
+    </div>
   </main>
 
+  <main v-else-if="controller.sessionLoading || controller.authenticated" class="login-page">
+    <section class="login-panel" aria-live="polite"><div class="brand-mark">GP</div><h1>{{ controller.authenticated ? controller.connectionLabel : '正在连接控制台' }}</h1><p>正在获取设备状态，请稍候。</p><p v-if="controller.error" class="form-error">{{ controller.error }}</p><button v-if="controller.authenticated" class="button" @click="controller.logout">返回登录</button></section>
+  </main>
   <main v-else class="login-page">
-    <form class="login-card" @submit.prevent="login">
-      <div class="brand-mark large">GP</div><span class="eyebrow">GEARPRO CONTROL</span><h1>欢迎回来</h1><p>登录齿轮视觉检测控制台</p>
-      <label>终端名称<input v-model="label" required maxlength="64" /></label>
-      <label v-if="passwordRequired">访问密码<input v-model="password" type="password" required autofocus /></label>
-      <div v-if="error" class="form-error">{{ error }}</div>
-      <button class="button primary large" :disabled="busy">{{ busy ? '正在连接…' : '进入控制台' }}</button>
-    </form>
+    <form class="login-panel" @submit.prevent="controller.login"><div class="brand-mark">GP</div><h1>GearPro 控制台</h1><p>齿轮视觉检测系统</p><label>终端名称<input v-model="controller.label" required maxlength="64" /></label><label v-if="controller.passwordRequired">访问密码<input v-model="controller.password" type="password" required autocomplete="current-password" /></label><p v-if="controller.error" class="form-error" role="alert">{{ controller.error }}</p><button class="button primary" :disabled="controller.busy">{{ controller.busy ? '正在连接…' : '进入控制台' }}</button></form>
   </main>
 
-  <div v-if="settingsOpen" class="modal" @click.self="settingsOpen = false">
-    <form class="settings-card" @submit.prevent="saveSettings">
-      <div class="settings-title"><div><span class="eyebrow">RUNTIME SETTINGS</span><h2>运行设置</h2></div><button type="button" class="icon-button" @click="settingsOpen = false">×</button></div>
-      <div class="form-grid">
-        <label>运行模式<select v-model="settings.mode"><option>自由模式</option><option>定量模式</option><option>定时模式</option><option v-if="settings.mode === '视频测试模式'">视频测试模式</option></select></label>
-        <label>推理档位<select v-model="settings.inference_profile"><option>FULL</option><option>SPARSE</option><option>TRT_FAST</option><option>SAFE_STOP</option></select></label>
-        <label>目标数量<input v-model.number="settings.target_quantity" type="number" min="1" /></label>
-        <label>运行时长（分钟）<input v-model.number="settings.duration_minutes" type="number" min="1" /></label>
-        <label>齿轮定位阈值<input v-model.number="settings.locator_confidence" type="number" min="0.01" max="0.99" step="0.01" /></label>
-        <label>缺陷判定阈值<input v-model.number="settings.defect_threshold" type="number" min="0.01" max="0.99" step="0.000001" /></label>
-        <label>推理间隔（秒）<input v-model.number="settings.inference_interval" type="number" min="0.03" max="5" step="0.01" /></label>
-        <label>摄像头索引<input v-model.number="settings.camera_index" type="number" min="0" max="32" /></label>
-        <label>串口设备<input v-model="settings.serial_port" /></label>
-        <label>串口波特率<input v-model.number="settings.serial_baudrate" type="number" min="300" /></label>
-        <label>画面帧率<input v-model.number="settings.stream_fps" type="number" min="1" max="30" /></label>
-        <label>JPEG 质量<input v-model.number="settings.stream_quality" type="number" min="30" max="95" /></label>
-      </div>
-      <div class="settings-actions"><button type="button" class="button" @click="settingsOpen = false">取消</button><button class="button primary" :disabled="busy">保存设置</button></div>
-    </form>
-  </div>
+  <DialogShell v-if="confirmation && controller.authenticated" :title="dialogTitle" :busy="controller.busy" @close="closeConfirmation">
+    <p class="dialog-copy">{{ confirmation === 'video' ? '将停止当前检测，切换来源并开始检测所选视频。测试期间相机和串口不参与检测。' : confirmation === 'reset' ? '将清除累计统计、最近检测结果和标注画面。此操作无法撤销。' : '尚有未保存的设置，离开后将丢弃这些修改。' }}</p>
+    <p v-if="pendingFile" class="filename">{{ pendingFile.name }}</p>
+    <p v-if="controller.error" class="form-error" role="alert">{{ controller.error }}</p>
+    <div class="dialog-actions"><button class="button" :disabled="controller.busy" @click="closeConfirmation">取消</button><button class="button primary" :disabled="controller.busy || (confirmation !== 'discard' && !controller.canControl)" @click="confirmAction">{{ controller.busy ? '正在处理…' : confirmation === 'video' ? '切换并开始检测' : confirmation === 'reset' ? '确认清空' : '放弃并离开' }}</button></div>
+  </DialogShell>
+  <DialogShell v-if="enlarged && controller.authenticated" title="检测画面" wide restore-selector=".enlarge-button" @close="enlarged = false">
+    <CameraView :controller="controller" @enlarge="enlarged = false" />
+  </DialogShell>
 </template>

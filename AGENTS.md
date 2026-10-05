@@ -29,6 +29,8 @@ Runtime behavior lives in `gp/`:
 - `gp/actions.py`, `gp/control.py`, and `gp/guardian.py` for Control API and in-process L0
 - `edgemedic/` is a **separate process** (`python -m edgemedic`) talking HTTP only
 - `web/` for Vue source and `gp/static/` for deployable assets
+- `artifacts/evaluations/` for versioned evaluation results without duplicate runtime weights
+- `reports/` for presentation sources, notes, templates, and final deliverables
 
 Old `gp_*.py` scripts, `new1`, and `aicode.py` live under `legacy/` unless
 the user says otherwise. Jetson NX checkout: `/home/jetson/Projects/Machine_vision`

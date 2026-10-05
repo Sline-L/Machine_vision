@@ -1,0 +1,1619 @@
+\documentclass[aspectratio=169,10pt]{beamer}
+
+\usepackage{ctex}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,booktabs,array,colortbl,tabularx}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+\usepackage{SoutheastUniversity}
+
+\author{夏秋桐}
+\title{工业零件缺陷检测系统阶段汇报}
+\subtitle{软件、结构与联合验证进展}
+\date{2026-09-29}
+\titlegraphic{\includegraphics[width=.145\paperwidth]{pic/Southeast_University_Logo.pdf}}
+
+\newcommand{\OverviewNav}{%
+  \GearProSetMajor{总览}%
+  \GearProHideMinorNav%
+}
+
+\newcommand{\SoftwareNav}[1]{%
+  \GearProSetMajor{软件}%
+  \GearProSetMinorNavEight{阶段现状}{流程数据}{架构决策}{双专项}{结果分析}{工程实现}{优化路线}{阶段结论}{#1}%
+}
+
+\newcommand{\HardwareNav}[1]{%
+  \GearProSetMajor{硬件}%
+  \GearProSetMinorNavFive{系统总览}{平台目标}{硬件模块}{优化设计}{实验验证}{#1}%
+}
+
+\newcommand{\JointNav}[1]{%
+  \GearProSetMajor{联合}%
+  \GearProSetMinorNavThree{接口关系}{整机验收}{阶段结论}{#1}%
+}
+
+\newcommand{\smallnote}[1]{%
+  \par\vspace{.35em}{\scriptsize\color{seugray}#1}%
+}
+
+\tikzset{
+  flow/.style={draw=seugreen,very thick,rounded corners=2pt,fill=seugreenlight,
+    align=center,minimum height=1.05cm,text width=2.2cm,inner sep=5pt},
+  flowwide/.style={flow,text width=2.75cm},
+  decision/.style={draw=seugold,very thick,rounded corners=2pt,fill=seuaccentlight,
+    align=center,minimum height=1.05cm,text width=2.15cm,inner sep=5pt},
+  line/.style={-{Latex[length=2.2mm]},very thick,draw=seugreen}
+}
+
+\begin{document}
+
+% 1. Cover
+\begin{frame}[plain]
+  \titlepage
+\end{frame}
+
+% 2. Outline
+\OverviewNav
+\begin{frame}{汇报结构}
+  \vspace{.25em}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.32\textwidth}
+      \begin{block}{软件}
+        \textbf{本轮完整汇报}
+
+        \vspace{.45em}
+        任务、数据、架构、双专项、结果与错误分析
+      \end{block}
+    \end{column}
+    \begin{column}{.32\textwidth}
+      \begin{exampleblock}{硬件}
+        \textbf{第一代实物与优化设计}
+
+        \vspace{.45em}
+        整机流程、六个模块、结构与成像优化、实验验证
+      \end{exampleblock}
+    \end{column}
+    \begin{column}{.32\textwidth}
+      \begin{exampleblock}{联合}
+        \textbf{验收路线}
+
+        \vspace{.45em}
+        软硬件接口、整机验收和阶段结论
+      \end{exampleblock}
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \centering
+  \textcolor{seugreen}{\large 从软件结果追溯成像条件，并形成软硬件联合验收路线}
+\end{frame}
+
+% 3. Project introduction and framework
+\begin{frame}{项目介绍与总体框架}
+  \textbf{GearPro 面向齿轮外观检测：}从真实成像中定位齿轮，识别划痕与缺齿缺口，并将合格或剔除结果送入页面、统计和执行机构。
+
+  \vspace{.9em}
+  \centering
+  \begin{tikzpicture}[node distance=.30cm]
+    \node[decision,text width=1.75cm,inner sep=3pt] (hardware) {载台、照明\\与相机视角};
+    \node[flow,text width=1.65cm,inner sep=3pt,right=of hardware] (capture) {相机取帧};
+    \node[flow,text width=1.75cm,inner sep=3pt,right=of capture] (locate) {Model1 定位\\裁剪 ROI};
+    \node[flow,text width=2.05cm,inner sep=3pt,right=of locate] (specialists) {Scratch / Missing Hole\\独立阈值后 OR};
+    \node[flow,text width=1.85cm,inner sep=3pt,right=of specialists] (output) {Web、统计\\串口输出};
+    \node[decision,text width=1.8cm,inner sep=3pt,right=of output] (acceptance) {整机验收\\精度、速度、稳定性};
+    \draw[line] (hardware) -- (capture);
+    \draw[line] (capture) -- (locate);
+    \draw[line] (locate) -- (specialists);
+    \draw[line] (specialists) -- (output);
+    \draw[line] (output) -- (acceptance);
+  \end{tikzpicture}
+
+  \vspace{1em}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.31\textwidth}
+      \textbf{第一代整机已经完成}\par
+      输送、双相机、Jetson、Web和分拣已经形成实物链路。
+    \end{column}
+    \begin{column}{.31\textwidth}
+      \textbf{软件完成整套检测流程}\par
+      定位、双专项判断、解释信息和输出链路已经连通。
+    \end{column}
+    \begin{column}{.31\textwidth}
+      \textbf{联合验证最终能力}\par
+      在固定设备条件下检查漏检、误报、节拍和长期运行情况。
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \small 第一代实物已经验证完整路线；优化结构的成像质量、重复性和整机效果仍需实验确认。
+\end{frame}
+
+\section{软件}
+
+% 4. Current state
+\subsection{阶段现状}
+\SoftwareNav{1}
+\GearProSetMinorProgressRange{4}{2}
+\begin{frame}{软件阶段现状}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.46\textwidth}
+      \textbf{已实现}
+      \begin{itemize}
+        \item Model1 定位与 4\% ROI 外扩
+        \item Scratch V5 与 Missing Hole V1
+        \item 独立阈值与最终 OR 
+        \item Web 控制台、数据统计和串口输出
+        \item 模型文件完整性检查，异常判断
+      \end{itemize}
+
+      \vspace{.25em}
+      \textbf{仍待验收}
+      \begin{itemize}
+        \item 真实结构与照明下的完整流程结果
+      \end{itemize}
+    \end{column}
+    \begin{column}{.51\textwidth}
+      \centering
+      % TODO: replace with the original high-resolution screenshot when available.
+      \includegraphics[width=\linewidth,height=.61\textheight,keepaspectratio]{pic/gearpro/web_console.png}
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \centering
+  \textcolor{seugreen}{\large 结论：整套软件流程已运行，模型和真实设备尚未完成生产验收}
+\end{frame}
+
+% 5. Tasks and metrics
+\begin{frame}{任务与评价标准}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.49\textwidth}
+      {\large\bfseries 三个视觉任务}
+
+      \vspace{.55em}
+      \textbf{定位}\par
+      Model1 找到齿轮位置，从而得到 ROI。
+
+      \vspace{.45em}
+      \textbf{划痕}\par
+      识别低对比、局部纹理型缺陷。
+
+      \vspace{.45em}
+      \textbf{缺口}\par
+      识别齿形和轮廓的结构变化。
+
+      \vspace{.5em}
+      \begin{exampleblock}{最终结果怎样计算}
+        从原始画面开始统计，没找到齿轮、ROI 偏移，或结果输出失败，都算作检测失败。
+      \end{exampleblock}
+    \end{column}
+    \begin{column}{.47\textwidth}
+      {\large\bfseries 评价指标}
+
+      \vspace{.55em}
+      \renewcommand{\arraystretch}{1.35}
+      \begin{tabularx}{\linewidth}{>{\bfseries\color{seugreen}}l X}
+        Recall & 真实缺陷中被检出的比例，反映漏检风险 \\
+        FPR & 正常样本被误判为缺陷的比例，反映误剔除风险 \\
+        Precision & 判为缺陷的结果中真正缺陷的比例 \\
+        mAP & 辅助框质量，不直接等于工件判定能力 \\
+      \end{tabularx}
+
+      \vspace{.8em}
+      \centering
+      {\color{seugreen}\large\bfseries 阶段目标}
+
+      \vspace{.25em}
+      {\Large Recall $\geq 0.95$}\qquad
+      {\Large FPR $\leq 0.20$}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% 6. Pipeline
+\subsection{流程与数据}
+\SoftwareNav{2}
+\GearProSetMinorProgressRange{6}{3}
+\begin{frame}{当前视觉处理流程}
+  \centering
+  \resizebox{.96\textwidth}{!}{%
+    \begin{tikzpicture}[node distance=.65cm and .6cm]
+      \node[flow] (input) {相机或\\测试视频};
+      \node[flow,right=of input] (loc) {Model1\\齿轮定位};
+      \node[flow,right=of loc] (roi) {定位框外扩 4\%\\裁剪 ROI};
+      \node[flowwide,right=of roi] (spec) {Scratch V5\\Missing Hole V1};
+      \node[decision,right=of spec] (judge) {各自校准\\独立过阈值};
+      \node[decision,right=of judge] (or) {最终 OR\\合格或剔除};
+      \draw[line] (input) -- (loc);
+      \draw[line] (loc) -- (roi);
+      \draw[line] (roi) -- (spec);
+      \draw[line] (spec) -- (judge);
+      \draw[line] (judge) -- (or);
+    \end{tikzpicture}%
+  }
+
+  \vspace{1.0em}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.31\textwidth}
+      \textbf{多个齿轮}
+
+      逐个生成 ROI，任意齿轮命中任意专项，整帧判为不合格。
+    \end{column}
+    \begin{column}{.31\textwidth}
+      \textbf{没有齿轮}
+
+      不计数，不发送串口结果，避免无效输出。
+    \end{column}
+    \begin{column}{.31\textwidth}
+      \textbf{测试视频}
+
+      主动禁用串口，防止测试素材触发真实执行机构。
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \centering
+  同一推理结果同时进入 \textbf{Web、统计和串口}，各模块不重复计算判定。
+\end{frame}
+
+% 7. Data split
+\begin{frame}{数据拆分与锁定测试}
+  \centering
+  \begin{tikzpicture}[node distance=1.15cm]
+    \node[flowwide] (train) {训练集\\更新模型参数};
+    \node[flowwide,right=of train] (val) {验证集\\选择结构、校准与阈值};
+    \node[decision,right=of val] (test) {锁定测试\\配置确定后只使用一次};
+    \draw[line] (train) -- (val);
+    \draw[line] (val) -- (test);
+  \end{tikzpicture}
+
+  \vspace{1em}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.48\textwidth}
+      \textbf{为什么不能随机按图片拆分}
+      \begin{itemize}
+        \item 连续帧和相近角度高度相似
+        \item 同一工件纹理可能跨集合出现
+        \item 验证分数会虚高
+      \end{itemize}
+    \end{column}
+    \begin{column}{.48\textwidth}
+      \textbf{当前隔离方法}
+      \begin{itemize}
+        \item SHA256 检查精确重复
+        \item dHash 发现视觉近似项
+        \item 结合序号、宽高比和灰度相关性建组
+        \item 同组不跨训练、验证和测试集合
+      \end{itemize}
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \begin{alertblock}{锁定测试的使用规则}
+    锁定测试只用于最终检查。结果一旦查看，就不再用这批数据调整温度、融合权重或阈值。
+  \end{alertblock}
+\end{frame}
+
+% 8. Difficult labels
+\begin{frame}{Difficult 样本处理}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.46\textwidth}
+      \vspace{.35em}
+      \begin{block}{保留 difficult 样本}
+        保留 difficult 框，让训练集包含全部已标注缺陷。
+      \end{block}
+
+      \vspace{.55em}
+      \begin{block}{排除 difficult 样本}
+        删除 difficult 框；若一张图片只剩 difficult 缺陷，则整张图片退出训练。
+      \end{block}
+    \end{column}
+    \begin{column}{.49\textwidth}
+      \textbf{必须避免的错误}
+
+      \vspace{.5em}
+      \begin{alertblock}{假负样本}
+        删除缺陷框后继续把图片当作正常样本，会让模型把真实缺陷学习成正常外观。
+      \end{alertblock}
+
+      \vspace{.55em}
+      \textbf{统一评价}
+      \begin{itemize}
+        \item 验证集和测试集保留完整真值
+        \item 不同训练方法使用相同的评价方式
+        \item 结果显示 oblique 缺陷类型才是主要问题
+      \end{itemize}
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \centering
+  \textcolor{seugreen}{\large 数据处理同时避免图像泄漏和标签含义错误}
+\end{frame}
+
+% 9. ROI
+\subsection{架构决策}
+\SoftwareNav{3}
+\GearProSetMinorProgressRange{9}{2}
+\begin{frame}{决策一：先定位，再识别缺陷}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.45\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \node[flowwide,text width=3.8cm,minimum height=2.1cm] (full) {整张图直接缩放\\背景占去大量像素\\划痕细节随之变少};
+        \node[decision,text width=3.8cm,below=1.0cm of full,minimum height=1.55cm] (loss) {多次下采样后\\缺陷特征可能丢失};
+        \draw[line] (full) -- (loss);
+      \end{tikzpicture}
+    \end{column}
+    \begin{column}{.08\textwidth}
+      \centering\vspace{2.4em}{\color{seugold}\Huge$\Rightarrow$}
+    \end{column}
+    \begin{column}{.45\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \node[flowwide,text width=3.8cm,minimum height=2.1cm] (loc) {先用 Model1 定位\\四周外扩 4\%};
+        \node[flowwide,text width=3.8cm,below=1.0cm of loc,minimum height=1.55cm] (roi) {只裁出齿轮区域\\保留表面和边缘细节};
+        \draw[line] (loc) -- (roi);
+      \end{tikzpicture}
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.48\textwidth}
+      \textbf{优点：}减少背景和摆放角度的干扰，把输入分辨率集中到齿轮区域。
+    \end{column}
+    \begin{column}{.48\textwidth}
+      \textbf{缺点：}Model1 漏定位仍算作漏检，4\% 外扩还要在真实设备上验证。
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% 10. Unified versus specialists
+\begin{frame}{决策二：统一模型转向双专项}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.43\textwidth}
+      \centering
+      {\large\bfseries 统一模型}
+
+      \vspace{.7em}
+      \begin{tabular}{lr}
+        Recall & 0.7606 \\
+        FPR & 0.4177 \\
+      \end{tabular}
+
+      \vspace{1.0em}
+      同时识别细小划痕和结构缺口，两类特征差别较大，当前模型难以兼顾。
+    \end{column}
+    \begin{column}{.12\textwidth}
+      \centering\vspace{2em}{\color{seugold}\Huge$\Rightarrow$}
+    \end{column}
+    \begin{column}{.43\textwidth}
+      \centering
+      {\large\bfseries 双专项 OR}
+
+      \vspace{.7em}
+      \begin{tabular}{lr}
+        Recall & \textbf{0.8873} \\
+        FPR & \textbf{0.2278} \\
+      \end{tabular}
+
+      \vspace{1.0em}
+      两类缺陷分别选择输入尺寸、检测结构和判断阈值。
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \begin{block}{为什么分成两个模型}
+    划痕主要是小面积、低对比的纹理变化，缺齿缺口主要改变轮廓。当前分开识别效果更好，数据集增加后仍可重新测试统一模型。
+  \end{block}
+\end{frame}
+
+% 11. Scratch architecture
+\subsection{双专项}
+\SoftwareNav{4}
+\GearProSetMinorProgressRange{11}{5}
+\begin{frame}{Scratch V5：整体分类与局部检测互补}
+  \centering
+  \resizebox{.92\textwidth}{!}{%
+    \begin{tikzpicture}[node distance=.55cm and .65cm]
+      \node[flowwide] (roi) {齿轮 ROI};
+      \node[flowwide,above right=.15cm and 1.2cm of roi] (eff) {EfficientNet-B0\\384 输入};
+      \node[flowwide,right=1.2cm of roi] (res) {ResNet18\\384 输入};
+      \node[flowwide,below right=.15cm and 1.2cm of roi] (det) {YOLO26-P2\\960 输入};
+      \node[decision,right=1.25cm of res] (cal) {校正三路分数};
+      \node[decision,right=1.0cm of cal] (fuse) {得到综合分数};
+      \draw[line] (roi) -- (eff);
+      \draw[line] (roi) -- (res);
+      \draw[line] (roi) -- (det);
+      \draw[line] (eff.east) -- (cal.west);
+      \draw[line] (res) -- (cal);
+      \draw[line] (det.east) -- (cal.west);
+      \draw[line] (cal) -- (fuse);
+    \end{tikzpicture}%
+  }
+
+  \vspace{.7em}
+  \begin{exampleblock}{最终分数计算}
+    \centering
+    $p_{\mathrm{scratch}} = 0.25\,p_{\mathrm{cls}} + 0.75\,p_{\mathrm{det}}$
+    \qquad
+    阈值 $= 0.3003$
+  \end{exampleblock}
+
+  \vfill
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.48\textwidth}
+      两个分类器判断整张齿轮图像，P2 检测器重点寻找细小划痕。
+    \end{column}
+    \begin{column}{.48\textwidth}
+      较低的检测分数也参与最终计算；标识框使用更高显示门槛，只供人工查看。
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% 12. Scratch result
+\begin{frame}{Scratch V5 锁定测试结果}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.39\textwidth}
+      \centering
+      % TODO: replace with the original high-resolution scratch image when available.
+      \includegraphics[width=.82\linewidth,height=.59\textheight,keepaspectratio]{pic/gearpro/scratch_reject.jpg}
+      \smallnote{现有划痕检测示例}
+    \end{column}
+    \begin{column}{.57\textwidth}
+      \vspace{.5em}
+      \begin{columns}[T,onlytextwidth]
+        \begin{column}{.32\textwidth}
+          \centering {\color{seugreen}\LARGE\bfseries 0.8065}\\Recall
+        \end{column}
+        \begin{column}{.32\textwidth}
+          \centering {\color{seugreen}\LARGE\bfseries 0.5556}\\Precision
+        \end{column}
+        \begin{column}{.32\textwidth}
+          \centering {\color{seugreen}\LARGE\bfseries 0.1681}\\FPR
+        \end{column}
+      \end{columns}
+
+      \vspace{1.0em}
+      \centering
+      \begin{tabular}{ccccc}
+        \toprule
+        样本 & TP & FP & TN & FN \\
+        \midrule
+        150 & 25 & 20 & 99 & 6 \\
+        \bottomrule
+      \end{tabular}
+
+      \vspace{1em}
+      \begin{itemize}
+        \item 漏检（FN）：颜色浅、面积小或形态不稳定的划痕
+        \item 误报（FP）：侧齿高光和正常加工纹
+      \end{itemize}
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \centering
+  \textcolor{seugreen}{局部检测器更容易发现细小划痕，但仍会把高光和正常加工纹看成缺陷}
+\end{frame}
+
+% 13. Missing architecture
+\begin{frame}{Missing Hole V1：结构缺陷专项}
+  \centering
+  \resizebox{.92\textwidth}{!}{%
+    \begin{tikzpicture}[node distance=.55cm and .65cm]
+      \node[flowwide] (roi) {齿轮 ROI};
+      \node[flowwide,above right=.15cm and 1.2cm of roi] (eff) {EfficientNet-B0\\512 输入};
+      \node[flowwide,right=1.2cm of roi] (res) {ResNet18\\384 输入};
+      \node[flowwide,below right=.15cm and 1.2cm of roi] (det) {标准 YOLO26n\\960 输入};
+      \node[decision,right=1.25cm of res] (cal) {校正三路分数};
+      \node[decision,right=1.0cm of cal] (fuse) {得到综合分数};
+      \draw[line] (roi) -- (eff);
+      \draw[line] (roi) -- (res);
+      \draw[line] (roi) -- (det);
+      \draw[line] (eff.east) -- (cal.west);
+      \draw[line] (res) -- (cal);
+      \draw[line] (det.east) -- (cal.west);
+      \draw[line] (cal) -- (fuse);
+    \end{tikzpicture}%
+  }
+
+  \vspace{.7em}
+  \begin{exampleblock}{最终分数计算}
+    \centering
+    $p_{\mathrm{missing}} = 0.50\,p_{\mathrm{cls}} + 0.50\,p_{\mathrm{det}}$
+    \qquad
+    阈值 $= 0.3413$
+  \end{exampleblock}
+
+  \vfill
+  \begin{block}{为什么没有使用 P2}
+    在 Missing Hole 验证中，P2 没有稳定优于标准检测结构，因此采用结果更稳定、结构更简单的方案。
+  \end{block}
+\end{frame}
+
+% 14. Missing result
+\begin{frame}{Missing Hole V1 锁定测试结果}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.36\textwidth}
+      \centering
+      % TODO: replace with the original high-resolution oblique image when available.
+      \includegraphics[width=.9\linewidth,height=.54\textheight,keepaspectratio]{pic/gearpro/oblique_missing.jpg}
+      \smallnote{边角缺齿（oblique）示例}
+    \end{column}
+    \begin{column}{.6\textwidth}
+      \begin{columns}[T,onlytextwidth]
+        \begin{column}{.32\textwidth}
+          \centering {\color{seugreen}\LARGE\bfseries 0.8182}\\Recall
+        \end{column}
+        \begin{column}{.32\textwidth}
+          \centering {\color{seugreen}\LARGE\bfseries 0.9000}\\Precision
+        \end{column}
+        \begin{column}{.32\textwidth}
+          \centering {\color{seugreen}\LARGE\bfseries 0.0377}\\FPR
+        \end{column}
+      \end{columns}
+
+      \vspace{.8em}
+      \textbf{不同位置缺齿的 Recall}
+
+      \vspace{.35em}
+      \begin{tabular}{@{}l@{\hspace{.8em}}l@{\hspace{.8em}}r@{}}
+        bottom & \textcolor{seugreen}{\rule{3.20cm}{1.1ex}} & 0.9167 \\
+        side & \textcolor{seugreen}{\rule{3.49cm}{1.1ex}} & 1.0000 \\
+        oblique & \textcolor{seugold}{\rule{2.05cm}{1.1ex}} & \textbf{0.5882} \\
+      \end{tabular}
+
+      \vspace{.8em}
+      TP/FP/TN/FN：36/4/102/8
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \begin{alertblock}{当前主要问题}
+    是否计入 difficult 样本对结果影响很小；oblique 类型不够清楚，难以检测。
+  \end{alertblock}
+\end{frame}
+
+% 15. OR decision
+\begin{frame}{决策三：两个模型分别判断后再合并}
+  \centering
+  \begin{tikzpicture}[node distance=1.1cm and 1.05cm]
+    \node[flowwide,text width=3.75cm] (scratch) {Scratch 概率\\{\scriptsize$p_{\mathrm{scratch}} \geq 0.3003$}};
+    \node[flowwide,text width=3.75cm,below=of scratch] (missing) {Missing Hole 概率\\{\scriptsize$p_{\mathrm{missing}} \geq 0.3413$}};
+    \coordinate (join) at ($(scratch.east)!0.5!(missing.east)+(0.75cm,0)$);
+    \node[decision,right=1.0cm of join] (or) {任一模型判为缺陷};
+    \node[flowwide,right=1.25cm of or] (final) {最终结果\\合格或不合格};
+    \draw[very thick,draw=seugreen] (scratch.east) -| (join);
+    \draw[very thick,draw=seugreen] (missing.east) -| (join);
+    \draw[line] (join) -- (or.west);
+    \draw[line] (or) -- (final);
+  \end{tikzpicture}
+
+  \vspace{1em}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.47\textwidth}
+      \textbf{为什么分别判断}
+
+      两个模型识别的缺陷不同，分数范围也不同，不能直接相加后使用同一个阈值。
+    \end{column}
+    \begin{column}{.47\textwidth}
+      \textbf{合并后的影响}
+
+      一个模型可以补回另一个模型漏掉的缺陷，但两个模型的误报也会累积。
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \centering
+  同一齿轮同时命中两个专项时保留两个原因，统计和串口只输出一次。
+\end{frame}
+
+% 16. Core results
+\subsection{结果分析}
+\SoftwareNav{5}
+\GearProSetMinorProgressRange{16}{4}
+\begin{frame}{核心锁定测试结果}
+  \centering
+  \renewcommand{\arraystretch}{1.3}
+  \begin{tabular}{lrrrr}
+    \toprule
+    方案 & Recall & Precision & FPR & TP/FP/TN/FN \\
+    \midrule
+    Scratch V5 专项 & 0.8065 & 0.5556 & 0.1681 & 25/20/99/6 \\
+    Missing Hole V1 专项 & 0.8182 & 0.9000 & 0.0377 & 36/4/102/8 \\
+    \rowcolor{seuyellowlight}
+    双专项 OR & \textbf{0.8873} & \textbf{0.7778} & \textbf{0.2278} & 63/18/61/8 \\
+    统一 EfficientNet-B0 & 0.7606 & 0.6207 & 0.4177 & 54/33/46/17 \\
+    \bottomrule
+  \end{tabular}
+
+  \vspace{1.2em}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.47\textwidth}
+      \textbf{同一批数据下的结果}
+
+      两个模型合并后相比统一模型漏检率明显降低，正常件误报率也明显减少。
+    \end{column}
+    \begin{column}{.47\textwidth}
+      \textbf{需要注意的数字}
+
+      两个模型使用的正常样本范围不同，各自的 FPR 不能直接相加。
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \centering
+  \textcolor{seugreen}{当前方案优于统一模型，但仍未达到生产目标}
+\end{frame}
+
+% 17. Target gap
+\begin{frame}{目标差距与阈值使用规则}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.48\textwidth}
+      \centering
+      {\small Recall}
+
+      \vspace{.25em}
+      {\color{seugreen}\Huge\bfseries 0.8873}
+
+      \vspace{.15em}
+      目标 0.95，仍差 \textbf{0.0627}
+    \end{column}
+    \begin{column}{.48\textwidth}
+      \centering
+      {\small FPR}
+
+      \vspace{.25em}
+      {\color{seugreen}\Huge\bfseries 0.2278}
+
+      \vspace{.15em}
+      上限 0.20，超出 \textbf{0.0278}
+    \end{column}
+  \end{columns}
+
+  \vspace{1em}
+  \begin{alertblock}{不能继续用当前测试集调整阈值}
+    这批数据已经用于最终检查。如果看过结果后继续调阈值，得到的提升可能只适用于这批数据，还可能明显增加误报。
+  \end{alertblock}
+
+  \vfill
+  \centering
+  下一轮应使用新数据选择模型和阈值，确定后再建立一批从未用于调整的新测试数据。
+\end{frame}
+
+% 18. Error patterns
+\begin{frame}{主要错误模式}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.31\textwidth}
+      \textbf{浅划痕漏检}
+
+      缺陷纹理接近正常加工纹。
+    \end{column}
+    \begin{column}{.31\textwidth}
+      \textbf{oblique 漏检}
+
+      单一视角下结构变化不稳定。
+    \end{column}
+    \begin{column}{.31\textwidth}
+      \textbf{高光正常件误报}
+
+      侧齿反光和加工纹触发划痕分支。
+    \end{column}
+  \end{columns}
+
+  \vspace{.65em}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.31\textwidth}
+      \textcolor{seugreen}{\bfseries 优化方法}\par
+      \vspace{.2em}
+      优先稳定低角度照明，并补采真实弱划痕。
+    \end{column}
+    \begin{column}{.31\textwidth}
+      \textcolor{seugreen}{\bfseries 优化方法}\par
+      \vspace{.2em}
+      优先验证背光、第二相机或转台。
+    \end{column}
+    \begin{column}{.31\textwidth}
+      \textcolor{seugreen}{\bfseries 优化方法}\par
+      \vspace{.2em}
+      需要调整光源并扩充真实负样本。
+    \end{column}
+  \end{columns}
+
+  \vspace{.55em}
+  \centering
+  % TODO: replace this montage with original full-resolution error cases when available.
+  \includegraphics[width=.88\linewidth,height=.42\textheight,keepaspectratio]{pic/gearpro/error_cases.jpg}
+  \smallnote{现有错误样本组合图，后续替换为原始单图}
+\end{frame}
+
+% 19. Error-analysis conclusion
+\begin{frame}{软件结果的分析}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.31\textwidth}
+      \centering
+      {\color{seugreen}\Large\bfseries 实验}
+
+      \vspace{.5em}
+      已避免相似图片跨集合，并建立锁定测试和 Recall/FPR 双重要求。
+    \end{column}
+    \begin{column}{.31\textwidth}
+      \centering
+      {\color{seugreen}\Large\bfseries 模型}
+
+      \vspace{.5em}
+      已形成 Model1 定位与 Scratch、Missing Hole 双专项方案。
+    \end{column}
+    \begin{column}{.31\textwidth}
+      \centering
+      {\color{seugreen}\Large\bfseries 差距}
+
+      \vspace{.5em}
+      联合 Recall 0.8873、FPR 0.2278，真实设备结果仍待验收。
+    \end{column}
+  \end{columns}
+
+  \vspace{1.1em}
+  \begin{block}{当前判断}
+    浅划痕、斜视缺口和高光误报都与图像是否看得清、样本是否覆盖充分有关。下一阶段先验证成像条件，再决定是否需要更复杂的模型。
+  \end{block}
+
+  \vfill
+  \begin{exampleblock}{后续软件内容}
+    继续说明实时架构、模型发布、现场演示与优化路线，再进入硬件结构和联合验收。
+  \end{exampleblock}
+\end{frame}
+
+% 20. Runtime architecture
+\subsection{工程实现}
+\SoftwareNav{6}
+\GearProSetMinorProgressRange{20}{4}
+\begin{frame}{软件如何持续处理实时画面}
+  \centering
+  \begin{tikzpicture}[node distance=.35cm]
+    \node[flow,text width=1.9cm,inner sep=3pt] (camera) {Camera\\Capture\\只保留最新帧};
+    \node[flow,text width=1.8cm,inner sep=3pt,right=of camera] (latest) {Latest\\Frame\\交付最新图像};
+    \node[flow,text width=1.95cm,inner sep=3pt,right=of latest] (worker) {Inspection\\Worker\\独立线程推理};
+    \node[decision,text width=1.85cm,inner sep=3pt,right=of worker] (result) {Observation\\唯一结果对象};
+    \node[flow,text width=2.0cm,inner sep=3pt,right=of result] (output) {Web、统计\\串口输出};
+    \draw[line] (camera) -- (latest);
+    \draw[line] (latest) -- (worker);
+    \draw[line] (worker) -- (result);
+    \draw[line] (result) -- (output);
+  \end{tikzpicture}
+
+  \vspace{1.1em}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.47\textwidth}
+      \textbf{后台处理方式}
+      \begin{itemize}
+        \item 图像采集和模型计算在独立后台线程运行
+        \item 暂停、恢复和浏览器重连复用已加载模型
+        \item 原图与标注图各保存一份，多台浏览器直接共用
+      \end{itemize}
+    \end{column}
+    \begin{column}{.47\textwidth}
+      \textbf{页面使用方式}
+      \begin{itemize}
+        \item 最新帧优先，避免排队造成结果滞后
+        \item 浏览器只负责查看和控制，不拥有检测任务
+        \item 页面刷新或临时断线不终止后台检测
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% 21. Bounded modes
+\begin{frame}{运行档位与异常保护}
+  \renewcommand{\arraystretch}{1.25}
+  \begin{tabularx}{\linewidth}{>{\bfseries}l X X}
+    \toprule
+    档位 & 当前行为 & 适用条件 \\
+    \midrule
+    FULL & 运行完整定位与双专项链路 & 正常检测与正式测试 \\
+    SPARSE & 增加推理间隔，模型组成不变 & 资源或温度压力较高 \\
+    SAFE\_STOP & 停止检测，不继续输出有效结果 & 必要模块失败或状态非法 \\
+    \bottomrule
+  \end{tabularx}
+
+  \vspace{1em}
+  \begin{block}{出现这些异常时停止检测}
+    必要模型未加载、没有有效齿轮区域、模型文件校验失败、计算结果异常或显存不足时停止检测。尚未实现的档位必须明确显示“不可用”。
+  \end{block}
+
+  \vfill
+  SystemSnapshot v2 汇总系统、相机、模型、串口和任务状态。当前可以查看状态并在部分异常下安全停机，但还不能自动处理所有故障。
+\end{frame}
+
+% 22. Model package
+\begin{frame}{模型发布包：配置与文件一一对应}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.44\textwidth}
+      \begin{block}{配置清单记录的内容}
+        \begin{itemize}
+          \item 版本、模型类型与输入尺寸
+          \item 预处理、温度与融合权重
+          \item 判断阈值和模型文件位置
+          \item 模型文件校验值与对应代码版本
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{.51\textwidth}
+      \begin{exampleblock}{启动时检查}
+        \begin{itemize}
+          \item 配置与权重不匹配时拒绝启动
+          \item 分类器从本地加载模型文件，不依赖在线下载
+          \item 加载后先试运行一次，尽早发现错误
+          \item 分数校正参数、融合比例和阈值固定在版本内
+        \end{itemize}
+      \end{exampleblock}
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \centering
+  \textcolor{seugreen}{\large 每次结果都能对应到具体配置和模型文件，才能稳定复现}
+\end{frame}
+
+% 23. Single source of truth
+\begin{frame}{一次检测，页面、统计和串口共用同一结果}
+  \centering
+  \begin{tikzpicture}[node distance=.75cm]
+    \node[decision,text width=3.6cm] (obs) {Observation\\定位置信度、专项概率、实际阈值\\分支概率、辅助框、拒绝原因、耗时};
+    \node[flow,right=1.15cm of obs,yshift=1.25cm] (web) {Web 展示};
+    \node[flow,right=1.15cm of obs] (stats) {运行统计};
+    \node[flow,right=1.15cm of obs,yshift=-1.25cm] (serial) {串口输出};
+    \draw[line] (obs.east) -- ++(.5,0) |- (web.west);
+    \draw[line] (obs.east) -- (stats.west);
+    \draw[line] (obs.east) -- ++(.5,0) |- (serial.west);
+  \end{tikzpicture}
+
+  \vspace{.8em}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.47\textwidth}
+      \textbf{结果保持一致}
+
+      页面、统计和串口不各自重复判断。阈值改变后，已有记录保持不变。
+    \end{column}
+    \begin{column}{.47\textwidth}
+      \textbf{谁可以操作}
+
+      多台设备可以同时查看，但一次只允许一个已登录会话操作，操作权保持 30 秒。修改设置、切换数据源和启停检测都需要操作权。
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \small 当前网页服务只适合可信的独立局域网；如果跨网段或接入公网，需要额外配置 HTTPS 和访问保护。
+\end{frame}
+
+% 24. Demo
+\subsection{优化路线}
+\SoftwareNav{7}
+\GearProSetMinorProgressRange{24}{4}
+\begin{frame}{现场演示流程}
+  \vspace{.8em}
+  \centering
+  \renewcommand{\arraystretch}{1.55}
+  \begin{tabular}{>{\bfseries\color{seugreen}}r p{11.2cm}}
+    1 & 启动 Jetson 服务并完成模型预热 \\
+    2 & 检查服务、相机、模型和串口状态 \\
+    3 & 获取操作权，启动实时相机 \\
+    4 & 上传固定视频，依次展示正常与两类缺陷 \\
+    5 & 核对概率、阈值、拒绝原因、耗时和统计 \\
+    6 & 验证视频模式禁用串口，再返回实时相机 \\
+  \end{tabular}
+\end{frame}
+
+% 25. Imaging and data optimization
+\begin{frame}{优化路线一：成像、数据与实验设计}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.47\textwidth}
+      \textbf{先固定输入条件}
+      \begin{itemize}
+        \item 记录工作距离、焦距、曝光、照明与姿态
+        \item 补采弱划痕正样本和高光、加工纹、灰尘、轻微失焦负样本
+        \item 对缺口比较低角度光、背光和补充视角
+      \end{itemize}
+    \end{column}
+    \begin{column}{.47\textwidth}
+      \textbf{再统一实验方法}
+      \begin{itemize}
+        \item 同一工件的连续帧、不同照明和视角归入同一组
+        \item 图像增强只模拟现场可能变化，并确保最小缺陷仍看得见
+        \item 每轮只改变一个主要变量，同时报告总体与关键子组
+      \end{itemize}
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \begin{block}{判断顺序}
+    先确认原始图像是否包含足够缺陷信息，再决定重新训练、调整阈值或增加模型复杂度。
+  \end{block}
+\end{frame}
+
+% 26. Geometry and model experiments
+\begin{frame}{优化路线二：齿轮位置校正与模型对比}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.45\textwidth}
+      \begin{block}{统一齿轮位置和方向}
+        \setlength{\rightskip}{.6em}
+        \begin{itemize}
+          \item 在 ROI 后估计齿轮中心和直径
+          \item 比较不校正、旋转校正与极坐标展开
+          \item 检查校正后是否更容易稳定识别划痕和缺口
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{.5\textwidth}
+      \begin{block}{逐项比较模型结构}
+        \setlength{\rightskip}{.6em}
+        \begin{itemize}
+          \item Scratch 比较完整 P2、减通道 P2 与轻量分支
+          \item 分别比较融合层数、输出通道数和注意力模块
+          \item 只有精度不下降且速度提高时才删除 P5
+          \item 设备算力仍不足时，再尝试用大模型指导小模型训练
+        \end{itemize}
+      \end{block}
+    \end{column}
+  \end{columns}
+
+  \vfill
+  每组实验同步报告 Recall、FPR、Precision、关键子组、延迟、显存、参数量与功耗，避免同时改变多个变量后只展示最佳结果。
+\end{frame}
+
+% 27. Jetson deployment
+\begin{frame}{优化路线三：Jetson 运行速度与部署}
+  \centering
+  \begin{tikzpicture}[node distance=.38cm]
+    \node[flow,text width=2.0cm] (pt) {.pt\\当前精度与速度};
+    \node[decision,text width=2.05cm,right=of pt] (m1) {Model1\\FP16 TensorRT};
+    \node[flow,text width=2.0cm,right=of m1] (retest) {分项性能复测};
+    \node[flow,text width=2.05cm,right=of retest] (special) {优先转换\\最耗时的模型};
+    \node[flow,text width=2.05cm,right=of special] (later) {必要时评估 INT8\\剪枝与复制优化};
+    \draw[line] (pt) -- (m1);
+    \draw[line] (m1) -- (retest);
+    \draw[line] (retest) -- (special);
+    \draw[line] (special) -- (later);
+  \end{tikzpicture}
+
+  \vspace{1em}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.47\textwidth}
+      \textbf{分步骤记录耗时}
+
+      分开记录取帧、定位、分类、检测、结果合并、绘图和网页传输的耗时，同时记录每秒处理量、显存、功耗和温度。
+    \end{column}
+    \begin{column}{.47\textwidth}
+      \textbf{部署时需要注意}
+
+      TensorRT 文件与 GPU、JetPack 和 TensorRT 版本相关，必须在目标 NX 上生成。使用 INT8 前要准备独立校准数据，并完整比较转换前后的精度。
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% 28. Software conclusion
+\subsection{阶段结论}
+\SoftwareNav{8}
+\GearProSetMinorProgressRange{28}{1}
+\begin{frame}{软件阶段结论}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.23\textwidth}
+      \centering\textbf{实验}\par\vspace{.4em}
+      已避免相似图片跨集合，并建立锁定测试和 Recall/FPR 双重要求。
+    \end{column}
+    \begin{column}{.23\textwidth}
+      \centering\textbf{模型}\par\vspace{.4em}
+      Model1 与 Scratch、Missing Hole 两个专项已经形成当前对照方案。
+    \end{column}
+    \begin{column}{.23\textwidth}
+      \centering\textbf{工程}\par\vspace{.4em}
+      模型文件、后台处理、网页、统计和串口已经连通，结果可以追溯。
+    \end{column}
+    \begin{column}{.23\textwidth}
+      \centering\textbf{差距}\par\vspace{.4em}
+      Recall 0.8873、FPR 0.2278，真实设备数据尚未完成。
+    \end{column}
+  \end{columns}
+
+  \vspace{1.1em}
+  \begin{block}{进入硬件实验的理由}
+    当前主要错误与缺陷是否拍得清楚、样本是否覆盖充分有关。下一阶段先固定成像条件，再重新比较模型和阈值。
+  \end{block}
+\end{frame}
+
+% 29. First-generation system overview
+\section{硬件}
+\subsection{系统总览}
+\HardwareNav{1}
+\GearProSetMinorProgressRange{29}{2}
+\begin{frame}{第一代系统总览}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.58\textwidth}
+      \centering
+      \includegraphics[width=\linewidth,height=.64\textheight,keepaspectratio]{pic/gearpro/hardware_system_overview.jpeg}
+      \smallnote{第一代整机实物：输送机构、检测区、Jetson与监控端}
+    \end{column}
+    \begin{column}{.38\textwidth}
+      \textbf{已经完成}
+      \begin{itemize}
+        \item 齿轮自动输送
+        \item 双相机图像采集
+        \item Jetson现场检测
+        \item Web显示与结果统计
+        \item 分类分拣与收集
+      \end{itemize}
+
+      \vspace{.45em}
+      \begin{block}{完成状态}
+        第一代整机已有实物；后续结构与成像优化仍处于设计阶段。
+      \end{block}
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \centering
+  \textcolor{seugreen}{\large 已经完成从上料、检测到分拣的完整实物原型}
+\end{frame}
+
+% 30. System workflow
+\begin{frame}{系统工作流程}
+  \centering
+  \begin{tikzpicture}[node distance=.27cm]
+    \node[flow,text width=1.55cm] (feed) {齿轮输送};
+    \node[flow,text width=1.55cm,right=of feed] (capture) {双相机采集};
+    \node[flow,text width=1.55cm,right=of capture] (infer) {Jetson检测};
+    \node[flow,text width=1.55cm,right=of infer] (web) {结果处理\\Web显示};
+    \node[flow,text width=1.55cm,right=of web] (control) {控制信号};
+    \node[flow,text width=1.55cm,right=of control] (sort) {分拣与收集};
+    \draw[line] (feed) -- (capture);
+    \draw[line] (capture) -- (infer);
+    \draw[line] (infer) -- (web);
+    \draw[line] (web) -- (control);
+    \draw[line] (control) -- (sort);
+  \end{tikzpicture}
+
+  \vspace{1.15em}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.31\textwidth}
+      \textbf{工件流}\par\vspace{.3em}
+      齿轮从输送带进入检测区，完成检测后进入分拣机构。
+    \end{column}
+    \begin{column}{.31\textwidth}
+      \textbf{图像与结果流}\par\vspace{.3em}
+      相机把图像送入 Jetson，检测结果进入 Web 页面和统计模块。
+    \end{column}
+    \begin{column}{.31\textwidth}
+      \textbf{控制流}\par\vspace{.3em}
+      STM32、Jetson和执行机构之间传递启停、速度与分拣信号。
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \begin{block}{系统关系}
+    工件、检测结果和控制信号在同一流程中相互配合。
+  \end{block}
+\end{frame}
+
+% 31. Platform goals
+\subsection{平台目标}
+\HardwareNav{2}
+\GearProSetMinorProgressRange{31}{1}
+\begin{frame}{平台目标}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.47\textwidth}
+      \textbf{验证完整检测过程}
+      \begin{itemize}
+        \item 自动输送并稳定放置齿轮
+        \item 获取齿轮不同表面的图像
+        \item 在 Jetson 上完成现场检测
+        \item 实时显示图像、结果和统计
+        \item 按检测结果完成分类收集
+      \end{itemize}
+    \end{column}
+    \begin{column}{.47\textwidth}
+      \textbf{支持后续实验}
+      \begin{itemize}
+        \item 比较相机位置与工作距离
+        \item 比较轮廓光和表面光
+        \item 检查重复放件与结构稳定性
+        \item 判断第二相机或转台是否必要
+      \end{itemize}
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \begin{exampleblock}{平台作用}
+    平台既验证从工件进入到分类收集的完整过程，也为下一步成像和结构实验提供基础。
+  \end{exampleblock}
+\end{frame}
+
+% 32. Conveyor module
+\subsection{硬件模块}
+\HardwareNav{3}
+\GearProSetMinorProgressRange{32}{6}
+\begin{frame}{物体输送模块}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.55\textwidth}
+      \centering
+      \includegraphics[width=\linewidth,height=.62\textheight,keepaspectratio]{pic/gearpro/hardware_conveyor.jpeg}
+      \smallnote{第一代输送机构实物}
+    \end{column}
+    \begin{column}{.40\textwidth}
+      \textbf{已实现}
+      \begin{itemize}
+        \item 输送带将齿轮送入检测区
+        \item STM32控制启停和运行速度
+        \item 输送动作与采集、检测和分拣配合
+      \end{itemize}
+
+      \vspace{.55em}
+      \textbf{仍需改善}
+      \begin{itemize}
+        \item 工件进入视野时的位置和姿态
+        \item 运行速度与图像清晰度的配合
+      \end{itemize}
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \centering
+  \textcolor{seugreen}{输送功能已经实现，下一步重点提高重复定位精度}
+\end{frame}
+
+% 33. Acquisition module
+\begin{frame}{数据采集模块}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.42\textwidth}
+      \centering
+      \includegraphics[width=\linewidth,height=.65\textheight,keepaspectratio]{pic/gearpro/hardware_camera_stage.jpeg}
+      \smallnote{工业相机与透明载台实物}
+    \end{column}
+    \begin{column}{.53\textwidth}
+      \textbf{已实现}
+      \begin{itemize}
+        \item 两台工业相机采集齿轮不同表面
+        \item 透明亚克力板支撑工件，并为下方视角留出光路
+        \item 图像传入 Jetson 进行检测
+      \end{itemize}
+
+      \vspace{.45em}
+      \textbf{现有结构的边界}
+      \begin{itemize}
+        \item 相机位置和工作距离不便精细调节
+        \item 亚克力板可能产生反光、污染和划伤
+        \item 双相机减少盲区，但不能保证覆盖全部侧面缺陷
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% 34. Edge inference module
+\begin{frame}{智能检测模块}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.48\textwidth}
+      \textbf{Jetson承担现场计算}
+      \begin{itemize}
+        \item 接收工业相机图像
+        \item 完成齿轮定位与缺陷识别
+        \item 输出检测结果和控制信息
+        \item 不依赖远程服务器完成检测
+      \end{itemize}
+
+      \vspace{.65em}
+      \begin{block}{与软件部分的边界}
+        本页只说明 Jetson 在硬件链路中的作用；模型结构、阈值和检测指标不再重复。
+      \end{block}
+    \end{column}
+    \begin{column}{.46\textwidth}
+      \centering
+      \includegraphics[width=\linewidth,height=.62\textheight,keepaspectratio]{pic/gearpro/hardware_jetson}
+      \smallnote{第一代系统使用的 NVIDIA Jetson}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% 35. Data processing and monitoring
+\begin{frame}{数据处理与实时监控模块}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.56\textwidth}
+      \centering
+      \includegraphics[width=\linewidth,height=.60\textheight,keepaspectratio]{pic/gearpro/web_console.png}
+      \smallnote{当前 GearPro Web 控制台}
+    \end{column}
+    \begin{column}{.39\textwidth}
+      \textbf{当前功能}
+      \begin{itemize}
+        \item 显示实时画面和检测结果
+        \item 汇总合格、剔除和异常数量
+        \item 保存必要的结果记录
+        \item 查看运行状态并执行控制操作
+      \end{itemize}
+
+      \vspace{.55em}
+      \begin{block}{版本说明}
+        当前监控端采用 Web 页面，旧版 Qt 界面不再作为现阶段成果展示。
+      \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% 36. Sorting module
+\begin{frame}{分拣与收集模块}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.55\textwidth}
+      \centering
+      \includegraphics[width=\linewidth,height=.63\textheight,keepaspectratio]{pic/gearpro/hardware_sorter.jpeg}
+      \smallnote{旋转分拣平台与收集结构实物}
+    \end{column}
+    \begin{column}{.40\textwidth}
+      \textbf{已实现}
+      \begin{itemize}
+        \item 步进电机驱动旋转平台
+        \item 多个工位承接不同检测结果
+        \item 挡板将齿轮引导到对应位置
+        \item 平滑加减速降低齿轮甩出风险
+      \end{itemize}
+
+      \vspace{.7em}
+      \begin{exampleblock}{闭环结果}
+        检测结果能够转换为实际分拣动作。
+      \end{exampleblock}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% 37. First-generation summary
+\begin{frame}{第一代平台总结与现有不足}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.46\textwidth}
+      \textbf{已经验证}
+      \begin{itemize}
+        \item 完成整机实物搭建
+        \item 打通输送、采集、检测、Web显示和分拣流程
+        \item 验证双相机、边缘计算和自动分拣路线可行
+      \end{itemize}
+    \end{column}
+    \begin{column}{.50\textwidth}
+      \textbf{现有不足}
+      \begin{itemize}
+        \item 相机和光源的调节能力有限
+        \item 亚克力载台容易产生反光和污染
+        \item 重复放件的位置精度不足
+        \item 固定照明难以兼顾轮廓和表面缺陷
+        \item 斜向及侧面缺陷仍可能被遮挡
+      \end{itemize}
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \begin{block}{下一步}
+    保留已经打通的系统链路，重点改进成像条件和结构重复性。
+  \end{block}
+\end{frame}
+
+% 38. Overall optimization design
+\subsection{优化设计}
+\HardwareNav{4}
+\GearProSetMinorProgressRange{38}{4}
+\begin{frame}{整体结构优化设计}
+  \small
+  \centering
+  \begin{tikzpicture}[
+      node distance=.28cm,
+      scale=.88,
+      transform shape,
+      optline/.style={-{Latex[length=1.8mm]},thick,draw=seugreen}
+    ]
+    \node[flowwide,minimum height=.58cm,inner sep=2pt] (base) {稳定基座 / 立柱};
+    \node[flowwide,minimum height=.58cm,inner sep=2pt,below=of base] (clamp) {独立可调相机支架};
+    \node[flowwide,minimum height=.58cm,inner sep=2pt,below=of clamp] (camera) {顶部主相机};
+    \node[decision,minimum height=.58cm,inner sep=2pt,below=of camera] (gear) {待测齿轮};
+    \node[flowwide,minimum height=.70cm,inner sep=2pt,below=of gear] (glass) {透明载台\\边缘支撑与定位};
+    \node[flowwide,minimum height=.58cm,inner sep=2pt,below=of glass] (backlight) {独立可调背光};
+    \node[flow,minimum height=.70cm,inner sep=2pt,left=1.25cm of gear] (second) {第二相机\\预留位置};
+    \node[flow,minimum height=.70cm,inner sep=2pt,right=1.25cm of gear] (surface) {低角度光\\独立调节};
+    \draw[optline] (base) -- (clamp);
+    \draw[optline] (clamp) -- (camera);
+    \draw[optline] (camera) -- (gear);
+    \draw[optline] (gear) -- (glass);
+    \draw[optline] (backlight) -- (glass);
+    \draw[dashed,very thick,draw=seugreen] (second) -- (gear);
+    \draw[dashed,very thick,draw=seugreen] (surface) -- (gear);
+  \end{tikzpicture}
+
+  \vspace{.15em}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.48\textwidth}
+      相机、载台和光源分别调节，减少改变一个部件时对其他部件的影响。
+    \end{column}
+    \begin{column}{.48\textwidth}
+      通过位置标记、标尺和限位恢复参数，实验确定后再固定关键位置。
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \begin{alertblock}{完成状态}
+    本页及后续三页均为下一代平台设计方案，尚未完成实物搭建。
+  \end{alertblock}
+\end{frame}
+
+% 39. Camera and stage optimization
+\begin{frame}{相机与载台优化设计}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.47\textwidth}
+      \textbf{相机}
+      \begin{itemize}
+        \item 主相机优先采用顶部正视
+        \item 按最大齿轮确定视野和工作距离
+        \item 比较中心与边缘清晰度
+        \item 缩短悬臂，降低振动和位置漂移
+      \end{itemize}
+    \end{column}
+    \begin{column}{.47\textwidth}
+      \textbf{载台}
+      \begin{itemize}
+        \item 比较光学表现更稳定的透明材料
+        \item 采用分散式边缘支撑
+        \item 增加工件定位基准
+        \item 保存空载台图，检查反光、灰尘和划伤
+      \end{itemize}
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \begin{exampleblock}{设计目标}
+    在完整拍摄齿轮的前提下保留微小缺陷细节，并提高重复放件后的成像一致性。
+  \end{exampleblock}
+\end{frame}
+
+% 40. Lighting optimization
+\begin{frame}{照明优化设计}
+  \renewcommand{\arraystretch}{1.22}
+  \begin{tabularx}{\linewidth}{>{\bfseries}p{2.2cm} X X}
+    \toprule
+    & 背光 & 低角度表面光 \\
+    \midrule
+    主要作用 & 形成清晰轮廓，观察缺齿、贯通缺口和齿形变化 & 增强划痕及表面起伏带来的明暗变化 \\
+    需要比较 & 覆盖范围、距离、过曝和支撑阴影 & 高度、角度、方向和亮度 \\
+    同时检查 & 载台污染是否破坏轮廓，Model1 能否正常定位 & 正常加工纹、高光和灰尘是否同步增强 \\
+    \bottomrule
+  \end{tabularx}
+
+  \vspace{1em}
+  \begin{block}{验证顺序}
+    两种照明先分别验证，再决定是否组合使用。切换照明时保持相机和工件位置不变。
+  \end{block}
+\end{frame}
+
+% 41. Additional viewpoint design
+\begin{frame}{补充视角优化设计}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.47\textwidth}
+      \begin{block}{第二相机}
+        从斜向或侧向观察顶部相机难以看到的区域。预留位置需要避开载台边缘、夹具和光源。
+      \end{block}
+      \textbf{优势：}可以直接获得新的观察方向。
+    \end{column}
+    \begin{column}{.47\textwidth}
+      \begin{block}{转台}
+        改变齿面相对侧相机或定向光的方向，但平面旋转不能替代真正的侧视。
+      \end{block}
+      \textbf{限制：}可能阻挡背光，并增加定位与时间成本。
+    \end{column}
+  \end{columns}
+
+  \vspace{.75em}
+  \begin{exampleblock}{判断方法}
+    先人工改变代表性工件的观察方向，确认是否获得新增缺陷信息，再比较识别收益、检测时间和结构复杂度。
+  \end{exampleblock}
+
+  \vfill
+  \small 多个视角会补充信息，也可能累积误报；最终结果需要按单个齿轮统计。
+\end{frame}
+
+% 42. Staged validation
+\subsection{实验验证}
+\HardwareNav{5}
+\GearProSetMinorProgressRange{42}{2}
+\begin{frame}{分阶段实验验证}
+  \centering
+  \begin{tikzpicture}[node distance=.34cm]
+    \node[flow,text width=2.25cm,minimum height=1.15cm] (base) {1 建立基准\\固定第一代配置};
+    \node[flow,text width=2.25cm,minimum height=1.15cm,right=of base] (single) {2 逐项验证\\相机、载台、光照、视角};
+    \node[flow,text width=2.25cm,minimum height=1.15cm,right=of single] (combo) {3 组合验证\\只组合有效参数};
+    \node[flow,text width=2.25cm,minimum height=1.15cm,right=of combo] (system) {4 整机验证\\连续运行与分拣};
+    \draw[line] (base) -- (single);
+    \draw[line] (single) -- (combo);
+    \draw[line] (combo) -- (system);
+  \end{tikzpicture}
+
+  \vspace{1em}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.47\textwidth}
+      \textbf{实验控制}
+      \begin{itemize}
+        \item 每次只改变一个主要条件
+        \item 固定模型、阈值和判断标准
+        \item 保存原图、配置和失败案例
+      \end{itemize}
+    \end{column}
+    \begin{column}{.47\textwidth}
+      \textbf{整机记录}
+      \begin{itemize}
+        \item 漏检、误报和重复定位误差
+        \item 采集、检测和分拣用时
+        \item 长时间运行后的结构变化
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% 43. Validation questions and conclusion
+\begin{frame}{验证问题与阶段结论}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.31\textwidth}
+      \textbf{相机与载台}
+      \begin{itemize}
+        \item 哪个位置兼顾完整视野和微小缺陷？
+        \item 透明载台是否产生明显伪缺陷？
+      \end{itemize}
+    \end{column}
+    \begin{column}{.31\textwidth}
+      \textbf{照明与视角}
+      \begin{itemize}
+        \item 哪种照明分别适合轮廓和划痕？
+        \item 第二相机或转台是否带来足够收益？
+      \end{itemize}
+    \end{column}
+    \begin{column}{.31\textwidth}
+      \textbf{系统效果}
+      \begin{itemize}
+        \item 优化结构能否降低漏检和误报？
+        \item 能否重新接入现有完整链路？
+      \end{itemize}
+    \end{column}
+  \end{columns}
+
+  \vspace{1em}
+  \begin{block}{阶段结论}
+    第一代整机已经证明完整路线可行。下一阶段保留现有链路，通过可控实验改善成像质量、结构重复性和特殊视角覆盖。
+  \end{block}
+\end{frame}
+
+% 44. Joint interface
+\section{联合}
+\subsection{接口关系}
+\JointNav{1}
+\GearProSetMinorProgressRange{44}{1}
+\begin{frame}{软件问题与硬件实验变量}
+  \scriptsize
+  \renewcommand{\arraystretch}{1.15}
+  \begin{tabularx}{\linewidth}{>{\bfseries}p{3.2cm} X X}
+    \toprule
+    软件发现的问题 & 硬件实验变量 & 软件侧复测内容 \\
+    \midrule
+    低对比划痕漏检 & 低角度光方向、角度、亮度和工作距离 & Scratch Recall、FPR 与弱划痕子组 \\
+    高光正常样本误报 & 光源方位、偏振或遮光条件、玻璃背景 & 高光正常负样本 FPR \\
+    oblique 缺口漏检 & 背光、侧视相机、工件方位或转台 & oblique 子组与工件级 Recall \\
+    ROI 不稳定 & 相机高度、姿态、载台定位与夹具刚度 & Model1 漏定位率与 ROI 覆盖 \\
+    实时性不足 & 采集次数、切灯过程和相机数量 & 整套流程用时与 Jetson 负载 \\
+    \bottomrule
+  \end{tabularx}
+
+  \vspace{.8em}
+  \normalsize
+  \begin{block}{实验顺序}
+    先保持模型不变，只调整结构或照明；成像条件确定后再训练模型或调整分数；最后优化 Jetson 的运行格式和速度。
+  \end{block}
+\end{frame}
+
+% 45. Acceptance path
+\subsection{整机验收}
+\JointNav{2}
+\GearProSetMinorProgressRange{45}{2}
+\begin{frame}{整套系统的验收流程}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.48\textwidth}
+      \begin{enumerate}
+        \item 固定结构、相机、照明与放件规则
+        \item 按实际齿轮和拍摄批次建立一批全新的测试数据
+        \item 从原始画面开始运行定位、齿轮裁剪、缺陷判断、统计和串口输出
+        \item 记录缺陷、视角、照明、定位、概率与硬件输出
+      \end{enumerate}
+    \end{column}
+    \begin{column}{.48\textwidth}
+      \begin{enumerate}
+        \setcounter{enumi}{4}
+        \item 报告总体和 scratch、bottom、oblique、side、高光正常子组
+        \item 在目标 Jetson NX 记录速度、功耗、温度与稳定性
+        \item 多视角或双照明按工件统计，并记录缺帧、错配和节拍成本
+      \end{enumerate}
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \begin{alertblock}{最终结果怎样统计}
+    从原始画面到输出的任何一步失败都算失败，包括没找到齿轮、裁剪位置偏移、缺陷判断错误或结果没有送出。只测试提前裁好的齿轮图片不能代替整套系统结果。
+  \end{alertblock}
+\end{frame}
+
+% 46. Acceptance evidence
+\begin{frame}{联合验收输出}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.31\textwidth}
+      \textbf{识别结果}
+      \begin{itemize}
+        \item Recall、Precision、FPR
+        \item TP、FP、TN、FN
+        \item 缺陷和视角子组
+        \item Model1 定位成功率
+      \end{itemize}
+    \end{column}
+    \begin{column}{.31\textwidth}
+      \textbf{运行记录}
+      \begin{itemize}
+        \item 整套流程用时与每秒处理量
+        \item 峰值显存与利用率
+        \item 功耗、温度和长期稳定性
+        \item 切灯与多次采集成本
+      \end{itemize}
+    \end{column}
+    \begin{column}{.31\textwidth}
+      \textbf{结果对应信息}
+      \begin{itemize}
+        \item 工件和批次编号
+        \item 结构及照明配置
+        \item 模型包与阈值版本
+        \item 原图、结果和串口记录
+      \end{itemize}
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \begin{block}{生产目标}
+    在结构和照明固定后，从原始画面开始验证 Recall $\geq 0.95$、FPR $\leq 0.20$，同时满足 Jetson 的处理速度和稳定性要求。
+  \end{block}
+\end{frame}
+
+% 47. Final conclusion
+\subsection{阶段结论}
+\JointNav{3}
+\GearProSetMinorProgressRange{47}{1}
+\begin{frame}{阶段结论与讨论重点}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.46\textwidth}
+      \textbf{当前已经具备}
+      \begin{itemize}
+        \item 避免相似图片跨集合的锁定测试方法
+        \item 先定位齿轮，再由两个模型识别缺陷
+        \item 结果可核对的软件完整流程
+        \item 第一代实物整机与完整工作链路
+        \item 面向主要错误的硬件优化方案
+      \end{itemize}
+    \end{column}
+    \begin{column}{.49\textwidth}
+      \textbf{当前仍未完成}
+      \begin{itemize}
+        \item Recall $\geq 0.95$ 且 FPR $\leq 0.20$
+        \item 优化平台实物与结构重复性数据
+        \item 多照明、多视角自动控制，以及按实际齿轮合并结果
+        \item Jetson NX 整套流程的速度与长期稳定性验收
+      \end{itemize}
+    \end{column}
+  \end{columns}
+
+  \vspace{.7em}
+  \begin{exampleblock}{需要讨论的优先级}
+    第一轮先验证低角度光、背光还是补充视角；万向夹重复到什么程度后改为固定支架；固定成像条件后，先重训模型还是先测试 Jetson 速度。
+  \end{exampleblock}
+
+  \vfill
+  \centering
+  \textcolor{seugreen}{先把成像条件固定并稳定复现，再用全新数据验收整套系统。}
+\end{frame}
+
+\end{document}

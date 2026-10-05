@@ -1,0 +1,14 @@
+{
+  "schema_version": "system-snapshot.v2",
+  "timestamp": "2026-09-15T10:00:00.000Z",
+  "system": {"cpu_percent": 41.2, "ram_used_mb": 9200, "ram_percent": 58.7, "gpu_util": 72.0, "gpu_mem_mb": 5100, "temperature_c": 68.0, "power_w": null},
+  "camera": {"device": "/dev/video0", "opened": true, "frame_seq": 1204, "actual_fps": 28.6, "frame_age_ms": 38, "read_failures": 0, "health": 1.0},
+  "locator": {"backend": "engine", "loaded": true, "latency_ms": 15.2, "gears_found": 1, "confidence_mean": 0.91, "health": 1.0},
+  "specialists": {
+    "scratch_v5": {"profile": "FULL", "classifier1_latency_ms": 8.1, "classifier2_latency_ms": 6.4, "detector_latency_ms": 41.0, "fusion_latency_ms": 0.2, "total_latency_ms": 55.7, "detector_enabled": true, "classifiers_enabled": true, "error_count": 0, "health": 0.85},
+    "missing_hole_v1": {"profile": "FULL", "classifier1_latency_ms": 9.0, "classifier2_latency_ms": 6.7, "detector_latency_ms": 43.0, "fusion_latency_ms": 0.2, "total_latency_ms": 58.9, "detector_enabled": true, "classifiers_enabled": true, "error_count": 0, "health": 0.82}
+  },
+  "inference": {"total_specialist_latency_ms": 114.6, "health": 0.82, "error_count": 0},
+  "serial": {"port": "/dev/ttyHS1", "connected": true, "last_send_ok": true, "consecutive_failures": 0, "last_error": null, "health": 1.0},
+  "mission": {"inspection_active": true, "output_valid": true, "inspection_rate_hz": null, "current_profile": "FULL", "utility": 1.0}
+}

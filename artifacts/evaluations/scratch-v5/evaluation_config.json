@@ -1,0 +1,100 @@
+{
+  "version": "scratch_v5",
+  "classes": {
+    "0": "normal",
+    "1": "scratch"
+  },
+  "classifiers": [
+    {
+      "name": "f_efficientnet_b0_384_w1_s20260911",
+      "family": "efficientnet_b0",
+      "weights": "../../../model/model2/classifier_1.pt",
+      "sha256": "44461f4e03ff716266a3123bf1ba4611a1c965cf8776d0e523f128cf7c0b8438",
+      "imgsz": 384,
+      "tta": "none",
+      "temperature": 0.7
+    },
+    {
+      "name": "p_resnet18_384_w1",
+      "family": "resnet18",
+      "weights": "../../../model/model2/classifier_2.pt",
+      "sha256": "d07678a6da421c4edc00ac24b8c5052b0b8b7f8b1614b9d82563ecefbf59360d",
+      "imgsz": 384,
+      "tta": "none",
+      "temperature": 2.05
+    }
+  ],
+  "detector": {
+    "name": "p_detector_p2_960",
+    "weights": "../../../model/model2/detector.pt",
+    "sha256": "4451e3f3664e3ad551926dc771e8cf4d0da9cd6648a9b841ea9d22bea86f15b3",
+    "imgsz": 960,
+    "temperature": 2.125,
+    "conf_floor": 0.001,
+    "display_confidence": 0.05,
+    "iou": 0.7
+  },
+  "fusion": {
+    "type": "weighted",
+    "alpha": 0.25,
+    "classifier": {
+      "type": "classifier_mean",
+      "models": [
+        "f_efficientnet_b0_384_w1_s20260911",
+        "p_resnet18_384_w1"
+      ]
+    }
+  },
+  "default_threshold": 0.300273610279458,
+  "operating_points": {
+    "0.1": {
+      "threshold": 0.300273610279458,
+      "recall": 0.9767441860465116,
+      "precision": 0.8235294117647058,
+      "f1": 0.8936170212765957,
+      "fpr": 0.08411214953271028,
+      "specificity": 0.9158878504672897,
+      "tp": 42,
+      "fp": 9,
+      "tn": 98,
+      "fn": 1
+    },
+    "0.2": {
+      "threshold": 0.300273610279458,
+      "recall": 0.9767441860465116,
+      "precision": 0.8235294117647058,
+      "f1": 0.8936170212765957,
+      "fpr": 0.08411214953271028,
+      "specificity": 0.9158878504672897,
+      "tp": 42,
+      "fp": 9,
+      "tn": 98,
+      "fn": 1
+    },
+    "0.3": {
+      "threshold": 0.300273610279458,
+      "recall": 0.9767441860465116,
+      "precision": 0.8235294117647058,
+      "f1": 0.8936170212765957,
+      "fpr": 0.08411214953271028,
+      "specificity": 0.9158878504672897,
+      "tp": 42,
+      "fp": 9,
+      "tn": 98,
+      "fn": 1
+    },
+    "0.5": {
+      "threshold": 0.203814024552052,
+      "recall": 1.0,
+      "precision": 0.5,
+      "f1": 0.6666666666666666,
+      "fpr": 0.40186915887850466,
+      "specificity": 0.5981308411214954,
+      "tp": 43,
+      "fp": 43,
+      "tn": 64,
+      "fn": 0
+    }
+  },
+  "decision": "REJECT when fused scratch probability >= threshold"
+}

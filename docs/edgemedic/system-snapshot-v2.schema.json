@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gearpro.local/edgemedic/system-snapshot-v2.schema.json",
+  "title": "GearPro SystemSnapshot v2",
+  "type": "object",
+  "required": ["schema_version", "timestamp", "system", "camera", "locator", "specialists", "inference", "serial", "mission"],
+  "properties": {
+    "schema_version": {"const": "system-snapshot.v2"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "system": {"type": "object"},
+    "camera": {"type": "object"},
+    "locator": {"type": "object"},
+    "specialists": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scratch_v5", "missing_hole_v1"],
+      "properties": {
+        "scratch_v5": {"$ref": "#/$defs/specialist"},
+        "missing_hole_v1": {"$ref": "#/$defs/specialist"}
+      }
+    },
+    "inference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total_specialist_latency_ms", "health", "error_count"],
+      "properties": {
+        "total_specialist_latency_ms": {"type": ["number", "null"], "minimum": 0},
+        "health": {"type": "number", "minimum": 0, "maximum": 1},
+        "error_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "serial": {"type": "object"},
+    "mission": {"type": "object"}
+  },
+  "$defs": {
+    "specialist": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile", "detector_enabled", "classifiers_enabled", "total_latency_ms", "error_count", "health"],
+      "properties": {
+        "profile": {"type": "string"},
+        "classifier1_latency_ms": {"type": ["number", "null"], "minimum": 0},
+        "classifier2_latency_ms": {"type": ["number", "null"], "minimum": 0},
+        "detector_latency_ms": {"type": ["number", "null"], "minimum": 0},
+        "fusion_latency_ms": {"type": ["number", "null"], "minimum": 0},
+        "total_latency_ms": {"type": ["number", "null"], "minimum": 0},
+        "detector_enabled": {"type": "boolean"},
+        "classifiers_enabled": {"type": "boolean"},
+        "error_count": {"type": "integer", "minimum": 0},
+        "health": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    }
+  }
+}

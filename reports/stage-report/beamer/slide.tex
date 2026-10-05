@@ -1,0 +1,109 @@
+\documentclass[aspectratio=169,10pt]{beamer}
+\usepackage{ctex}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,booktabs,array,colortbl}
+\usepackage{graphicx}
+\usepackage{SoutheastUniversity}
+
+\author[GearPro 项目组]{GearPro 项目组}
+\title[GearPro 阶段汇报]{GearPro 齿轮视觉检测系统}
+\subtitle{软件与结构阶段汇报模板测试}
+\institute[东南大学]{东南大学}
+\date{\today}
+\titlegraphic{\includegraphics[width=.15\paperwidth]{pic/Southeast_University_Logo.pdf}}
+
+\begin{document}
+
+\begin{frame}[plain]
+  \titlepage
+\end{frame}
+
+\section{视觉系统}
+
+\begin{frame}{东南大学黄绿色视觉体系}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.58\textwidth}
+      \begin{block}{设计基准}
+        主题直接采用校徽原配色。深绿用于标题和结构信息，黄色用于关键数据与当前状态。
+      \end{block}
+      \begin{itemize}
+        \item 深绿：\texttt{\#3D6016}
+        \item 校徽黄：\texttt{\#FFCC00}
+        \item 浅色背景降低长时间投影的视觉负担
+      \end{itemize}
+    \end{column}
+    \begin{column}{.36\textwidth}
+      \centering
+      \includegraphics[width=.68\linewidth]{pic/Southeast_University_Logo.pdf}
+
+      \vspace{.6em}
+      {\small 校徽保持原始比例与颜色}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{当前视觉处理流程}
+  \begin{enumerate}
+    \item Model1 在整帧中定位齿轮并生成 ROI
+    \item Scratch V5 与 Missing Hole V1 分别输出专项概率
+    \item 两个专项独立过阈值，最终执行 OR 判定
+    \item 同一结果进入 Web、统计和串口输出
+  \end{enumerate}
+
+  \vfill
+  \begin{exampleblock}{阶段结论}
+    软件闭环已经运行，真实设备条件下的端到端指标仍需验收。
+  \end{exampleblock}
+\end{frame}
+
+\section{实验结果}
+
+\begin{frame}{核心锁定测试结果}
+  \centering
+  \renewcommand{\arraystretch}{1.25}
+  \begin{tabular}{lrrrr}
+    \toprule
+    方案 & Recall & Precision & FPR & TP/FP/TN/FN \\
+    \midrule
+    Scratch V5 & 0.8065 & 0.5556 & 0.1681 & 25/20/99/6 \\
+    Missing Hole V1 & 0.8182 & 0.9000 & 0.0377 & 36/4/102/8 \\
+    \rowcolor{seuyellowlight}
+    双专项 OR & \textbf{0.8873} & \textbf{0.7778} & 0.2278 & 63/18/61/8 \\
+    统一模型 & 0.7606 & 0.6207 & 0.4177 & 54/33/46/17 \\
+    \bottomrule
+  \end{tabular}
+
+  \vfill
+  {\small 当前结果优于统一模型，但仍未达到 Recall $\geq 0.95$ 且 FPR $\leq 0.20$ 的阶段目标。}
+\end{frame}
+
+\section{结构实验}
+
+\begin{frame}{软件误差与结构实验}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.48\textwidth}
+      \begin{block}{软件观察}
+        \begin{itemize}
+          \item 低对比划痕容易漏检
+          \item 斜视缺口召回偏低
+          \item 侧齿高光容易造成误报
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{.48\textwidth}
+      \begin{alertblock}{结构验证方向}
+        \begin{itemize}
+          \item 比较低角度表面照明
+          \item 验证背光轮廓信息
+          \item 评估第二相机或转台
+        \end{itemize}
+      \end{alertblock}
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \centering
+  \textcolor{seugreen}{\large 固定成像条件后，再重新训练并建立新盲测集}
+\end{frame}
+
+\end{document}

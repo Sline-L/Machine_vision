@@ -1,0 +1,34 @@
+%* 使用说明
+%* 文章正文写在 document.tex
+%* 文章附录写在 appendices.tex
+%* 文章所有全局设置全在 settings.tex
+%* 一般不需要修改的配置放在 config.tex
+%* 标题、作者等信息在 main.tex 中修改
+
+\documentclass[fontset=none]{ctexart}
+\input{TEX/package.tex}
+\input{TEX/settings.tex}
+\input{TEX/config.tex}
+
+\begin{document}
+
+    %* Cover
+    % \pagenumbering{gobble}
+    % \includepdf{cover.pdf}
+    % \pagenumbering{arabic}
+    %* Table of Contents
+    % \tableofcontents
+    %* Quotation
+
+    \input{document.tex}
+
+    \bibliographystyle{IEEEtran}
+    \bibliography{references}
+
+    \clearpage
+
+    \begin{appendices}
+        \input{TEX/appendices.tex}
+    \end{appendices}
+
+\end{document}

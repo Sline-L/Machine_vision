@@ -1,0 +1,232 @@
+% !TEX root=./main.tex
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% *常用命令 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%todo 空格: 1:\  2:~ 3:\quad \qquad 4:\hspace{l}
+
+%todo 分段: \par
+
+%todo 脚注: \footnote{}
+
+%todo 加粗: \textbf{}
+
+%todo 斜体: \textit{}
+
+%todo 行间距: \vspace{0.5\baselineskip} 
+
+%todo 强制行间距: \vspace*{0.5\baselineskip}
+
+%todo \noindent            % 单独取消当前段落的首行缩进
+
+%todo \href{URL}{name}     % 超链接
+
+%todo \setcounter{page}{0} %更改页码
+
+%todo \includepdf[pages=1]{example.pdf}  % 插入pdf第一页
+
+%todo \tableofcontents      % 目录
+
+%todo 引用
+%todo \autoref{tab:example}
+%todo \ref{tab:example}
+%todo \ref{fig:example}
+
+%todo 分栏
+%todo \begin{multicols}{n}
+%todo n为栏数，代码复制到需要分栏的地方
+%todo \end{multicols}
+
+%%%%%%%%%%%%%%%%%%%%% *封面，列表，表格，页眉，代码，图片 %%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%% ?封面 %%%%%%%%%%%%%%%
+
+%* 常用 
+% \title{标题}
+% \author{作者}
+% \date{时间}
+
+%* article专属
+% \begin{abstract}
+% \end{abstract}
+
+%%%%%%%%%%%%%%% ?列表 %%%%%%%%%%%%%%%
+
+%* 这是一个计数的列表
+% leftmargin: 控制整体左边距
+% itemsep: 控制各item项之间的垂直间距
+% topsep: 控制列表与上下文的垂直间距
+% label={\rm (\arabic*)} %\roman
+
+% \begin{enumerate}  
+% 	\item 第一项
+% 		\begin{enumerate}
+% 			\item 第一项中的第一项
+% 			\item 第一项中的第二项
+% 		\end{enumerate}
+% 	\item 第二项
+% \end{enumerate}
+
+%* 这是一个不计数的列表
+% \begin{itemize}  %[label={$\bullet$}]
+% 	\item 第一项
+% 	\begin{itemize}
+% 		\item 第一项中的第一项
+% 		\item 第一项中的第二项
+% 	\end{itemize}
+% 	\item 第二项
+% \end{itemize}
+
+%%%%%%%%%%%%%%% ?表格 %%%%%%%%%%%%%%%
+
+% \begin{tabular}{@{}m{5cm}@{}m{5cm}@{}}
+%     \raggedright 第一段内容 & 第二段内容 \\[2em]
+%     顶对齐测试 \vfill & 底对齐测试 \vfill \\
+% \end{tabular}
+
+% 带边框的表格
+% m表示该列内容宽度也是 5 厘米，但内容在垂直方向上会居中对齐
+% p表示该列内容的宽度是 5 厘米，内容会自动换行
+% | 表示列之间有竖线 \hline横线 
+
+% \begin{tabular}{|p{5cm}|m{5cm}|}   
+%     \hline
+%     上对齐 & \parbox[t]{5cm}{这是顶对齐的内容，\\支持多行文本展示。} \\ \hline
+%     居中对齐 & \parbox[c]{5cm}{这是居中对齐的内容，\\支持多行文本展示。} \\ \hline
+%     下对齐 & \parbox[b]{5cm}{这是底对齐的内容，\\支持多行文本展示。} \\ \hline
+% \end{tabular}
+
+%%%%%%%%%%%%%%% ?代码 %%%%%%%%%%%%%%%
+
+% \lstinputlisting[
+%     language    =   Python,
+%     caption     =   {\bf code.py},
+%     label       =   {code.py}
+% ]{./codes/code.py}
+
+%%%%%%%%%%%%%%% ?图片 %%%%%%%%%%%%%%%
+%%%%% *单独一张 %%%%%
+% \begin{figure}[htbp]  %? h:当前 t:顶部 b:底部 p:单独一页 H:固定
+%     \flushleft          %? 左对齐
+%     \centering          %? 居中
+%     \zihao{-5}
+%     \songti
+%     \includegraphics[width=0.5\textwidth]{相对路径}  %宽度为纸张的一半
+%     \caption{标题}
+%     \label{fig:标签}
+% \end{figure}
+
+%%%%% *并排几张 %%%%%
+
+%? 也可以调整高度 [height=0.2]
+
+% \begin{figure}[ht]
+%     \centering
+%     \begin{minipage}{0.4\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{image1.jpg}
+%         \caption{第一张图片}
+%         \label{fig:img1}
+%     \end{minipage}
+%     \hfill
+%     \begin{minipage}{0.4\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{image2.jpg}
+%         \caption{第二张图片}
+%         \label{fig:img2}
+%     \end{minipage}
+% \end{figure}
+
+%%%%% *环绕文字 %%%%%
+% \begin{wrapfigure}{r}{0.4\textwidth} % r 表示图片在右侧，0.4\textwidth 是图片宽度
+%     \centering
+%     \includegraphics[width=0.4\textwidth]{example.jpg}
+%     \caption{这是环绕图片的标题}
+%     \label{fig:example}
+% \end{wrapfigure}
+
+%%%%%%%%%%%%%%% ?三线表 %%%%%%%%%%%%%%%
+
+% \begin{table}[ht]
+%     \centering
+%     \caption{示例三线表}
+%     \label{tab:example}
+ 
+%     \begin{tabular}{@{} l c r @{}} %* @{} 去掉左右多余的 \tabcolsep
+%       \toprule
+%       左对齐 & 居中 & 右对齐 \\
+%       \midrule
+%       第一行 & 数据 A & 123 \\
+%       第二行 & 数据 B & 456 \\
+%       第三行 & 数据 C & 789 \\
+%       \bottomrule
+%     \end{tabular}
+% \end{table}
+
+%%%%%%%%%%%%%%% ?公式 %%%%%%%%%%%%%%%
+%* 行内公式
+% $ \theta $
+
+%* 行间公式
+% \begin{equation}
+% E=mc^2
+% \label{eq:energy}
+% \end{equation}
+
+%* 单行超长公式
+% \begin{multline}
+% a+b+c+d+e+f+g+h+i+j+k+l+m+n+o+p+q+r+s+t+u+v+w+x+y+z \\
+% = 1+2+3+4+5+6+7+8+9+10+11+12+13+14+15+16+17+18+19+20
+% \end{multline}
+
+%* 多行公式
+% \begin{align}
+% P & = UI \\
+% & = I^2R
+% \end{align}
+
+%* 矩阵
+%* 可换成equation来添加序号
+% \[    
+% \mathbf{X} = \left(
+%     \begin{array}{cccc}
+%     x_{11} & x_{12} & \ldots & x_{1n}\\
+%     x_{21} & x_{22} & \ldots & x_{2n}\\
+%     \vdots & \vdots & \ddots & \vdots\\
+%     x_{n1} & x_{n2} & \ldots & x_{nn}\\
+%     \end{array} \right)
+% \]
+
+%* 分段函数
+% \[
+% f(x) =
+%     \begin{cases}
+%         0 &  x \text{为无理数} ,\\
+%         1 &  x \text{为有理数} .
+%     \end{cases}
+% \]
+
+%* 公式内加粗
+% \bm{}
+
+%* 宏包手册
+% http://texdoc.net/texmf-dist/doc/latex/amsmath/amsldoc.pdf
+% http://mirrors.ctan.org/info/symbols/comprehensive/symbols-a4.pdf
+
+%%%%%%%%%%%%%%% ?定义 %%%%%%%%%%%%%%%
+% \begin{definition}
+%     定义的内容
+%     \label{def:nosense}
+% \end{definition}
+
+% definition   def  定义
+% theorem      thm  定理
+% lemma        lem  引理
+% corollary    cor  推论
+% assumption   asu  假设
+% conjecture   con  猜想
+% axiom        axi  公理
+% principle    pri  定律
+% problem      pro  问题
+% example      exa  例 
+% solution     sol  解 
+
+%* 用ref 别用autoref
