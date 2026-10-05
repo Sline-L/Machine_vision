@@ -81,6 +81,15 @@ npm install
 npm run build
 ```
 
+前端采用左侧固定启停和功能导航，支持 16:10 全屏自适应。浏览器回归检查使用模拟设备数据，不会操作真实相机或串口。安装 Node.js 22+ 和 Chromium 后，在 `web/` 中执行：
+
+```bash
+npm run build
+npm run test:ui
+```
+
+默认浏览器路径为 `/usr/bin/chromium`，可用 `CHROMIUM_PATH` 指定其他路径；检查截图保存在命令输出的临时目录。
+
 ## 启动与访问
 
 局域网运行必须设置共享密码：
