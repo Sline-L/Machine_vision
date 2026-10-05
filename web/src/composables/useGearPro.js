@@ -1,6 +1,15 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const API = '/api/v2'
+const HISTORY_SIZE = 12
+
+function duration(seconds) {
+  if (!Number.isFinite(seconds)) return '—'
+  const total = Math.max(0, Math.floor(seconds))
+  const hours = Math.floor(total / 3600)
+  const clock = [Math.floor(total / 60) % 60, total % 60].map(value => String(value).padStart(2, '0')).join(':')
+  return hours ? `${hours}:${clock}` : clock
+}
 
 export function useGearPro() {
   const state = ref(null)
@@ -18,7 +27,10 @@ export function useGearPro() {
   const awaitingResult = ref(false)
   const streamView = ref('auto')
   const streamNonce = ref(Date.now())
+  const history = ref([])
   let previousResult = ''
+  let historyKey = ''
+  let historyId = 0
   let socket, reconnectTimer, tickTimer, heartbeatTimer
 
   const connected = computed(() => connection.value === 'connected' && clock.value - lastMessageAt.value < 5000)
@@ -58,6 +70,41 @@ export function useGearPro() {
     ['串口', offlineSource.value ? '未使用' : !connected.value ? '未知' : state.value?.health?.serial?.connected ? '已连接' : '未连接'],
   ])
   const streamUrl = computed(() => `${API}/stream?view=${streamView.value}&v=${streamNonce.value}`)
+  const task = computed(() => {
+    const current = state.value
+    if (!current) return null
+    const elapsed = current.inspection?.started_seconds_ago
+    if (current.settings.mode === '定量模式') {
+      const target = current.settings.target_quantity
+      return { label: '目标进度', ratio: target ? current.stats.total / target : null, text: `${current.stats.total} / ${target}` }
+    }
+    if (current.settings.mode === '定时模式') {
+      const limit = current.settings.duration_minutes * 60
+      return { label: '计时进度', ratio: Number.isFinite(elapsed) ? elapsed / limit : 0, text: `${duration(elapsed ?? 0)} / ${duration(limit)}` }
+    }
+    return { label: '运行时长', ratio: null, text: active.value ? duration(elapsed) : '—' }
+  })
+
+  function specialist(name) {
+    const readings = (result.value?.observations || [])
+      .map(item => item.specialists?.[name])
+      .filter(item => Number.isFinite(item?.probability))
+    if (!readings.length) return null
+    const top = readings.reduce((best, item) => item.probability > best.probability ? item : best)
+    const threshold = top.threshold ?? state.value?.settings?.[`${name}_threshold`]
+    return { probability: top.probability, threshold, reject: top.reject ?? top.probability >= threshold }
+  }
+
+  function recordHistory() {
+    const current = state.value
+    if (!current?.stats?.total) { history.value = []; historyKey = ''; return }
+    const latest = current.result
+    const key = latest ? JSON.stringify(latest) : ''
+    if (key === historyKey) return
+    historyKey = key
+    if (!current.inspection?.active || !latest?.has_gear) return
+    history.value = [{ id: ++historyId, bad: !!latest.is_defective, verdict: latest.verdict, reasons: latest.reject_reasons || [] }, ...history.value].slice(0, HISTORY_SIZE)
+  }
 
   async function request(path, options = {}) {
     const response = await fetch(`${API}${path}`, {
@@ -84,6 +131,7 @@ export function useGearPro() {
       try {
         state.value = JSON.parse(event.data)
         if (awaitingResult.value && JSON.stringify(state.value.result) !== previousResult) awaitingResult.value = false
+        recordHistory()
         lastMessageAt.value = clock.value = Date.now()
         connection.value = 'connected'
       } catch { error.value = '无法读取设备状态，请重新连接' }
@@ -174,5 +222,6 @@ export function useGearPro() {
   return { state, authenticated, sessionLoading, passwordRequired, password, label, error, busy, operation,
     connected, ownsControl, active, canControl, result, historical, isVideo, sourceLabel, connectionLabel,
     runtimeLabel, startBlocked, verdictClass, verdictLabel, rejectReason, goodRate, healthItems,
-    streamView, streamNonce, streamUrl, action, uploadVideo, login, logout }
+    streamView, streamNonce, streamUrl, task, history, historySize: HISTORY_SIZE, specialist,
+    action, uploadVideo, login, logout }
 }

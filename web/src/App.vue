@@ -75,7 +75,7 @@ async function returnToCamera() {
 <template>
   <main v-if="controller.authenticated && controller.state" class="console-shell" :inert="!!confirmation || enlarged">
     <aside class="function-rail">
-      <div class="rail-brand"><span class="brand-mark">GP</span><strong>GearPro</strong></div>
+      <div class="rail-brand"><span class="brand-mark">GP</span><div><strong>GearPro</strong><small>齿轮视觉检测</small></div></div>
       <div class="inspection-controls" aria-label="检测控制">
         <button class="rail-button start-button" :disabled="!controller.canControl || !!controller.startBlocked" :title="controller.startBlocked" @click="controller.action('/inspection/start')"><span aria-hidden="true">▶</span>开始检测</button>
         <button class="rail-button stop-button" :disabled="!controller.canControl || !controller.active" @click="controller.action('/inspection/stop')"><span aria-hidden="true">■</span>停止检测</button>
