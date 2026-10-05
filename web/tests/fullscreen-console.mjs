@@ -128,6 +128,8 @@ try {
   await command('Emulation.setDeviceMetricsOverride', { width:1024,height:640,deviceScaleFactor:1,mobile:false })
   const before = await evaluate('window.requests.length')
   await click('统计')
+  assert.equal(await evaluate('document.querySelectorAll(".ring-progress").length'),3)
+  assert.equal(await evaluate('document.querySelector(".ring-reading > strong").textContent'),'65.2%')
   assert.equal(await evaluate('window.requests.length'), before, 'Navigation must not mutate runtime')
   assert(await evaluate('window.mockState.inspection.active'))
   await snapshot('statistics-1024')
@@ -174,6 +176,7 @@ try {
   assert.equal(await evaluate('window.requests.filter(r=>r.url.endsWith("/stats/reset")).length'),0)
   await click('清空统计');await click('确认清空')
   assert.equal(await evaluate('window.mockState.stats.total'),0)
+  assert(await evaluate('[...document.querySelectorAll(".ring-reading > strong")].every(e=>e.textContent==="—")'))
   await click('视频测试')
   await snapshot('video-1024')
   const chooseVideo = async () => { await evaluate(`(() => {const dt=new DataTransfer();dt.items.add(new File(['test'],'测试.mp4',{type:'video/mp4'}));const i=document.querySelector('input[type=file]');i.files=dt.files;i.dispatchEvent(new Event('change',{bubbles:true}))})()`);await settle() }
