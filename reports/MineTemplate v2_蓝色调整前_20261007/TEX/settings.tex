@@ -1,0 +1,39 @@
+% !TEX root = ../main.tex
+\geometry{a4paper,left=23mm,right=23mm,top=23mm,bottom=22mm,headheight=15pt,headsep=7mm,footskip=11mm}
+\setstretch{1.18}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.25em plus 0.1em minus 0.1em}
+\ctexset{
+  section={format=\Large\sffamily\bfseries\color{GearInk},number=\arabic{section},aftername=\quad,beforeskip=1.2em,afterskip=0.7em},
+  subsection={format=\large\sffamily\bfseries\color{GearInk},number=\thesection.\arabic{subsection},aftername=\quad,beforeskip=0.9em,afterskip=0.45em},
+  subsubsection={format=\normalsize\sffamily\bfseries,number=\thesection.\arabic{subsection}.\arabic{subsubsection},aftername=\quad}}
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{1}
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.18}
+\setlength{\LTpre}{0.65em}
+\setlength{\LTpost}{0.4em}
+\captionsetup{font=small,labelfont={bf,sf},labelsep=quad,justification=justified,singlelinecheck=false,skip=6pt}
+\captionsetup[table]{hypcap=false}
+\setlength{\textfloatsep}{13pt plus 3pt minus 2pt}
+\setlength{\intextsep}{12pt plus 3pt minus 2pt}
+\setcounter{topnumber}{2}
+\setcounter{bottomnumber}{1}
+\renewcommand{\topfraction}{0.88}
+\renewcommand{\bottomfraction}{0.65}
+\renewcommand{\textfraction}{0.08}
+\renewcommand{\floatpagefraction}{0.72}
+\setlist{nosep,leftmargin=2em,topsep=0.3em}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\sffamily\color{GearMuted}GearPro\quad 齿轮外观缺陷检测}
+\fancyhead[R]{\small\sffamily\color{GearMuted}阶段技术报告}
+\fancyfoot[C]{\small\color{GearMuted}\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\small\color{GearMuted}\thepage}\renewcommand{\headrulewidth}{0pt}}
+\emergencystretch=2em
+\clubpenalty=10000
+\widowpenalty=10000
+\displaywidowpenalty=10000
+\raggedbottom

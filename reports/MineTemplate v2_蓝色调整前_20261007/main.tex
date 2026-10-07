@@ -1,0 +1,24 @@
+% !TEX program = xelatex
+% 内容依据 reports/GearPro_技术报告/GearPro_技术报告.md；使用 XeLaTeX 编译。
+\documentclass[UTF8,fontset=none,11pt,a4paper]{ctexart}
+\input{TEX/package.tex}
+\input{TEX/config.tex}
+\input{TEX/settings.tex}
+\input{TEX/commend.tex}
+\begin{document}
+\pagenumbering{roman}
+\input{TEX/frontmatter.tex}
+\clearpage
+\tableofcontents
+\clearpage
+\pagenumbering{arabic}
+\input{document.tex}
+\FloatBarrier
+\clearpage
+\appendix
+\ctexset{section={number=\Alph{section},name={附录\space,},aftername=\quad}}
+\input{TEX/appendices.tex}
+\FloatBarrier
+\clearpage
+\input{TEX/references.tex}
+\end{document}

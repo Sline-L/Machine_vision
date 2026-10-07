@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="734.58pt" height="364.4208pt" viewBox="0 0 734.58 364.4208" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-10-07T01:49:05.578739</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 364.4208 
+L 734.58 364.4208 
+L 734.58 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 28.55052 121.27392 
+L 167.44788 121.27392 
+Q 181.62108 121.27392 181.62108 114.62112 
+L 181.62108 69.38208 
+Q 181.62108 62.72928 167.44788 62.72928 
+L 28.55052 62.72928 
+Q 14.37732 62.72928 14.37732 69.38208 
+L 14.37732 114.62112 
+Q 14.37732 121.27392 28.55052 121.27392 
+z
+" clip-path="url(#p6908fae449)" style="fill: #f3f7f8; stroke: #157f76; stroke-width: 1.3; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 205.71552 121.27392 
+L 344.61288 121.27392 
+Q 358.78608 121.27392 358.78608 114.62112 
+L 358.78608 69.38208 
+Q 358.78608 62.72928 344.61288 62.72928 
+L 205.71552 62.72928 
+Q 191.54232 62.72928 191.54232 69.38208 
+L 191.54232 114.62112 
+Q 191.54232 121.27392 205.71552 121.27392 
+z
+" clip-path="url(#p6908fae449)" style="fill: #f3f7f8; stroke: #157f76; stroke-width: 1.3; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 382.88052 121.27392 
+L 521.77788 121.27392 
+Q 535.95108 121.27392 535.95108 114.62112 
+L 535.95108 69.38208 
+Q 535.95108 62.72928 521.77788 62.72928 
+L 382.88052 62.72928 
+Q 368.70732 62.72928 368.70732 69.38208 
+L 368.70732 114.62112 
+Q 368.70732 121.27392 382.88052 121.27392 
+z
+" clip-path="url(#p6908fae449)" style="fill: #f3f7f8; stroke: #157f76; stroke-width: 1.3; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 560.04552 121.27392 
+L 698.94288 121.27392 
+Q 713.11608 121.27392 713.11608 114.62112 
+L 713.11608 69.38208 
+Q 713.11608 62.72928 698.94288 62.72928 
+L 560.04552 62.72928 
+Q 545.87232 62.72928 545.87232 69.38208 
+L 545.87232 114.62112 
+Q 545.87232 121.27392 560.04552 121.27392 
+z
+" clip-path="url(#p6908fae449)" style="fill: #f3f7f8; stroke: #157f76; stroke-width: 1.3; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 28.55052 247.67712 
+L 139.10148 247.67712 
+Q 153.27468 247.67712 153.27468 241.02432 
+L 153.27468 179.15328 
+Q 153.27468 172.50048 139.10148 172.50048 
+L 28.55052 172.50048 
+Q 14.37732 172.50048 14.37732 179.15328 
+L 14.37732 241.02432 
+Q 14.37732 247.67712 28.55052 247.67712 
+z
+" clip-path="url(#p6908fae449)" style="fill: #f3f7f8; stroke: #157f76; stroke-width: 1.3; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 198.62892 207.76032 
+L 394.21908 207.76032 
+Q 408.39228 207.76032 408.39228 201.10752 
+L 408.39228 152.54208 
+Q 408.39228 145.88928 394.21908 145.88928 
+L 198.62892 145.88928 
+Q 184.45572 145.88928 184.45572 152.54208 
+L 184.45572 201.10752 
+Q 184.45572 207.76032 198.62892 207.76032 
+z
+" clip-path="url(#p6908fae449)" style="fill: #f3f7f8; stroke: #157f76; stroke-width: 1.3; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 198.62892 294.24672 
+L 394.21908 294.24672 
+Q 408.39228 294.24672 408.39228 287.59392 
+L 408.39228 239.02848 
+Q 408.39228 232.37568 394.21908 232.37568 
+L 198.62892 232.37568 
+Q 184.45572 232.37568 184.45572 239.02848 
+L 184.45572 287.59392 
+Q 184.45572 294.24672 198.62892 294.24672 
+z
+" clip-path="url(#p6908fae449)" style="fill: #f3f7f8; stroke: #3476a0; stroke-width: 1.3; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 453.74652 247.67712 
+L 543.03768 247.67712 
+Q 557.21088 247.67712 557.21088 241.02432 
+L 557.21088 179.15328 
+Q 557.21088 172.50048 543.03768 172.50048 
+L 453.74652 172.50048 
+Q 439.57332 172.50048 439.57332 179.15328 
+L 439.57332 241.02432 
+Q 439.57332 247.67712 453.74652 247.67712 
+z
+" clip-path="url(#p6908fae449)" style="fill: #f3f7f8; stroke: #b47928; stroke-width: 1.3; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 602.56512 247.67712 
+L 698.94288 247.67712 
+Q 713.11608 247.67712 713.11608 241.02432 
+L 713.11608 179.15328 
+Q 713.11608 172.50048 698.94288 172.50048 
+L 602.56512 172.50048 
+Q 588.39192 172.50048 588.39192 179.15328 
+L 588.39192 241.02432 
+Q 588.39192 247.67712 602.56512 247.67712 
+z
+" clip-path="url(#p6908fae449)" style="fill: #f3f7f8; stroke-dasharray: 4.81,2.08; stroke-dashoffset: 0; stroke: #b47928; stroke-width: 1.3; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 18px; font-family: 'Noto Sans CJK JP'; text-anchor: start; fill: #163342" x="16.5033" y="28.8" transform="rotate(-0 16.5033 28.8)">上下双相机、边缘计算与缺陷检测结果</text>
+   </g>
+   <g id="text_2">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK JP'; text-anchor: middle; fill: #157f76" x="97.9992" y="85.91712" transform="rotate(-0 97.9992 85.91712)">输送与成像</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 9px; font-family: 'Noto Sans CJK JP'; text-anchor: middle; fill: #163342" x="97.9992" y="104.992491" transform="rotate(-0 97.9992 104.992491)">上下双工业相机</text>
+   </g>
+   <g id="text_4">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK JP'; text-anchor: middle; fill: #157f76" x="275.1642" y="85.91712" transform="rotate(-0 275.1642 85.91712)">边缘平台</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 9px; font-family: 'Noto Sans CJK JP'; text-anchor: middle; fill: #163342" x="275.1642" y="105.001632" transform="rotate(-0 275.1642 105.001632)">Jetson NX · 简单现场测试</text>
+   </g>
+   <g id="text_6">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK JP'; text-anchor: middle; fill: #157f76" x="452.3292" y="85.91712" transform="rotate(-0 452.3292 85.91712)">软件结果</text>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 9px; font-family: 'Noto Sans CJK JP'; text-anchor: middle; fill: #163342" x="452.3292" y="105.019913" transform="rotate(-0 452.3292 105.019913)">Web显示 · 统计 · 串口</text>
+   </g>
+   <g id="text_8">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK JP'; text-anchor: middle; fill: #157f76" x="629.4942" y="85.91712" transform="rotate(-0 629.4942 85.91712)">机构支路</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 9px; font-family: 'Noto Sans CJK JP'; text-anchor: middle; fill: #163342" x="629.4942" y="105.001632" transform="rotate(-0 629.4942 105.001632)">第一代分拣原型</text>
+   </g>
+   <g id="patch_11">
+    <path d="M 177.952692 92.0016 
+Q 186.582996 92.0016 193.536249 92.0016 
+" style="fill: none; stroke: #879ca5; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 189.136249 89.8016 
+L 193.536249 92.0016 
+L 189.136249 94.2016 
+" style="fill: none; stroke: #879ca5; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 355.117692 92.0016 
+Q 363.747996 92.0016 370.701249 92.0016 
+" style="fill: none; stroke: #879ca5; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 366.301249 89.8016 
+L 370.701249 92.0016 
+L 366.301249 94.2016 
+" style="fill: none; stroke: #879ca5; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="patch_13">
+    <path d="M 532.282692 92.0016 
+Q 540.912996 92.0016 547.866249 92.0016 
+" style="fill: none; stroke: #879ca5; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 543.466249 89.8016 
+L 547.866249 92.0016 
+L 543.466249 94.2016 
+" style="fill: none; stroke: #879ca5; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="text_10">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK JP'; text-anchor: middle; fill: #157f76" x="83.826" y="200.67792" transform="rotate(-0 83.826 200.67792)">齿轮定位 → ROI</text>
+   </g>
+   <g id="text_11">
+    <text style="font-size: 9px; font-family: 'Noto Sans CJK JP'; text-anchor: middle; fill: #163342" x="83.826" y="226.065014" transform="rotate(-0 83.826 226.065014)">裁剪边界扩展4%</text>
+   </g>
+   <g id="text_12">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK JP'; text-anchor: middle; fill: #157f76" x="296.424" y="170.07504" transform="rotate(-0 296.424 170.07504)">划痕检测</text>
+   </g>
+   <g id="text_13">
+    <text style="font-size: 9px; font-family: 'Noto Sans CJK JP'; text-anchor: middle; fill: #163342" x="296.424" y="190.432725" transform="rotate(-0 296.424 190.432725)">分类分数 + 检测置信度</text>
+   </g>
+   <g id="text_14">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK JP'; text-anchor: middle; fill: #3476a0" x="296.424" y="256.56144" transform="rotate(-0 296.424 256.56144)">齿部缺损检测</text>
+   </g>
+   <g id="text_15">
+    <text style="font-size: 9px; font-family: 'Noto Sans CJK JP'; text-anchor: middle; fill: #163342" x="296.424" y="276.919125" transform="rotate(-0 296.424 276.919125)">分类分数 + 检测置信度</text>
+   </g>
+   <g id="text_16">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK JP'; text-anchor: middle; fill: #b47928" x="498.3921" y="200.67792" transform="rotate(-0 498.3921 200.67792)">决策级融合</text>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 9px; font-family: 'Noto Sans CJK JP'; text-anchor: middle; fill: #163342" x="498.3921" y="226.060092" transform="rotate(-0 498.3921 226.060092)">或规则 · 保留预测类别</text>
+   </g>
+   <g id="text_18">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK JP'; text-anchor: middle; fill: #b47928" x="650.754" y="200.67792" transform="rotate(-0 650.754 200.67792)">疑似件复核</text>
+   </g>
+   <g id="text_19">
+    <text style="font-size: 9px; font-family: 'Noto Sans CJK JP'; text-anchor: middle; fill: #163342" x="650.754" y="226.078373" transform="rotate(-0 650.754 226.078373)">流程与记录待设计</text>
+   </g>
+   <g id="patch_14">
+    <path d="M 149.180681 208.856424 
+Q 168.864392 193.457432 187.227234 179.091785 
+" style="fill: none; stroke: #879ca5; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 182.406159 180.070172 
+L 187.227234 179.091785 
+L 185.117299 183.535677 
+" style="fill: none; stroke: #879ca5; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="patch_15">
+    <path d="M 148.853687 211.651298 
+Q 168.865891 236.700864 187.831325 260.440173 
+" style="fill: none; stroke: #879ca5; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 186.803794 255.629334 
+L 187.831325 260.440173 
+L 183.366134 258.375694 
+" style="fill: none; stroke: #879ca5; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="patch_16">
+    <path d="M 404.298281 178.057176 
+Q 423.981992 193.456168 442.344834 207.821815 
+" style="fill: none; stroke: #879ca5; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 440.234899 203.377923 
+L 442.344834 207.821815 
+L 437.523759 206.843428 
+" style="fill: none; stroke: #879ca5; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="patch_17">
+    <path d="M 403.971287 261.748702 
+Q 423.983491 236.699136 442.948925 212.959827 
+" style="fill: none; stroke: #879ca5; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 438.483734 215.024306 
+L 442.948925 212.959827 
+L 441.921394 217.770666 
+" style="fill: none; stroke: #879ca5; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="patch_18">
+    <path d="M 553.542492 210.0888 
+Q 572.800254 210.0888 590.380966 210.0888 
+" style="fill: none; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #879ca5; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 585.980966 207.8888 
+L 590.380966 210.0888 
+L 585.980966 212.2888 
+" style="fill: none; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #879ca5; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="text_20">
+    <text style="font-size: 10px; font-family: 'Noto Sans CJK JP'; text-anchor: start; fill: #607681" x="20.0466" y="333.1656" transform="rotate(-0 20.0466 333.1656)">实线：原型或既有软件规则　虚线：待设计人工复核　当前NX上没有系统性能记录</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p6908fae449">
+   <rect x="12.96" y="18.8208" width="708.66" height="332.64"/>
+  </clipPath>
+ </defs>
+</svg>

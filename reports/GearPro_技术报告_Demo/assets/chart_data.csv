@@ -1,0 +1,60 @@
+﻿figure,label,metric,value,numerator,denominator,source
+03,双专项 OR,Recall,0.8873239436619719,63,71,P §10—11
+03,双专项 OR,Recall_wilson95_low,0.7930974330875985,63,71,由计数推导
+03,双专项 OR,Recall_wilson95_high,0.941787978234447,63,71,由计数推导
+03,统一 EfficientNet-B0,Recall,0.7605633802816901,54,71,P §10—11
+03,统一 EfficientNet-B0,Recall_wilson95_low,0.6495855917759032,54,71,由计数推导
+03,统一 EfficientNet-B0,Recall_wilson95_high,0.8447918667498364,54,71,由计数推导
+03,双专项 OR,FPR,0.22784810126582278,18,79,P §10—11
+03,双专项 OR,FPR_wilson95_low,0.14926656041627734,18,79,由计数推导
+03,双专项 OR,FPR_wilson95_high,0.33167055330436546,18,79,由计数推导
+03,统一 EfficientNet-B0,FPR,0.4177215189873418,33,79,P §10—11
+03,统一 EfficientNet-B0,FPR_wilson95_low,0.3152645504906467,33,79,由计数推导
+03,统一 EfficientNet-B0,FPR_wilson95_high,0.5278094606341988,33,79,由计数推导
+04,三类 · 保留 difficult / standard,Recall,0.912,,,P §9.5 E01（源表三位小数）
+04,三类 · 保留 difficult / P2,Recall,0.941,,,P §9.5 E02（源表三位小数）
+04,三类 · 排除 difficult / standard,Recall,0.912,,,P §9.5 E03（源表三位小数）
+04,三类 · 排除 difficult / P2,Recall,0.912,,,P §9.5 E04（源表三位小数）
+04,两类 · 保留 difficult / standard,Recall,0.912,,,P §9.5 E05（源表三位小数）
+04,两类 · 保留 difficult / P2,Recall,0.941,,,P §9.5 E06（源表三位小数）
+04,两类 · 排除 difficult / standard,Recall,0.941,,,P §9.5 E07（源表三位小数）
+04,两类 · 排除 difficult / P2,Recall,0.882,,,P §9.5 E08（源表三位小数）
+04,单类 · 保留 difficult / standard,Recall,0.971,,,P §9.5 E09（源表三位小数）
+04,单类 · 保留 difficult / P2,Recall,0.882,,,P §9.5 E10（源表三位小数）
+04,单类 · 排除 difficult / standard,Recall,0.971,,,P §9.5 E11（源表三位小数）
+04,单类 · 排除 difficult / P2,Recall,0.971,,,P §9.5 E12（源表三位小数）
+04,三类 · 保留 difficult / standard,FPR,0.123,,,P §9.5 E01（源表三位小数）
+04,三类 · 保留 difficult / P2,FPR,0.108,,,P §9.5 E02（源表三位小数）
+04,三类 · 排除 difficult / standard,FPR,0.092,,,P §9.5 E03（源表三位小数）
+04,三类 · 排除 difficult / P2,FPR,0.154,,,P §9.5 E04（源表三位小数）
+04,两类 · 保留 difficult / standard,FPR,0.108,,,P §9.5 E05（源表三位小数）
+04,两类 · 保留 difficult / P2,FPR,0.108,,,P §9.5 E06（源表三位小数）
+04,两类 · 排除 difficult / standard,FPR,0.077,,,P §9.5 E07（源表三位小数）
+04,两类 · 排除 difficult / P2,FPR,0.092,,,P §9.5 E08（源表三位小数）
+04,单类 · 保留 difficult / standard,FPR,0.185,,,P §9.5 E09（源表三位小数）
+04,单类 · 保留 difficult / P2,FPR,0.123,,,P §9.5 E10（源表三位小数）
+04,单类 · 排除 difficult / standard,FPR,0.092,,,P §9.5 E11（源表三位小数）
+04,单类 · 排除 difficult / P2,FPR,0.2,,,P §9.5 E12（源表三位小数）
+05,Scratch V5,EfficientNet_coefficient,0.125,,,P §8.5 / §9.6
+05,Scratch V5,ResNet18_coefficient,0.125,,,P §8.5 / §9.6
+05,Scratch V5,YOLO检测分支_coefficient,0.75,,,P §8.5 / §9.6
+05,Missing Hole V1,EfficientNet_coefficient,0.25,,,P §8.5 / §9.6
+05,Missing Hole V1,ResNet18_coefficient,0.25,,,P §8.5 / §9.6
+05,Missing Hole V1,YOLO检测分支_coefficient,0.5,,,P §8.5 / §9.6
+06,划痕 V5 / validation,Recall,0.9767441860465116,42,43,P §11.1
+06,划痕 V5 / test,Recall,0.8064516129032258,25,31,P §11.1
+06,缺口 V1 / validation,Recall,1.0,34,34,P §11.1
+06,缺口 V1 / test,Recall,0.8181818181818182,36,44,P §11.1
+06,划痕 V5 / validation,FPR,0.08411214953271028,9,107,P §11.1
+06,划痕 V5 / test,FPR,0.16806722689075632,20,119,P §11.1
+06,缺口 V1 / validation,FPR,0.06153846153846154,4,65,P §11.1
+06,缺口 V1 / test,FPR,0.03773584905660377,4,106,P §11.1
+07,bottom,Recall,0.9166666666666666,11,12,P §9.7
+07,bottom,wilson95_low,0.6461140782014047,11,12,由计数推导
+07,bottom,wilson95_high,0.9851352905492264,11,12,由计数推导
+07,oblique,Recall,0.5882352941176471,10,17,P §9.7
+07,oblique,wilson95_low,0.36005074385515545,10,17,由计数推导
+07,oblique,wilson95_high,0.7838921396086862,10,17,由计数推导
+07,side,Recall,1.0,20,20,P §9.7
+07,side,wilson95_low,0.8388698745050667,20,20,由计数推导
+07,side,wilson95_high,1.0,20,20,由计数推导

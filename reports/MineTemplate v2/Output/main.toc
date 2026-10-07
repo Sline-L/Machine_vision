@@ -1,0 +1,53 @@
+\contentsline {section}{\numberline {1}项目背景与检测任务}{1}{section.1}%
+\contentsline {subsection}{\numberline {1.1}应用目标与工作范围}{1}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}缺陷定义与自建数据}{1}{subsection.1.2}%
+\contentsline {section}{\numberline {2}技术路线与文献依据}{2}{section.2}%
+\contentsline {subsection}{\numberline {2.1}从图像到检测结果}{2}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}相关研究如何支持设计}{3}{subsection.2.2}%
+\contentsline {section}{\numberline {3}关键发现与最终方案选择}{3}{section.3}%
+\contentsline {subsection}{\numberline {3.1}V3：判断有无缺陷与定位缺陷是不同任务}{3}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}V4：排序能力、阈值与集成收益需要分别评价}{3}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}划痕：组合整体纹理与局部线索}{4}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}齿部缺损：比较标签粒度与困难目标处理}{5}{subsection.3.4}%
+\contentsline {subsection}{\numberline {3.5}分别检测是否值得增加模型数量}{6}{subsection.3.5}%
+\contentsline {section}{\numberline {4}参数来源与检测结果}{7}{section.4}%
+\contentsline {subsection}{\numberline {4.1}指标、权重与阈值各自是什么}{7}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}核心参数怎样确定}{7}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}同一测试集上的结果}{8}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}错误案例与使用取舍}{9}{subsection.4.4}%
+\contentsline {section}{\numberline {5}项目贡献与后续验证}{9}{section.5}%
+\contentsline {subsection}{\numberline {5.1}现阶段的项目贡献}{9}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}下一阶段优先回答的问题}{10}{subsection.5.2}%
+\contentsline {section}{\numberline {附录 A}文献与证据的对应关系}{11}{appendix.A}%
+\contentsline {section}{\numberline {附录 B}关键固定训练参数与资料索引}{11}{appendix.B}%
+\contentsline {section}{\numberline {附录 C}术语及方法名称}{12}{appendix.C}%
+\contentsline {section}{\numberline {附录 D}数据检查与早期探索}{13}{appendix.D}%
+\contentsline {subsection}{\numberline {D.1}工件构成与位置标签}{13}{subsection.D.1}%
+\contentsline {subsection}{\numberline {D.2}数据规模与类别定义}{14}{subsection.D.2}%
+\contentsline {subsection}{\numberline {D.3}近重复检查与工件划分限制}{14}{subsection.D.3}%
+\contentsline {subsection}{\numberline {D.4}训练、验证与测试职责}{15}{subsection.D.4}%
+\contentsline {subsection}{\numberline {D.5}早期方案与转向依据}{15}{subsection.D.5}%
+\contentsline {subsection}{\numberline {D.6}V3划痕定位计数的未解释差异}{16}{subsection.D.6}%
+\contentsline {subsection}{\numberline {D.7}V4新增比较的配置与资料来源}{16}{subsection.D.7}%
+\contentsline {section}{\numberline {附录 E}候选实验与未采用配置}{16}{appendix.E}%
+\contentsline {subsection}{\numberline {E.1}划痕候选与比较限制}{16}{subsection.E.1}%
+\contentsline {subsection}{\numberline {E.2}齿部缺损候选与选择规则}{17}{subsection.E.2}%
+\contentsline {subsection}{\numberline {E.3}未采用配置}{17}{subsection.E.3}%
+\contentsline {section}{\numberline {附录 F}参数选择与补充结果}{18}{appendix.F}%
+\contentsline {subsection}{\numberline {F.1}训练参数、采样与框架配置}{18}{subsection.F.1}%
+\contentsline {subsection}{\numberline {F.2}温度参数选择}{18}{subsection.F.2}%
+\contentsline {subsection}{\numberline {F.3}融合公式、候选与完整阈值}{18}{subsection.F.3}%
+\contentsline {subsection}{\numberline {F.4}阈值选择与两类结果合并}{19}{subsection.F.4}%
+\contentsline {subsection}{\numberline {F.5}复核评价框架}{19}{subsection.F.5}%
+\contentsline {subsection}{\numberline {F.6}参数来源完整表}{20}{subsection.F.6}%
+\contentsline {subsection}{\numberline {F.7}验证与测试差异}{20}{subsection.F.7}%
+\contentsline {subsection}{\numberline {F.8}位置分组结果}{21}{subsection.F.8}%
+\contentsline {subsection}{\numberline {F.9}缺陷比例与复核负担}{21}{subsection.F.9}%
+\contentsline {subsection}{\numberline {F.10}合并结果的类别解释与划痕分组统计}{21}{subsection.F.10}%
+\contentsline {subsection}{\numberline {F.11}正文新增单模型与融合对照的完整记录}{21}{subsection.F.11}%
+\contentsline {section}{\numberline {附录 G}软件、整机状态与后续测量}{22}{appendix.G}%
+\contentsline {subsection}{\numberline {G.1}软件输出链路}{22}{subsection.G.1}%
+\contentsline {subsection}{\numberline {G.2}原型状态}{23}{subsection.G.2}%
+\contentsline {subsection}{\numberline {G.3}整机测量}{23}{subsection.G.3}%
+\contentsline {subsection}{\numberline {G.4}后续实验与评价方法}{24}{subsection.G.4}%
+\contentsline {section}{参考文献}{25}{section*.14}%

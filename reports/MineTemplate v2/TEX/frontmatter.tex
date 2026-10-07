@@ -1,0 +1,21 @@
+\thispagestyle{plain}
+\noindent{\small\sffamily\color{GearTeal}GEARPRO\quad /\quad 阶段研究报告}\par
+\vspace{1.1cm}
+\noindent{\fontsize{29}{37}\selectfont\sffamily\bfseries\color{GearInk}齿轮外观缺陷检测\par}
+\vspace{0.2cm}
+\noindent{\fontsize{23}{31}\selectfont\sffamily\bfseries\color{GearInk}系统技术报告\par}
+\vspace{0.55cm}
+\noindent{\large\color{GearMuted}自建数据 · 两类缺陷选型 · 参数依据 · 软件集成}\par
+\vspace{0.4cm}
+\noindent{\small\color{GearMuted}GearPro\quad 阶段记录日期：2026年10月7日}\par
+\vspace{0.55cm}
+\noindent\textcolor{GearTeal}{\rule{\linewidth}{1.1pt}}\par
+\vspace{0.4cm}
+\noindent{\large\sffamily\bfseries 摘要}\par\medskip
+本项目面向齿轮外观质检场景，自主采购或定制50个齿轮，进行多角度拍摄并标注划痕和齿部缺损。在早期分类探索的基础上，针对两类缺陷分别选择模型与判定参数，再合并检测结果。报告围绕两类缺陷分别探索标签、检测结构与分数组合。验证对照中，划痕融合比入选EfficientNet单模型多检出1张、少误报4张；齿部缺损融合主要减少误报，三模型并未在检出和误报计数上优于已比较的两模型方案。在同一批150张测试图像上，系统检出63/71张缺陷图像，误报18/79张无可见目标缺陷图像；相比已测试的统一缺陷分类模型，多检出9张、少误报15张。项目已完成软件集成及第一代原型链路，当前使用上下两台工业相机和Jetson NX；新模型尚无系统记录的整机测试结果。现阶段应用方向是辅助人工复核，离线图像结果仍需通过新工件与现场测试验证。
+
+\textbf{关键词：} 齿轮外观检测；划痕；齿部缺损；模型融合；边缘计算
+
+\ReportNote{
+阅读说明：正文围绕任务、方法、实验依据和结果展开；完整配置与补充分析放在附录。项目事实、实验记录与历史报告的来源说明见\protect\hyperlink{appendix-b}{附录B}；学术文献采用数字编号引用。本报告未新增训练或现场测试。
+}

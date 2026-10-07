@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="712.26pt" height="323.83872pt" viewBox="0 0 712.26 323.83872" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-10-05T16:54:57.826398</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 323.83872 
+L 712.26 323.83872 
+L 712.26 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 30.1185 187.46928 
+L 167.3865 187.46928 
+Q 184.545 187.46928 184.545 180.12348 
+L 184.545 80.2206 
+Q 184.545 72.8748 167.3865 72.8748 
+L 30.1185 72.8748 
+Q 12.96 72.8748 12.96 80.2206 
+L 12.96 180.12348 
+Q 12.96 187.46928 30.1185 187.46928 
+z
+" clip-path="url(#p08542b59a8)" style="fill: #f2f7f8; stroke: #168477; stroke-width: 1.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 201.7035 187.46928 
+L 338.9715 187.46928 
+Q 356.13 187.46928 356.13 180.12348 
+L 356.13 80.2206 
+Q 356.13 72.8748 338.9715 72.8748 
+L 201.7035 72.8748 
+Q 184.545 72.8748 184.545 80.2206 
+L 184.545 180.12348 
+Q 184.545 187.46928 201.7035 187.46928 
+z
+" clip-path="url(#p08542b59a8)" style="fill: #f2f7f8; stroke: #168477; stroke-width: 1.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 373.2885 187.46928 
+L 510.5565 187.46928 
+Q 527.715 187.46928 527.715 180.12348 
+L 527.715 80.2206 
+Q 527.715 72.8748 510.5565 72.8748 
+L 373.2885 72.8748 
+Q 356.13 72.8748 356.13 80.2206 
+L 356.13 180.12348 
+Q 356.13 187.46928 373.2885 187.46928 
+z
+" clip-path="url(#p08542b59a8)" style="fill: #f2f7f8; stroke: #3479ac; stroke-width: 1.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 544.8735 187.46928 
+L 682.1415 187.46928 
+Q 699.3 187.46928 699.3 180.12348 
+L 699.3 80.2206 
+Q 699.3 72.8748 682.1415 72.8748 
+L 544.8735 72.8748 
+Q 527.715 72.8748 527.715 80.2206 
+L 527.715 180.12348 
+Q 527.715 187.46928 544.8735 187.46928 
+z
+" clip-path="url(#p08542b59a8)" style="fill: #f2f7f8; stroke: #3479ac; stroke-width: 1.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 18px; font-family: 'Noto Sans CJK JP'; text-anchor: start; fill: #172b3a" x="12.96" y="28.8" transform="rotate(-0 12.96 28.8)">研究方向的变化由失败证据推动</text>
+   </g>
+   <g id="text_2">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK JP'; text-anchor: middle; fill: #168477" x="98.7525" y="118.424364" transform="rotate(-0 98.7525 118.424364)">V3</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 9px; font-family: 'Noto Sans CJK JP'; fill: #425864" transform="translate(53.7525 140.926467)">判废与定位能否分开？</text>
+    <text style="font-size: 9px; font-family: 'Noto Sans CJK JP'; fill: #425864" transform="translate(62.738438 155.313108)">三分类 + 独立定位</text>
+    <text style="font-size: 9px; font-family: 'Noto Sans CJK JP'; fill: #425864" transform="translate(58.845234 169.294046)">增强 / P2 / 异常距离</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 11px; font-family: 'Noto Sans CJK JP'; fill: #172b3a" transform="translate(71.2525 220.486268)">划痕泛化弱</text>
+    <text style="font-size: 11px; font-family: 'Noto Sans CJK JP'; fill: #172b3a" transform="translate(54.7525 239.16994)">视角造成缺口差异</text>
+   </g>
+   <g id="patch_6">
+    <path d="M 179.682308 128.70288 
+Q 184.5448 128.70288 187.730241 128.70288 
+" style="fill: none; stroke: #83929b; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 183.330241 126.50288 
+L 187.730241 128.70288 
+L 183.330241 130.90288 
+" style="fill: none; stroke: #83929b; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="text_5">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK JP'; text-anchor: middle; fill: #168477" x="270.3375" y="118.424364" transform="rotate(-0 270.3375 118.424364)">V4</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 9px; font-family: 'Noto Sans CJK JP'; fill: #425864" transform="translate(216.3375 140.935608)">任意缺陷二分类是否更稳？</text>
+    <text style="font-size: 9px; font-family: 'Noto Sans CJK JP'; fill: #425864" transform="translate(242.8425 155.326467)">20个正式模型</text>
+    <text style="font-size: 9px; font-family: 'Noto Sans CJK JP'; fill: #425864" transform="translate(240.345 169.722249)">470个融合配置</text>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 11px; font-family: 'Noto Sans CJK JP'; fill: #172b3a" transform="translate(226.3375 220.49744)">集成补检伴随误报</text>
+    <text style="font-size: 11px; font-family: 'Noto Sans CJK JP'; fill: #172b3a" transform="translate(231.8375 239.16994)">划痕瓶颈仍存在</text>
+   </g>
+   <g id="patch_7">
+    <path d="M 351.267308 128.70288 
+Q 356.1298 128.70288 359.315241 128.70288 
+" style="fill: none; stroke: #83929b; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 354.915241 126.50288 
+L 359.315241 128.70288 
+L 354.915241 130.90288 
+" style="fill: none; stroke: #83929b; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="text_8">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK JP'; text-anchor: middle; fill: #3479ac" x="441.9225" y="118.424364" transform="rotate(-0 441.9225 118.424364)">V5 + V1</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 9px; font-family: 'Noto Sans CJK JP'; fill: #425864" transform="translate(392.4225 140.926467)">两种缺陷怎样分别适配？</text>
+    <text style="font-size: 9px; font-family: 'Noto Sans CJK JP'; fill: #425864" transform="translate(410.4225 155.331389)">专项数据与结构</text>
+    <text style="font-size: 9px; font-family: 'Noto Sans CJK JP'; fill: #425864" transform="translate(402.141797 169.312327)">标签矩阵 / 校准融合</text>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 11px; font-family: 'Noto Sans CJK JP'; fill: #172b3a" transform="translate(392.4225 220.491424)">不同任务选择不同头</text>
+    <text style="font-size: 11px; font-family: 'Noto Sans CJK JP'; fill: #172b3a" transform="translate(403.4225 239.164784)">测试召回仍不足</text>
+   </g>
+   <g id="patch_8">
+    <path d="M 522.852308 128.70288 
+Q 527.7148 128.70288 530.900241 128.70288 
+" style="fill: none; stroke: #83929b; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 526.500241 126.50288 
+L 530.900241 128.70288 
+L 526.500241 130.90288 
+" style="fill: none; stroke: #83929b; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="text_11">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Noto Sans CJK JP'; text-anchor: middle; fill: #3479ac" x="613.5075" y="118.424364" transform="rotate(-0 613.5075 118.424364)">联合对照</text>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 9px; font-family: 'Noto Sans CJK JP'; fill: #425864" transform="translate(568.5075 140.931389)">能否用统一模型替代？</text>
+    <text style="font-size: 9px; font-family: 'Noto Sans CJK JP'; fill: #425864" transform="translate(575.810859 155.322249)">固定专项阈值后OR</text>
+    <text style="font-size: 9px; font-family: 'Noto Sans CJK JP'; fill: #425864" transform="translate(574.515 169.713108)">同150张测试图对照</text>
+   </g>
+   <g id="text_13">
+    <text style="font-size: 11px; font-family: 'Noto Sans CJK JP'; fill: #172b3a" transform="translate(575.0075 220.513768)">保留当前双专项</text>
+    <text style="font-size: 11px; font-family: 'Noto Sans CJK JP'; fill: #172b3a" transform="translate(569.5075 239.153612)">联合误报仍超目标</text>
+   </g>
+   <g id="text_14">
+    <text style="font-size: 10px; font-family: 'Noto Sans CJK JP'; text-anchor: start; fill: #6a7881" x="19.8234" y="290.31048" transform="rotate(-0 19.8234 290.31048)">不同阶段的标签、数据与测试条件改变；本图表达研究认识，不用于计算跨版本性能提升。</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p08542b59a8">
+   <rect x="12.96" y="17.04672" width="686.34" height="293.832"/>
+  </clipPath>
+ </defs>
+</svg>
