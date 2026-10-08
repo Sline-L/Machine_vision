@@ -48,6 +48,9 @@ python gp_main.py
 
 任一专项分支以后若转 engine，必须重新验证对应三路概率、温度校准、融合结果和最终 OR 判定。
 
+六个专项模型的 FP16/DLA engine 目前只供基准测试使用（`python -m gp.export_engine specialists`、
+`python -m gp.bench`），生产启动入口仍用 `.pt`。验收流程见 [Jetson 加速研究](jetson-acceleration.md)。
+
 ## 4. 资产约定
 
 - `.pt` 可随仓库搬运。
