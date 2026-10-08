@@ -1,7 +1,7 @@
 """Background power / utilisation sampling for benchmarks.
 
 Jetson: `tegrastats` reports module input power (VDD_IN, INA3221 rails), GPU
-load (GR3D_FREQ), memory-controller load (EMC_FREQ), DLA state, shared RAM and
+load (GR3D_FREQ), memory-controller load (EMC_FREQ), DLA load or clock, shared RAM and
 temperatures. Desktop/laptop NVIDIA GPU: `nvidia-smi` reports board power of
 the discrete GPU only, which is not comparable with Jetson VDD_IN.
 """
@@ -17,7 +17,8 @@ TEMPERATURE = re.compile(r"\b([A-Za-z0-9_]+)@(-?[\d.]+)C\b")
 RAM = re.compile(r"\bRAM (\d+)/(\d+)MB")
 GR3D = re.compile(r"\bGR3D_FREQ (\d+)%")
 EMC = re.compile(r"\bEMC_FREQ (\d+)%")
-DLA = re.compile(r"\b(NVDLA\d) (off|\S+)")
+# Documented forms: "NVDLA0 X%", "NVDLA0 Y" (MHz) and "NVDLA0 X%@Y"; Orin also prints "off".
+DLA = re.compile(r"\b(NVDLA\d) (?:(off)|(\d+)%(?:@(\d+))?|(\d+))")
 CPU = re.compile(r"\bCPU \[([^\]]*)\]")
 
 
@@ -39,9 +40,13 @@ def parse_tegrastats_line(line):
         loads = [float(core.split("%")[0]) for core in match.group(1).split(",") if "%" in core]
         if loads:
             sample["cpu_util_pct"] = sum(loads) / len(loads)
-    for name, state in DLA.findall(line):
-        # tegrastats only exposes DLA on/off and clock, not a utilisation percentage.
-        sample[f"{name.lower()}_active"] = 0.0 if state == "off" else 1.0
+    for name, off, percent, percent_clock, clock in DLA.findall(line):
+        name = name.lower()
+        sample[f"{name}_active"] = 0.0 if off else 1.0
+        if percent:
+            sample[f"{name}_util_pct"] = float(percent)
+        if percent_clock or clock:
+            sample[f"{name}_mhz"] = float(percent_clock or clock)
     for name, value in TEMPERATURE.findall(line):
         sample[f"temp_{name.lower()}_c"] = float(value)
     for name, current, _average in RAIL.findall(line):
@@ -74,6 +79,7 @@ class CommandSampler:
         self.command = command
         self.parser = parser
         self.samples = []
+        self.raw_lines = []
         self._process = None
         self._thread = None
 
@@ -91,6 +97,7 @@ class CommandSampler:
 
     def _read(self):
         for line in self._process.stdout:
+            self.raw_lines.append(line)
             sample = self.parser(line)
             if sample:
                 sample["t"] = time.monotonic()

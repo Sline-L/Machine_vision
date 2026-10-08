@@ -194,6 +194,7 @@ def environment_info():
         "jetson_model": _read_text("/proc/device-tree/model"),
         "l4t_release": _read_text("/etc/nv_tegra_release"),
         "nvpmodel": _command_output(["nvpmodel", "-q"]),
+        "jetson_clocks": _command_output(["jetson_clocks", "--show"]),
         "git_commit": _command_output(["git", "-C", str(PROJECT_ROOT), "rev-parse", "HEAD"]),
         "git_dirty": bool(_command_output(["git", "-C", str(PROJECT_ROOT), "status", "--porcelain"])),
     }
@@ -492,6 +493,9 @@ def run_benchmark(args):
     _write_csv(out / "predictions.csv", prediction_rows)
     if samples:
         _write_csv(out / "power.csv", samples)
+    if sampler is not None and sampler.raw_lines:
+        # Keep raw sensor lines so runs can be re-parsed if field formats differ.
+        (out / f"{sampler.source}.log").write_text("".join(sampler.raw_lines), encoding="utf-8")
     (out / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return out, summary
 

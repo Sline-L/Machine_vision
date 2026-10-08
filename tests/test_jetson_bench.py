@@ -44,6 +44,15 @@ class PowerParsingTests(unittest.TestCase):
         self.assertAlmostEqual(sample["power_w"], 12.345)
         self.assertNotIn("temp_1984_c", sample)
 
+    def test_tegrastats_documented_dla_forms(self):
+        sample = parse_tegrastats_line("NVDLA0 25%@614 NVDLA1 1600 GR3D_FREQ 1%")
+        self.assertEqual(sample["nvdla0_util_pct"], 25)
+        self.assertEqual(sample["nvdla0_mhz"], 614)
+        self.assertEqual(sample["nvdla1_active"], 1.0)
+        self.assertEqual(sample["nvdla1_mhz"], 1600)
+        self.assertNotIn("nvdla1_util_pct", sample)
+        self.assertEqual(parse_tegrastats_line("NVDLA0 40% RAM 1/2MB")["nvdla0_util_pct"], 40)
+
     def test_tegrastats_legacy_rail_format(self):
         sample = parse_tegrastats_line("RAM 100/200MB VDD_IN 4870/4870 GR3D_FREQ 0%@305")
         self.assertAlmostEqual(sample["power_w"], 4.87)

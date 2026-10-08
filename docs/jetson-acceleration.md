@@ -139,7 +139,7 @@ N4 与 N5 的差就是 DLA 本身的贡献；N2 与 N3 的差是共享预处理�
 | 每件能耗 | 平均功耗 × 计时时长 / 零件数（J/件） | `power.energy_per_part_j` |
 | 每件动态能耗 | （运行平均功耗 − 已加载空闲平均功耗）× 时长 / 零件数 | `power.dynamic_energy_per_part_j` |
 | GPU 利用率 | `GR3D_FREQ` 百分比均值 | `tegrastats` |
-| DLA | `tegrastats` 只给开/关与频率，无利用率百分比；记录活跃采样比例，精确时间线用 Nsight Systems | `nvdla0_active` 等 |
+| DLA | 按 NVIDIA tegrastats 文档，输出可能是利用率 `X%`、频率 `Y` MHz 或 `X%@Y`（关闭时为 `off`），取决于 JetPack 版本；有百分比时记录利用率，否则只能记录活跃采样比例与频率，精确时间线用 Nsight Systems | `nvdla0_util_pct`、`nvdla0_active`、`nvdla0_mhz` |
 | 内存 | `tegrastats` RAM 峰值（CPU+GPU 共用）；torch 峰值显存（不含 TensorRT 自身分配）；进程峰值 RSS | `summary.json` |
 | 温度 | 各温区最大值（`tj`、`gpu`、`cpu`…） | `tegrastats` |
 | 精度 | 见第 6 节 | `predictions.csv` |
@@ -188,6 +188,10 @@ P_D = 被判不合格的缺陷件 / 缺陷件总数；P_FA = 被判不合格的�
 - 如锁定测试集是 ROI 图（专项指标在 ROI 上计算），用 `--input roi`；整帧数据再用
   `--input frame` 单独衡量定位 engine 的影响。
 
+精度通过后，候选才算“有效加速”需满足其一（建议值，同样在运行前冻结）：3 次重复的
+端到端 p95 中位数比 N0 降低 ≥15%；或每件能耗降低 ≥15% 且 p95 不恶化超过 5%。
+3 次重复中不得出现 OOM、热降频或 p99 长尾失控（p99 > 2 × p50）。
+
 未通过时：先用 `--dynamic-detector` 排除 letterbox 差异；仍不通过的模型保留 `.pt`，
 不得改阈值迁就 engine。
 
@@ -226,7 +230,8 @@ PC（RTX 4060 Laptop）上同样命令，去掉 `--locator/--engines` 即为 P0�
 （`--input frame`）另测。
 
 输出在 `var/bench/<run>/`（不提交）：`summary.json`（环境、git 提交、模型与 engine 哈希、
-统计结果）、`frames.csv`、`predictions.csv`、`power.csv`。
+统计结果）、`frames.csv`、`predictions.csv`、`power.csv`，以及原始 `tegrastats.log` 或
+`nvidia-smi.log`（字段格式与预期不同时可重新解析）。
 
 ## 8. 结果记录表（实测后填写，禁止填入估计值）
 
