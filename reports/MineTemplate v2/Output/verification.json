@@ -29,7 +29,7 @@
     "A4纸张",
     "文字在左右版心范围内"
   ],
-  "source_markdown_sha256": "ba44e8ce729c6405903f5e27750435c7df1dbe5bef254bf6087ca89487814b90",
-  "pdf_sha256": "b63a9bc40798a77047c2aa98c0882711e1fadf122cc9bdf6161b874a4edc63d1",
+  "source_markdown_sha256": "72b54d5d9ad1d05117ba12d525dad38da2f194d077a359bf0f8a1a34db6ab4c0",
+  "pdf_sha256": "4267d764f66c531c6171432df347ae3ef9c30af4a2361bea91a48d8c0e7e83f0",
   "scope": "LaTeX_typesetting_only; no_training; no_inference; no_model_configuration_changes"
 }

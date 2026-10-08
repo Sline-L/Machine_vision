@@ -471,8 +471,8 @@ check('由人工摆放' in main_text and '确认看不到目标缺陷' in main_t
 check('18/79是图像误报计数' in main_text and '不能证明三个成员都必要' in main_text, '评价单位与成员必要性边界明确')
 check('### F.11' in md and '0.9634' in main_text and '0.9660' in main_text, '完整对照与近似AUPRC保留')
 check('本轮没有恢复或改写工件对应关系' in md, '未将可辨识特征写成已恢复身份')
-check('### 3.1　V3' in main_text and '### 3.2　V4' in main_text and '### 3.5　' in main_text,'新增关系融入第3章')
-check('尚未由逐图预测重算' in main_text and '正文不以其“零检出”作为论据' in main_text,'补充证据来源与冲突边界明确')
+check(re.search(r'^### 3\.1　.*V3',main_text,re.M) and re.search(r'^### 3\.2　.*V4',main_text,re.M) and '### 3.5　' in main_text,'新增关系融入第3章')
+check('尚未由逐图预测重算' in main_text and '两套定位统计存在差异' in main_text and '不使用存在冲突的划痕定位计数' in main_text,'补充证据来源与冲突边界明确')
 check('Scratch V5' not in main_text and 'Missing Hole V1' not in main_text,'版本名移入附录')
 for link in soup.find_all('a',href=True):
     if link['href'].startswith('#'):
@@ -485,7 +485,8 @@ check('只有图片顺序编号' in md and 'NX' in md and '未记录' in md,'当
 check(not re.search(r'\bturn\d+(?:search|view)\d+\b',md),'没有工具引用残留')
 for obsolete in ['专项','逻辑OR','先导','长训','完整复训','难例精炼','排行榜','筛出可靠性','命中','历史留出','工程先验']:
     check(obsolete not in md, '正文术语检查/' + obsolete)
-check('difficult表示识别困难' in md, '困难目标含义明确')
+check('difficult表示识别困难' in md and '缺陷的存在已经确认' in md, '困难目标含义明确')
+check('ΣΔRecall×Precision' in md and '未按并列阈值成组' in md, 'AUPRC实际实现说明明确')
 check('分数级加权融合' in md and '决策级融合' in md, '两层融合分别定义')
 check('## 附录C' in md and (ROOT/'术语对照表.md').is_file(), '术语附录与独立对照表存在')
 
@@ -507,7 +508,7 @@ code{font-family:"Noto Sans Mono CJK SC",monospace;background:#f1f5f6;padding:2p
 .footer{margin-top:45px;border-top:1px solid var(--line);padding-top:15px;color:var(--muted);font-size:11px}
 @media(max-width:1050px){.layout{grid-template-columns:185px minmax(0,1fr);gap:16px;padding:20px}article{padding:36px 28px}}
 @media(max-width:760px){.layout{display:block;padding:12px}aside{position:static;height:auto;max-height:230px;margin-bottom:16px}aside .toc>ul{columns:2}aside li ul{display:none}article{padding:27px 18px}h1{font-size:27px}h2{font-size:20px}body{font-size:14px}}
-@media print{@page{size:齿部缺损及联合测试记录;margin:18mm 16mm}body{background:#fff;font-size:10pt;line-height:1.7}.layout{display:block;padding:0;max-width:none}aside{display:none}article{padding:0;box-shadow:none;border:0}h1{font-size:24pt}h2{font-size:15pt;break-after:avoid;margin-top:24pt}h3{font-size:12pt;break-after:avoid}h2.appendix-start{break-before:page}p{orphans:3;widows:3}.table-wrap{overflow:visible}table{font-size:8pt}th,td{padding:6px}thead{display:table-header-group}tr{break-inside:avoid}figure{break-inside:avoid}a{color:inherit}blockquote{break-inside:avoid}.eyebrow{font-size:8pt}.caption{font-size:8pt}}
+@media print{@page{size:A4;margin:18mm 16mm}body{background:#fff;font-size:10pt;line-height:1.7}.layout{display:block;padding:0;max-width:none}aside{display:none}article{padding:0;box-shadow:none;border:0}h1{font-size:24pt}h2{font-size:15pt;break-after:avoid;margin-top:24pt}h3{font-size:12pt;break-after:avoid}h2.appendix-start{break-before:page}p{orphans:3;widows:3}.table-wrap{overflow:visible}table{font-size:8pt}th,td{padding:6px}thead{display:table-header-group}tr{break-inside:avoid}figure{break-inside:avoid}a{color:inherit}blockquote{break-inside:avoid}.eyebrow{font-size:8pt}.caption{font-size:8pt}}
 '''
 page='<!DOCTYPE html>\n<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GearPro：齿轮外观缺陷检测系统技术报告</title><style>'+css+'</style></head><body><div class="layout"><aside><div class="brand">GEARPRO</div><div class="edition">技术报告 · 2026-10-07</div>'+renderer.toc+'</aside><article><div class="eyebrow">项目任务 / 核心探索 / 参数依据 / 软件集成</div>'+str(soup)+'<div class="footer">GearPro · 阶段研究报告<br>正文与全部图片可离线阅读；文献网址需要网络，本地实验索引需要原项目目录。</div></article></div></body></html>'
 (ROOT/'GearPro_技术报告.html').write_text(page,encoding='utf-8')
@@ -526,6 +527,8 @@ verification={
 
 readme='''# GearPro技术报告阅读说明
 
+2026-10-08语言优化：保留五章正文与实验细节，采用自然的技术说明；摘要、正文、图注及附录已改写。优化大纲与证据自审见`语言优化大纲与自审.md`，逐段变更见`语言优化逐段记录.json`。PDF已重新编译并检查，页数见LaTeX版Output/verification.json。
+
 - `GearPro_技术报告.html`：带目录的单文件阅读版，全部图片内嵌，可直接用浏览器离线打开。
 - `GearPro_技术报告.md`：可修改正文，与`assets`目录放在一起阅读。
 - `assets`：正文与附录共12组PNG/SVG图表及`chart_data.csv`，可用于后续排版或汇报。
@@ -537,7 +540,7 @@ readme='''# GearPro技术报告阅读说明
 本轮取消内部来源代码，论文引用仍采用数字编号；实验资料按名称链接到附录B，项目事实统一说明。问题清单独立归档并跟踪本轮更新。当前版本补充可见缺陷标签规则、实际摄像头人工摆拍条件及单模型／融合验证对照；不训练、推理、调整部署阈值或恢复工件身份。选型优化前版本保存于相邻的`GearPro_技术报告_选型优化前_20261007`目录。来源规范前版本保存于相邻的`GearPro_技术报告_来源规范前_20261007`目录。
 
 打包文件提供正文、图表及记录。附录中的本地实验资料链接和构建脚本需要原项目目录；文献链接需要网络。
-本版本补充了V3判定与定位的区别，以及V4排序、阈值、集成的取舍；仍为五章精简正文（6张核心图）＋详细附录（6张补充图）。正文按约10—12页的阅读目标编排，实际打印页数取决于排版，尚未验证分页。参数细节、历史版本名、完整配置和补充分析见附录。修改前的完整版本保存于相邻的`GearPro_技术报告_完整版_20261007`目录。补充前的精简版本保存于相邻的`GearPro_技术报告_精简版_补充前_20261007`目录。方法名称及代码对应关系见`术语对照表.md`。
+本版本补充了V3判定与定位的区别，以及V4排序、阈值、集成的取舍；仍为五章精简正文（6张核心图）＋详细附录（6张补充图）。正文按约10—12页的阅读目标编排，实际打印页数取决于排版，分页以LaTeX版PDF及其检查记录为准。参数细节、历史版本名、完整配置和补充分析见附录。修改前的完整版本保存于相邻的`GearPro_技术报告_完整版_20261007`目录。补充前的精简版本保存于相邻的`GearPro_技术报告_精简版_补充前_20261007`目录。方法名称及代码对应关系见`术语对照表.md`。
 '''
 (ROOT/'README.md').write_text(readme,encoding='utf-8')
 archive=ROOT/'GearPro_技术报告_正文与图表.zip'

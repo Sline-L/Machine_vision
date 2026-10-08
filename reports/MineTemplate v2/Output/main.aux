@@ -3,17 +3,17 @@
 \providecommand*\HyPL@Entry[1]{}
 \HyPL@Entry{0<</S/r>>}
 \HyPL@Entry{2<</S/D>>}
-\@writefile{toc}{\contentsline {section}{\numberline {1}项目背景与检测任务}{1}{section.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}应用目标与工作范围}{1}{subsection.1.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}缺陷定义与自建数据}{1}{subsection.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1}项目要解决什么问题}{1}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}应用目标与分工}{1}{subsection.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}检测哪些缺陷，数据怎样采集}{1}{subsection.1.2}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces 自建数据中的正常外观、划痕与齿部缺损示例。红框为人工标注，局部放大用于观察，均不是模型预测。（来源：\hyperlink {source-5}{划痕数据清单}；\hyperlink {source-6}{齿部缺损数据清单}）}}{1}{figure.caption.2}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
 \newlabel{fig:report-1}{{1}{1}{自建数据中的正常外观、划痕与齿部缺损示例。红框为人工标注，局部放大用于观察，均不是模型预测。（来源：\protect \hyperlink {source-5}{划痕数据清单}；\protect \hyperlink {source-6}{齿部缺损数据清单}）}{figure.caption.2}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces 自建图像数据划分}}{2}{table.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {2}技术路线与文献依据}{2}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}系统怎样完成检测}{2}{section.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.1}从图像到检测结果}{2}{subsection.2.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces 上下双相机、NX、检测软件与分拣机构的关系。虚线为尚待设计的人工复核环节；整机原型连接成功不等于最终模型已完成现场验证。（来源：\hyperlink {project-facts}{项目事实说明}；\href {run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》}）}}{2}{figure.caption.3}\protected@file@percent }
-\newlabel{fig:report-2}{{2}{2}{上下双相机、NX、检测软件与分拣机构的关系。虚线为尚待设计的人工复核环节；整机原型连接成功不等于最终模型已完成现场验证。（来源：\protect \hyperlink {project-facts}{项目事实说明}；\protect \href {run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》}）}{figure.caption.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces 上下双相机、NX、检测软件与分拣机构的关系。虚线表示尚待设计的人工复核环节；当前模型的整机性能还需现场测试。（来源：\hyperlink {project-facts}{项目事实说明}；\href {run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》}）}}{2}{figure.caption.3}\protected@file@percent }
+\newlabel{fig:report-2}{{2}{2}{上下双相机、NX、检测软件与分拣机构的关系。虚线表示尚待设计的人工复核环节；当前模型的整机性能还需现场测试。（来源：\protect \hyperlink {project-facts}{项目事实说明}；\protect \href {run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》}）}{figure.caption.3}{}}
 \citation{ref10}
 \citation{ref11}
 \citation{ref12}
@@ -26,40 +26,40 @@
 \citation{ref6}
 \citation{ref1}
 \citation{ref2}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}相关研究如何支持设计}{3}{subsection.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3}关键发现与最终方案选择}{3}{section.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}V3：判断有无缺陷与定位缺陷是不同任务}{3}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}方法参考了哪些研究}{3}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}我们怎样探索并选择方案}{3}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}判断有无缺陷与找到缺陷位置（V3）}{3}{subsection.3.1}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces V3图像判断与区域定位的不同评价单位}}{3}{table.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}V4：排序能力、阈值与集成收益需要分别评价}{3}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}模型分数、阈值与融合的关系（V4）}{3}{subsection.3.2}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces V4排序指标与所选工作点}}{4}{table.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}划痕：组合整体纹理与局部线索}{4}{subsection.3.3}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces 划痕候选在各自验证阈值下的召回率与误报率，采用当时FPR\ensuremath {\leq }0.20的选择约束。图中是候选配置比较，不能把同时改变的输入尺寸、权重或batch分别解释为单因素效果。（来源：\hyperlink {source-7}{划痕候选模型评价表}）}}{5}{figure.caption.4}\protected@file@percent }
-\newlabel{fig:report-3}{{3}{5}{划痕候选在各自验证阈值下的召回率与误报率，采用当时FPR\ensuremath {\leq }0.20的选择约束。图中是候选配置比较，不能把同时改变的输入尺寸、权重或batch分别解释为单因素效果。（来源：\protect \hyperlink {source-7}{划痕候选模型评价表}）}{figure.caption.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}划痕：比较分类、检测与分数融合}{4}{subsection.3.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces 各划痕候选在自身验证阈值下的召回率与误报率，按当时FPR\ensuremath {\leq }0.20的规则选择。部分实验同时改变输入尺寸、权重或批量大小（batch），各因素的单独作用还需控制条件比较。（来源：\hyperlink {source-7}{划痕候选模型评价表}）}}{5}{figure.caption.4}\protected@file@percent }
+\newlabel{fig:report-3}{{3}{5}{各划痕候选在自身验证阈值下的召回率与误报率，按当时FPR\ensuremath {\leq }0.20的规则选择。部分实验同时改变输入尺寸、权重或批量大小（batch），各因素的单独作用还需控制条件比较。（来源：\protect \hyperlink {source-7}{划痕候选模型评价表}）}{figure.caption.4}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces 划痕单模型与融合验证对照}}{5}{table.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}齿部缺损：比较标签粒度与困难目标处理}{5}{subsection.3.4}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces 12组检测配置在验证集上的召回率与误报率。每组采用自身验证阈值，batch等条件未全部一致，因此该矩阵用于配置选择，不是严格隔离每个因素的消融。（来源：\hyperlink {source-8}{齿部缺损候选模型评价表}）}}{6}{figure.caption.5}\protected@file@percent }
-\newlabel{fig:report-4}{{4}{6}{12组检测配置在验证集上的召回率与误报率。每组采用自身验证阈值，batch等条件未全部一致，因此该矩阵用于配置选择，不是严格隔离每个因素的消融。（来源：\protect \hyperlink {source-8}{齿部缺损候选模型评价表}）}{figure.caption.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}齿部缺损：比较标签划分与困难目标处理}{5}{subsection.3.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces 12组检测配置的验证召回率与误报率。各组采用自身验证阈值，batch等条件也有差异；图中结果用于比较候选配置，各因素的单独作用还需进一步实验。（来源：\hyperlink {source-8}{齿部缺损候选模型评价表}）}}{6}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:report-4}{{4}{6}{12组检测配置的验证召回率与误报率。各组采用自身验证阈值，batch等条件也有差异；图中结果用于比较候选配置，各因素的单独作用还需进一步实验。（来源：\protect \hyperlink {source-8}{齿部缺损候选模型评价表}）}{figure.caption.5}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces 齿部缺损单模型与融合验证对照}}{6}{table.5}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.5}分别检测是否值得增加模型数量}{6}{subsection.3.5}\protected@file@percent }
 \gdef \LT@i {\LT@entry 
     {1}{112.19249pt}\LT@entry 
     {1}{161.85094pt}\LT@entry 
     {1}{192.58177pt}}
-\@writefile{toc}{\contentsline {section}{\numberline {4}参数来源与检测结果}{7}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}参数怎么确定，最终结果怎样}{7}{section.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.1}指标、权重与阈值各自是什么}{7}{subsection.4.1}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces 评价指标与模型参数的区别}}{7}{table.6}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.2}核心参数怎样确定}{7}{subsection.4.2}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces 最终融合系数及判定阈值}}{7}{table.7}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.3}同一测试集上的结果}{8}{subsection.4.3}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces 同一批150张图像、相同“任意缺陷”标签下的系统比较。误差线为按图像计数的Wilson 95\%区间；工件内图像相关性未知，区间仅作描述性参考，不能据此判断差异具有统计显著性。（来源：\hyperlink {source-4}{齿部缺损及联合测试记录}）}}{8}{figure.caption.6}\protected@file@percent }
-\newlabel{fig:report-5}{{5}{8}{同一批150张图像、相同“任意缺陷”标签下的系统比较。误差线为按图像计数的Wilson 95\%区间；工件内图像相关性未知，区间仅作描述性参考，不能据此判断差异具有统计显著性。（来源：\protect \hyperlink {source-4}{齿部缺损及联合测试记录}）}{figure.caption.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces 同一批150张图像上，按“任意缺陷”标签比较两套方案。误差线为按图像计数的Wilson 95\%区间。由于同一工件照片之间的相关性未知，这些区间仅供描述结果，不用于判断差异是否具有统计显著性。（来源：\hyperlink {source-4}{齿部缺损及联合测试记录}）}}{8}{figure.caption.6}\protected@file@percent }
+\newlabel{fig:report-5}{{5}{8}{同一批150张图像上，按“任意缺陷”标签比较两套方案。误差线为按图像计数的Wilson 95\%区间。由于同一工件照片之间的相关性未知，这些区间仅供描述结果，不用于判断差异是否具有统计显著性。（来源：\protect \hyperlink {source-4}{齿部缺损及联合测试记录}）}{figure.caption.6}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces 固定配置的图像级测试结果}}{8}{table.8}\protected@file@percent }
 \citation{ref3}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.4}错误案例与使用取舍}{9}{subsection.4.4}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces 两个划痕漏检和一个划痕误报案例。红框来自人工标注，模型分数来自固定配置的已有预测记录；局部放大不产生新的推理结果。“无划痕”不意味着无齿部缺损。（来源：\hyperlink {source-10}{划痕逐图预测与标注}）}}{9}{figure.caption.7}\protected@file@percent }
-\newlabel{fig:report-6}{{6}{9}{两个划痕漏检和一个划痕误报案例。红框来自人工标注，模型分数来自固定配置的已有预测记录；局部放大不产生新的推理结果。“无划痕”不意味着无齿部缺损。（来源：\protect \hyperlink {source-10}{划痕逐图预测与标注}）}{figure.caption.7}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}项目贡献与后续验证}{9}{section.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}现阶段的项目贡献}{9}{subsection.5.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces 两个划痕漏检和一个划痕误报案例。红框是人工标注，模型分数取自固定配置的已有预测记录，局部放大只供观察。图中的“无划痕”表示该任务的负样本，图像仍可能有齿部缺损。（来源：\hyperlink {source-10}{划痕逐图预测与标注}）}}{9}{figure.caption.7}\protected@file@percent }
+\newlabel{fig:report-6}{{6}{9}{两个划痕漏检和一个划痕误报案例。红框是人工标注，模型分数取自固定配置的已有预测记录，局部放大只供观察。图中的“无划痕”表示该任务的负样本，图像仍可能有齿部缺损。（来源：\protect \hyperlink {source-10}{划痕逐图预测与标注}）}{figure.caption.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}目前完成了什么，下一步验证什么}{9}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}目前的成果与认识}{9}{subsection.5.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.2}下一阶段优先回答的问题}{10}{subsection.5.2}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces 下一阶段验证优先级}}{10}{table.9}\protected@file@percent }
 \citation{ref1}
@@ -115,7 +115,7 @@
 \@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces V3/V4提供研究转向依据，V5/V1承担重点技术探索。该图表示问题和设计演进，非同一数据上的性能趋势。（来源：\href {run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第3、6--10节}）}}{15}{figure.caption.9}\protected@file@percent }
 \newlabel{fig:report-8}{{8}{15}{V3/V4提供研究转向依据，V5/V1承担重点技术探索。该图表示问题和设计演进，非同一数据上的性能趋势。（来源：\protect \href {run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第3、6--10节}）}{figure.caption.9}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {D.6}V3划痕定位计数的未解释差异}{16}{subsection.D.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {D.7}V4新增比较的配置与资料来源}{16}{subsection.D.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {D.7}V4比较方案的配置与资料来源}{16}{subsection.D.7}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {15}{\ignorespaces V4配置与历史结果来源}}{16}{table.15}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {附录 E}候选实验与未采用配置}{16}{appendix.E}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {E.1}划痕候选与比较限制}{16}{subsection.E.1}\protected@file@percent }
@@ -128,31 +128,28 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {F.1}训练参数、采样与框架配置}{18}{subsection.F.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {F.2}温度参数选择}{18}{subsection.F.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {F.3}融合公式、候选与完整阈值}{18}{subsection.F.3}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces 发布配置（来源：\hyperlink {source-1}{划痕发布配置}；\hyperlink {source-2}{齿部缺损发布配置}）中的融合公式展开。划痕\ensuremath {\alpha }=0.25，所以分类器分别0.125、检测器0.75；齿部缺损\ensuremath {\alpha }=0.50，所以分类器分别0.25、检测器0.50。系数表示分数计算规则，不能解释为因果贡献或定位精度。}}{18}{figure.caption.10}\protected@file@percent }
-\newlabel{fig:report-9}{{9}{18}{发布配置（来源：\protect \hyperlink {source-1}{划痕发布配置}；\protect \hyperlink {source-2}{齿部缺损发布配置}）中的融合公式展开。划痕\ensuremath {\alpha }=0.25，所以分类器分别0.125、检测器0.75；齿部缺损\ensuremath {\alpha }=0.50，所以分类器分别0.25、检测器0.50。系数表示分数计算规则，不能解释为因果贡献或定位精度。}{figure.caption.10}{}}
 \citation{ref15}
-\citation{ref5}
-\citation{ref6}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces 发布配置（来源：\hyperlink {source-1}{划痕发布配置}；\hyperlink {source-2}{齿部缺损发布配置}）中的融合公式展开。划痕\ensuremath {\alpha }=0.25，所以分类器分别0.125、检测器0.75；齿部缺损\ensuremath {\alpha }=0.50，所以分类器分别0.25、检测器0.50。系数表示分数计算规则，不能解释为因果贡献或定位精度。}}{19}{figure.caption.10}\protected@file@percent }
+\newlabel{fig:report-9}{{9}{19}{发布配置（来源：\protect \hyperlink {source-1}{划痕发布配置}；\protect \hyperlink {source-2}{齿部缺损发布配置}）中的融合公式展开。划痕\ensuremath {\alpha }=0.25，所以分类器分别0.125、检测器0.75；齿部缺损\ensuremath {\alpha }=0.50，所以分类器分别0.25、检测器0.50。系数表示分数计算规则，不能解释为因果贡献或定位精度。}{figure.caption.10}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {17}{\ignorespaces 最终成员系数、温度及阈值}}{19}{table.17}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {F.4}阈值选择与两类结果合并}{19}{subsection.F.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {F.5}复核评价框架}{19}{subsection.F.5}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {18}{\ignorespaces 人工复核评价框架}}{19}{table.18}\protected@file@percent }
+\citation{ref5}
+\citation{ref6}
 \gdef \LT@vi {\LT@entry 
     {1}{112.19249pt}\LT@entry 
     {1}{161.85094pt}\LT@entry 
     {1}{192.58177pt}}
+\@writefile{lot}{\contentsline {table}{\numberline {18}{\ignorespaces 人工复核评价框架}}{20}{table.18}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {F.6}参数来源完整表}{20}{subsection.F.6}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {19}{\ignorespaces 参数来源完整表}}{20}{table.19}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {F.7}验证与测试差异}{20}{subsection.F.7}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces 每条线连接同一缺陷类别的验证与测试指标。两任务分母不同；验证参与多层选择，线条不表示时间上的退化。数据来自（来源：\hyperlink {source-1}{划痕发布配置}；\hyperlink {source-2}{齿部缺损发布配置}；\hyperlink {source-3}{划痕测试记录}；\hyperlink {source-4}{齿部缺损及联合测试记录}）。}}{20}{figure.caption.11}\protected@file@percent }
-\newlabel{fig:report-10}{{10}{20}{每条线连接同一缺陷类别的验证与测试指标。两任务分母不同；验证参与多层选择，线条不表示时间上的退化。数据来自（来源：\protect \hyperlink {source-1}{划痕发布配置}；\protect \hyperlink {source-2}{齿部缺损发布配置}；\protect \hyperlink {source-3}{划痕测试记录}；\protect \hyperlink {source-4}{齿部缺损及联合测试记录}）。}{figure.caption.11}{}}
-\citation{ref3}
+\@writefile{toc}{\contentsline {subsection}{\numberline {F.7}验证与测试差异}{21}{subsection.F.7}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces 每条线连接同一缺陷类别的验证与测试指标。两任务分母不同；验证参与多层选择，线条不表示时间上的退化。数据来自（来源：\hyperlink {source-1}{划痕发布配置}；\hyperlink {source-2}{齿部缺损发布配置}；\hyperlink {source-3}{划痕测试记录}；\hyperlink {source-4}{齿部缺损及联合测试记录}）。}}{21}{figure.caption.11}\protected@file@percent }
+\newlabel{fig:report-10}{{10}{21}{每条线连接同一缺陷类别的验证与测试指标。两任务分母不同；验证参与多层选择，线条不表示时间上的退化。数据来自（来源：\protect \hyperlink {source-1}{划痕发布配置}；\protect \hyperlink {source-2}{齿部缺损发布配置}；\protect \hyperlink {source-3}{划痕测试记录}；\protect \hyperlink {source-4}{齿部缺损及联合测试记录}）。}{figure.caption.11}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {F.8}位置分组结果}{21}{subsection.F.8}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces bottom为11/12、oblique为10/17、side为20/20。位置分组可重叠，数量之和49大于44，不能相加算总体召回；区间按图像计数推导。（来源：\hyperlink {source-4}{齿部缺损及联合测试记录}）}}{21}{figure.caption.12}\protected@file@percent }
 \newlabel{fig:report-11}{{11}{21}{bottom为11/12、oblique为10/17、side为20/20。位置分组可重叠，数量之和49大于44，不能相加算总体召回；区间按图像计数推导。（来源：\protect \hyperlink {source-4}{齿部缺损及联合测试记录}）}{figure.caption.12}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {F.9}缺陷比例与复核负担}{21}{subsection.F.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {F.10}合并结果的类别解释与划痕分组统计}{21}{subsection.F.10}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {F.11}正文新增单模型与融合对照的完整记录}{21}{subsection.F.11}\protected@file@percent }
+\citation{ref3}
 \gdef \LT@vii {\LT@entry 
     {1}{33.46674pt}\LT@entry 
     {1}{91.32379pt}\LT@entry 
@@ -161,21 +158,24 @@
     {1}{107.59227pt}\LT@entry 
     {1}{54.72902pt}\LT@entry 
     {1}{61.92728pt}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {F.9}缺陷比例与复核负担}{22}{subsection.F.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {F.10}合并结果的类别解释与划痕分组统计}{22}{subsection.F.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {F.11}单模型与融合对照的完整记录}{22}{subsection.F.11}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {20}{\ignorespaces 单模型与融合完整验证记录}}{22}{table.20}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {附录 G}软件、整机状态与后续测量}{22}{appendix.G}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {G.1}软件输出链路}{22}{subsection.G.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {附录 G}软件、整机状态与后续测量}{23}{appendix.G}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {G.1}软件输出链路}{23}{subsection.G.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces 软件将同次检测结果提供给页面、统计和串口；原型已完成分拣模块联调，人工复核规则和记录方式还待确定。图据\href {run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第13节}及负责人确认绘制。}}{23}{figure.caption.13}\protected@file@percent }
+\newlabel{fig:report-12}{{12}{23}{软件将同次检测结果提供给页面、统计和串口；原型已完成分拣模块联调，人工复核规则和记录方式还待确定。图据\protect \href {run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第13节}及负责人确认绘制。}{figure.caption.13}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {G.2}原型状态}{23}{subsection.G.2}\protected@file@percent }
 \gdef \LT@viii {\LT@entry 
     {1}{112.19249pt}\LT@entry 
     {1}{161.85094pt}\LT@entry 
     {1}{192.58177pt}}
-\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces 阶段材料记载的软件链路：同次结果供页面、统计与串口共享；原型分拣支路已打通，人工复核规则及记录尚待设计。结构图据\href {run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第13节}及负责人确认绘制。}}{23}{figure.caption.13}\protected@file@percent }
-\newlabel{fig:report-12}{{12}{23}{阶段材料记载的软件链路：同次结果供页面、统计与串口共享；原型分拣支路已打通，人工复核规则及记录尚待设计。结构图据\protect \href {run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第13节}及负责人确认绘制。}{figure.caption.13}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {G.2}原型状态}{23}{subsection.G.2}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {21}{\ignorespaces 软件与原型状态}}{23}{table.21}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {G.3}整机测量}{23}{subsection.G.3}\protected@file@percent }
 \citation{ref7}
 \citation{ref8}
 \citation{ref9}
+\@writefile{lot}{\contentsline {table}{\numberline {21}{\ignorespaces 软件与原型状态}}{24}{table.21}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {G.3}整机测量}{24}{subsection.G.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {G.4}后续实验与评价方法}{24}{subsection.G.4}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {22}{\ignorespaces 后续实验与评价方法}}{24}{table.22}\protected@file@percent }
 \bibcite{ref1}{1}

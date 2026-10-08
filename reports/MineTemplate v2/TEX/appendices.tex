@@ -91,7 +91,9 @@ Focal损失设置 & \ensuremath{\gamma}=1.5，最终w\_pos=1 & \ensuremath{\gamm
 \ReportAnchor{appendix-c}
 
 \FloatBarrier\Needspace{5\baselineskip}\section{术语及方法名称}
-本报告采用中文名称，并在首次出现时给出英文或代码名。独立训练的网络称“成员模型”，两个面向同类缺陷的分类模型与一个目标检测模型构成“检测子系统”。方法名称按实际操作确定；有关名词的更完整说明见\protect\href{run:../GearPro_技术报告/术语对照表.md}{术语对照表}。
+正文优先使用中文名称，必要时补充英文或代码名。独立训练的网络称为“成员模型”；针对同一类缺陷的两个分类模型和一个目标检测模型合称“检测子系统”。下表解释这些名称在项目中的含义，更多代码对应见\protect\href{run:../GearPro_技术报告/术语对照表.md}{术语对照表}。
+
+报告保留实验记录中的字段名AUPRC。实际脚本先按分数从高到低逐样本排序，再累计“召回增量\ensuremath{\times}当前精确率”，即ΣΔRecall\ensuremath{\times}Precision，属于AP式阶梯求和，并非梯形积分；相同分数按输入顺序处理，未按并列阈值成组。因此这些数值用于复现项目内的排序比较，与其他实现比较时应先统一计算方式。计算代码见\protect\href{run:../../train_scratch_v5.py}{划痕评价函数}和\protect\href{run:../../train_binary_defect_v4.py}{V4评价函数}，V1复用划痕函数。
 
 
 \begingroup\small\setstretch{1.06}
@@ -140,7 +142,7 @@ Focal损失设置 & \ensuremath{\gamma}=1.5，最终w\_pos=1 & \ensuremath{\gamm
 \label{fig:report-7}
 \end{figure}
 
-需要区分三个概念：工件的缺陷类型、采集时的观察角度、XML中的位置标签。采购时的“侧部缺损/齿角缺损”不能直接等同于V1的bottom/oblique/side标注，也不同于其他版本按宽高比推断的视角。本文保持原始定义，不自行建立未经核对的映射。
+这里有三个不同概念：采购齿轮时记录的缺陷类型、拍摄时的观察角度，以及XML中的位置标签。采购分类为“侧部缺损/齿角缺损”，V1位置标注为bottom/oblique/side；其他版本还使用按宽高比推断的视角。它们之间的对应关系还没有核对，所以报告分别保留原有定义。
 
 \FloatBarrier\Needspace{4\baselineskip}\subsection{数据规模与类别定义}
 
@@ -160,18 +162,18 @@ Missing Hole V1 & 397 & 99 & 150 & 有可见齿部缺损 / 无可见齿部缺损
 缺少某类标注不能自动解释为不含该类缺陷。统一模型的数据构建曾排除59张划痕状态未知且无齿部缺损的候选图像，保留类别状态已确定的数据。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第10.1.2节}）
 
 \FloatBarrier\Needspace{4\baselineskip}\subsection{近重复检查与工件划分限制}
-历史实验使用SHA256、dHash、序号、宽高比及灰度相关性等方法识别相同或近重复图像，并据此审计拆分。当前只有图片顺序编号，清单没有可靠的图像与50个齿轮工件的对应关系，无法确认同一齿轮的不同角度是否跨训练、验证和测试。（来源：\protect\hyperlink{project-facts}{项目事实说明}；\protect\hyperlink{source-5}{划痕数据清单}；\protect\hyperlink{source-6}{齿部缺损数据清单}）
+已有实验用SHA256检查相同文件，并用dHash、序号、宽高比和灰度相关性检查相似图像。这些检查有助于发现重复，但当前清单只有图片顺序编号，没有照片与50个齿轮的可靠对应关系，同一齿轮的不同角度是否跨训练、验证和测试仍无法确认。（来源：\protect\hyperlink{project-facts}{项目事实说明}；\protect\hyperlink{source-5}{划痕数据清单}；\protect\hyperlink{source-6}{齿部缺损数据清单}）
 
-项目负责人认为独特缺陷形态可用于辨识部分工件；正常工件及缺陷不可见的照片无法可靠辨识。本轮没有恢复或改写工件对应关系，完整工件独立性仍未知；只检查可辨识照片，未发现交叉也不能证明全体独立。
+部分齿轮的缺陷形态独特，可能用于辨识工件；正常齿轮和缺陷不可见的照片则无法可靠辨识。本轮没有恢复或改写工件对应关系，因此完整的工件独立性仍未知。即使可辨识的照片没有跨集重复，也还需要检查其余照片。
 
-V5测试记录未发现字节级重复，但存在75个dHash\ensuremath{\leq}2跨集合相似对（来源：\protect\hyperlink{source-3}{划痕测试记录}）。相似外形和背景可能触发这些提示，尚不能直接认定泄漏；结合工件编号缺失，当前测试结果仅反映所评价图像上的表现，以及已执行的近重复图像检查结果。报告保留“固定模型、温度、融合权重及阈值后评价”的流程记录，按工件划分数据的独立性仍待确认。
+V5测试记录没有发现字节级重复，但提示75个dHash\ensuremath{\leq}2的跨集合相似对。齿轮外形和背景相似也可能产生这种提示，需要逐图核对；目前还不能确定是否存在数据泄漏。现有记录能够确认配置固定后进行了图像评价，按工件分组的独立性还需补查。（来源：\protect\hyperlink{source-3}{划痕测试记录}）
 
-这一区分直接影响结论力度：测试图上的检出能力，尚不能自动转为新采购齿轮、不同批次或新生产线的泛化能力。后续采集应为每个齿轮工件建立ID，其所有角度、照明和连续帧进入同一数据组。
+现有测试描述的是这些图像上的检测效果。要判断对新采购齿轮、不同批次或新生产线是否有效，后续应给每个齿轮建立ID，并将其所有角度、照明条件和连续帧放入同一个数据组。
 
 \FloatBarrier\Needspace{4\baselineskip}\subsection{训练、验证与测试职责}
-训练集用于更新网络参数；验证数据用于选候选、温度、融合及阈值；测试记录用于配置固定后的结果评价。测试一旦查看，后续调整需要新的开发数据和新的未查看测试，而现有集合可保留为历史回归集。\cite{ref1}\cite{ref2}
+训练集用于学习网络参数，验证集用于选择模型、温度、融合方式和阈值，测试集用于评价固定配置。如果查看测试结果后继续调整方案，后续需要新的开发数据和未查看的测试数据，旧集合可用于检查修改后是否退步。\cite{ref1}\cite{ref2}
 
-本报告在现有证据上解释结果，不重新训练或调整运行阈值。多个阶段的数据和标签不同，跨版本仅讨论设计认识，不将各版指标连成同一条性能提升曲线。
+这次整理只解释已有结果，没有重新训练或调整运行阈值。各阶段的数据和标签不同，所以跨版本比较主要解释思路如何变化，性能数值仍分别报告。
 
 \FloatBarrier\Needspace{4\baselineskip}\subsection{早期方案与转向依据}
 \begin{figure}[H]\centering
@@ -180,14 +182,14 @@ V5测试记录未发现字节级重复，但存在75个dHash\ensuremath{\leq}2�
 \label{fig:report-8}
 \end{figure}
 
-V3用分类模型区分正常、划痕与齿部缺损，并用独立模型定位缺陷，并尝试增强、P2和正常特征距离。它揭示低对比划痕与不同视角下的齿部缺损的困难，也建立了判定与定位分别评价的框架。V4将两类合并为“至少一类缺陷”，探索多模型、纹理和集成。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第6--7节}）
+V3用分类模型区分正常、划痕和齿部缺损，另用目标检测模型定位缺陷，还尝试了增强、P2和正常特征距离。实验关注低对比划痕和不同视角下的缺损，也促使我们分别评价图像判断与区域定位。V4随后合并两类缺陷，尝试统一二分类、多模型、纹理方法和融合。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第6--7节}）
 
-V4最终留出测试集的结果为正确检出19/30张缺陷图像、误报7/20张无可见目标缺陷图像；11个漏检中7个来自划痕。模型组合补检了部分缺陷，也增加了误报，划痕漏检仍是主要问题。后续因而针对划痕与齿部缺损分别组织数据、检测结构及判定规则。V4曾用第一次留出结果判断扩展方向，本文明确说明该留出测试集曾用于指导后续实验，不能视为始终未查看的最终测试集。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第7.7节}）
+V4最终在留出集上检出19/30张缺陷图像，误报7/20张无可见目标缺陷图像；11个漏检中7个来自划痕。这说明后续需要重点检查划痕，我们因此分别组织两类缺陷的数据与模型实验。第一次留出结果曾用于决定扩展方向，这批数据已参与探索，后续最终评价需要另选未查看的数据。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第7.7节}）
 
 \FloatBarrier\Needspace{4\baselineskip}\subsection{V3划痕定位计数的未解释差异}
 原始测试JSON的划痕图像分类检出4/11张；整体定位评价记录TP=0、FP=6、FN=19。另一个按视角逐框匹配的结果在oblique组、IoU=0.5时记录TP=1、FP=5、FN=9，其他视角TP=0。（来源：\protect\hyperlink{source-11}{V3测试与定位记录}） 两套定位计数不能相加或互相替换，差异原因尚未核清。因此正文采用齿部缺损数据解释图像判定与定位的任务区别，不作“划痕完全无法定位”的结论。
 
-\FloatBarrier\Needspace{4\baselineskip}\subsection{V4新增比较的配置与资料来源}
+\FloatBarrier\Needspace{4\baselineskip}\subsection{V4比较方案的配置与资料来源}
 
 \par\medskip\noindent\begin{minipage}{\linewidth}\small\setstretch{1.06}
 \captionof{table}{V4配置与历史结果来源}
@@ -208,18 +210,18 @@ V4最终留出测试集的结果为正确检出19/30张缺陷图像、误报7/20
 
 \FloatBarrier\Needspace{5\baselineskip}\section{候选实验与未采用配置}
 \FloatBarrier\Needspace{4\baselineskip}\subsection{划痕候选与比较限制}
-\textbf{问题与假设。} 图像分类可以识别纹理变化，却可能受加工纹和高光影响；目标检测可以预测局部缺陷区域，但定位并不总可靠。划痕检测实验比较两类模型的输出能否共同改善图像级分类结果。
+划痕实验尝试结合图像分类与局部检测线索。加工纹和高光可能与划痕混淆，局部预测框也可能不准，因此先比较两类模型及其分数组合对图像判断的影响，定位效果另行检查。
 
 \textbf{对照设计。} 正式记录包含6个分类模型初步实验、2个目标检测模型初步实验和2个增加训练轮数上限的分类模型重新训练实验。初步分类实验比较ResNet18、EfficientNet-B0、YOLO分类器及384/w1、512/w2配置；目标检测实验比较960输入的原始YOLO26n与包含P2检测层的模型。实验还比较是否使用测试时增强（test-time augmentation，TTA），随后进入温度参数与融合规则选择。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第8节}；\protect\hyperlink{source-7}{划痕候选模型评价表}）
 
-原始YOLO26n检测模型的召回率为38/43、FPR为21/107，P2对应38/43和19/107；精确率--召回率曲线下面积（AUPRC）约0.828与0.866。在相同召回率下，P2误报更少，排序指标更高，进入最终组合。最终分类成员为增加训练轮数上限后重新训练的EfficientNet-B0与初步实验中的ResNet18，两者384输入、w1、无TTA。（来源：\protect\hyperlink{source-1}{划痕发布配置}；\protect\hyperlink{source-7}{划痕候选模型评价表}）
+原始YOLO26n检测模型的召回率为38/43、FPR为21/107，P2对应38/43和19/107；记录中的AUPRC约0.828与0.866（计算定义见附录C）。在相同召回率下，P2误报更少，排序指标更高，进入最终组合。最终分类成员为增加训练轮数上限后重新训练的EfficientNet-B0与初步实验中的ResNet18，两者384输入、w1、无TTA。（来源：\protect\hyperlink{source-1}{划痕发布配置}；\protect\hyperlink{source-7}{划痕候选模型评价表}）
 
-\textbf{设计认识。} 当前结果支持选择P2配置，但原始YOLO26n与包含P2检测层的模型采用不同批量大小（batch size），因此该对照未单独隔离结构变化的影响。384/w1与512/w2同时改变输入和权重，也不能单独断言w2或512必然较差。融合方案的验证结果支持该模型组合，成员模型的错误互补情况还需要统计各模型在同一图像上的共同错误，并通过消融实验验证。
+我们根据验证结果选择P2配置，但两个检测配置的batch不同，结构的单独作用还需要对照。384/w1与512/w2也同时改变输入和权重。后续应固定其他条件比较这些设置，并核对模型在同一图像上的共同错误，检查融合成员是否必要。
 
-P2模型的预测框最大置信度可用于图像分类，与准确定位是两个结论。原报告在IoU=0.3匹配中记录大量FP，框仅作辅助线索。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第8.8--8.9节}）
+P2模型的最高框置信度参与图像判断，预测框是否准确则单独评价。原报告在IoU=0.3的框匹配中记录了大量FP，所以目前显示框只供辅助观察。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第8.8--8.9节}）
 
 \FloatBarrier\Needspace{4\baselineskip}\subsection{齿部缺损候选与选择规则}
-\textbf{问题与假设。} 齿部缺损在不同位置有不同外观。细分位置标签可能帮助学习，也可能分散有限监督；困难目标的保留或排除影响训练标注的组成。V1用交叉矩阵比较这些选择。
+我们比较标签划分和困难目标处理，是为了检查有限样本下哪种设置更合适。位置标签细分后可能更容易区分外观，也可能使每类样本不足；保留或排除困难目标会改变训练标注。V1因此组合这些设置进行比较。
 
 \textbf{对照设计。} 初步目标检测实验采用三类/两类/单类\ensuremath{\times}保留/排除困难目标\ensuremath{\times}原始YOLO26n/包含P2检测层的模型，共12组，统一960输入和35轮训练上限。随后进行12个初步分类实验、增加训练轮数上限的重新训练、第二个随机种子的验证、1280输入对照及困难样本重采样与CLAHE增强实验，总计34个实验记录。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第9节}；\protect\hyperlink{source-8}{齿部缺损候选模型评价表}）
 
@@ -229,7 +231,7 @@ exclude\_difficult只修改训练集：删除21个困难目标的标注框，6�
 
 最终EfficientNet采用512、排除仅含困难目标的训练图像，ResNet18采用384、保留困难目标，检测器采用单类标注的原始YOLO26n模型、960、排除困难目标。不同成员保留不同训练配置；它们的互补程度仍需逐图对照。（来源：\protect\hyperlink{source-2}{齿部缺损发布配置}）
 
-\textbf{选择规则带来的取舍。} 最终检测模型采用初步实验保存的权重。增加训练轮数上限后重新训练的模型具有相同总体召回率和FPR，选择规则先比较各位置组中的最低召回率：初步实验约0.917，重新训练约0.909，随后才比较AUPRC。因此按既定规则选择初步实验模型。这个小差别对应很少样本，体现规则遵守，不证明初步实验模型具有稳定的统计优势。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第9.11节}）
+最终保留初步实验的检测权重。重新训练模型的总体召回率和FPR相同，AUPRC更高，但选择规则先比较各位置组中的最低召回率：初步实验约0.917，重新训练约0.909，所以初步模型入选。这个差别涉及少量样本，还需要重复实验检查是否稳定。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第9.11节}）
 
 \FloatBarrier\Needspace{4\baselineskip}\subsection{未采用配置}
 
@@ -251,18 +253,18 @@ V1增加训练轮数上限后的重新训练 & 更充分拟合数据 & 最低位
 
 \FloatBarrier\Needspace{5\baselineskip}\section{参数选择与补充结果}
 \FloatBarrier\Needspace{4\baselineskip}\subsection{训练参数、采样与框架配置}
-分类网络从ImageNet预训练参数初始化，替换输出层后训练；YOLO采用官方初始化或框架P2配置加载可迁移权重。最终checkpoint来自对应训练实验的保存及验证选择，并不是人为给每层设一个“识别权重”。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第8--9节}）
+分类网络从ImageNet预训练参数初始化，替换输出层后训练。YOLO使用官方初始化，或从已有权重加载可迁移参数到P2配置。最终使用的checkpoint由训练保存和验证选择得到，网络各层的参数通过训练更新。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第8--9节}）
 
-自定义分类器使用Focal BCE：$L=\operatorname{mean}[w_y(1-p_t)^\gamma\operatorname{BCE}(z,y)]$，其中\ReportCode{p_t}为真实类别的预测分数。Focal机制降低易样本的损失权重，方法动机来自Lin等\cite{ref13}；项目\ensuremath{\gamma}=1.5为预先固定的参数。V5在组合候选中比较w1/w2，最终分类器w1；V1正类权重2在本轮固定，没有独立网格证明其最优。
+自定义分类器使用Focal BCE：$L=\operatorname{mean}[w_y(1-p_t)^\gamma\operatorname{BCE}(z,y)]$，其中\ReportCode{p_t}为真实类别的预测分数。Focal机制降低易样本的损失占比，参考Lin等\cite{ref13}。项目预设\ensuremath{\gamma}=1.5；V5在候选组合中比较w1/w2，最终使用w1；V1固定正类权重2，其单独作用还未验证。
 
-逆频率采样$w_i=1/n_{(\mathrm{label},\,\mathrm{view\ or\ position})}$改变样本出现频率，与损失权重是不同机制。FN\ensuremath{\times}3、FP\ensuremath{\times}2难例乘数为脚本设定；V5本轮实际额外加权仅一张训练FP，不能据策略存在就宣称困难样本学习带来主要收益。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第8.5节}）
+逆频率采样$w_i=1/n_{(\mathrm{label},\,\mathrm{view\ or\ position})}$调整样本被抽到的频率，损失权重则调整抽到后对训练损失的影响。脚本另设FN\ensuremath{\times}3、FP\ensuremath{\times}2的困难样本乘数，但V5这轮实际只对一张训练FP额外加权。因此目前还没有证据说明困难样本加权带来了主要收益。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第8.5节}）
 
-YOLO分类候选的w2通过复制正类文件改变训练经验分布，并非直接给其分类损失乘以2。检测args记录box/cls/dfl配置7.5/0.5/1.5，属于框架配置，未独立消融；通用字段是否实际生效须结合任务实现和loss日志解释。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第5.2、8.5、9.1节}）
+YOLO分类候选的w2通过复制正类文件增加正类的出现频率，自定义分类器则使用损失权重。检测args中的box/cls/dfl设置为7.5/0.5/1.5，来自框架配置，没有逐项消融；哪些字段实际参与训练，需要结合任务实现和loss日志核对。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第5.2、8.5、9.1节}）
 
 \FloatBarrier\Needspace{4\baselineskip}\subsection{温度参数选择}
-项目将原始分数p转换为$\operatorname{logit}(p)=\ln[p/(1-p)]$，计算$p_T=\operatorname{sigmoid}(\operatorname{logit}(p)/T)$。温度T在[0.35,4.00]的147个等距候选中，以验证NLL最小选择，边界分数按发布实现处理。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第5、8.3.4节}）
+温度缩放先将原始分数p转换为$\operatorname{logit}(p)=\ln[p/(1-p)]$，再计算$p_T=\operatorname{sigmoid}(\operatorname{logit}(p)/T)$。我们在[0.35,4.00]中比较147个等距温度候选，选择验证集负对数似然（NLL）最小的T。NLL衡量分数与真实标签的符合程度，越小越好；边界分数按发布实现处理。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第5、8.3.4节}）
 
-温度缩放借鉴\cite{ref4}。正温度保持单个模型的样本分数排序，因此不能独立提升该成员模型理想排序下的AUROC/AUPRC；它可以改变融合中的相对尺度。当前做过温度选择，校准质量及融合概率可靠性仍需要校准前后NLL、可靠性图与分箱样本量评价。
+温度缩放参考Guo等\cite{ref4}。正温度不会改变单个模型分数的排序，但会改变融合时各模型分数的相对尺度。当前记录了温度选择，还需要比较校准前后的NLL、可靠性图和分箱样本量，检查分数是否更可靠。
 
 \FloatBarrier\Needspace{4\baselineskip}\subsection{融合公式、候选与完整阈值}
 将两个分类模型经温度缩放后的分数先取平均$c=(s_{\mathrm{Eff}}+s_{\mathrm{Res}})/2$，再比较$f_\alpha=\alpha c+(1-\alpha)s_{\mathrm{det}}$，\ensuremath{\alpha}\ensuremath{\in}\{0.25,0.50,0.75\}，同时比较单模型、分类分数平均/最大值及与检测模型分数取最大值的方案。V5记录20个融合候选规则，V1保留21个候选成绩。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第8.2、9.6节}；\protect\hyperlink{source-9}{齿部缺损融合候选评价表}）
@@ -284,12 +286,12 @@ YOLO分类候选的w2通过复制正类文件改变训练经验分布，并非�
 齿部缺损V1 & 0.250 & 0.250 & 0.500 & 1.000/2.375/1.850 & 0.3413 \\
 \bottomrule\end{tabular}\end{minipage}\par\medskip
 
-V1最终将分类平均分数与检测分数等权融合的方案，与仅使用EfficientNet分类分数并赋予其0.25权重的方案，均为34TP、4FP；其AUPRC分别约0.966和0.963，前者在优先评价指标相同时，按AUPRC排序被选中。（来源：\protect\hyperlink{source-9}{齿部缺损融合候选评价表}） 这为0.50提供了选择记录，而非全局最优或稳定优势证明。
+V1的分类平均分数与检测分数等权融合时，结果为34TP、4FP；仅将EfficientNet分数以0.25权重与检测分数组合时，计数也相同。两者AUPRC约为0.966和0.963，所以按既定排序选择前者。这是采用0.50的记录依据，其稳定优势还需要进一步比较。（来源：\protect\hyperlink{source-9}{齿部缺损融合候选评价表}）
 
-部署使用JSON完整精度：划痕阈值0.300273610279458，齿部缺损阈值0.3413327979078584。正文四位小数方便阅读，运行时不据正文舍入重建阈值。（来源：\protect\hyperlink{source-1}{划痕发布配置}；\protect\hyperlink{source-2}{齿部缺损发布配置}）
+运行时使用JSON中的完整阈值：划痕为0.300273610279458，齿部缺损为0.3413327979078584。正文显示四位小数方便阅读，运行配置保持原值。（来源：\protect\hyperlink{source-1}{划痕发布配置}；\protect\hyperlink{source-2}{齿部缺损发布配置}）
 
 \FloatBarrier\Needspace{4\baselineskip}\subsection{阈值选择与两类结果合并}
-历史流程在固定候选分数上扫描验证阈值，优先满足FPR\ensuremath{\leq}0.20，再最大化Recall，随后按项目规则比较位置、FPR和AUPRC等量。齿部缺损流程特别考虑各位置组中的最低召回率，图像选择目标与基于边界框匹配的mAP不同。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第8.3.4、9.2节}）
+阈值选择先扫描固定候选的验证分数，优先满足FPR\ensuremath{\leq}0.20，再提高Recall，并按规则比较位置组召回、FPR和AUPRC。齿部缺损还优先考虑各位置组中的最低召回率。这里选择的是图像判断配置，目标框的mAP需要另外评价。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第8.3.4、9.2节}）
 
 Recall\ensuremath{\geq}0.95、FPR\ensuremath{\leq}0.20没有正式产线需求或成本测算依据，本文将其保留为\textbf{历史实验目标及选择约束}。0.20解释当时阈值如何被选出；0.95解释历史目标，不作为本项目当前生产验收标准。结果继续保留真实数值，评价重点转向检出能力及人工复核负担。
 
@@ -311,7 +313,7 @@ Recall\ensuremath{\geq}0.95、FPR\ensuremath{\leq}0.20没有正式产线需求�
 应选择哪个判定阈值 & 历史阈值对应的验证结果及误差分析 & 两类缺陷标签完整的新开发数据、可接受漏检与复核负担 \\
 \bottomrule\end{tabular}\end{minipage}\par\medskip
 
-成本敏感和优先错误约束提供目标制定思想\cite{ref5}\cite{ref6}，不能直接给出新的合格百分比。当前权重和阈值维持历史配置，今后在流程明确后用新的开发数据选择判定阈值，旧测试留作回归。
+成本敏感学习和错误约束研究\cite{ref5}\cite{ref6}帮助确定需要优先控制哪类错误。具体接受多少漏检、承担多少复核，还要根据实际流程确定。当前保留历史权重和阈值，后续用新的开发数据选择阈值，旧测试用于回归检查。
 
 \FloatBarrier\Needspace{4\baselineskip}\subsection{参数来源完整表}
 
@@ -362,15 +364,15 @@ ROI裁剪边界扩展 & 4\% & 实现设定，未独立消融 \\
 \FloatBarrier\Needspace{4\baselineskip}\subsection{缺陷比例与复核负担}
 联合测试可见目标缺陷图像比例71/150，是富含缺陷的研究数据，不代表生产线。假设可见缺陷图像的召回率和无可见目标缺陷图像的误报率保持不变，$\mathrm{Precision}=\pi R/[\pi R+(1-\pi)\mathrm{FPR}]$，预测为缺陷的样本比例为$q=\pi R+(1-\pi)\mathrm{FPR}$，\ensuremath{\pi}为应用条件下的可见目标缺陷图像比例，并非整件缺陷率。\cite{ref3}
 
-由此，论文与实验不能单凭77.78\%测试Precision证明生产复核可靠性。下一步需分别测量应用图像与工件的缺陷比例、被判为无缺陷的工件中的漏检情况、疑似缺陷工件的人工确认比例与复核时间，再确定适用的判定阈值。当前可确认的是研究图像上的计数，人工复核效果未测量。
+测试精确率77.78\%还不足以判断产线人工复核的效果。后续应测量现场图像与工件的缺陷比例、模型未检出工件中的漏检、疑似工件的人工确认比例及复核时间，再选择适合实际流程的阈值。目前人工复核效果尚未测量。
 
 \FloatBarrier\Needspace{4\baselineskip}\subsection{合并结果的类别解释与划痕分组统计}
 齿部缺损检测本身检出36/44张正样本；两类结果合并后，这44张图像中有41张被标为疑似缺陷。其中5张由划痕检测判为有缺陷，不能据此将齿部缺损检测的正确检出数改为41。（来源：\protect\hyperlink{source-4}{齿部缺损及联合测试记录}）
 
 历史划痕分析中，漏检组的分类模型平均分数约0.455、检测模型平均分数约0.144；误报组的分类模型平均分数约0.814。结合图像外观，加工纹和高光是值得检查的误报来源，但分组均值不能直接解释每张图像的错误原因。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第8.6.3节}）
 
-\FloatBarrier\Needspace{4\baselineskip}\subsection{正文新增单模型与融合对照的完整记录}
-下表均为同一任务验证集、既有FPR\ensuremath{\leq}0.20选择规则下各方案的工作点。\ensuremath{\alpha}表示分类分数系数，检测分数系数为1\ensuremath{-}\ensuremath{\alpha}；两个分类分数均值作为一项时，共有三个成员。候选采用各自阈值，不能解释成阈值固定的组件移除实验。划痕发布配置未给出最终融合AUPRC，此处不补造。
+\FloatBarrier\Needspace{4\baselineskip}\subsection{单模型与融合对照的完整记录}
+下表记录同一任务验证集上各方案按FPR\ensuremath{\leq}0.20规则选择的结果。\ensuremath{\alpha}是分类分数系数，检测分数系数为1\ensuremath{-}\ensuremath{\alpha}；若分类分数是两个分类器的均值，组合就包含三个成员。各方案使用各自阈值，组件的单独作用还需消融实验检查。划痕最终融合AUPRC未在发布配置中载明，表中保留缺项。
 
 
 \begingroup\small\setstretch{1.06}
@@ -394,26 +396,26 @@ ROI裁剪边界扩展 & 4\% & 实现设定，未独立消融 \\
 齿部缺损 & \ReportCode{weighted_classifier_mean_0.5} & 分类均值与检测分数加权，\ensuremath{\alpha}=0.50 & 34／4 & 0.3413327979078584 & 0.965955 & \protect\hyperlink{source-9}{融合候选评价表} \\
 \end{longtable}\endgroup
 
-单模型与融合的逐图补检／丢失样本尚未在本轮核对，计数差是净变化。齿部缺损两模型与三模型的34TP、4FP相同，不代表预测图像集合相同，也不证明两者部署代价或稳定性相同。当前配置维持不变，成员必要性与NX开销仍待验证。
+本轮还未核对单模型与融合逐图的新增检出和丢失图像，因此计数差表示净变化。齿部缺损两模型与三模型都是34TP、4FP，具体预测图像、部署代价和稳定性仍需比较。当前配置保持不变，后续再检查成员必要性与NX开销。
 
 \ReportAnchor{appendix-g}
 
 \FloatBarrier\Needspace{5\baselineskip}\section{软件、整机状态与后续测量}
 \FloatBarrier\Needspace{4\baselineskip}\subsection{软件输出链路}
-项目负责人承担软件与模型工作，成员承担硬件、现场部署等后续工作。 软件以采集和推理线程处理图像，Model1生成ROI后执行两个检测子系统，结果保留成员模型分数、实际阈值、预测的缺陷类别、预测框及耗时。
+我负责软件和模型，其他成员负责硬件及后续现场部署。软件分别用采集线程和推理线程处理图像，齿轮定位模型（代码名称Model1）生成ROI，再执行两个检测子系统。每次结果保存成员分数、实际阈值、缺陷类别、预测框和耗时。
 
 \begin{figure}[H]\centering
 \includegraphics[width=\linewidth,height=0.37\textheight,keepaspectratio]{fig12_software_flow.png}
-\caption{阶段材料记载的软件链路：同次结果供页面、统计与串口共享；原型分拣支路已打通，人工复核规则及记录尚待设计。结构图据\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第13节}及负责人确认绘制。}
+\caption{软件将同次检测结果提供给页面、统计和串口；原型已完成分拣模块联调，人工复核规则和记录方式还待确定。图据\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第13节}及负责人确认绘制。}
 \label{fig:report-12}
 \end{figure}
 
-统一检测结果对象（代码名称Observation）使页面、统计和串口使用同一次判断，避免多处阈值逻辑不一致。模型加载时校验配置、版本和文件哈希，暂停恢复复用模型。必要检测子系统运行失败或分数非法时停止有效检测输出，避免错误路径产生有效通过结果。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第13节}）
+软件用同一个检测结果对象（代码名称Observation）向页面、统计模块和串口提供结果，避免不同模块各自判断。加载模型时检查配置、版本和文件哈希；暂停后恢复时复用已加载模型。如果必要检测子系统运行失败或分数非法，就停止有效检测输出，避免将运行错误当成通过结果。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第13节}）
 
 \FloatBarrier\Needspace{4\baselineskip}\subsection{原型状态}
-当前硬件仍为上下两台工业相机的旧方案，设备已经升级为NX；新模型只做过简单现场测试，未记录测试数据。 第一代实物完成输送、采集、显示与分拣链路，表示原型功能可连接，不代表当前模型已经经过完整现场验收。
+当前仍使用上下两台工业相机，设备已升级为NX。第一代原型已完成输送、采集、显示与分拣模块联调。新模型只做过简单现场测试，未记录测试数据，整机性能还需要系统测量。
 
-历史最新帧策略与5秒重复计数抑制间隔可以限制积压和重复统计，但仍需工件级验证；一帧多个齿轮时的整帧结果，也不同于每个齿轮工件独立分拣。当前没有完整跨帧工件ID追踪、检测时间和分拣对应测量。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第13.1--13.4节}）
+历史软件优先处理最新帧，并设置5秒间隔抑制重复计数，以减少积压和重复统计。还需要按工件检查这些设置是否合适，尤其是一帧出现多个齿轮时，整帧判断怎样对应每件分拣。目前尚无完整跨帧工件ID追踪、检测耗时和分拣对应测量。（来源：\protect\href{run:../GearPro_综合技术报告_Markdown含配图/GearPro_综合实验与部署技术报告.md}{《GearPro综合实验与部署技术报告》第13.1--13.4节}）
 
 
 \begingroup\small\setstretch{1.06}
@@ -437,9 +439,9 @@ Web、统计与串口 & 已实现统一结果链路 & 阶段材料记载的实�
 \end{longtable}\endgroup
 
 \FloatBarrier\Needspace{4\baselineskip}\subsection{整机测量}
-后续从相机原帧记录定位、ROI、缺陷判定、串口命令和实际分拣，将漏定位、未处理、错配、迟到及未执行纳入统计。各层级分别定义分母，避免仅在成功ROI上计算精度。
+后续应从相机原帧开始记录齿轮定位、ROI、缺陷判断、串口命令和实际分拣结果。漏定位、未处理、工件错配、命令迟到和未执行都应纳入统计，并分别说明评价对象和分母。这样才能同时检查识别效果与整机流程。
 
-NX测试先保持发布配置，记录取帧、定位、各成员模型、后处理和传输时间，以及温度、资源及长时运行；再决定是否需要FP16或其他优化。当前未确定每件处理窗口，本报告不设造FPS或毫秒指标。
+NX测试先使用当前发布配置，分别记录取帧、定位、各成员模型、后处理和传输时间，同时记录设备温度、资源占用及长时运行表现，再决定是否需要FP16等优化。目前还没有确定每件工件的处理时间要求，也没有实测时延与吞吐率。
 
 \FloatBarrier\Needspace{4\baselineskip}\subsection{后续实验与评价方法}
 
@@ -457,7 +459,7 @@ V5输入与权重各自作用 & 同拆分和骨干，384/512\ensuremath{\times}w
 NX是否满足真实节拍 & 完整原型记录分项耗时和工件命令对应 & 时延分布、覆盖、资源与稳定性 \\
 \bottomrule\end{tabular}\end{minipage}\par\medskip
 
-大搜索空间可将随机搜索作为预算基线\cite{ref7}，昂贵训练可考虑贝叶斯优化\cite{ref8}；这两种方法在当前流程中尚未实施。优先级是数据来源和实验问题明确，再选择搜索工具。
+如果后续需要比较较多参数，可以先用随机搜索作为预算对照\cite{ref7}；训练成本较高时，再考虑贝叶斯优化\cite{ref8}。当前还没有使用这两种方法，优先把数据来源和待回答的问题确定清楚。
 
 上线后如缺陷稀少、标注预算有限，可参考Shang等按预测结果分层抽样并校正P/R估计的研究\cite{ref9}。这涉及测试抽样，与训练正类复制不同；实际流程需包含被判为无缺陷的工件抽查，才能评价漏检。
 
