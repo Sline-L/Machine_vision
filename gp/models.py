@@ -1,5 +1,6 @@
 """Two-stage gear location and defect classification pipeline."""
 
+from pathlib import Path
 import time
 
 import cv2
@@ -12,18 +13,34 @@ from .types import GearObservation, InspectionResult
 class TwoStageInspector:
     """Locate gear ROIs, then run Scratch V5 and Missing Hole V1."""
 
-    def __init__(self, config):
+    def __init__(self, config, device=None, engines=None, overlap=False, share_preprocess=False):
+        """`device`/`engines`/`overlap`/`share_preprocess` are benchmark options.
+
+        `engines` is a directory from `python -m gp.export_engine specialists`
+        holding `scratch_v5/` and `missing_hole_v1/`. Defaults keep the
+        production `.pt` path.
+        """
         config.validate_models()
         from ultralytics import YOLO
 
         self.config = config
         # Locator is a Ultralytics `.pt` or NX-built `.engine` via GEARPRO_MODEL1.
         self.locator = YOLO(str(config.locator_model), task="detect")
-        self.model2 = ScratchV5Runtime(config.model2_config)
+        self.locator_device = device
+        engines = None if engines is None else Path(engines)
+        self.model2 = ScratchV5Runtime(
+            config.model2_config,
+            device=device,
+            engines=None if engines is None else engines / "scratch_v5",
+            overlap=overlap,
+        )
         self.missing_hole = MissingHoleRuntime(
             config.missing_hole_config,
             device=str(self.model2.device),
+            engines=None if engines is None else engines / "missing_hole_v1",
+            overlap=overlap,
         )
+        self.share_preprocess = bool(share_preprocess)
 
     def inspect(self, frame):
         started = time.perf_counter()
@@ -32,6 +49,7 @@ class TwoStageInspector:
             conf=self.config.locator_confidence,
             iou=self.config.locator_iou,
             verbose=False,
+            **({} if self.locator_device is None else {"device": self.locator_device}),
         )[0]
         locator_ms = (time.perf_counter() - started) * 1000
         observations = []
@@ -46,8 +64,9 @@ class TwoStageInspector:
                 crop, crop_box = self._crop_with_margin(frame, coordinates)
                 if crop.size == 0:
                     raise ValueError("Model1 生成了空齿轮 ROI")
-                scratch = self.model2.predict(crop)
-                missing = self.missing_hole.predict(crop)
+                shared = {} if self.share_preprocess else None
+                scratch = self.model2.predict(crop, shared)
+                missing = self.missing_hole.predict(crop, shared)
                 cls1_ms += scratch.classifier1_latency_ms
                 cls2_ms += scratch.classifier2_latency_ms
                 det_ms += scratch.detector_latency_ms

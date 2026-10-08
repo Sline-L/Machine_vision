@@ -60,6 +60,15 @@ def square_rgb_image(image, size):
     return canvas
 
 
+def cached(shared, key, build):
+    """Reuse per-ROI preprocessing when the caller passes a shared dict."""
+    if shared is None:
+        return build()
+    if key not in shared:
+        shared[key] = build()
+    return shared[key]
+
+
 def _sha256(path):
     digest = hashlib.sha256()
     with path.open("rb") as handle:
@@ -130,7 +139,7 @@ def load_model2_config(path, verify_hashes=True):
 class ScratchV5Runtime:
     """Load the two classifiers and auxiliary detector once per worker."""
 
-    def __init__(self, config_path, device=None, warmup=True):
+    def __init__(self, config_path, device=None, warmup=True, engines=None, overlap=False):
         import torch
         from torchvision import transforms
         from ultralytics import YOLO
@@ -140,12 +149,23 @@ class ScratchV5Runtime:
         self.torch = torch
         self.device = torch.device(device or ("cuda:0" if torch.cuda.is_available() else "cpu"))
         self.yolo_device = 0 if self.device.type == "cuda" else "cpu"
+        # Optional NX-built TensorRT engines; the default `.pt` path is unchanged.
+        self.engines = None
+        if engines is not None:
+            from .specialist_engines import load_engine_bundle
+            self.engines = load_engine_bundle(engines, self.config, self.device)
+        if overlap and self.engines is None:
+            raise ValueError("overlap 需要 TensorRT 分类器 engine")
+        self.overlap = bool(overlap)
         self.tensor_transform = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
         ])
         self.classifiers = [self._load_classifier(item) for item in self.config["classifiers"]]
-        self.detector = YOLO(str(self.config["detector"]["weights"]), task="detect")
+        detector_weights = self.config["detector"]["weights"]
+        if self.engines is not None:
+            detector_weights = self.engines.engine_path(self.config["detector"])
+        self.detector = YOLO(str(detector_weights), task="detect")
         if set(self.detector.names.values()) != {"scratch"}:
             raise ValueError("Scratch V5 detector 必须是单类别 scratch 模型")
         if warmup:
@@ -158,6 +178,8 @@ class ScratchV5Runtime:
     def _load_classifier(self, item):
         from torchvision.models import efficientnet_b0, resnet18
 
+        if self.engines is not None:
+            return item, self.engines.classifier(item)
         try:
             checkpoint = self.torch.load(str(item["weights"]), map_location="cpu", weights_only=True)
         except TypeError:
@@ -198,17 +220,25 @@ class ScratchV5Runtime:
             verbose=False,
         )
 
-    def predict(self, crop):
+    def predict(self, crop, shared=None):
+        """Score one ROI; `shared` lets callers reuse identical preprocessing."""
         if crop is None or not isinstance(crop, np.ndarray) or crop.size == 0:
             raise ValueError("Scratch V5 收到空齿轮 ROI")
-        rgb = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB)
+        rgb = cached(shared, "rgb", lambda: cv2.cvtColor(crop, cv2.COLOR_BGR2RGB))
         classifier_scores = []
         classifier_times = []
+        pending = []
         with self.torch.inference_mode():
             for item, model in self.classifiers:
                 started = time.perf_counter()
-                image = square_rgb_image(rgb, int(item["imgsz"]))
-                tensor = self.tensor_transform(image).unsqueeze(0).to(self.device)
+                size = int(item["imgsz"])
+                tensor = cached(shared, ("tensor", size), lambda: self.tensor_transform(
+                    square_rgb_image(rgb, size)
+                ).unsqueeze(0).to(self.device))
+                if self.overlap:
+                    # Classifier engines run on their own stream/DLA while the detector runs.
+                    pending.append((item, started, model.enqueue(tensor)))
+                    continue
                 raw = float(model(tensor).sigmoid()[0, 0].item())
                 classifier_times.append((time.perf_counter() - started) * 1000)
                 classifier_scores.append(apply_temperature(raw, item.get("temperature", 1.0)))
@@ -233,6 +263,10 @@ class ScratchV5Runtime:
             if raw_detector >= float(detector.get("display_confidence", 0.05)):
                 coordinates = result.boxes.xyxy[best_index].detach().cpu().tolist()
                 auxiliary_box = _clip_box(coordinates, crop.shape)
+        for item, started, job in pending:
+            raw = float(job.wait().sigmoid()[0, 0].item())
+            classifier_times.append(job.prepare_ms(started) + job.device_ms)
+            classifier_scores.append(apply_temperature(raw, item.get("temperature", 1.0)))
         started = time.perf_counter()
         detector_score = apply_temperature(raw_detector, detector.get("temperature", 1.0))
         fused, classifier_score = fuse_probabilities(
