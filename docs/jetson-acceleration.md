@@ -78,8 +78,8 @@ Orin NX 16GB 的主要硬件（据 NVIDIA 模块数据手册；以实际模块�
 
 关于“两个分类器做 batch”：同一子系统的两个分类器是**不同网络**（EfficientNet-B0 与
 ResNet18），Missing Hole 的输入尺寸也不同（512 与 384），不能放进同一个 batch 维度。
-能做的是：共享相同输入（第 4 行）、在不同执行单元上并发（第 6、7 行）。真正的 batch
-只适用于同一帧有多个齿轮 ROI 时对同一模型合批；当前工位通常每帧一个齿轮，暂不实现。
+能做的是：共享相同输入（第 4 行）、在不同执行单元上并发（第 6、7 行）。传送带一次只送入
+一个齿轮，每帧只有一个 ROI，同一模型没有可合批的输入，因此不做 batch。
 
 计时口径（读结果时要注意）：
 
@@ -197,9 +197,19 @@ P_D = 被判不合格的缺陷件 / 缺陷件总数；P_FA = 被判不合格的�
 
 ## 7. NX 操作步骤
 
+NX 上的 `/home/jetson/Projects/Machine_vision` 是 `srtp` 分支，没有这套脚本。基准代码在
+`feat/jetson-bench` 分支（基于 `main`）。不要在原目录里切换分支，另建一个 worktree，
+原目录和正在运行的服务都不受影响：
+
 ```bash
+# 0) 取基准分支到独立目录（只需一次；之后在该目录 git pull 即可）
 cd /home/jetson/Projects/Machine_vision
+git fetch origin feat/jetson-bench
+git worktree add /home/jetson/Projects/Machine_vision-bench -b feat/jetson-bench origin/feat/jetson-bench
+cd /home/jetson/Projects/Machine_vision-bench
+git log --oneline -1                          # 确认是 feat/jetson-bench 的最新提交
 git lfs pull                                  # Missing Hole 权重是 LFS 文件
+ls -l model/missing_hole_v1/*.pt              # 应为 5–45 MB，若只有约 130 字节说明 LFS 没拉下来
 python3 -c "import tensorrt; print(tensorrt.__version__)"
 pip install onnx                              # 仅当分类器导出报缺少 onnx 时
 
