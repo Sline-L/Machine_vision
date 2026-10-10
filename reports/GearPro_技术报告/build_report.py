@@ -364,7 +364,7 @@ v4_base=load_json('outputs/binary_defect_v4/baseline_report_before_extended.json
 v4_final=load_json('outputs/binary_defect_v4/final_report.json')
 v4_cfg=load_json('outputs/binary_defect_v4/inference_config.json')
 v4_candidates=load_json('outputs/binary_defect_v4/leaderboard.json')
-v4_text=read_bytes('reports/V4实验详细技术报告.md').decode('utf-8')
+v4_text=read_bytes('reports/experiments/V4实验详细技术报告.md').decode('utf-8')
 v4_extended=next(row for row in v4_candidates if row['name']=='xfull_resnet18_384_w1_s73_r1')
 
 # Substantive checks against the exact experiment artifacts and current scope.
@@ -537,10 +537,10 @@ readme='''# GearPro技术报告阅读说明
 - `verification.json`：输入文件哈希和数值/资料链接核对记录。
 - `build_report.py`：在原项目中运行，读取已有实验记录重新生成图表及HTML；不训练或修改模型。
 
-本轮取消内部来源代码，论文引用仍采用数字编号；实验资料按名称链接到附录B，项目事实统一说明。问题清单独立归档并跟踪本轮更新。当前版本补充可见缺陷标签规则、实际摄像头人工摆拍条件及单模型／融合验证对照；不训练、推理、调整部署阈值或恢复工件身份。选型优化前版本保存于相邻的`GearPro_技术报告_选型优化前_20261007`目录。来源规范前版本保存于相邻的`GearPro_技术报告_来源规范前_20261007`目录。
+本轮取消内部来源代码，论文引用仍采用数字编号；实验资料按名称链接到附录B，项目事实统一说明。问题清单独立归档并跟踪本轮更新。当前版本补充可见缺陷标签规则、实际摄像头人工摆拍条件及单模型／融合验证对照；不训练、推理、调整部署阈值或恢复工件身份。历史版本统一保存于`../_archive/2026-10-07/`。
 
 打包文件提供正文、图表及记录。附录中的本地实验资料链接和构建脚本需要原项目目录；文献链接需要网络。
-本版本补充了V3判定与定位的区别，以及V4排序、阈值、集成的取舍；仍为五章精简正文（6张核心图）＋详细附录（6张补充图）。正文按约10—12页的阅读目标编排，实际打印页数取决于排版，分页以LaTeX版PDF及其检查记录为准。参数细节、历史版本名、完整配置和补充分析见附录。修改前的完整版本保存于相邻的`GearPro_技术报告_完整版_20261007`目录。补充前的精简版本保存于相邻的`GearPro_技术报告_精简版_补充前_20261007`目录。方法名称及代码对应关系见`术语对照表.md`。
+本版本补充了V3判定与定位的区别，以及V4排序、阈值、集成的取舍；仍为五章精简正文（6张核心图）＋详细附录（6张补充图）。正文按约10—12页的阅读目标编排，实际打印页数取决于排版，分页以最终 PDF 及其检查记录为准。参数细节、历史版本名、完整配置和补充分析见附录。方法名称及代码对应关系见`术语对照表.md`。
 '''
 (ROOT/'README.md').write_text(readme,encoding='utf-8')
 archive=ROOT/'GearPro_技术报告_正文与图表.zip'

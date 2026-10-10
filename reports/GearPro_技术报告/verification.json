@@ -29,7 +29,7 @@
     "outputs/binary_defect_v4/final_report.json": "4b4fa960b455b96d869c495a4c3c9907377b8514fd893e53a43aac85b5f029ac",
     "outputs/binary_defect_v4/inference_config.json": "465c9c7c947ce84f9deb97a96e8a8a3631b068fe6b702479fa059541f6b8d713",
     "outputs/binary_defect_v4/leaderboard.json": "fc59b9b0006b41149ca752172ad455acf5f121190d8fe7e2ed8a6040b0246bbb",
-    "reports/V4实验详细技术报告.md": "8f69efc271edd5e1bd7503fa1f1d11e937855a4002e6b0d07e193a20e4c519a8"
+    "reports/experiments/V4实验详细技术报告.md": "a86a8564ea609703161510f07b4e08bcb974051eaa688afb9ea097a934342386"
   },
   "checks_passed": 370,
   "checks": [

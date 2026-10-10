@@ -1,0 +1,2028 @@
+          metals
+Article
+Online Surface Defect Identification of Cold Rolled
+Strips Based on Local Binary Pattern and Extreme
+Learning Machine
+Yang Liu 1 , Ke Xu 1, * ID and Dadong Wang 2
+ 1   Collaborative Innovation Center of Steel Technology, University of Science and Technology Beijing,
+     Beijing 100083, China; liuyang_ustb_1988@163.com
+ 2   Quantitative Imaging Research Team, Data61, Commonwealth Scientific and Industrial Research
+     Organization, Marsfield, NSW 2122, Australia; Dadong.Wang@csiro.au
+ *   Correspondence: xuke@ustb.edu.cn; Tel.: +86-10-6233-2159
+
+ Received: 12 February 2018; Accepted: 17 March 2018; Published: 20 March 2018
+
+ Abstract: In the production of cold-rolled strip, the strip surface may suffer from various defects
+ which need to be detected and identified using an online inspection system. The system is equipped
+ with high-speed and high-resolution cameras to acquire images from the moving strip surface.
+ Features are then extracted from the images and are used as inputs of a pre-trained classifier to
+ identify the type of defect. New types of defect often appear in production. At this point the
+ pre-trained classifier needs to be quickly retrained and deployed in seconds to meet the requirement
+ of the online identification of all defects in the environment of a continuous production line. Therefore,
+ the method for extracting the image features and the training for the classification model should
+ be automated and fast enough, normally within seconds. This paper presents our findings in
+ investigating the computational and classification performance of various feature extraction methods
+ and classification models for the strip surface defect identification. The methods include Scale
+ Invariant Feature Transform (SIFT), Speeded Up Robust Features (SURF) and Local Binary Patterns
+ (LBP). The classifiers we have assessed include Back Propagation (BP) neural network, Support
+ Vector Machine (SVM) and Extreme Learning Machine (ELM). By comparing various combinations
+ of different feature extraction and classification methods, our experiments show that the hybrid
+ method of LBP for feature extraction and ELM for defect classification results in less training and
+ identification time with higher classification accuracy, which satisfied online real-time identification.
+
+ Keywords: machine learning; LBP; ELM; surface inspection; defect identification
+
+
+
+
+1. Introduction
+      Cold rolled strip is a true all-round material in various products such as automobiles, electrical
+appliances, ships etc. With the rapid development of the economy, the demand for cold rolled strip
+increases year by year. In the production of cold rolled strip, various defects appear on the surface
+of the rolled strip due to various reasons such as issues from manufacturing technology, equipment
+etc. These defects not only affect the appearance of the products, but also degrade the performance of
+the products. To eliminate these defects, they should be detected at the first instance with a surface
+inspection system [1]. The detection system is machine vision-based, which has become the mainstream
+of all identification methods. Feature extraction and classification are the key steps of the machine
+vision method. The step “local feature extraction” has been widely used in machine vision for image
+recognition [2], image retrieval [3], image registration [4], image classification [5], image mosaicking [6].
+Defects are caused for different reasons and appear in different types. Useful features are extracted
+
+
+
+Metals 2018, 8, 197; doi:10.3390/met8030197                                      www.mdpi.com/journal/metals
+Metals 2018, 8, 197                                                                                    2 of 18
+
+
+
+from the surface images for the detection and classification of the defects on the surface. The cause of
+different types of defects can then be tracked and addressed.
+      New types of defects are often discovered in the production of cold rolled strip. To identify these
+new defects, the production line is normally suspended and then the classification model is retrained
+with added sample images for the new defect. If the re-training process takes a long time, the product
+will be impacted. Therefore, a classification model with fast training and identification algorithms is
+preferred. In the production line, workers change the rolls of a cold rolling mill when a coil of raw strip
+steel is run out. If the model retraining can be finished within the time of roll change, the classification
+model can be quickly adapted to the online real-time identification of new defects. This will avoid the
+suspension of the production.
+      In this paper, we will explore various options for the image feature extraction and classification
+and aim to find the best option for the fast identification of the defects with high classification accuracy
+and high computing performance for the training of the classification model.
+      There are several popular feature extraction methods, including Scale Invariant Feature
+Transform [7] (SIFT), Speeded Up Robust Feature [8] (SURF) and Local Binary Pattern [9] (LBP). Lowe
+proposed efficient SIFT algorithm to speed up feature extraction. Based on SIFT, Bay proposed more
+efficient SURF algorithm [8] to further speed up feature extraction. Ojala presented LBP algorithm [9],
+which is a redefinition of the grayscale values of the original image and a simple combination of
+histogram. Compared to SIFT and SURF, LBP has less computational complexity, leading to higher
+computing performance in feature extraction.
+      Literature has reported several popular classification methods, including Back Propagation neural
+networks [10] (BP), Support Vector Machine [11] (SVM) and Extreme Learning Machine [12] (ELM).
+The algorithms of BP neural networks are complicated and slow in training. BP neural network
+requires many iterations to compute weights [13] and it is easy for it to get stuck in a local minima.
+The identification of complex surface defects of cold rolled strip is a problem of multi-class classification,
+in which the classic SVM has some disadvantages [14]. ELM [15] (Extreme learning machine) is an
+improved algorithm based on single hidden layer feedforward neural networks. The only artificial
+parameter of ELM is the number of hidden layer nodes. Initial weights are randomly generated.
+ELM is fully automatically implemented without iterative tuning, and it is extremely fast compared
+to other traditional learning methods. Hence ELM is potentially a solution to satisfy the real-time
+requirement in online defect identification of cold rolled strip. This paper is organized as follows:
+Section 2 introduces the principle of LBP and ELM algorithms; Section 3 demonstrates the computing
+performance of LBP and ELM with comparison among several hybrid methods for the surface defect
+identification; Section 4 illustrates how the hybrid method of LBP and ELM can be adapted to identify
+a new defect with an online surface inspection case study; the conclusions are drawn in Section 5.
+
+2. Principle of LBP (Local Binary Pattern) and ELM (Extreme Learning Machine) Algorithms
+
+2.1. LBP Algorithm
+
+2.1.1. Principle of the LBP
+      Local binary pattern (LBP) is a type of visual descriptor used for classification in computer vision.
+      As shown in Figure 1, the LBP feature vector, in its simplest form, is created as follows:
+
+(1)   Compare each pixel in a cell with each of its 8 neighbors (on its top left, top right, right, bottom
+      right, bottom, bottom left, left in order) clockwise.
+(2)   If the value of the neighbor is larger than the value of the center pixel, write “0”, otherwise, write
+      “1”. This generates an 8-digit binary number (usually converted to decimal for convenience).
+(3)   Calculate the times of occurrence of each decimal number. Then a feature histogram is made
+      (x-axis is decimal number; y-axis is the times of each decimal number occurring). This histogram
+      can be seen as a 256-dimensional feature vector.
+   Metals 2018, 8, x FOR PEER REVIEW                                                                                              3 of 18
+   Metals 2018, 8, x FOR PEER REVIEW                                                                                              3 of 18
+
+  (3) Calculate the times of occurrence of each decimal number. Then a feature histogram is made
+   (3) Calculate the times of occurrence of each decimal number. Then a feature histogram is made
+         (x-axis is decimal number; y-axis is the times of each decimal number occurring). This
+          (x-axis
+Metals 2018, 8, 197
+                    is decimal number; y-axis is the times of each decimal number occurring). This
+                                                                                               3 of 18
+         histogram     can be seen as a 256-dimensional feature vector.
+          histogram can be seen as a 256-dimensional feature vector.
+
+                                                                             Multiply corresponding points
+                                                                             Multiply corresponding points
+
+
+
+                                     Thresholding
+                                    Thresholding
+               20 90 74                                   0      1     1                1   2 4                0       2     4
+               20 90 74                                   0      1     1                1   2  4               0       2     4
+               65 55 50                                   0            0               128    8                0             0
+               65 55 50                                   0            0               128     8               0             0
+               65 10 54                                   1      0     0               64 32 16               64       0     0
+               65 10 54                                   1      0     0                64 32 16              64       0     0
+               Binary Pattern                                                        Weights
+               Binary Pattern                                                        Weights
+                 01100010                                            LBP = 0 + 2 + 4 + 0 + 0 + 0 + 64 + 0 = 70
+                 01100010                                            LBP = 0 + 2 + 4 + 0 + 0 + 0 + 64 + 0 = 70
+                       Figure 1. Principle and encoding process of the LBP (Local Binary Pattern).
+                       Figure
+                     Figure 1. 1.Principle
+                                  Principleand
+                                            andencoding
+                                                encoding process
+                                                         process of the LBP
+                                                                        LBP (Local
+                                                                             (LocalBinary
+                                                                                    BinaryPattern).
+                                                                                           Pattern).
+   2.1.2. Improved LBP
+    2.1.2.
+2.1.2.     Improved
+        Improved       LBP
+                     LBP
+         The original LBP operator has obvious limitation, namely its computation only covers a fixed
+          The original LBP operator has obvious limitation, namely its computation only covers a fixed
+       The
+   area.  Tooriginal
+              adapt toLBP   operatorofhas
+                        the changes        obvious
+                                        scale,        limitation,
+                                                LBP operator   shouldnamely
+                                                                        be improved   to addressonly
+                                                                              its computation          covers a fixed
+                                                                                                  the limitation.
+    area. To adapt to the changes of scale, LBP operator should be improved to address the limitation.
+area. ToTheadapt to   the changes
+               improvement          of scale,
+                               includes  threeLBP   operator
+                                                 aspects:      should
+                                                          firstly, the be   improved
+                                                                        square   neighborhood   is the
+                                                                                       to address       limitation.
+                                                                                                    changed   into a
+          The improvement includes three aspects: firstly, the square neighborhood is changed into a
+       The one;
+   circular         secondly, its
+            improvement           radius of
+                              includes  threethe   coveredfirstly,
+                                                aspects:     area isthe
+                                                                      expanded
+                                                                         square from 1    to arbitrary
+                                                                                  neighborhood     is size
+                                                                                                      changedR [16];
+                                                                                                                 into a
+    circular one; secondly, its radius of the covered area is expanded from 1 to arbitrary size R [16];
+   thirdly,  the  number   of sample  points   is changed   to variant  P. The  improved   LBP  operator  is
+circular one; secondly, its radius of the covered area is expanded from 1 to arbitrary size R [16]; thirdly, shown
+    thirdly, the number of sample points is changed to variant P. The improved LBP operator is shown
+theinnumber
+       Figure 2.of sample points is changed to variant P. The improved LBP operator is shown in Figure 2.
+    in Figure 2.
+
+
+
+
+                          (a) R = 1, P = 8                           (b) R = 2, P = 8             (c) R = 2, P = 16
+                           (a) R = 1, P = 8                           (b) R = 2, P = 8             (c) R = 2, P = 16
+                                                          Figure 2.
+                                                                 2. Principle of improved
+                                                                                  improvedLBP.
+                                                          Figure 2.Principle
+                                                         Figure     Principle of
+                                                                              of improved  LBP.
+                                                                                          LBP.
+        The value of LBP patterns with the radius R and sample points P can be represented as LBP . R
+        The   value     of LBPpatterns
+                                  patternswith
+                                            withthetheradius
+                                                       radius R and
+                                                                  and sample    points PPcancanbe  represented     as LBP    .
+      The  value
+  The encoding       ofprocess
+                         LBP      of the improved      LBP is Rsimilarsample
+                                                                        to thatpoints
+                                                                                  of the basic   be
+                                                                                                 LBP.represented
+                                                                                                         Take LBP as  as LBP
+                                                                                                                          an P .
+   The  encoding       process    of  the improved     LBP   is similar  to  that of  the  basic  LBP.      1 LBP as an
+                                                                                                         Take
+The encoding
+  example    shownprocess     of the3.improved
+                        in Figure                 LBP is similar
+                                       First, 8 neighborhood     points                as LBP.
+                                                                               the basic
+                                                                        areofselected
+                                                                   to that                      Take
+                                                                                          a circle.    LBP8
+                                                                                                     Then        an example
+                                                                                                           theasgray  value
+   example
+shown         shown      in Figure   3. First, 8 neighborhood    points  areas a
+                                                                              selected  as a circle. Then the   gray  value
+        in Figure     3.  First, 8 neighborhood      points  are
+  of selected points is calculated by bilinear interpolation. The procedures below are same as of
+                                                                 selected        circle. Then   the  gray  value      selected
+                                                                                                                   original
+   of
+pointsselected   points
+           calculated
+        is Figure          is calculated   by  bilinear  interpolation. The    procedures    below   are same   as original
+  LBP in             1. by bilinear interpolation. The procedures below are same as original LBP in
+   LBP 1.
+Figure  in Figure 1.
+   Metals 2018, 8, x FOR PEER REVIEW                                                                                   4 of 18
+
+
+                                                                        1     1    1
+
+                                                                        1     C    1
+
+                                                                        0     0    1
+                                                    20     90   74                           1    2    4
+                                                                                                                 The value of
+                                                    65     55   50                          128   C    8        LBP patterns is
+                                                                                                                     159
+                                                    65     10   54                           0    0   16
+                                                                        1     2    4
+
+                                                                       128    C    8
+
+                                                                       64     32   16
+
+
+                                     Figure 3. Encoding process of the improved LBP .
+                                   Figure 3. Encoding process of the improved LBP18 .
+    2.1.3. LBP Uniform Pattern
+         Set the number of sample points as P, then the maximum of LBP patterns is 2P. That is, the
+    number of LBP patterns rises exponentially as P increases. When = 32, the maximum of LBP
+    patterns reaches 2 ≈ 4.3 × 10 , which is incredibly huge for data processing. Such a huge number
+    of patterns will result in long calculation time. Furthermore, huge pattern numbers lead to a sparse
+                                                                1     2    4
+
+                                                               128   C     8
+
+                                                               64    32    16
+
+Metals 2018, 8, 197                                                                                                                   4 of 18
+                                       Figure 3. Encoding process of the improved LBP .
+
+2.1.3. LBP
+2.1.3. LBP Uniform
+           Uniform Pattern
+                   Pattern
+       Setthe
+      Set    thenumber
+                  numberofof     sample
+                              sample         points
+                                         points    as P,asthen
+                                                             P, then   the maximum
+                                                                 the maximum                      LBP patterns
+                                                                                    of LBPofpatterns                  is 2is,
+                                                                                                            is 2P . That
+                                                                                                                           P. That is, the
+                                                                                                                               the number
+ number
+of  LBP of
+         patternsLBPrises
+                       patterns     rises as P
+                            exponentially   exponentially
+                                                      increases.  as P    increases.
+                                                                     When P             When
+                                                                                = 32, the      maximum = 32, oftheLBPmaximum
+                                                                                                                        patterns of       LBP
+                                                                                                                                     reaches
+ patterns
+  32         reaches
+                   10  2     ≈ 4.3  ×   10   ,  which     is incredibly     huge   for  data
+2 ≈ 4.3 × 10 , which is incredibly huge for data processing. Such a huge number of patterns will processing.      Such   a  huge    number
+result  in longwill
+ of patterns          result intime.
+                  calculation     long Furthermore,
+                                          calculation time.   huge Furthermore,
+                                                                      pattern numbers hugelead        to a numbers
+                                                                                                pattern                          to a sparse
+                                                                                                                        lead vector
+                                                                                                            sparse feature                and
+ feature
+histogram  vector   and
+               that is nothistogram
+                             suitable to that is   not the
+                                            describe     suitable    to of
+                                                               feature   describe
+                                                                             defect.the feature of defect.
+       Tosolve
+      To    solvethese
+                   thesetwotwoproblems,
+                                 problems,Ojala  Ojalaoptimized
+                                                          optimizedthe   the improved
+                                                                              improved LBP   LBP operator
+                                                                                                     operator and and put
+                                                                                                                        put forward
+                                                                                                                              forward the  the
+ LBP   uniform     pattern    [17].  This   idea    is motivated       by   the  fact that     some
+LBP uniform pattern [17]. This idea is motivated by the fact that some binary patterns occur more       binary    patterns     occur    more
+ commonlyinintexture
+commonly            texture    images
+                            images     thanthan
+                                             othersothers
+                                                        [18].[18].
+                                                               The The      motivation
+                                                                     motivation     for this foridea       idea is
+                                                                                                    thisis that  some that             binary
+                                                                                                                             somepatterns
+                                                                                                                         binary
+ patterns    are more    common       in  texture    images     than    the
+are more common in texture images than the other. If the binary pattern contains up to two to
+                                                                             other.  If the    binary     pattern    contains     up   0-1two
+                                                                                                                                            or
+ 0-1 or 1-0
+1-0             transitions,
+     transitions,               these binary
+                     these common        commonpatterns binary are patterns
+                                                                         calledare
+                                                                                 uniform         uniform For
+                                                                                     calledpatterns.          patterns.            instance,
+                                                                                                                            For 00000010
+                                                                                                                    instance,
+ 00000010
+(2             (2 transformations)
+   transformations)       is a uniform is        a uniform
+                                            pattern,     0100100  pattern,     0100100 (4 transformations)
+                                                                     (4 transformations)         is not. Other uncommon    is not. binary
+                                                                                                                                        Other
+ uncommon        binary   patterns     are  called     non-uniformed         pattern    if  it  contains
+patterns are called non-uniformed pattern if it contains more than 2 transitions. In LBP uniform pattern,    more    than    2  transitions.
+the LBP
+ In        uniform
+     maximum           pattern,
+                   of LBP         the is P
+                             patterns   maximum( P − 1)of+ 3,
+                                                            LBPmuchpatterns    is than
+                                                                          smaller       − 21P +  of 3,
+                                                                                                     themuch     smaller
+                                                                                                          original          than
+                                                                                                                      LBP. In       2P of
+                                                                                                                                 this      the
+                                                                                                                                       paper,
+ original   LBP.   In this  paper,    for     =   8, the   number
+for P = 8, the number of LBP patterns decreases from 256 to 59.        of  LBP  patterns      decreases      from    256  to  59.
+       In the
+      In   the LBP
+                LBP histogram
+                       histogram calculation,
+                                      calculation, the  the histogram
+                                                              histogram has  has aa separate
+                                                                                     separate bin    bin for
+                                                                                                           for each
+                                                                                                               each uniform
+                                                                                                                       uniform pattern,
+                                                                                                                                    pattern,
+and    all non-uniform
+ and all   non-uniform patterns
+                              patterns areare assigned
+                                                assigned to   to aa single
+                                                                     single bin.
+                                                                              bin. The
+                                                                                    The length
+                                                                                           length of   of the
+                                                                                                           the feature
+                                                                                                                feature vector
+                                                                                                                          vector for  for one
+                                                                                                                                           one
+ picture   is reduced    from    256   to 59  with    a
+picture is reduced from 256 to 59 with a uniform pattern.uniform      pattern.
+
+2.2. ELM
+2.2. ELM Algorithm
+         Algorithm
+
+2.2.1.
+2.2.1. The
+       The Theory
+           Theory of
+                  of ELM
+                     ELM
+      ELMisisaapopular
+     ELM        popularmachine-learning
+                        machine-learningalgorithm
+                                           algorithmininrecent years.
+                                                          recent      The
+                                                                 years.   theory
+                                                                        The theory  thethe
+                                                                                 of of   ELM
+                                                                                           ELMalgorithm  is
+                                                                                                 algorithm
+briefly
+is      introduced
+   briefly         as as
+           introduced below  [15].
+                         below     TheThe
+                                [15].  model  of of
+                                          model  ELMELMneural  network
+                                                           neural network  shown
+                                                                        is is     in in
+                                                                              shown  Figure  4. 4.
+                                                                                         Figure
+
+
+
+
+                                            Figure4.
+                                            Figure 4. Model
+                                                      Model of
+                                                            of ELM
+                                                               ELM neural
+                                                                   neural network.
+                                                                          network.
+
+
+      For N arbitrary distinct samples ( Xi , ti ), where
+
+                                                  Xi = [ Xi1 , Xi2 , . . . , Xin ] T ∈ Rn                                                (1)
+
+                                                    ti = [ti1 , ti2 , . . . , tim ] T ∈ Rm                                               (2)
+
+      The ELM with L hidden-layer nodes is mathematically described as
+
+                                            L
+                                           ∑ βi g Wi ·Xj + bi = oi , j = 1, 2, . . . , N
+                                                                     
+                                                                                                                                         (3)
+                                           i =1
+Metals 2018, 8, 197                                                                                                         5 of 18
+
+
+
+      g( Xi ) is activation function, using a common activation function such as sigmoid.
+Wi = [Wi1 , Wi2 , . . . , Win ] T is the weight vector connecting the ith hidden node and the input nodes, β i
+is the weight vector connecting the ith hidden node and the output node, bi is the bias parameter of
+the ith hidden node. The computation of ELM is to minimize the error between actual output and the
+ground truth of a training sample.
+                                                           N
+                                                           ∑ ko j − t j k = 0                                                  (4)
+                                                          j =1
+
+i.e., there exist β i , Wi and bi , such that
+
+                                           L
+                                          ∑ βi g Wi ·Xj + bi = ti , j = 1, 2, . . . , N
+                                                                     
+                                                                                                                               (5)
+                                          i =1
+
+      The above N equations can be written compactly as Hβ = T, where
+
+                                                                       g(W1 · X1 + b1 )    ···    g(WL · X1 + bL )
+                                                                                                                  
+
+         H (Wi , . . . , WL , bi , . . . , bL , Xi , . . . , X L ) = 
+                                                                              ..          ..             ..       
+                                                                                                                               (6)
+                                                                                .             .            .       
+                                                                       g(W1 · X N + b1 )   ···    g(WL · X N + bL ) N × L
+
+                                                                β T1
+                                                                    
+
+                                                          β =  ...                                                           (7)
+                                                                    
+
+                                                                β TL L× N
+
+                                                                T1T
+                                                                   
+
+                                                          T =  ...                                                           (8)
+                                                                   
+
+                                                                     TLT   N×M
+
+      Our goal is to find specific Ŵi , b̂i and β̂ i , such that
+
+                             k H (Ŵi ,b̂i ) β̂ i − T k = min k H (Wi , bi ) β i − T k i = 1, 2, . . . , L                     (9)
+                                                          W,b,β
+
+which is equivalent to minimizing the cost function
+                                                                                           !2
+                                                   N       L
+                                            E=∑           ∑ βi g Wi ·Xj + bi − t j
+                                                                                  
+                                                                                                                             (10)
+                                                   j =1   i =1
+
+     Unlike the approximation theories of traditional functions, which require the adjustment of input
+weights and hidden layer biases, input weights and hidden layer biases can be randomly assigned.
+The input weights Wi and the hidden layer biases bi are in fact not tuned and the hidden layer output
+matrix H can actually remain unchanged. The learning process is simply equivalent to finding a
+solution β̂ of the linear system Hβ = T and the minimum norm least-squares solution of the above
+linear system is
+                                              β̂ = H + T                                           (11)
+
+where H + is the Moore–Penrose generalized inverse of matrix H, and the norm of the solution β
+is smallest and unique. Thus, ELM omits the process of adjusting input weights and hidden layer
+biases, only needs a generalized inverse, and this greatly improves the speed for training the ELM
+neural network.
+Metals 2018, 8, 197                                                                                    6 of 18
+
+
+
+2.2.2. The Classification Strategies of ELM
+
+Maximum Strategy
+      Using an N-dimensional vector of sample features, a trained ELM can produce an output of an
+M-dimensional vector, where M is the number of classes for the classification. In this work, the samples
+of cold rolled strip are from 4 categories of defects. Therefore, the output of ELM is a four-dimensional
+vector ti in response to each input sample ( xi , ti ). For example, a specific sample belongs to defect
+I, its output vector ti is [1, −1, −1, −1] T . If it belongs to defect II, then ti is [−1, 1, −1, −1] T , and
+so on. Each dimension of this vector varies between −1 and 1, which means that each element
+of this vector represents the probability of each defect category. For instance, if the output ti is
+[0.72, −0.92, −0.88, −0.58] T , the first element of the vector is the largest, thus the defect category is
+I. The maximum strategy is most effective when all defect categories are known, and their training
+samples are used in the training stage of ELM.
+      If the output ti is a vector such as [−0.72, −0.92, −0.88, −0.58] T , according to the maximum
+strategy, the 4th element of the vector is the largest, thus the defect belongs to Category IV. However,
+all elements of the output vector are negative. This means that this actual defect may belong to none of
+any known categories. In this case, the maximum strategy is not applicable.
+
+Real-Time Identification Strategy
+     In the production of cold rolled strip, from time to time, a new category of defect may be
+observed. To monitor these new categories of defects, we proposed a real-time identification strategy
+as described below.
+     The procedure for determining a new category of defect is described below:
+
+(1)   Set a threshold ε,
+                   
+(2)   Find Max t j ,
+                
+(3)   If Max t j ≥ ε, the defect is to be classified into the jth known category, otherwise the defect
+      sample should be classified as “unknown”.
+
+     For instance, if we set ε = 0, and if an output vector is [−0.92, −0.82, −0.88, 0.91] T , thus
+                                      
+Max t j = 0.91. This satisfies Max t j ≥ ε, so this defect belongs to Category IV (j = 4). For an output
+vector such as [−0.72, −0.92, −0.88, −0.58] T , Max t j = −0.58, which does not satisfy Max t j ≥ ε,
+                                                                                                  
+
+so the defect should be classified as “unknown”.
+
+3. Experiment and Analysis of Defect Identification
+     In this section, we present our experimental results by comparing the performance of ELM and
+other algorithms for surface defect identification of cold rolled strip.
+
+3.1. General Design of the Experiment
+      The flowchart of the experiment for defect identification is shown in Figure 5. In the experiment,
+all the samples are divided into training set and testing set. The training set includes 4 categories,
+1348 samples in total. The same is true for the testing set, it includes 4 categories, and 1130 samples in
+total. Specific distribution of samples is shown in Table 1. We used cross-validation method to train
+the model by splitting the samples into m shares to train the model and using one share each time.
+Metals 2018, 8, 197                                                                                                  7 of 18
+Metals 2018, 8, x FOR PEER REVIEW                                                                                    7 of 18
+Metals 2018, 8, x FOR PEER REVIEW                                                                                    7 of 18
+
+
+
+                            Testing                                   Training
+                            samples                                   samples
+
+                       Feature extraction                          Feature extraction
+
+
+                              LBP                                       LBP
+                                                                                                 Classification
+                            Feature               Input               Feature           Output
+                                                                                                    results
+                            vectors                                   vectors
+
+                                                                    Model training
+
+
+
+
+                                                                    ELM model
+
+
+
+
+                                                    Figure 5. Flowchart of the experiment.
+                                                    Figure
+                                                    Figure 5. Flowchart of
+                                                           5. Flowchart of the
+                                                                           the experiment.
+                                                                               experiment.
+
+                              Table 1. The number of training and testing samples.
+                                Table
+                             Table        Thenumber
+                                    1. 1.The  number ofof training
+                                                          trainingand
+                                                                   andtesting samples.
+                                                                        testing samples.
+                 Defect Type Number of Training Samples Number of Testing Samples
+                 Defect
+                Defect   Type Number
+                       Type         Number  of of
+                                               Training
+                                                  TrainingSamples
+                                                            Samples Number      of Testing
+                                                                            Number           Samples
+                                                                                     of Testing Samples
+                    Scratch                       296                               216
+                    Scratch                      296                                216
+                  Scratch
+                      Slag                         296
+                                                  178                               100 216
+                     Slag
+                   Slag                          178
+                                                   178                              100 100
+                      Peel                        362                               302
+                     Peel
+                   Peel                          362
+                                                   362                              302 302
+                 No
+                   No  defect
+                    defect
+                                                  512
+                                                   512
+                                                                                    512
+                  No   defect                    512                                512 512
+3.2. Feature Extraction Using LBP
+3.2. Feature Extraction Using LBP
+3.2.1. Image Processing with LBP Operator
+3.2.1. Image Processing
+3.2.1. Image   Processing with
+                            with LBP
+                                  LBP Operator
+                                         Operator
+      There are various types of defects on the surface of cold rolled strip. Among these types of
+      There are
+      There   arevarious
+                  varioustypes
+                            typesof of
+                                    defects   on the
+                                        defects      surface
+                                                 on the       of cold
+                                                          surface    of rolled   strip. Among
+                                                                        cold rolled                                 defects,
+                                                                                                         theseoftypes
+                                                                                                  these types
+                                                                                        strip. Among                      of
+defects, scratches, slags, and peels have significant negative impact on the quality of the strip;
+scratches, slags,
+defects,  scratches,and   peelsand
+                       slags,   havepeels
+                                       significant
+                                             have negative
+                                                   significantimpact
+                                                                  negativeon the   quality
+                                                                               impact        thethe
+                                                                                         on of              furthermore,
+                                                                                                    strip; of the
+                                                                                                   quality            strip;
+furthermore, these defects are the most common ones occurred in the production process. Therefore,
+these  defects these
+furthermore,    are the   most common
+                      defects   are the mostones  occurred
+                                               common        in the
+                                                          ones   occurred     in the process.
+                                                                      production      production    process.these
+                                                                                                 Therefore,           three
+                                                                                                                Therefore,
+these three defects are the main focus for defect identification.
+defects
+these    are the
+       three      mainare
+              defects    focus
+                           the for defect
+                                main        identification.
+                                      focus for   defect identification.
+      As has been mentioned in Section 2, LBP algorithm can be used to characterize the texture of
+      As has been mentioned in Section 2, LBP algorithm can be used to characterize the texture of
+images by comparing the grayscale between pixels. It is a linear method for removing light effect by
+             comparing the
+images by comparing        thegrayscale
+                                grayscalebetween
+                                             betweenpixels.
+                                                       pixels.It It
+                                                                 is is a linear
+                                                                    a linear      method
+                                                                                method    forfor removing
+                                                                                              removing    lightlight effect
+                                                                                                                  effect by
+extracting local features. LBP algorithm does not change the position and number of pixels in an
+by extracting
+extracting      local
+             local    features.
+                   features.   LBPLBP   algorithm
+                                     algorithm      does
+                                                  does    not
+                                                        not    changethe
+                                                             change             positionand
+                                                                          theposition          numberof
+                                                                                           andnumber          pixels in an
+                                                                                                         of pixels
+image, therefore it does not change the size of the image.
+image, therefore it does not change
+                                 change thethe size
+                                               size of
+                                                    of the
+                                                       the image.
+                                                            image.
+      Figure 6 shows some defect images including scratches, slags, peels, and an image with no
+      Figure 66shows      ome  defect images   including
+                 shows some defect images including        scratches,    slags,slags,
+                                                                scratches,              and an
+                                                                                 peels,peels,    image
+                                                                                               and       with nowith
+                                                                                                     an image       defects.
+                                                                                                                         no
+defects. Figure 7 shows the corresponding images after applying LBP for extracting features. As
+defects.7 shows
+Figure    Figure 7theshows
+                      corresponding     images afterimages
+                              the corresponding        applying    LBP for
+                                                               after         extracting
+                                                                       applying     LBP forfeatures.  As shown
+                                                                                               extracting          in these
+                                                                                                             features.   As
+shown in these two figures, LBP method clearly preserves the texture details of the original images,
+two
+shownfigures,  LBPtwo
+         in these   method    clearly
+                        figures,  LBP preserves    the texture
+                                        method clearly            details
+                                                          preserves            the original
+                                                                        theoftexture   detailsimages,  while removing
+                                                                                                of the original    images,
+while removing the effect of uneven lighting.
+the effect of
+while          uneven
+        removing        lighting.
+                   the effect  of uneven lighting.
+
+
+
+
+          5mm                                     5mm                             5mm               5mm
+
+        5mm                                 5mm                                  5mm                5mm
+
+
+
+                      (a)                                 Figure
+                                                            (b) 6. Original defect images.
+                                                                                     (c)                      (d)
+
+                   Figure 6.
+                   Figure 6. Original
+                             Original defect
+                                      defect images:
+                                             images: scratches
+                                                     scratches (a),
+                                                               (a), slags
+                                                                    slags (b),
+                                                                          (b), peels
+                                                                               peels (c),
+                                                                                     (c), no
+                                                                                          no defects (d).
+                                                                                             defects (d).
+      Metals 2018, 8, 197                                                                                                   8 of 18
+         Metals 2018, 8, x FOR PEER REVIEW                                                                                8 of 18
+
+
+
+
+                            (a)                        (b)                       (c)                       (d)
+
+               Figure
+            Figure     7. The
+                   7. The      images
+                            images     after
+                                   after applying  LBPLBP
+                                             applying      feature
+                                                       feature     extraction:
+                                                               extraction:            (a), (a),
+                                                                               scratches
+                                                                           scratches              (b), (b),
+                                                                                                slags
+                                                                                            slags           peels
+                                                                                                        peels      (c),defects
+                                                                                                              (c), no   no     (d).
+               defects (d).
+
+      3.2.2. Statistical Analysis and Dimension Reduction of LBP Images
+         3.2.2. Statistical Analysis and Dimension Reduction of LBP Images
+            This   section presents the histogram of LBP patterns for different types of defects. Images with
+               This section presents the histogram of LBP patterns for different types of defects. Images with
+      256-level   grayscales
+         256-level grayscales areare
+                                   used   to show
+                                       used        the distribution
+                                              to show                  of LBP
+                                                         the distribution    of patterns,
+                                                                                 LBP patterns,       the is,
+                                                                                           that is,that   frequency   of different
+                                                                                                             the frequency    of
+      gray  levels  in a defect  image.    The  LBP  pattern   is a one-dimensional      vector   containing
+         different gray levels in a defect image. The LBP pattern is a one-dimensional vector containing 256    256  eigenvalues,
+      in which    the kthineigenvalue
+         eigenvalues,       which the kthrepresents   therepresents
+                                             eigenvalue    occurrencetherate   of the kthrate
+                                                                            occurrence     LBPofpattern     in the
+                                                                                                  the kth LBP      wholeinimage.
+                                                                                                                 pattern     the
+            Figure
+         whole image.8 shows    the  histogram    of LBP    patterns  for  the  above   three   types   of  defects  and the one
+                 defects.
+     withoutFigure      8 As
+                          showsshown
+                                  the in    Figureof
+                                      histogram    8, the   histograms
+                                                      LBP patterns    for of
+                                                                           theLBP
+                                                                                above  three for
+                                                                                   patterns         different
+                                                                                              types of          defects
+                                                                                                          defects            quite
+                                                                                                                        areone
+                                                                                                                   and the
+Metals 2018, 8, x FOR
+      different.
+         without   Therefore, REVIEW
+                       PEERAsthe
+                    defects.        LBP in
+                                 shown   patterns
+                                             Figurefor   different
+                                                     8, the         defects
+                                                             histograms      LBPbe
+                                                                          of can     used tofor
+                                                                                   patterns    train  classification
+                                                                                                  different               quitefor9 of 18
+                                                                                                                       models
+                                                                                                              defects are
+      defect  identification.
+         different.  Therefore, the LBP patterns for different defects can be used to train classification models
+         for defect identification.
+
+
+
+
+                                           Frequency
+
+
+
+
+                                                                LBP patt ern
+                                                             (a) Scratches
+
+
+
+
+                                           Frequency
+
+
+
+
+                                                                LBP patt ern
+                                                                (b) Slags
+
+
+
+
+                                           Frequency
+
+
+
+
+                                                                LBP pattern
+                                                                (c) Peels
+
+                                                             Figure 8. Cont.
+
+
+
+                                           Frequency
+
+
+
+
+                                                                  LBP pattern
+                                                             (d) No defects
+                                        Frequenc
+
+
+
+
+                                                           LBP pattern
+     Metals 2018, 8, 197                                                                                           9 of 18
+                                                          (c) Peels
+
+
+
+
+                                        Frequency
+
+
+
+
+                                                             LBP pattern
+                                                       (d) No defects
+
+     Figure  8. The
+         Figure       256-dimensionial
+                 8. The                  histogramof of
+                        256-dimensionial histogram   LBPLBP  patterns:
+                                                         patterns:       scratches
+                                                                   scratches         (a),(b),slags
+                                                                             (a), slags        peels(b),  peels
+                                                                                                     (c), no     (c),(d).
+                                                                                                             defects  no
+     defects (d).
+           LBP uniform pattern described in Section 2 can be used for dimension reduction for the LBP
+       LBP uniform
+     patterns.     We used pattern described
+                             the LBP           in Section
+                                     uniform pattern         2 can be
+                                                      and reduced    theused  for dimension
+                                                                         dimension               reduction
+                                                                                     of LBP patterns         fortothe
+                                                                                                      from 256     59. LBP
+patterns.Figure
+            We used        the LBP  uniform   pattern  and   reduced    the dimension     of  LBP  patterns
+                       9 shows the 59-dimensional histogram of LBP patterns after the dimension reduction.   from   256 to
+59. The dimension reduction has two advantages: (1) remove low frequency LBP especially noises, and
+       Figure
+Metals(2)
+        2018, 8, x9 FOR
+          reduce     shows
+                     the PEERthe  59-dimensional
+                               REVIEWin
+                         computation                histogram
+                                        training classifiers         defectpatterns
+                                                                  of LBP
+                                                             for the                              dimension
+                                                                                             thetherefore
+                                                                                      afterand
+                                                                            identification                     reduction.
+                                                                                                          reduce the10 of 18
+The training
+      dimension   time.reduction has two advantages: (1) remove low frequency LBP especially noises, and
+(2) reduce the computation in training classifiers for the defect identification and therefore reduce
+the training time.
+
+
+                                       Frequency
+
+
+
+
+                                                           LBP patt ern
+                                                        (a) Scratches
+
+
+
+
+                                       Frequency
+
+
+
+
+                                                          LBP patt ern
+                                                          (b) Slags
+
+
+
+
+                                       Frequency
+
+
+
+
+                                                          LBP patt ern
+                                                          (c) Peels
+
+                                                       Figure 9. Cont.
+
+
+
+                                       Frequency
+
+
+
+
+                                                           LBP pattern
+                                                       (d) No defects
+
+      Figure 9. 59-dimensional histogram of LBP patterns: scratches (a), slags (b), peels (c), no defects (d).
+                                       Frequen
+
+
+
+
+                                                           LBP patt ern
+     Metals 2018, 8, 197                                                                                          10 of 18
+                                                          (c) Peels
+
+
+
+
+                                       Frequency
+
+
+
+
+                                                           LBP pattern
+                                                       (d) No defects
+
+      Figure 9. 9.
+               59-dimensional
+          Figure   59-dimensional histogramofofLBP
+                               histogram           patterns: scratches
+                                                LBP patterns: scratches(a),
+                                                                         (a),slags
+                                                                               slags
+                                                                                   (b),(b), peels
+                                                                                         peels      (c), no
+                                                                                               (c), no      defects
+                                                                                                        defects (d). (d).
+
+3.2.3. A Comparison
+     3.2.3. A         of of
+              Comparison Computing
+                            ComputingPerformance  amongLBP
+                                      Performance among LBPand
+                                                            andOther
+                                                                Other  Feature
+                                                                     Feature    Extraction
+                                                                             Extraction    Methods
+                                                                                        Methods
+         Apart
+     Apart  fromfrom  LBP,the
+                   LBP,     themost
+                                most common
+                                     commonlocal
+                                               localfeature-extraction
+                                                      feature-extractiondescriptor is SIFTisand
+                                                                            descriptor       SIFTSURF.
+                                                                                                    andSIFT
+                                                                                                         SURF.can SIFT
+    improve   the computing   speed based on  SURF.  They both perform   well on feature   extraction,
+can improve the computing speed based on SURF. They both perform well on feature extraction,           compared
+    with LBP.
+compared   withHowever,    the computation
+                  LBP. However,             complexity and
+                                    the computation          cost of SIFT
+                                                        complexity     andand  SURF
+                                                                            cost      are high,
+                                                                                 of SIFT         so theyare
+                                                                                            and SURF          not so
+                                                                                                          are high,
+    suitable for the real-time applications. The following table shows the comparison of computation time
+they are not suitable for the real-time applications. The following table shows the comparison of
+    among LBP, SIFT and SURF. As shown in Table 2, LBP performs the best in terms of computation cost.
+computation time among LBP, SIFT and SURF. As shown in Table 2, LBP performs the best in terms
+of computation cost.
+                 Table 2. Comparison of average computation time among LBP, SIFT and SURF.
+
+         Method Table 2. Size
+                  SampleComparison      of average
+                              (Pixels) (0.3 mm/Pixel)computation time among LBP, SIFT and
+                                                                Dimensions                SURF.
+                                                                                    Computation Time (ms)
+           LBP                   128 × 128                                256                            15
+           LBP       Sample Size128 ×(Pixels)
+                                       128               59 (After dimension reduction)         15 (ms)
+            Method                                      Dimensions                 Computation Time
+          SIFT           (0.3 mm/Pixel)
+                                128 ×  128                  128 × number of features            72
+          SURF
+              LBP           128 128 × 128
+                                 × 128                       64 × number of features
+                                                              256                           15 22
+              LBP           128 × 128         59 (After dimension reduction)                15
+     3.3. Model Training
+             SIFT         Using ELM
+                            128 × 128            128 × number of features                   72
+             SURF           128 × 128             64 × number of features                   22
+     3.3.1. Optimization of the Number of Hidden-Nodes
+
+3.3. ModelThe number
+           Training   of ELM
+                    Usinghidden nodes has great impact on the performance of computation and
+     classification of the defects. If the number is too large, it will cause an over-fitting problem that
+     reduces the generalization ability of ELM. If it is too small, it may lead to an under-fitting problem that
+     reduces the acquisition of all features of the training set.
+          We select the number of hidden nodes based on the following principle. (1) Refer to the empirical
+     number of the ELM method; (2) Compute the number in I-ELM method; and (3) Depend on the
+     accuracy of cross-validation test.
+          Figure 10 shows the accuracy of the cross-validation test with different hidden-nodes numbers.
+     When the node number is 50, the identification achieves the highest accuracy. Therefore, we select 50
+     as the hidden-node number.
+Metals 2018, 8, 197                                                                                             11 of 18
+Metals 2018, 8, x FOR PEER REVIEW                                                                               11 of 18
+
+
+                           97.00%
+
+                           96.00%
+
+                           95.00%
+
+
+
+                Accuracy
+                           94.00%
+
+                           93.00%
+
+                           92.00%
+
+                           91.00%
+
+                           90.00%
+                                    10   15   20   25   30   35   40   45   50   55   60   65   70   75   80
+                                              the number of hidden-layer nodes
+
+
+                 Figure 10. Accuracy of cross-validation test with different hidden-nodes numbers.
+                 Figure 10. Accuracy of cross-validation test with different hidden-nodes numbers.
+
+3.3.2. Comparison of Training Time between ELM and Other Models
+3.3.2. Comparison of Training Time between ELM and Other Models
+      ELM omits the process of adjusting input weights and hidden layer biases, this greatly saves the
+      ELM omits the process of adjusting input weights and hidden layer biases, this greatly saves the
+training time. Table 3 shows the comparison of training time among ELM and other models. For
+training time. Table 3 shows the comparison of training time among ELM and other models. For more
+more accurate comparison of training time, we set 50 hidden nodes for BP neural network as well as
+accurate comparison of training time, we set 50 hidden nodes for BP neural network as well as linear
+linear kernel for SVM. The comparison shows ELM takes much less time to train than the others.
+kernel for SVM. The comparison shows ELM takes much less time to train than the others.
+                              Table 3. Comparison of training time among ELM and other models.
+                              Table 3. Comparison of training time among ELM and other models.
+    Learning Model Sample Size Feature Dimensions                              Parameters     Training Time (ms)
+    Learning
+           BPModel Sample
+                      1348Size Feature Dimensions
+                                       256                                      Parameters
+                                                                            50 hidden nodes     Training  Time (ms)
+                                                                                                    153,354
+          BP
+         BP           1348
+                      1348              59
+                                       256                                  50
+                                                                             50hidden   nodes
+                                                                                hidden nodes         41,017
+                                                                                                      153,354
+         BP
+         SVM          1348
+                      1348              59
+                                       256                                   50 hidden
+                                                                              Linear   nodes
+                                                                                      Kernel          41,017
+                                                                                                      6338
+        SVM           1348             256                                     Linear Kernel            6338
+         SVM          1348              59                                    Linear Kernel           6137
+        SVM           1348              59                                     Linear Kernel            6137
+         ELM
+        ELM           1348
+                      1348             256
+                                       256                                  50
+                                                                             50hidden   nodes
+                                                                                hidden nodes          2059
+                                                                                                        2059
+         ELM
+        ELM           1348
+                      1348              59
+                                        59                                  50
+                                                                             50hidden   nodes
+                                                                                hidden nodes           865
+                                                                                                         865
+
+3.4. Defect
+3.4. Defect Identification Using ELM
+            Identification Using ELM
+    This section
+    This  section reports
+                  reports the
+                          the classification
+                              classification results
+                                             results of
+                                                     of various
+                                                        various defects
+                                                                defects using
+                                                                        using ELM.
+                                                                              ELM. We use aa confusion
+                                                                                   We use    confusion
+matrix to show  the actual and  classified defect classes.
+matrix to show the actual and classified defect classes.
+
+3.4.1. Analysis on the Result of Defect Identification
+      We used
+     We   used1130
+                1130sample
+                       sample   defect
+                             defect images  for for
+                                       images        testing
+                                                testing  the the
+                                                             ELMELM     classifier,
+                                                                  classifier,       including
+                                                                              including              images
+                                                                                                216 for
+                                                                                         216 images           for
+                                                                                                         scratch,
+scratch,
+100      100for
+    images    images    for slag,
+                slag, 302   images302  images512
+                                    for peel,   forsamples
+                                                     peel, 512  samples
+                                                             with no  defects.  Afterdefects.
+                                                                           with no             After
+                                                                                       extracting     extracting
+                                                                                                   features and
+features and
+reducing       reducingfor
+          dimensions       dimensions
+                             each sampleforimage,
+                                             each sample    image,
+                                                    we obtained     we obtained a 256-dimensional
+                                                                  a 256-dimensional                       and a
+                                                                                         and a 59-dimensional
+59-dimensional
+feature          feature
+        vector for         vector for
+                    classification.   classification.
+                                    The  confusion The     confusion
+                                                     matrices for the matrices    for the
+                                                                       classification     classification
+                                                                                       using a           using a
+                                                                                                59-dimensional
+59-dimensional
+feature vector andfeature   vector and feature
+                     256-dimensional     256-dimensional     featureinvector
+                                                vector are shown       Tables 4areand
+                                                                                   shown
+                                                                                       5, in   Tables 4 and 5,
+                                                                                         respectively.
+respectively.
+      As shown in Tables 4 and 5, the classification accuracy for the defects of scratch and peel are
+about 95%. This is because these two defect types have distinguishing features and many samples
+for training. The classification accuracy for the defect of slag is about 89%, which is less than those
+for other defect types. This is because the image features of these types of defect are less perceptible
+than those for other defects. It is worth mentioning that all images with no defects are classified
+correctly using either their 256-dimensional feature vectors or 59-dimensional feature vectors. This is
+Metals 2018, 8, 197                                                                                                            12 of 18
+
+
+
+                       Table 4. Confusion matrix using ELM with 256-dimensional feature vectors.
+
+  Defect Type       Scratch     Slag     Peel     No Defect     Correctly Classified      Sample Number     Classification Accuracy
+       Scratch        204         0       2           10                204                    216                  94.44%
+        Slag           5         85       6           4                 85                     100                  85.00%
+        Peel           6         5       281         10                 281                    302                  93.05%
+      No defect        0         3        4          505                505                   512                   98.63%
+        Total         215        93      293         529               1075                   1130                  95.13%
+
+
+                       Table 5. Confusion matrix using ELM with 59-dimensional feature vectors.
+
+      Defect Type    Scratch      Slag    Peel      No Defect      Correctly Classified     Sample Number      Classification Rate
+        Scratch        206          4      2            4                  206                   216                 95.37%
+         Slag           1          89      6            4                   89                   100                 89.00%
+         Peel           3          5      289           5                   289                   302                 95.70%
+       No defect        0          0       0           512                  512                   512                100.00%
+         Total         210         98     297          525                 1096                  1130                96.99%
+
+
+     As shown in Tables 4 and 5, the classification accuracy for the defects of scratch and peel are
+about 95%. This is because these two defect types have distinguishing features and many samples for
+training. The classification accuracy for the defect of slag is about 89%, which is less than those for
+other defect types. This is because the image features of these types of defect are less perceptible than
+those for other defects. It is worth mentioning that all images with no defects are classified correctly
+using either their 256-dimensional feature vectors or 59-dimensional feature vectors. This is because
+the image features with no defects are distinct, and there are lots of sample images for training.
+
+3.4.2. Comparison of the Performance of Computation and Classification among ELM and
+Other Models
+     To compare the performance of ELM and other classification models, we have conducted
+experiments and populated the experiment results in Table 6 to show both the computation and
+classification performance. From Table 6, we can see that:
+
+(1)      BP neural network is not performing well in terms of classification accuracy when the training
+         dataset is small;
+(2)      The classification accuracy of SVM is high, however, it takes long time to identify the defects.
+(3)      LBP + ELM outperforms others, it can achieve higher classification accuracy with less training
+         time than other models in Table 6.
+
+
+        Table 6. Comparison of the computation and classification performance among ELM and
+        other methods.
+
+          Method             Average Classification Accuracy        Feature Dimensions        Classification Time (ms Per Sample)
+       SURF + SVM                        90.57%                   64 × number of features                    138
+         LBP + BP                        69.71%                           256                                33
+         LBP + BP                        82.45%                            59                                21
+        LBP + SVM                        94.47%                           256                                47
+        LBP + SVM                        95.01%                            59                                43
+        LBP + ELM                        95.13%                           256                                 17
+        LBP + ELM                        96.99%                            59                                 15
+
+
+4. Experiment and Analysis of Online Monitoring with New Types of Defects
+      In the production of cold rolled strip, new types of defects often appear due to various types of
+equipment malfunctions. In this case, the pre-trained defect classification model is no longer suitable
+for identifying these new defect types. This will lead to misclassification of the defects and has negative
+impact on the product quality. By accurately identifying the defect types, operators can take actions
+Metals
+Metals 2018,
+       2018, 8,
+             8, x197
+                  FOR PEER REVIEW                                                                                       13
+                                                                                                                        13 of
+                                                                                                                           of 18
+                                                                                                                              18
+Metals 2018, 8, x FOR PEER REVIEW                                                                                        13 of 18
+4.1. Design of the Experiment
+accordingly
+ 4.1. Design oftothe mitigate    the negative impact of the defects. Therefore, it is important to address the
+                        Experiment
+      The primary purpose of online monitoring is to improve identification reliability. That is, when
+problem of identifying new types of defects.
+new Thetypes of    defects
+             primary          appear,
+                         purpose     of the
+                                        onlineclassification
+                                                 monitoring is model
+                                                                   to can
+                                                                       improve quickly    sense the
+                                                                                  identification       defects and
+                                                                                                    reliability.       properly
+                                                                                                                  That is, when
+      In this section, an online monitoring experiment has been carried out. ELM has been used for the
+adjusttypes
+ new     itself to  identify them.
+                of defects     appear, the classification model can quickly sense the defects and properly
+classification of new types of defects.
+      Figure
+ adjust   itself11
+                 to shows
+                     identifythe   flowchart of the defect identification process. First, we train ELM using
+                                them.
+images     of
+       Figure known
+                  11     defect
+4.1. Design of the Experimentflowchart
+                      shows    thetypes.   Then ofELMthe is  used to
+                                                           defect       identify the
+                                                                   identification     process.   types of
+                                                                                        defect First,       imagesELM
+                                                                                                         we train      captured
+                                                                                                                           using
+from
+ imagestheofproduction
+               known defect line. This
+                                   types.works
+                                            Thenwell.
+                                                    ELM is used to identify the defect types of images captured
+      The
+ fromIf  new
+        the  primary
+                types
+             production  purpose
+                         of defects
+                             line. Thisonline
+                                    ofare works monitoring
+                                           present,   the images
+                                                  well.                     new identification
+                                                                      improve
+                                                               is towith          types of defects reliability.  That is, when
+                                                                                                        will be captured     and
+new   types
+savedIffornew of  defects
+              manual        appear,
+                 types of defects     the   present,the
+                                       are When
+                          classification.  classification   model
+                                                       theimages     can
+                                                            imageswith    quickly
+                                                                      withnew       sense
+                                                                             new defect
+                                                                                   types of the defects
+                                                                                            types        and
+                                                                                                   accumulate
+                                                                                              defects will     properly
+                                                                                                              be to       adjust
+                                                                                                                       a certain
+                                                                                                                  captured    and
+itself
+number,to  identify
+            they   willthem.
+                         be  added    to  the training   set. Then    the  training   set is used
+ saved for manual classification. When the images with new defect types accumulate to a certain    to  retrain  the model.    As
+      Figure
+aforementioned,
+ number,         11  shows
+             they will        the  flowchart
+                                         trained
+                              addedbeto the
+                          be can
+                        ELM                      of the
+                                               training   defect
+                                                   in seconds     identification
+                                                                  andthe
+                                                          set. Then     thetraining  process.
+                                                                              re-trained    model
+                                                                                       set is   First,
+                                                                                              used to   we
+                                                                                                     can be  train
+                                                                                                              used
+                                                                                                        retrain    ELM
+                                                                                                                 the for   using
+                                                                                                                          online
+                                                                                                                      model.   As
+images
+monitoringof known
+ aforementioned,        defect
+                immediately.
+                         ELM can types.
+                                     be Then    ELM
+                                          trained   in is used toand
+                                                        seconds     identify
+                                                                         the re-trained      modelofcan
+                                                                               the defect types        images   captured
+                                                                                                           be used          from
+                                                                                                                      for online
+the  production
+ monitoring          line. This works well.
+                 immediately.
+
+
+
+
+                                 Figure 11. Flowchart of the online monitoring system.
+                                 Figure11.
+                                 Figure 11.Flowchart
+                                           Flowchartof
+                                                     ofthe
+                                                        theonline
+                                                           onlinemonitoring
+                                                                  monitoringsystem.
+                                                                             system.
+4.2. Experiment Process
+ 4.2. Experiment Process
+      If new types of defects are present, the images with new types of defects will be captured and
+4.2.1. Training of ELM
+saved for manual classification. When the images with new defect types accumulate to a certain
+ 4.2.1. Training of ELM
+      ELMthey
+number,      was will
+                   initially  trained
+                         be added      towith    four typical
+                                           the training   set. defect  types.
+                                                                Then the        Theseset
+                                                                            training   four    defectotypes
+                                                                                           is used       retrainarethe
+                                                                                                                     shown   in
+                                                                                                                        model.
+Figure   12.
+       ELM    was   initially   trained    with   four  typical defect   types. These   four   defect
+As aforementioned, ELM can be trained in seconds and the re-trained model can be used for online        types    are  shown   in
+      The12.
+ Figure
+monitoring  number      of training samples for each defect type is shown in Table 7. These four types of
+               immediately.
+defectsTheare the
+             number most    common and
+                         of training            representative
+                                         samples for              onestype
+                                                        each defect      in is
+                                                                            theshown
+                                                                                 production
+                                                                                        in Table    cold
+                                                                                                 of 7.     rolled
+                                                                                                       These        strip.
+                                                                                                                 four  typesThe
+                                                                                                                              of
+4.2. Experiment
+number
+ defects of        Process
+              training
+           are the   most samples
+                             common    in and
+                                           Table 7 is   smaller than
+                                                 representative    onesthat  theSection
+                                                                          in in           3 (shown
+                                                                                 production                 rolled 1).
+                                                                                                        in Table
+                                                                                                  of cold               ThisThe
+                                                                                                                     strip.   is
+ numberthe
+because        samples used
+            of training    samples in this  experiment
+                                        in Table          have more
+                                                   7 is smaller        representative
+                                                                  than that in           features
+                                                                                 Section 3    (shown than                This1.is
+                                                                                                             Tablein1).Table
+                                                                                                         in those
+4.2.1. Training of ELM
+Therefore,
+ because    theven    the used
+                samples    training     set is
+                                    in this     smaller inhave
+                                             experiment      thismore
+                                                                   experiment,    high features
+                                                                         representative               thanrate
+                                                                                         classification      those      Tablebe1.
+                                                                                                                    in also
+                                                                                                                  can
+achieved.
+ Therefore,
+      ELM was  even    the training
+                   initially   trainedset withis four
+                                                 smaller  in this
+                                                       typical      experiment,
+                                                                defect  types. These      classification
+                                                                                   highfour    defect types  rate
+                                                                                                                arecan        be
+                                                                                                                        also in
+                                                                                                                     shown
+FigureFor12.more accurate comparison of experimental results, we set the number of nodes in the
+ achieved.
+hidden Forlayer
+             moreto 50   which is the
+                     accurate             same asofused in
+                                  comparison                  the experiment
+                                                      experimental     results, in Section
+                                                                                 we set    the3. number of nodes in the
+ hidden layer to 50 which is the same as used in the experiment in Section 3.
+
+
+
+
+       5mm                           5mm                            5mm                         5mm
+
+
+        5mm                           5mm                            5mm                         5mm
+                  (a)                          (b)                           (c)                          (d)
+                   (a)                       (b)                         (c)                           (d)
+                    Figure 12.
+                    Figure     Four defect
+                           12. Four defect types:
+                                           types: scratches
+                                                  scratches (a),
+                                                            (a), slags
+                                                                 slags (b),
+                                                                       (b), peels
+                                                                            peels (c),
+                                                                                  (c), no
+                                                                                       no defects
+                                                                                          defects (d).
+                                                                                                  (d).
+                     Figure 12. Four defect types: scratches (a), slags (b), peels (c), no defects (d).
+      The number of training samples for each defect type is shown in Table 7. These four types of
+defects are the most common and representative ones in the production of cold rolled strip. The number
+of training samples in Table 7 is smaller than that in Section 3 (shown in Table 1). This is because the
+Metals 2018, 8, 197                                                                                                            14 of 18
+Metals 2018, 8, x FOR PEER REVIEW                                                                                              14 of 18
+
+
+                                 Table 7. The number of training samples for each defect type.
+samples used in this experiment have more representative features than those in Table 1. Therefore,
+even the training set is smaller
+                           Defectin this
+                                   Typeexperiment, high classification
+                                                Number of   Training rate can also be achieved.
+                                                                      Samples
+                                        Scratch                            160
+                                 Table 7. The
+                                          Slag number of training samples for80each defect type.
+                                          Peel                             200
+                                 No significant
+                                     Defect Type defect                    300
+                                                               Number of Training    Samples
+                                        Scratch                 160
+4.2.2. Defect Identification Using
+                                SlagELM                         80
+                               Peel                             200
+      After training ELM, it is used defect
+                       No significant for the defect classification.
+                                                                300 The trained model will output a
+ 4-dimensional vector corresponding to the four types of defects.
+        In Section 2.2, two classification strategies of ELM are proposed, that is maximum strategy and
+        For more accurate comparison of experimental results, we set the number of nodes in the hidden
+ real-time identification strategy. With the experiment in Section 3, the maximum strategy is used. In
+layer to 50 which is the same as used in the experiment in Section 3.
+ that experiment, all testing samples belong to the four known types, so each image sample will be
+ classified
+4.2.2.    Defectinto one   of the four
+                   Identification          defect
+                                       Using    ELMtypes. In this section, the real-time identification strategy is used
+ to address the problem coming with new defect types. With the real-time identification strategy, a
+ testingAfter
+           sampletraining
+                      will ELM,       it is used
+                             be classified     intoforonethe
+                                                           of defect     classification.
+                                                               four defect      classes only The   trained
+                                                                                                when         model will output
+                                                                                                        the corresponding       one of a
+4-dimensional
+ the four elements    vector   corresponding
+                          in the   output vector    toisthe  four types
+                                                          greater   than or of defects.
+                                                                                equal to the preset threshold .
+        In Section    2.2,  two   classification      strategies
+        To determine a proper value for the threshold, we have     of  ELM     are proposed,
+                                                                                     conductedthat     is maximum strategy
+                                                                                                   cross-validation.    All samplesand
+real-time      identification      strategy.    With    the  experiment        in Section    3, the
+ in the training set are with known defect types. When plotting the curve of classification accuracy maximum      strategy    is used.
+In   that experiment,
+ against                      all testing
+             different threshold             samples
+                                         values,         belong tothat
+                                                    we observe         the the
+                                                                             fourclassification
+                                                                                    known types,      so each drops
+                                                                                                   accuracy    image significantly
+                                                                                                                        sample will
+be  classified     into  one    of the   four   defect   types.   In  this  section,    the
+ when the threshold ε approaches the value of −0.1. As shown in Figure 13, the inflection   real-time    identification   strategy
+                                                                                                                                 pointis
+used
+ appears to address
+             when the  thethreshold
+                             problem coming
+                                          ε is equalwith   new defect
+                                                        to −0.1.           types.
+                                                                  Therefore,      weWith
+                                                                                      use the
+                                                                                            −0.1real-time   identification
+                                                                                                  as the value               strategy,
+                                                                                                                 of the threshold      ε
+    this experiment. That is, if the maximum value of the elements in the output vector is lessone
+aintesting    sample    will   be  classified    into  one  of  four   defect   classes   only   when   the  corresponding           of
+                                                                                                                                  than
+the
+ −0.1,four
+         thiselements
+               test samplein the   output
+                               should     be vector    is greater
+                                              classified           than or equal to the preset threshold ε.
+                                                           as “unknown”.
+        To  determine
+        Table    8 showsa theproper     value for
+                                   confusion         the threshold,
+                                                  matrix   obtained we   by have
+                                                                              usingconducted
+                                                                                      the trainedcross-validation.
+                                                                                                      ELM to classifyAll  thesamples
+                                                                                                                               testing
+ dataset. As shown in the table, the average classification accuracy is about 92%, slightly accuracy
+in  the   training    set  are  with    known      defect   types.   When       plotting   the  curve   of classification   less than
+against
+ that shown different   threshold
+                  in Section     3.4.1values,
+                                        (Tablewe  5). observe
+                                                       This may  that
+                                                                   bethe    classification
+                                                                        caused               accuracy
+                                                                                   by the smaller        dropssize
+                                                                                                      sample    significantly
+                                                                                                                     of training when
+                                                                                                                                    set.
+the   threshold
+ Another             ε approaches
+               observation      is thatthe             of −0.1. are
+                                              value samples
+                                           several                 As shown
+                                                                         classifiedin Figure
+                                                                                       as unknown        inflection
+                                                                                                13, the defect           dueappears
+                                                                                                                     point
+                                                                                                                 types          to the
+when
+ changetheofthreshold        ε is equal
+                  classification           to −0.1.
+                                     strategy.     TheTherefore,
+                                                          proportion   weof       −0.1 samples
+                                                                            usethese     as the value    of the 1.1%.
+                                                                                                    is about    threshold      in this
+                                                                                                                        Thisε is   still
+experiment.         That   is, if the   maximum         value   of the    elements     in the   output
+ acceptable. When the “unknown” types of defects appear more frequently, we have to re-train ELM,         vector is less  than   −  0.1,
+this   test  sample    should     be  classified
+ and this is described in the following section.   as   “unknown”.
+
+
+                       100.00%
+                        90.00%
+                        80.00%
+                        70.00%
+
+
+            Accuracy
+                        60.00%
+                        50.00%
+                        40.00%
+                        30.00%
+                        20.00%
+                        10.00%
+                         0.00%
+                                 -1 -0.9-0.8-0.7-0.6-0.5-0.4-0.3-0.2-0.1 0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1
+                                                                     Threshold ε
+
+
+                           Figure 13. Classification accuracy changes with different threshold values.
+                           Figure 13. Classification accuracy changes with different threshold values.
+
+
+     Table 8 shows the confusion matrix obtained by using the trained ELM to classify the testing
+dataset. As shown in the table, the average classification accuracy is about 92%, slightly less than
+that shown in Section 3.4.1 (Table 5). This may be caused by the smaller sample size of training set.
+                  70.00%
+
+
+           Accuracy
+                  60.00%
+                  50.00%
+                  40.00%
+                  30.00%
+                  20.00%
+Metals 2018, 8, 197                                                                                            15 of 18
+                  10.00%
+                   0.00%
+Another observation is-1that several samples       are classified0 as0.1 0.2
+                            -0.9-0.8-0.7-0.6-0.5-0.4-0.3-0.2-0.1       unknown     defect0.6types
+                                                                             0.3 0.4 0.5            due
+                                                                                              0.7 0.8 0.9to 1the change
+of classification strategy. The proportion of these samples        is about
+                                                            Threshold ε       1.1%.  This  is still acceptable.   When
+the “unknown” types of defects appear more frequently, we have to re-train ELM, and this is described
+in the following section.
+                      Figure 13. Classification accuracy changes with different threshold values.
+                                Table 8. Confusion matrix with unknown defect type.
+                                Table 8. Confusion matrix with unknown defect type.
+   Defect Type
+            DefectScratch  Slag Slag
+                   Type Scratch   Peel PeelNoNo
+                                             Defect
+                                                Defect Unknown
+                                                       UnknownDefect
+                                                                Defect TotalTotal       Classification
+                                                                               Classification AccuracyAccuracy
+     Scratch Scratch109   1090    02    2      7 7           22         120 120         90.83% 90.83%
+      Slag     Slag 6      649   493    3      1 1           11          60 60          81.67% 81.67%
+      Peel     Peel 3      32     2132 132    11 11          22         150 150         88.00% 88.00%
+    No defectNo defect
+                     0     00    01     1    218218          11         220 220         99.09% 99.09%
+      Total    Total118     51
+                          118    5138 138 237237             66         550 550         92.36% 92.36%
+
+
+4.2.3. Re-Training ELM with New Types
+                                Types of
+                                      of Defects
+                                         Defects
+     With the new types of defects being detected, we have manually identified that the new defect
+type is “pore”, as shown in Figure 14. Over
+                                        Over time,
+                                              time, more
+                                                    more “unknown”
+                                                         “unknown” types
+                                                                       types of
+                                                                             of defects
+                                                                                defects are
+                                                                                        are identified.
+                                                                                            identified.
+Table 9 shows the  confusion matrix with the additional defects of “pores”.
+Table 9 shows the confusion matrix with the additional defects of “pores”.
+
+
+
+
+                                              5mm
+
+
+
+
+                                               Figure 14. Pores
+                                               Figure 14. Pores defect.
+                                                                defect.
+
+     As shown in TableTable9, the
+                                9. average
+                                   Confusionclassification   accuracy
+                                                matrix with the additiondrops   todefect.
+                                                                         of pores  about 87.6%, lower than the
+average accuracy of 92% shown in Table 5. This shows that a small number of samples of
+“unknown”
+   Defect Type types of defects
+                 Scratch  Slag hasPeellittleNo
+                                             effect on average
+                                               Defect   Unknownclassification
+                                                                  Defect         accuracy.
+                                                                             Total          However,Accuracy
+                                                                                          Classification  when lots
+of unknown
+     Scratch defects
+                   109 are 0
+                           present,2 ELM 7   should be re-trained
+                                                                2   with the120“unknown” defect         types added
+                                                                                                   90.83%
+      Slag
+into the  training 6
+                   dataset.49       3           1               1              60                  81.67%
+      Peel          3        2      132        11                2               150                88.00%
+   No defect        0        0       1        218                1               220                99.09%
+     Pore           0     Table
+                             2   9. Confusion
+                                     0                                            30 defect.
+                                                0matrix with the28addition of pores                  N/A
+     Total         118      53      138       237               34               580                87.59%
+           Defect Type Scratch Slag Peel No Defect Unknown Defect Total Classification Accuracy
+             Scratch      109      0     2         7               2          120            90.83%
+    As shown  Slagin Table 69, the49     3
+                                    average        1
+                                             classification        1
+                                                               accuracy drops  60 to about 81.67%
+                                                                                             87.6%, lower than the
+              Peel
+average accuracy     of 92%3shown  2
+                                     in 132
+                                        Table 5. 11This shows that 2
+                                                                      a small150             88.00%
+                                                                               number of samples       of “unknown”
+            No defect      0       0     1        218              1          220            99.09%
+types of defects
+              Porehas little
+                           0 effect2 on average
+                                         0         0classification28accuracy. 30
+                                                                               However, when   N/A lots of unknown
+defects are Total
+             present, ELM 118 should
+                                  53    138 re-trained
+                                        be        237     with the34 “unknown”580    defect 87.59%
+                                                                                              types added into the
+training dataset.
+     Before adding the “unknown” types of defect samples into the training dataset, we need to
+manually label them. The re-trained ELM can then be used to replace the old model for defect
+classification. Table 10 shows the new confusion matrix using the retrained ELM. As shown in the
+table, the proportion of unknown defects has significantly dropped when using the retrained ELM for
+classification. We notice that the classification accuracy for the new defect type “pore” is not high. This
+is because the number of training samples for this type of defect is not large enough. This means that
+Metals 2018, 8, 197                                                                                                                            16 of 18
+
+
+
+the re-training of the classification model should happen only when sufficient number of unknown
+types of defects appear.
+
+                     Table 10. New confusion matrix using retrained ELM with new samples of “pore”.
+
+       Defect Type      Scratch Slag           Peel    No Defect          Pore        Unknown Defect     Total            Classification Accuracy
+          Scratch        108        0           3              7           0                2               120                   90.00%
+           Slag           5         49          3              1            1               1               60                    81.67%
+           Peel           4          3         131            10           0                2               150                   87.33%
+         No defect        0          0          2            216           0                2               220                   98.18%
+           Pore           0         4           2              4           18               2                30                   60.00%
+           Total         117        56         141           238           19               9               580                   90.00%
+
+
+     To make the experiment more convincing, we add white spots as a new type of defect.
+The confusion matrix obtained using the original or retrained ELM is shown in Tables 11 and 12,
+respectively. As shown in these two tables, the experimental results are similar to that in
+Tables 9 and 10.
+
+                       Table 11. Confusion matrix with new samples of the defect type “white spot”.
+
+  Defect Type         Scratch Slag             Peel         No Defect      Pore        Unknown Defect        Total          Classification Accuracy
+       Scratch         108     0                3               7           0                    2            120                   90.00%
+        Slag            5      49               3               1            1                   1            60                    81.67%
+        Peel            4      3               131              10           0                  2             150                   87.33%
+      No defect         0      0                2              216           0                  2             220                   98.18%
+        Pore            0      4                2               4           18                   2             30                   60.00%
+      White spot        0      0                1                2           0                  22             25                    N/A
+        Total          117     56              142             240          19                  31            605                   86.28%
+
+
+          Table 12. Confusion matrix obtained using the retrained ELM with new samples of “white spot”.
+
+      Defect Type     Scratch Slag Peel No Defect                  Pore    White Spot      Unknown Defect         Total      Classification Accuracy
+        Scratch        106      0         4             6            0           2                   2            120                88.33%
+         Slag           4      47         2             2            3           0                   2             60                78.33%
+         Peel           2      3         133           11             0           0                  1            150                88.67%
+       No defect        0      0          0           217             0          1                   2            220                98.64%
+         Pores          0       5         3             2            18          1                   1             30                60.00%
+       White spot       0      0          1            7              0          17                  0             25                68.00%
+         Total         112     55        143          245            21          21                  8            605                88.93%
+
+
+5. Conclusions
+     To detect and identify various types of surface defects of cold rolled strip, we have developed an
+online monitoring system. The system is capable of extracting features of the surface images acquired
+from the cold rolling production line, and then using the features as input of the ELM classifier. In the
+production environment, for yield and quality assurance, the model should be quick enough in feature
+extraction and defect identification based on satisfactory classification accuracy. For potential new
+defects, fast classifier re-training and satisfactory classification accuracy of re-trained classifier are
+both necessary.
+     This paper has explored different feature extraction methods (SIFT, SURF, LBP) and various
+classifiers (BP, SVM, ELM) to find the fastest combination method with satisfactory classification
+accuracy. After getting the best combination method, this paper also explored its re-training time and
+classification accuracy when dealing with new types of defects.
+     The conclusions from our study are as follows:
+
+(1)      LBP is faster in extracting features than traditional methods SIFT and SURF.
+(2)      ELM can be trained faster than traditional classification method BP and SVM for its
+         simple algorithm.
+Metals 2018, 8, 197                                                                                          17 of 18
+
+
+
+(3)   When dealing with known types of defects, the hybrid LBP + ELM method is more efficient than
+      other combination methods with less training time (865 ms on 1348 samples), classification time
+      (15 ms per sample), and higher classification accuracy (more than 96%).
+(4)   When dealing with new types of defects, in most cases of production line environment,
+      the samples of new types of defects will be less than training samples in experiment (1348), so the
+      retraining time will be less than 1 s. The retrained classifier also has satisfactory classification
+      accuracy (more than 86%).
+
+      On accounts of the satisfactory classification time, re-training time and classification accuracy on
+major known pre-trained defects and minor new defects in production environment, the hybrid LBP
++ ELM method satisfy the demand of real-time online defect monitoring system for continuous cold
+rolling process.
+
+Acknowledgments: This work is sponsored by The National Natural Science Foundation of China (No. 51674031).
+The authors are indebted to the Collaborative Innovation Center of Steel Technology (CICST), the University
+of Science and Technology Beijing (USTB), Quantitative Imaging Research Team (QIRT) and Commonwealth
+Scientific and Industrial Research Organization (CSIRO) for the development infrastructure and financial support.
+Author Contributions: Yang Liu conceived, designed and designed the experiments; Ke Xu and Dadong Wang
+contributed experiment data, materials and experiment equipments; Yang Liu and Ke Xu analyzed the data;
+Yang Liu wrote the paper; Ke Xu and Dadong Wang revised the paper.
+Conflicts of Interest: The authors declare no conflict of interest.
+
+References
+1.    Xu, K.; Liu, S.; Ai, Y. Application of Shearlet Transform to Classification of Surface Defects for Metals.
+      Image Vis. Comput. 2015, 35, 23–30. [CrossRef]
+2.    Kawano, Y.; Yanai, K. Food image recognition with deep convolutional features. In Proceedings of the 2014
+      ACM International Joint Conference on Pervasive and Ubiquitous Computing: Adjunct Publication, Seattle,
+      WA, USA, 13–17 September 2014; ACM: New York, NY, USA, 2014; pp. 589–593.
+3.    Yue-Hei Ng, J.; Yang, F.; Davis, L.S. Exploiting local features from deep networks for image retrieval.
+      In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition Workshops, Boston,
+      MA, USA, 8–10 June 2015; pp. 53–61.
+4.    Mohanaiah, P.; Sathyanarayana, P.; GuruKumar, L. Image texture feature extraction using GLCM approach.
+      Int. J. Sci. Res. Publ. 2013, 3, 1.
+5.    Romero, A.; Gatta, C.; Camps-valls, G. Unsupervised Deep Feature Extraction for Remote Sensing Image
+      Classification. IEEE Trans. Geosci. Remote Sens. 2016, 54, 1349–1362. [CrossRef]
+6.    Bheda, D.; Joshi, M.; Agrawal, V. A study on features extraction techniques for image mosaicing. Int. J. Innov.
+      Res. Comput. Commun. Eng. 2014, 2, 3432–3437.
+7.    Li, Y.; Liu, W.; Li, X.; Huang, Q.; Li, X. GA-SIFT: A new scale invariant feature transform for multispectral
+      image using geometric algebra. Inf. Sci. 2014, 281, 559–572. [CrossRef]
+8.    Bay, H.; Ess, A.; Tuytelaars, T.; Van Gool, L. Speeded-up Robust Features (surf). Comput. Vis. Image Underst.
+      2008, 110, 346–359. [CrossRef]
+9.    Ojala, T.; Pietikäinen, M.; Harwood, D. A Comparative Study of Texture Measures with Classification Based
+      on Featured Distributions. Pattern Recognit. 1996, 29, 51–59. [CrossRef]
+10.   Hecht-Nielsen, R. Theory of the backpropagation neural network. Neural Netw. 1988, 1 (Suppl. S1), 445–448.
+      [CrossRef]
+11.   Jiang, J.; Song, C.; Wu, C.; Marchese, M.; Liang, Y. Support vector machine regression algorithm based on
+      chunking incremental learning. In Proceedings of the International Conference on Computational Science,
+      Reading, UK, 28–31 May 2006; pp. 547–554.
+12.   Huang, G.; Zhu, Q.; Siew, C. Extreme Learning Machine: Theory and Applications. Neurocomputing 2006, 70,
+      489–501. [CrossRef]
+13.   Yu, D.; Deng, L. Efficient and Effective Algorithms for Training Single-hidden-layer Neural Networks.
+      Pattern Recognit. Lett. 2012, 33, 554–558. [CrossRef]
+Metals 2018, 8, 197                                                                                            18 of 18
+
+
+
+14.   Hu, J.; Li, D.; Duan, Q.; Han, Y.; Chen, G.; Si, X. Fish species classification by color, texture and multi-class
+      support vector machine using computer vision. Comput. Electron. Agric. 2012, 88, 133–140. [CrossRef]
+15.   Huang, G.B.; Zhu, Q.Y.; Siew, C.K. Extreme learning machine: A new learning scheme of feedforward neural
+      networks. In Proceedings of the 2004 IEEE International Joint Conference on Neural Networks, Budapest,
+      Hungary, 25–29 July 2004; Volume 2, pp. 985–990.
+16.   Mohamed, A.A.; Yampolskiy, R.V. An improved LBP algorithm for avatar face recognition. In Proceedings
+      of the 2011 XXIII International Symposium on Information, Communication and Automation Technologies
+      (ICAT), Sarajevo, Bosnia and Herzegovina, 27–29 October 2011; pp. 1–5.
+17.   Nanni, L.; Lumini, A.; Brahnam, S. Survey on LBP Based Texture Descriptors for Image Classification.
+      Expert Syst. Appl. 2012, 39, 3634–3641. [CrossRef]
+18.   Shan, C. Learning Local Binary Patterns for Gender Classification on Real-world Face Images. 2012, 33,
+      431–437. [CrossRef]
+
+                        © 2018 by the authors. Licensee MDPI, Basel, Switzerland. This article is an open access
+                        article distributed under the terms and conditions of the Creative Commons Attribution
+                        (CC BY) license (http://creativecommons.org/licenses/by/4.0/).
+

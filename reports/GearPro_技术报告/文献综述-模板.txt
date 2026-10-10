@@ -1,0 +1,65 @@
+﻿离子液体萃取/催化氧化脱除燃油中有机硫
+吴欣  孙茜  吴玲
+（东南大学化学化工学院，江苏省 南京市）
+指导教师：周钰明 教授
+
+摘要：
+汽车排放的有害物质已成为全球空气污染的主要来源之一。燃油中含有多种硫化物，因此，脱硫成为生产清洁燃油的一个可研究方向。目前脱硫有许多方法，分加氢和非加氢两大类。本文主要阐述离子液体在汽油脱硫中的应用。
+关键词：酸性离子液体    催化氧化    脱硫
+
+一、脱硫研究背景
+近年来随着世界经济的迅猛发展，汽车用量的增多，汽车尾气污染成为环境污染的主要原因之一，许多环境法规中已经严格规定限制了燃料中硫的含量，于是为了怎样有效的低成本的脱去燃料中的有机硫就变成了重中之重。国内外对此已进行了许多研究[1]。燃油中含有多种硫化物，噻吩占柴油总硫的80%以上，苯并噻吩和二苯并噻吩又占噻吩类的70%以上[2-4]。近年来各国均开始制定并执行严格的标准来控制汽车尾气排放，尤其是严格限制燃料油中的硫质量分数，促使燃料油向着无硫化方向发展。关于燃油中硫含量的标准，各国的标准各不相同。目前我国柴油中硫含量过高达800ppm，而欧洲只有50ppm。改善柴油品质首先要提高柴油质量强制性标准，其次适时将柴油质量提高到欧Ⅲ、欧Ⅳ标准。欧Ⅱ排放标准正在中国实施，燃油含硫量应≤500ppm。欧Ⅲ排放标准：燃油含硫量应≤350ppm。欧Ⅳ标准：燃油含硫量≤50ppm。欧Ⅴ标准：燃油含硫量≤10ppm。我国燃油脱硫的道路任重而道远。
+二、脱硫方法简介
+通过对文献的阅读，我们了解到，目前的脱硫方法主要分为加氢与非加氢两大类。下面将对这两大类方法做一个简单的概括和介绍。
+催化加氢脱硫(HDS)是工业上燃油脱硫的主要手段，可将汽柴油中硫醇、硫醚等简单小分子有机硫脱除[5-6]。但是深度加氢降低烯烃和芳香烃的含量从而引起汽油辛烷值的下降，同时氢的耗量也增加，反应器的体积急剧增加，导致加氢工艺设备投资大，使得操作费用非常高[7]。
+由于传统的催化加氢法有许多不足，一些新型脱硫方法正在研究使用。如生物脱硫、吸附脱硫、氧化脱硫以及烷基化反应脱硫、离子液体萃取等[8-22]。各种新型脱硫方法，有些已经用于实际生产中，而有些方法还处于实验阶段。各种方法之间的结合也有利于提高脱硫的效果。下面着重介绍离子液体法在脱硫中的应用。
+三、离子液体法
+1、离子液体概述
+离子液体通常的定义为是一种完全有离子组成的液体（一般熔点小于100℃）离子液体(Ionic liquid)是室温离子液体的简称[23]。离子间的作用力主要是库仑力，大量的有机阳离子和不同阴离子的结合。离子液体的数目理论上大于1018，因此把离子液体称为“可设计的溶剂”，阳离子是一个大而非对称的有机阳离子：N,N-二烷基咪唑阳离子，四烷基铵，三烷基旒、膦、N-烷基吡啶，甲基吡啶等。阴离子：BF4-、PF6-, SbF6-、ZnCl3-, CuCl2-、SnCl3-, N(CF3SO2)2-、N(C2F5SO2)2 -、N(FSO2)2-,C(CF3SO2)3-,、CF3CO2-、CF3SO3-、MeSO3-、[CB11H12]-、[CB11H6C16]-、[CB11H6Br6]-和一些对水敏感的多核阴离子，如Al2Cl7-、Al3Cl10-、AuCl7-、Fe2Cl7-、Sb2F11-等[24]。
+离子液体的性质如下：
+熔点：阳离子中电荷越分散，分子对称性越低，生成的化合物熔点就越低。阴离子对离子液体的熔点有较大的影响。
+溶解性：离子液体能够溶解有机物、无机物和聚合物等不同物质，是许多化学反应的良好溶剂。改变阳离子的侧链烷基大小可以调整离子液体的溶解性。烷基咪唑离子液体与水溶解性的关系取决于阴离子，温度和咪唑阳离子烷基侧链的长度。
+热稳定性：离子液体有较高的热稳定性，是由于离子液体有较低的饱和蒸气压，胺膦盐形成的离子液体的热稳定性差，许多含三烷基铵正离子液体在真空80℃下会分解。
+密度：总体来讲，离子液体的密度比水大，阴离子的摩尔质量对离子液体的密度影响很大。
+酸碱度：离子液体的酸碱性实际上由阴离子的本质决定。
+黏度：离子液体的黏度比水大，和油的密度大小相似，而且随温度的升高而下降。离子液体的黏度主要是由于其中的范德华力和氢键共同作用而成。阳离子的结构也是影响离子液体的黏度。而对于1-烷基-3-甲基咪唑盐来说烷基链上的支链增长，总是使得黏度降低。
+2、离子液体法概述
+通过对有关文献的研究学习，目前的离子液体法属于一种比较新型的脱硫方法，应用前景十分广泛。许多研究者对此方法进行了实验研究，取得了一些成就。以下将列举一些研究的例子。
+张成中[25]等用不同金属氯化物与氯代甲基咪唑合成离子液体，采用快原子轰击谱测定了这些离子液体的结构，并评价了这些离子液体对汽油萃取脱硫的能力。实验结果表明，由CuCl合成的离子液体中存在稳定的CuC1-；，CuC13-和Cu3Cl4-阴离子。这些阴离子可能通过Cu(I)与S的π络合作用而使离子液体具有较高的萃取脱硫效率。经六次萃取后，汽油中的硫含量可以从650 μg/g 降至20～30 μg/g。且这种离子液体不会造成汽油中烯烃的聚合。另外，该离子液体常温下具有较好的稳定性和流动性，与汽油的分离容易，具有一定的应用前景。
+周瀚成[26]等考察了[XMIM]Y(1-烷基-3-甲基咪唑离子液体)应用于模拟汽油脱硫的情况。在试验的6种离子液体中，[DMIM]BF4 具有较好的萃取脱硫性能，在 m(剂)： m(油)= l：5、室温、反应30 min的条件下，单次萃取可将加入噻吩的模拟汽油硫质量分数由l 500μg／g降至472μg／g，萃取4次则可降至138 μg／g，但再进行第5次萃取，硫质量分数仅由138 μg／g降至137 μg／g。这说明这一类离子液体作为萃取溶剂用于萃取脱硫时，存在一定的萃取极限。
+张进[27]等人合成了5种新型离子液体[bmim]AlCl4，[bmin]DBP，[brnim]BeS，[bmim]PF6，[bmim]BF4，并将它们用于萃取模拟油中的苯并噻吩(BT)、二苯并噻吩(DBT)。研究人员比较了5种离子液体的萃取性能，结合分子间作用力的理论和价键理论阐述了离子液体萃取脱硫的机理。结果表明，离子液体的萃取性能与其阴离子结构有关，其中[bmim]DBP适宜作萃取脱硫溶剂。BT、DBT在模拟油品中的初始含量分别为1 000 μg／g左右时，用[bmim]DBP经4级错流萃取和5级逆流萃取，BT、DBT含量均能降至50μ g／g以下。
+项小燕[28]等分析了离子液体萃取脱硫机理以及离子液体的结构、硫化物类型、萃取温度、萃取时间、剂油比等因素对脱硫效果的影响，并对离子液体再生方式进行了比较。研究者找到了离子液体萃取脱硫技术今后发展的主要任务在于：研究开发价格低廉、适于大规模工业化使用的离子液体，增大硫化物的萃取选择性，提高离子液体的再生利用率，完善工业化应用所必需的各种基础数据，以及此法与其他脱硫方法的结合使用。离子液体萃取脱硫技术具有操作简易，工艺设备投资低，对环境无污染，再生容易，对油品影响小，可满足超低硫要求等优点。该技术若与目前HDS技术相结合，将节省HDS技术中过高的能耗， 同时解决TS类硫化物难以脱除的难题，是值得深入研究的脱硫方向。迄至目前，离子液体萃取脱硫尚处于实验研究阶段，要真正实现工业放大，尚需解决好以下关键问题：① 设计和合成对硫化物具有高选择性的含π离子供体的功能型离子液体；② 研究开发并合成生产价格低廉、适于大规模工业化使用的离子液体；③ 深入探讨离子液体的再生方法，提高离子液体的循环利用率；④ 开发离子液体萃取脱硫技术与其它脱硫技术相结合的组合工艺；⑤在实验窜研究的基础上，逐渐完善工业化应用的所必需的各种基础数据，加快实现离子液体工业上萃取脱硫的应用。
+四、结论
+通过对许多文献的研究学习，对脱硫的方法有了一定了解，特别是一种新型有效的方法----离子液体法。通过研究离子液体在不同脱硫场合的脱硫效果，可以帮助我们更好的完成我们的研究。一种新型方法的推广应用需要我们不断地去探索，去发现改进的方法，使这种方法能被应用到实际中去，并且有很好的效果。
+ 
+
+参考文献：
+[1]  Zhang Guang—lin(张广林)．Petroleum Re．f．Eng[J]．炼油设计，1999，29(8)：3-2
+[2]  张进，朴香兰，朱慎林. 新型离子液体对苯并噻吩、二苯并噻吩的萃取性能研究[J]. 石油炼制与化工，2008,39(2):38-41
+[3]  Raheel Shafi, Graham J. Hutchings. Hydrodesulfurization of hindered dibenzothiophenes: an overview[J]. Catal. Today, 2000, 59(3-4): 423-442
+[4]  Girgis M J, Gates B C. Reactivities, reaction networks, and kinetics in high-pressure catalytic hydroprocessing [J]. Ind. Eng. Chem. Res., 1991, 30(9): 2021-2058
+[5]  王建龙等. 吡啶类离子液体在汽油萃取脱硫中的应用研究[J].燃料化学学报，2007,35(3):293-296
+[6]  KWAK C,LEE J J,BAE J S,CHOI K,MOON S H．Hydrodesulfurization of DBT,4-MDBT,and 4,6-DMDBT of fluorinated CoMoS／Al2O3 catalysts[J]．Appl Catal A,2000,200(1-2)：233-242
+[7]  MA X,SAKANISHI K,MOCHIDA L .Hydrodesulfurization reactivities of various sulfur compounds in diesel fuel[J]．Ind Eng Chem Res,1994,34(2)：218-222
+[8]  OTUSKI S,NONAKA T,TAKASHIMA N．Oxidative desulfurization of fight gas oil and vacuum gas oil by oxidation and solvent extraction[J]．Energy Fuels,2000,14(6)：1232—1239
+[9]  YANG R T,HERNANEDZ—MALDONADO A J,YANG F H．Desulfurization of transportation fuels with zeolites under ambient conditions[J]．Science,2003,301(5629)：79-81
+[10]  周瀚成，陈楠，石峰，邓友全．离子液体萃取脱硫新工艺研究[J]．分子催化，2005，19(2)：94-97
+[11]  刘淑芝, 孙兰兰, 张晓丽, 王宝辉, 崔宝臣. 柴油氧化脱硫技术研究进展 [J]. 化工进展, 2007, 26(2): 212-220
+[12]  Alexander V. Anisimov, Elena V. Fedorova, Andrey Z. Lesnugin, Vladimir M. Senyavin, Leonid A. Aslanov, Viktor B. Rybakov, Alla V. Tarakanova. Vanadium peroxocomplexes as oxidation catalysts of sulfur organic compounds by hydrogen peroxide in biphase systems [J]. Catal. Today, 2003, 78(1-4): 319-325
+[13] 赵地顺, 马四国, 刘翠微, 任红威. 相转移催化应用于催化裂化汽油氧化脱硫的研究[J]. 高等学校化学学报, 2006, 27(1): 144-146
+[14]  Tam P S, Kittrell J R, Eldridge J W. Desulfurization of Fuel Oil by Oxidation and Extraction. 1. Enhancement of Extraction Oil Yield [J]. Ind. Eng. Chem. Res., 1990, 29(3): 321-324
+[15]  Al-Shahrani F, Xiao T C, Llewellyn S A, Barri S, Jiang Z, Shi H H, Martinie G, Green M L H. Desulfurization of Diesel via the H2O2 Oxidation of Aromatic Sulfides to Sulfones Using a Tungstate Catalyst [J]. Appl. Catal. B: Environ., 2007, 73(3-4): 311-316
+[16]  Nie Y, Li C X, Sun A J, Meng H, Wang Z H. Extractive Desulfurization of Gasoline Using Imidazolium-Based Phosphoric Ionic Liquids [J]. Energy & Fuels, 2006, 20(5): 2083-2087
+[17]  Kim J H, Ma X L, Zhou A N, Song C S. Ultra-Deep Desulfurization and Denitrogenation of Diesel Fuel by Selective Adsorption over Three Different Adsorbents: A Study on Adsorptive Selectivity and Mechanism [J]. Catal. Today, 2006, 111(1-2): 74-83 
+[18] 崔盈贤, 唐晓东. 复合萃取剂选择性萃取脱硫研究 [J]. 石油与天然气化工, 2005, 34(5): 387-388
+[19] 王志国，刘成翠，周爱国，柯 明，宋昭峥，蒋庆哲.离子液体在车用燃料油脱硫中的应用[J]. 化工科技,2007,15(3):5l-55
+[20]  Otsuki S, Nonaka T, Takashima N, Qian W, Ishihara A, Imai T, Kabe T. Oxidative Desulfurization of Light Gas Oil and Vacuum Gas Oil by Oxidation and Solvent Extraction [J]. Energy & Fuels, 2000, 14(6): 1232-1239
+[21] 张艳维, 沈健, 袁兴东, 亓玉台. Ti3(PW12O40)4催化氧化吸附脱硫的研究 [J]. 石油炼制与化工, 2005, 36(3): 20-23
+[22]  Li C, Jiang Z X, Gao J B, Yang Y X, Wang S J, Tian F P, Sun F X, Sun X P, Ying P L, Han C R. Ultra-Deep Desulfurization of Diesel: Oxidation with a Recoverable Catalyst Assembled in Emulsion [J]. Chem. Eur. J., 2004, 10(9): 2277-2280
+[23]  蒋伟燕，余文轴. 离子液体的分类、合成及应用. 金属材料与冶金工程，2008,36(4）：51-54
+[24]  Lu L, Cheng H F, Gao J B, Gao G H, He M Y. Deep oxidative desulfurization of fuels catalyzed by ionic liquid in the presence of H2O2[J]. Energy & Fuels, 2007, 21(1): 383-384
+[25]  张成中等. 离子液体的结构及其汽油萃取脱硫性能[J].化学研究,2005,16(1):23-25
+[26]  周瀚成，陈楠，石峰等．离子液体萃取脱硫新工艺研究[J]．分子催化,2005,19(2)：94- 97
+[27]  张进，朴香兰，朱慎林. 新型离子液体对苯并噻吩、二苯并噻吩的萃取性能研究[J].石油炼制与化工.2008,39(2):38-41
+[28] 项小燕，林金清. 离子液体萃取燃料油脱硫技术的研究进展[J].化工进展,2007,26(12):1681-1685
+

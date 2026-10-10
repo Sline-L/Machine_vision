@@ -1,0 +1,617 @@
+ReView by River Valley This
+                       Technologies                                                             CAAI Transactions
+                            article has been accepted for publication in a future issue of this journal, but has not beenon  Intelligence
+                                                                                                                          fully edited.   Technology
+    Content may change prior to final publication in an issue of the journal. To cite the paper please use the doi provided on the Digital Library page.
+
+
+
+
+              IET Research Journals
+
+
+
+
+              TDD-Net: A Tiny Defect Detection Network                                                                          ISSN 1751-8644
+                                                                                                                                doi: 0000000000
+
+              for Printed Circuit Boards
+                                                                                                                                www.ietdl.org
+
+
+
+              Runwei Ding1 , Linhui Dai1∗ , Guangpeng Li2 , Hong Liu1
+              1
+               Key Laboratory of Machine Perception, Peking University, Shenzhen Graduate School, China
+              2
+               Shenzhen Skyworth-RGB Electronic, CO., LTD., China
+              * E-mail: dailinhui@pku.edu.cn
+
+              Abstract: Tiny defect detection which aims to perform the quality control of PCBs is a basic and essential task in the production of
+              most electronic products. Though significant progress has been made in PCB defect detection, traditional methods are still difficult
+              to cope with the complex and diverse PCBs. To deal with these problems, this paper proposes a Tiny Defect Detection Network
+              (TDD-Net) to improve performance for PCB defect detection. In this method, the inherent multi scale and pyramidal hierarchies of
+              deep convolutional networks are exploited to construct feature pyramids. Compared with existing approaches, the TDD-Net has
+              three novel changes. Firstly, reasonable anchors are designed by using k-means clustering. Secondly, TDD-Net strengthens the
+              relationship of feature maps from different levels and benefits from low-level structural information, which is suitable for tiny defect
+              detection. Finally, considering the small and imbalance dataset, online hard example mining is adopted in the whole training phase
+              in order to improve the quality of Region-of-Interest proposals and make more effective use of data information. Quantitative results
+              on the PCB defect dataset show that the proposed method has better portability and can achieve 98.90% mAP, which outperforms
+              the state-of-arts. The code will be publicly available.
+              Keywords: DEFECT DETECTION, MULTI-SCALE FEATURE FUSION, ONLINE HARD EXAMPLE MINING.
+
+
+
+
+              1     Introduction
+
+              The Printed Circuit Board (PCB) is essentially a board that mechan-
+              ically supports and electrically connects electronic components. It is
+              the basic building block of any electronic design and has developed
+              into a very sophisticated component over the years. PCBs are widely
+              used in all but the simplest electronic products. In 2018, the Global
+                                                                                                     (a) missing hole                   (b) mouse bite
+              Single Sided Printed Circuit Board Market Analysis Report esti-
+              mated that the PCB market would reach $79 billion by 2024. Visual
+              defect inspection which ensures PCB product quality is generally the
+              largest cost of PCB manufacturing [1]. In recent years, automatic
+              optical inspection (AOI) system has replaced most of human inspec-
+              tions, which improves the inspection precision and reduces the cost
+              consistency [2]. Although AOI system is more convenient and effi-
+              cient than human inspection, the false detection rate and the missing
+                                                                                                      (c) open circuit                     (d) short
+              detection rate are still too high [3].
+                  Three major challenges exist in PCB defect detection. First, there
+              are a broad range of different PCBs in the real market, different PCBs
+              have different complex wring design rules. As making general algo-
+              rithms compatible with various PCBs is difficult, instability in the
+              traditional PCB defect detection methods may occur. Second, the
+              categories and characteristics of PCB defects are generally varied.
+              Third, collecting large number of PCB defect samples is extremely
+                                                                                                         (e) spur                    (f) spurious cropper
+              difficult in industry, resulting in a data imbalance for some traditional
+              methods.
+                  PCB defects can be divided into two categories: functional defects       Fig. 1: Some defects examples. From (a) to (f), the defects are
+              and cosmetic defects [4]. Functional defects can seriously affect            classified as missing hole, mouse bite, open circuit, short, spur and
+              the performance of PCB, which may lead to the abnormal usage                 spurious copper,respectively (best viewed in color).
+              of PCBs. These defects are the most serious defects. Cosmetic
+              defects mainly affect the appearance of PCB, but also damage its
+              performance in the long run due to abnormal heat dissipation and
+              distribution of current [1]. Among the two categories, there are 6
+                                                                                              In recent years, various image processing algorithms are widely
+              kinds of defects which frequently appear in the actual industrial
+                                                                                           investigated for PCB defect detection, such as binary morpholog-
+              scene. In this paper, we mainly study these 6 known and common
+                                                                                           ical image processing [5], similarity measure approach [6] and
+              defects which contain missing hole, mouse bite, open circuit, short,
+                                                                                           segmentation-based method [7]. However, these methods require the
+              spur, and spurious copper. Some defects examples are shown in Fig.
+                                                                                           inspected images to be aligned with the standard sample in defect
+              1. In this figure, defect areas are indicated by thicker and red outlines.
+                                                                                           inspection, suffering from low contrast, uneven brightness or irregu-
+              Best viewed in color.
+                                                                                           lar shape. Therefore, it is necessary to build a novel defect detection
+                                                                                           framework that has strong adaption for diverse defects.
+
+
+              IET Research Journals, pp. 1–7
+               c The Institution of Engineering and Technology 2015                                                                                             1
+
+
+
+2019/04/11 11:33:46                                                         IET Review Copy Only                                                                     2
+ReView by River Valley This
+                       Technologies                                                             CAAI Transactions
+                            article has been accepted for publication in a future issue of this journal, but has not beenon  Intelligence
+                                                                                                                          fully edited.   Technology
+    Content may change prior to final publication in an issue of the journal. To cite the paper please use the doi provided on the Digital Library page.
+
+
+
+
+                 Since 2014, algorithms based on deep learning have been made          2.1    Referential methods
+              significant improvements in object detection, such as Faster R-CNN
+              [8], Single Shot MultiBox Detector [9], and You Only Look Once           The referential methods use a real pixel to pixel (or feature to fea-
+              [10]. Deep learning methods have shown a good performance in             ture) comparison between a standard PCB image and inspected PCB
+              automatically extracting features and realizing end-to-end control.      image. These methods can detect obvious defects like short, open
+              However, deep learning algorithms are limited in the field of PCB        circuit, and missing track.
+              defect detection due to the local feature property of CNN, while             Image subtraction is the simplest and most direct referential
+              the defect regions usually occupy a tiny portion of a defective PCB      approach by XOR logic operator. The subtraction operation runs
+              image. Therefore, almost no feasible network has been proposed           fast because it has only two types of pixel values to compare. The
+              for PCB defect detection until now. Among region based detec-            advantage of this approach is that it is simple to implement in dedi-
+              tors, Faster R-CNN [8] has shown significant competitiveness in          cated hardware and it allows verification of the overall defects in the
+              object detection due to its detection accuracy on public benchmarks      geometry of PCB [15].
+              (COCO [11], PASCAL VOC2007 [12]). Faster R-CNN improves the                  The main difficulty of XOR operation is to determine a pre-
+              region proposal quality and object detection accuracy by combining       cise alignment of the reference image and the inspected image.
+              the region proposal network with Fast R-CNN [13]. However, for           Consequently, feature matching as an improved classical referential
+              tiny objects, the Region-of-Interest (ROI) pooling layer which per-      approach has been proposed, feature matching extracts more robust
+              forms on a low-resolution feature map can result in “plain” features     features from whole images and establishes the registration mapping
+              while the size of small objects can even be smaller than stride. So      relationship. Generally, the extracted features include points, edges,
+              it will introduce some challenges while naively employing Faster         outlines, and centroid of a particular area, such as HOG, SIFT and
+              R-CNN for PCB defect detection. We review the issues why Faster          SURF. The SIFT features are robust to scale, rotation, affine and illu-
+              R-CNN is not suitable for small object detection, and redesign the       mination change. The SIFT feature matching is currently the most
+              architecture to specifically address them in order to adapt for tiny     effective algorithm in the feature detection and matching algorithms.
+              defect detection. We focus on two challenges:                                Another significant referential method is similarity measure.
+                 (1) How to design reasonable anchors? The PCB defect images           Gaidhane et al [6] proposed a symmetric matrix which calculated
+              are different from common images in open-source datasets. The            using the companion matrices of two compared image. The rank of a
+              defects only occupy a tiny proportion of a PCB image. However,           symmetric matrix is then used as similarity measure metric for defect
+              the general detection methods of R-CNN series often have prede-          detection. The numerical value of rank is zero for the defectless and
+              fined anchor scales which are suitable for large object detection,       distinctly large for defective images. The advantage of this approach
+              such as pedestrian detection and vehicle detection. Thus, a naturally    is that the measurement of similarity is taken without computing fea-
+              challenge is to design reasonable anchors for tiny defects.              tures such as eigenvalues and eigenvectors. However, it still suffers
+                 (2) How to fuse multi-scale feature maps by redesigning the           from environment noise.
+              architecture of Faster R-CNN? Finding a tiny defect is fundamen-             In the referential methods, there are several critical practical prob-
+              tally challenging because the features of tiny defects will gradually    lems: misalignment, color variation, reflectivity variation, surround-
+              disappear in the feed-forward computation of the backbone Con-           ing variations and fuzzy boundary defect segmentation. Moreover,
+              vNets. Hence we need to rethink the architecture of Faster R-CNN         to obtain such a totally standard PCB image from actual production
+              [8] and Feature Pyramid Network [14] based on the considerations         environment is relatively unrealistic.
+              of tiny scale and irregular shape of PCB defects.
+                 Given the aforementioned concerns, we propose a novel tiny
+              defect detection network to tackle the PCB defect detection problem.     2.2    Non-referential methods
+              Firstly, considering the small PCB defect dataset, data augmenta-
+              tion methods are naturally adopted to provide more training data.        Non-referential methods are based on the verification of the general
+              Adequate training data can effectively avoid overfitting. Secondly,      design rules. Nowadays, feature learning by using deep neural net-
+              we propose a novel tiny defect detection network (TDD-Net) which         works has been applied to defects recognition and classification. And
+              strengthens the relationship of feature maps from different levels and   some superior object detection approaches, such as R-CNN series
+              benefits from low-level structural information. Finally, to address      (R-CNN [16], Fast R-CNN [13], Faster R-CNN [8]), DarkNet [17],
+              the significant actual factory problem, some tricks are explored to      SSD [9], and R-FCN [18] show obvious improvements in defect
+              enhance the detection performance. More details are presented in         detection.
+              Section 4.                                                                  F. Shahrzad et al [19] presented a deep learning approach for
+                 Contributions: With aforementioned methods we proposed, the           automatic detection of rail surface defects. This paper contains three
+              main contributions of this paper can be conducted as:                    DCNN (for small, medium and large) structures based on the classi-
+                 (1) This paper presents a novel tiny defect detection network         cal neural network. Soukup. D et al [20] trained CNNs on a database
+              (TDD-Net), which can learn better features for tiny defect detec-        of a photo-metric stereo images of metal surface defects. The classi-
+              tion and address some issues of traditional methods. The code will       cal CNN already distinctly outperforms the model-based approach.
+              be publicly available.                                                   However, these traditional CNN methods often use a sliding win-
+                 (2) This paper first attempts to apply deep learning algorithms       dow to localize the defects, which are difficult to determine the size
+              combined with feature pyramid ConvNets to tackle the PCB defect          of window if the input images have different sizes and scales. Y.
+              detection problem.                                                       Cha et al [21] developed a structural damage detection method based
+                 (3) Extensive experiments are carried out on PCB defect dataset       on Faster R-CNN to detect five types of surface damages: concrete
+              to demonstrate the effectiveness of our proposed network. TDD-Net        cracks, steel corrosion (medium and high levels), bolt corrosion, and
+              achieves state-of-the-arts performance on the task of PCB defect         steel delamination. Nevertheless, there is almost no defect detection
+              detection. Moreover, TDD-Net is easy to be extended to other fields      network which has been proposed for PCB defects until now.
+              of defect detection, such as fabric defect detection and aluminum
+              defect detection.
+                                                                                       2.3    Hybrid methods
+
+                                                                                       The hybrid defect detection techniques combine both referential and
+              2     Related Work                                                       non-referential approaches. Z. Qu et al [22] proposed a new idea
+                                                                                       to construct a deep convolutional network called PartsNet comb-
+              In the last decades, different defect detection methods have been        ing traditional feature processing and deep learning for automotive
+              proposed in the field of PCB defect detection. Moganti [15] firstly      engine precision parts defect detection. And they also constructed a
+              proposed three categories of PCB inspection algorithms: referential      refining network consisting of several typical traditional methods to
+              approaches, non-referential approaches, and hybrid approaches.           improve adaption ability and achieve an end-to-end learning. Thus,
+
+
+                                                                                                                              IET Research Journals, pp. 1–7
+              2                                                                                        c The Institution of Engineering and Technology 2015
+
+
+
+2019/04/11 11:33:46                                                      IET Review Copy Only                                                                       3
+ReView by River Valley This
+                       Technologies                                                             CAAI Transactions
+                            article has been accepted for publication in a future issue of this journal, but has not beenon  Intelligence
+                                                                                                                          fully edited.   Technology
+    Content may change prior to final publication in an issue of the journal. To cite the paper please use the doi provided on the Digital Library page.
+
+
+
+
+                                                                                                 Using the pooled feature, a full connected layer then computes
+                                                                                               object class probability and simultaneously regresses the detection
+                                                                                               boundaries for each object class.
+
+
+                                                                                               4     Tiny Defect Detection Network
+                                                                                               The proposed Tiny Defect Detection Network (TDD-Net) follows
+                                                                                               the Faster R-CNN detection paradigm for PCB defect detection but
+                                                                                               has three novel changes as shown in Fig. 3. First of all, the CNN
+                                                                                               model of Faster R-CNN is trained on the PCB defect dataset. Dur-
+                  Fig. 2: The Faster R-CNN architecture for object detection.                  ing the fine-tuning process, we apply data augmentation techniques
+                                                                                               and design reasonable anchors. To enhance the detect performance
+                                                                                               of tiny defects, multi-scale feature fusion strategy is adopted. And
+              PartsNet exploited the strengths of typical feature processing meth-             online hard example mining is applied in the training phase for
+              ods such as density slicing, region segmentation and area filtration to          improving the quality of RoI proposal. The whole training process
+              overcome the weakness of deep convolutional networks in detecting                follows the end-to-end training paradigm as Faster R-CNN.
+              small defect regions.
+                                                                                               4.1    Reasonable anchors design and data augmentation
+              3     Overview of Faster R-CNN                                                   The PCB defect images are different from common images in open-
+                                                                                               source datasets (COCO [11], PASCAL VOC2007 [12]). The PCB
+              In this section, we briefly review the Faster R-CNN detection archi-             images which collected by industrial camera often have large resolu-
+              tecture and naturally redesign some experiment details for PCB                   tion (e.g. 2, 777 × 2, 138), while defects in an image only occupy a
+              defect detection. Faster R-CNN is first proposed to address object               tiny proportion of whole image area. At training time, Faster R-CNN
+              detection [8], where given an input image, the network can simulta-              uses 3 scales {1282 , 2562 , 5122 } and 3 aspect ratios {1:1, 2:1, 1:2},
+              neously output object bound and class label score at each position.              yielding 9 anchors at each sliding position, which are not appropriate
+              The full pipeline contains two stages: proposal generation and                   for detecting tiny defects. With the respect of tiny defects, we must
+              classification. Fig. 2 illustrates the full pipeline.                            design reasonable anchor.
+                 Generating region proposals is the core task of region proposals,                Inspired by YOLO 9000 [24], instead of casually choosing anchor
+              and Faster R-CNN uses k reference boxes (anchors) to k proposals.                scale, k-means clustering is used on the PCB training set bounding
+              The anchors have 3 scales and 3 aspect ratios, yielding 9 anchors at             boxes to automatically find reasonable anchor scales. The standard
+              each sliding position.                                                           k-means with distance metric is used as follows [24]:
+                 For training RPNs, Fig. 2 shows that RPN is a multi-task that
+              needs to predict object/non-object in proposal and regression bound-                        d(box, centroid) = 1 − IoU (box, centroid).                (7)
+              ing boxes. The loss function for an image is defined as [8]:
+                                                                                                   Then the scales with box areas are {152 , 252 , 402 , 602 , 802 } pix-
+                                     1 X                       1 X ∗                           els, and 4 aspect ratios of {2., 3., 4., 5.}. On the other hand, the
+               L({pi }, {ti }) =              (pi , p∗i ) + λ           pi Lreg (ti , t∗i ),
+                                   Ncls                       Nreg                             success of recent deep learning algorithms greatly relies on large-
+                                           i                         i
+                                                                                         (1)   scale labeled training data. Conversely, without enough training
+              where i is the index of an anchor in a mini-batch and pi is the pre-             samples, CNNs with numerous parameters have a risk of over-
+              dicted probability of anchor i being an object. The ground-truth label           fitting. Large-scale PCB defect dataset is also a limiting requirement
+              p∗i is 1 if the anchor is positive, and p∗i is 0 if the anchor is negative.      due to confidential circuit design and expensive acquisition. Con-
+              ti is a vector representing the 4 parameterized coordinates of the pre-          sequently, data augmentation techniques have been proposed to
+              dicted bounding box, and t∗i is a ground-truth box associated with a             prevent over-fitting while enriching dataset.
+              positive anchor. For the regression loss, Smooth L1 is used as robust                In this work, 6 traditional data augmentation techniques are nat-
+              loss function [14]:                                                              urally adopted which including add Gaussian noise, change light,
+                                                                                               rotate image, flipping, random crop, and shift. The simple opera-
+                                               (                                               tions like adding Gaussian noise or changing light do not required
+                                                   0.5x2 ,    |x| ≤ 1                          change value of bounding boxes. Nevertheless, while rotating, crop-
+                          SmoothL1 (x) =                                .               (2)
+                                                   |x| − 0.5, otherwise                        ping and shifting image, the corresponding value of bounding boxes
+                                                                                               has changed.
+                 For regression, as Faster R-CNN [9], the parameterizations of the                 The key issues of data augmentation are defects truncated in the
+              4 coordinates are adopted as following:                                          stage of random crop (as shown in Fig. 4). Therefore, we need to
+                                                                                               setup a threshold value and discard these abnormal bounding boxes.
+                                      (x − xa )                  (y − ya )
+                                   tx =         ,          ty =            ,            (3)    4.2    Multi-scale feature fusion
+                                         wa                         ha
+                              tw = log(w/wa ),            th = log(h/ha ),              (4)    A deep convolutional network computes a feature hierarchy layer
+                                       (x∗ − xa )                 (y ∗ − ya )                  by layer, and through sub-sampling layer, the feature hierarchy has
+                               t∗x =              ,       t∗y =               ,         (5)    an inherent multi-scale, pyramidal shape. This in-network feature
+                                          wa                          ha
+                                                                                               hierarchy produces feature maps of different spatial resolutions, but
+                           t∗w = log(w∗ /wa ),          th = log(w∗ /ha ),              (6)    introduces large semantic gaps caused by different depths. High res-
+                                                                                               olution feature maps are semantically weak and structurally strong,
+              where x, y, w, and h denote the two coordinates of the box center,               while low-resolution feature maps are semantically strong. The tiny
+              width, and height, respectively. Variables x, xa , and x∗ denote the             defect detection can be classified as low-level vision tasks, thus we
+              predicted box, anchor box, and ground-truth, respectively (likewise              focus on multi-scale feature fusion.
+              for y,w,h).                                                                         The features of small objects will gradually disappear in the
+                  Our goal is to minimize L({pi }, {ti }) through back-propagation             feed-forward computation of the backbone ConvNets, which is
+              and stochastic gradient descent (SGD) [23]. For each generated                   quite unfavourable for detecting small objects. Therefore, the high-
+              region proposal, features within the region proposal are pooled to               resolution feature maps of feature hierarchy are important for detect-
+              a fixed feature map in RoI Pooling layer [13].                                   ing small objects. TDD-Net adopts feature pyramid architecture [14]
+
+
+              IET Research Journals, pp. 1–7
+               c The Institution of Engineering and Technology 2015                                                                                                    3
+
+
+
+2019/04/11 11:33:46                                                               IET Review Copy Only                                                                      4
+ReView by River Valley This
+                       Technologies                                                             CAAI Transactions
+                            article has been accepted for publication in a future issue of this journal, but has not beenon  Intelligence
+                                                                                                                          fully edited.   Technology
+    Content may change prior to final publication in an issue of the journal. To cite the paper please use the doi provided on the Digital Library page.
+
+
+
+
+              Fig. 3: The proposed tiny defect detection network architecture which makes use of feature maps on multiple scales. In addition to the
+              bottom-up feature extraction, TDD-Net adds a top-down path which summarizes multi-scale feature representations into a single feature map.
+
+
+
+
+                       (a) original defect              (b) truncated defect
+                                                                                              (a) feature pyramid        (b) multi-scale feature fusion pyra-
+              Fig. 4: (a) it is an original missing hole defect in the image; (b)                                        mid
+              random crop may lead to truncated defect which has negative impact
+              on feature learning.                                                     Fig. 5: (a) extracting feature maps from last level of ResNet-101;
+                                                                                       (b) TDD-Net adopts feature pyramid network to form a multi-scale
+                                                                                       feature fusion pyramid (best viewed in color).
+
+              which fuses low-resolution features, semantically strong features           In the stage of assigning RoIs of different scales to the pyramid
+              with high-resolution, structurally strong features via a top-down        levels, the level {Pk } of feature pyramid is calculate by [14]:
+              pathway and lateral connections.
+                 First of all, ResNet-101 is used [25] as our backbone Con-                                              √
+              vNet to extract features. The ResNet-101 models are pre-                                     k = |k0 + log2 wh/224|,                          (8)
+              trained on the ImageNet classification set and fine-tuned on
+              the PCB defect dataset. The ResNets have 5 residual blocks               where 224 is the canonical ImageNet pre-training size, and k0 is the
+              {conv2_x, conv3_x, conv4_x, conv5_x}, and the output of the              target level on which a RoI with w × h = 2242 . w is the width of
+              last residual block is selected as our reference set of feature          RoI and h is the height of RoI.
+              maps. And the outputs of these last residual blocks are denoted as          For a better understanding, feature fusion results on different
+              {C2 , C3 , C4 , C5 } for conv2, conv3, conv4, conv5 outputs, and note    convolutional layers are visualized in Fig. 5.
+              that they have strides of {4, 8, 16, 32} pixels with respect to input
+              image.                                                                   4.3   Online hard example mining
+                 Secondly, the high-resolution feature maps have strong structural
+              information which help for detecting small objects. Our top-down         We first attempt to apply online hard example mining strategy to
+              feature map is constructed by up-sampling the spatial resolution         the task of PCB defect inspection. Inspired by [26], the readonly
+              by a factor of 2, for simplicity, nearest neighbor up-sampling has       RoI network runs a forward pass on the feature map and all RoIs.
+              been selected. Inspired by [14], we propose to concatenate the fea-      Then the hard RoI module uses these RoI losses to select examples.
+              ture maps both low-level and high-level. Thus, the corresponding         Online Hard Example Mining (called OHEM) can be used for train-
+              bottom-up feature map undergoes a 1 × 1 convolutional layer in           ing any region-based ConvNets, and it automatically selects hard
+              order to reduce channel dimensions. Then the up-sampled map is           examples rather than uses several heuristics and hyper-parameters,
+              concatenate with the corresponding bottom-up map by element-wise         thus improving detecting efficiency.
+              addition. For example, the last output feature map {C5 } of the last
+              layer undergoes a 1 × 1 convolutional layer to produce the coarsest      4.4   Loss and training
+              resolution map, then the coarsest feature map is up-sampled by a
+              factor of 2, and finally the up-sampled feature map is merged with       The total loss is a weighted sum of 4 different losses: rpn_loss_bbox,
+              low-level feature map. Last but not least, a 3 × 3 convolutional layer   rpn_loss_cls, fast_rcnn_loss_bbox, and fast_rcnn_loss_cls. A Fast
+              is appended on each merged map to generate the final feature map.        R-CNN network has two sibling output layers (cls score and bound-
+              And the final sets of feature map are denoted as {P2 , P3 , P4 , P5 },   ing box score). The first outputs a discrete probability distribution
+              corresponding to {C2 , C3 , C4 , C5 }, which are of the same spatial     (per RoI), p = {p0 , ..., pk }, over k + 1 categories. As usual, k is
+              sizes, respectively.                                                     computed by a softmax over the k + 1 outputs of a fully connected
+
+
+                                                                                                                             IET Research Journals, pp. 1–7
+              4                                                                                       c The Institution of Engineering and Technology 2015
+
+
+
+2019/04/11 11:33:46                                                       IET Review Copy Only                                                                    5
+ReView by River Valley This
+                       Technologies                                                             CAAI Transactions
+                            article has been accepted for publication in a future issue of this journal, but has not beenon  Intelligence
+                                                                                                                          fully edited.   Technology
+    Content may change prior to final publication in an issue of the journal. To cite the paper please use the doi provided on the Digital Library page.
+
+
+
+
+              layer. The second sibling layer outputs bounding-box regression off-
+              sets, tk = (tkx , tky , tkw , tkh ), for each of the k object classes, indexed
+              by k. The classification loss Lcls is log loss over two classes (object
+              vs. not object), Lcls can be computed by:
+
+                        Lcls (pi , p∗i ) = −log(p∗i pi + (1 − p∗i )(1 − pi )),          (9)
+
+              where pi is the predicted probability of anchor i being an object.               Fig. 6: Three scenarios about the results of ground truth and
+              And p∗i is the ground-truth label.                                               detection.
+
+                                          (
+                                           0, negative label
+                                  p∗i =                      .                         (10)
+                                           1, positive label
+
+                  The regression loss Lreg is computed by:
+
+                                     Lreg (ti , t∗i ) = R(ti − t∗i ),                  (11)
+
+              where R represents Smooth L1 function, the definitions of ti , t∗i
+              have been introduced in Section 3.
+
+
+              5      Experiments and Discussions
+
+              The experiments are conducted on a computer with 4 NVIDIA
+              GeForce GTX 1080 GPU. The calculation software environment is                    Fig. 7: The comparisons between TDD-Net and state-of-the-arts on
+              set with python 2.7.12, CUDA 8.0.44 and cuDNN 5.1.10.                            the PCB defect dataset.
+
+              5.1    Dataset
+                                                                                               5.2   Evaluation metrics
+              Extensive experiments are carried out on the PCB defect dataset.
+              ∗                                                                                Two tasks are considered: defects region localization and defects
+                . The dataset contains 693 PCB defective images and correspond-
+                                                                                               classification. For defects region localization, Intersection-over-
+              ing annotation files. For this dataset, the average pixel size of each
+                                                                                               Union (IoU) is calculated, and by default an IoU threshold of 0.5
+              image is 2, 777 × 2, 138. The PCB defects include 6 classes (miss-
+                                                                                               is used for determining true positives on the PCB defect dataset.
+              ing hole, mouse bite, open circuit, short, spur, and spurious copper).
+              One image contains several defects. The more details of dataset are
+                                                                                                                               GT ∩ DR
+              shown in Table 1.                                                                                        IoU =           ,                       (12)
+                                                                                                                               GT ∪ DR
+
+              Table 1 The original PCB defect dataset.                                         where GT means ground truth, DR means detection results. And
+                    Type of defects     Number of images          Number of defects            for better understand, there are three scenarios about the results of
+                     missing hole            115                       497                     ground truth and detection in Fig. 6.
+                      mouse bite             115                       492                        For defects classification, mean Average Precision (mAP) is cal-
+                      open circuit           116                       482                     culated as evaluation metric. In general, mAP using an IoU threshold
+                         short               116                       491                     of 0.5 is reported as evaluation metric.
+                          spur               115                       488
+                    spurious copper          116                       503                     5.3   Experimental details and results
+                          total              693                      2953
+                                                                                               Our implementation is based on the TensorFlow Object Detection
+                                                                                               API. The input image is cropped such that its shorter side has 600
+                 With the respect of such small dataset, data augmentation tech-               pixels. We perform experiments using a pre-trained ResNet-101
+              niques are adopted before data training. The images are then cropped             model from [25]. Synchronized SGD is used to train the model on
+              into 600 × 600 sub-images, forming our training set and testing                  1 GPU. Each mini-batch involves 2 images per GPU and 512 RoIs
+              set with 9920 and 2508 images, respectively. The more details of
+              augmented PCB defect dataset are shown in Table 2.
+
+              Table 2 The augmented PCB defect dataset.
+                    Type of defects     Number of images          Number of defects
+                     missing hole           1832                      3612
+                      mouse bite            1852                      3684
+                      open circuit          1740                      3548
+                         short              1732                      3508
+                          spur               1752                     3636
+                    spurious copper          1760                      3676
+                          total             10668                     21664
+
+
+
+                                                                                               Fig. 8: The precision and recall curve results based on proposed
+              ∗ http://robotics.pkusz.edu.cn/resources/dataset/                                network.
+
+
+
+              IET Research Journals, pp. 1–7
+               c The Institution of Engineering and Technology 2015                                                                                               5
+
+
+
+2019/04/11 11:33:46                                                             IET Review Copy Only                                                                   6
+ReView by River Valley This
+                       Technologies                                                             CAAI Transactions
+                            article has been accepted for publication in a future issue of this journal, but has not beenon  Intelligence
+                                                                                                                          fully edited.   Technology
+    Content may change prior to final publication in an issue of the journal. To cite the paper please use the doi provided on the Digital Library page.
+
+
+
+
+              Table 3 The comparison of TDD-Net(proposed) with all recent state-of-the-arts methods on the PCB defect dataset.
+                                                      Model                  Backbone       Anchors        Feature       Head    mAP@0.5
+                                                Faster R-CNN [8]             VGG-16           2k        the last layer    2fc     58.57%
+                                                Faster R-CNN [8]            ResNet-101        2k             C5           2fc     94.27%
+                                                    FPN [14]                ResNet-101        2k            {Pk }         2fc     92.23%
+                                            Faster R-CNN(fine-tuned)        ResNet-101        2k             C5           2fc     96.44%
+                                                TDD-Net(Ours)               ResNet-101        2k            {Pk }         2fc     98.90%
+
+
+
+
+                                             Fig. 9: Defect detection results using the proposed TDD-Net (best viewed in color).
+
+
+              per image. A weight decay 0.0001 and a momentum of 0.9 are used.                  Table 4 Ablation study on TDD-Net (ours).
+              The learning rate is 0.001 for 30k mini-batches. The whole training                            Metric              Test set   mAP@0.5       Up
+              takes about 7 hours on the PCB defect dataset.                                                Original              2134       94.27%      0%
+                 Some defects region proposals highly overlap with each other. To                      +Reasonable anchors        2134       96.44%    2.17% ↑
+              reduce redundancy, non-maximum suppression (NMS) is adopted on                           +Multi-scale feature       2134       98.02%    1.58% ↑
+              the proposal regions based on their classification scores. The IoU                            +OHEM                 2134       98.90%    0.88% ↑
+              threshold for NMS is fixed at 0.7, which leaves about 2000 proposal
+              regions per image.
+                 Comparisons with state-of-the-arts: We compare TDD-Net
+                                                                                                   The ablation experiments results are reported in Table 4. From
+              with state-of-the-arts methods on the PCB defect dataset. The results
+                                                                                                the table, we can see that the original algorithm (Faster R-CNN with
+              are summarized in Table 3 and Fig. 7, where we compare our method
+                                                                                                ResNet-101) performs worst, since it relies on the last level feature
+              with main stream detection network such as Faster R-CNN with
+                                                                                                map which has wilder receptive field and is not suitable for detecting
+              backbone VGG-16 and ResNet-101. TDD-Net achieves the highest
+                                                                                                small defects. The algorithm (Original + Reasonable anchors) per-
+              mAP when the tIoU threshold is 0.5, demonstrating the effectiveness
+                                                                                                forms better than original algorithm, but still suffers from misaligned
+              of TDD-Net and justifying the importance of reasonable anchors
+                                                                                                receptive fields; TDD-Net (Original+ Reasonable anchors + Multi-
+              design and multi-scale feature fusion. As discussed in Section 4.1
+                                                                                                scale feature fusion + online hard example mining) outperforms the
+              and Section 4.2, the anchor scales of Faster R-CNN are not appro-
+                                                                                                others, as it combines structurally strong features with semantically
+              priate for detecting tiny defects. And TDD-Net adpots multi-scale
+                                                                                                strong features, which is help for detecting tiny defects.
+              feature fusion strategy, it will get structurally strong features which
+              is quite important for detecting tiny defects.
+                 Then, we draw Precision-Recall curve to evaluate the perfor-
+              mance of defect detection. Fig. 8 compares detection performance                  6      Conclusion
+              among different defect types of PCB on the test set. TDD-Net
+              achieves the superior performance compared with other state-of-the-               This paper presents a Tiny Defect Detection Network (TDD-Net),
+              arts . The mean Average and Precision is 98.90%. And examples of                  a clean and simple network that aims to perform the quality con-
+              defect inspection results are presented in Fig. 9.                                trol of PCBs. To tackle with the problems of low efficiency, high
+                 Ablation experiments: To investigate the behavior of reasonable                false detection rate, and high missing detection rate, this paper
+              anchors design, multi-scale feature fusion and OHEM, we validate                  first attempts to apply deep learning algorithms combined with fea-
+              the design by comparing four ablation experiments: (1) a naïve                    ture pyramid ConvNets to PCB defect detection problem. TDD-Net
+              Faster R-CNN using ResNet-101; (2) faster R-CNN using ResNet-                     has three novel changes to adapt to tiny defect detection. Firstly,
+              101 with anchor fine-tuned; (3) the addition of multi-scale feature               experiments demonstrate that reasonable anchors design can obtain
+              fusion based on former design; and (4) the addition of online hard                more precision IoU scores to accurately locate defects. Secondly,
+              example mining.                                                                   it can extract better features of tiny defects through feature pyra-
+                                                                                                mids. Finally, TDD-Net adopts online hard example mining in the
+                                                                                                whole training stage to improve the quality of RoI proposals. In
+
+
+                                                                                                                                        IET Research Journals, pp. 1–7
+              6                                                                                                  c The Institution of Engineering and Technology 2015
+
+
+
+2019/04/11 11:33:46                                                          IET Review Copy Only                                                                         7
+ReView by River Valley This
+                       Technologies                                                             CAAI Transactions
+                            article has been accepted for publication in a future issue of this journal, but has not beenon  Intelligence
+                                                                                                                          fully edited.   Technology
+    Content may change prior to final publication in an issue of the journal. To cite the paper please use the doi provided on the Digital Library page.
+
+
+
+
+              these ways, extensive experimental results on the PCB defect dataset                        25  He, K., Zhang, X., Ren, S., et al.: ‘Deep residual learning for image recognition’,
+              demonstrate that TDD-Net achieves better mAP of 98.90% than                                    IEEE Conference on Computer Vision and Pattern Recognition (CVPR), Las Vegas,
+                                                                                                             America, June 2016, pp. 770–778
+              state-of-the-arts. Ablation studies verify the robustness of TDD-                           26 Hrivastava, A., Gupta, A., Girshick, R.: ‘Training region-based object detectors
+              Net. Moreover, TDD-Net has strong expansibility and can be easily                              with online hard example mining’, IEEE Conference on Computer Vision and
+              extend to other fields, such as fabric defect detection and aluminum                           Pattern Recognition (CVPR), Las Vegas, America, June 2016, pp. 761–769
+              defect detection.
+                 Future works will include: (1) exploring zero-shotting methods
+              due to small training dataset; (2) optimizing of networks and post-
+              process methods; and (3) extending TDD-Net to more types of PCB
+              defects.
+
+
+              7      Acknowledgments
+              This work is supported by Specialized Research Fund for Strate-
+              gic and Prospective Industrial Development of Shenzhen City (No.
+              ZLZBCXLJZI20160729020003).
+
+
+              8      References
+              1  Putera, S., Ibrahim, Z.: ‘Printed circuit board defect detection using mathemat-
+                 ical morphology and matlab image processing tools’, International Conference
+                 on Education Technology and Computer (ICETC), Shanghai, China, June 2010,
+                 pp. 359–363
+              2 Chin, R.T., Harlow, C.A.: ‘Automated visual inspection: A survey’. IEEE Transac-
+                 tions on Pattern Analysis and Machine Intelligence, 1982, PAMI-4, pp. 557–573
+              3 Deng, Y.S., Luo, A.C.,Dai, M.J.: ‘Building an automatic defect verification system
+                 using deep neural network for pcb defect classification’, International Confer-
+                 ence on Frontiers of Signal Processing (ICFSP), Poitiers, France, September 2018,
+                 pp. 145–149
+              4 Wu, W.Y., Wang, M.J., Liu, C.M.: ‘Automated inspection of printed circuit boards
+                 through machine vision’, Computers in Industry, 1996, 28, (2), pp. 103–111
+              5 Malge, P. S , R. S. Nadaf.: ‘PCB Defect Detection, Classification and Localiza-
+                 tion using Mathematical Morphology and Image Processing Tools’, International
+                 Journal of Computer Applications, 2014, 87, (9), pp. 40–45
+              6 Gaidhane, V., Hote, Y., Singh, V.: ‘An efficient similarity measure approach for pcb
+                 surface defect detection’, Pattern Analysis and Applications, 2018, 21, (1), pp. 277–
+                 289
+              7 Kaur, B., Kaur, G., Kaur, A.: ‘Detection and classification of printed circuit board
+                 defects using image subtraction method’, Recent Advances in Engineering and
+                 Computational Sciences (RAECS), Chandigarh, India, 2014, pp. 1–5
+              8 Ren, S., He, K., Girshick, R.,et al.: ‘Faster r-cnn: Towards real-time object detection
+                 with region proposal networks’, Pattern Analysis and Machine Intelligence, 2017,
+                 39, (6), pp. 1137–1149
+              9 Liu, W., Anguelov, D., Erhan, D.,et al.: ‘Ssd: Single shot multibox detector’,
+                 Computer Vision – ECCV 2016, Amsterdam, Netherlands, 2016, pp. 21–37
+              10 Redmon, J., Divvala, S., Girshick, R.,et al.: ‘You only look once: Unified, real-time
+                 object detection’, IEEE Conference on Computer Vision and Pattern Recognition
+                 (CVPR), Las Vegas, November 2016, pp. 779–788
+              11 Lin, Tsung-Yi, Maire, M., Belongie, S, et al.: ‘Microsoft coco: Common objects in
+                 context’, ArXiv.org (2015): ArXiv.org, Feb 21, 2015
+              12 Everingham, M., Eslami, S., Gool, L., et al.: ‘The pascal visual object classes chal-
+                 lenge: A retrospective’, International Journal of Computer Vision, 2015, 111, (1),
+                 pp. 98–136
+              13 Girshick, Ross.: ‘Fast R-CNN’, IEEE International Conference on Computer
+                 Vision (ICCV), Santiago, America, December 2015, pp. 1440–1448
+              14 Lin, T.Y., Dollar, P., Girshick, R., et al.: ‘Feature pyramid networks for object
+                 detection’, Computer Vision and Pattern Recognition (CVPR), Hawaii, America,
+                 July 2017, pp. 936–944
+              15 Moganti, M., Ercal, F.: ‘Automatic pcb inspection systems’, Potentials, 1995, 14,
+                 (3), pp. 6–10
+              16 Girshick, R., Donahue, J., Darrell, T., et al.: ‘Rich feature hierarchies for accu-
+                 rate object detection and semantic segmentation’, Computer Vision and Pattern
+                 Recognition (CVPR), Columbus, America, June 2014, pp. 580–587
+              17 ‘Darknet: Open source neural networks in c’, http://pjreddie.com/darknet/,
+                 accessed 15 December 2018
+              18 Dai, J., Li, Y., He, K., et al.: ‘R-fcn: Object detection via region-based fully
+                 convolutional networks’. ArXiv.org (2016): ArXiv.org, Jun 21, 2016
+              19 Faghih-Roohi, S., Hajizadeh, S., Nunez, A., et al.: ‘Deep convolutional neural
+                 networks for detection of rail surface defects’, International Joint Conference on
+                 Neural Networks (IJCNN), Vancouver, Canada, July 2016, pp. 2584–2589
+              20 Soukup, D., Huber-Mork, R.: ‘Convolutional neural networks for steel surface
+                 defect detection from photometric stereo images’, International Symposium on
+                 Visual Computing, 2014, 8887, pp. 668–677
+              21 Cha, Y., Choi, W., Suh, G., et al.: ‘Autonomous structural visual inspection using
+                 region-based deep learning for detecting multiple damage types’, Computer-Aided
+                 Civil and Infrastructure Engineering, 2018, 33, (9), pp. 731–747
+              22 Qu, Z., Shen, J., Li, R., et al.: ‘Partsnet: A unified deep network for automotive
+                 engine precision parts defect detection’, ArXiv.org (2018): ArXiv.org, Oct 29, 2018
+              23 Lecun, Y., Boser, B., Denker, J.S., et al.: ‘Backpropagation applied to handwritten
+                 zip code recognition’. Neural Computation, 1989, 1, (4), pp. 541–551
+              24 Redmon, J.,Farhadi, A.: ‘Yolo9000: Better, faster, stronger’, IEEE Conference on
+                 Computer Vision and Pattern Recognition (CVPR), Hawaii, America, July 2017,
+                 pp. 6517–6525
+
+
+
+              IET Research Journals, pp. 1–7
+               c The Institution of Engineering and Technology 2015                                                                                                                            7
+
+
+
+2019/04/11 11:33:46                                                                      IET Review Copy Only                                                                                       8
+

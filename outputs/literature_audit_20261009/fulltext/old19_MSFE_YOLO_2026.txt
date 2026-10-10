@@ -1,0 +1,1657 @@
+Article
+
+MSFE-YOLO: A Steel Surface Defect Detection Algorithm
+Integrating Multi-Scale Frequency Domain and
+Defect-Aware Attention
+Siqi Su 1 , Jiale Shen 1 , Peiyi Lin 1 , Wanhe Tang 1 , Weijie Zhang 1 and Zhen Chen 1,2, *
+
+                                         1   School of Mechanical and Energy Engineering, Guangdong Ocean University, Yangjiang 529500, China;
+                                             18219521228@stu.gdou.edu.cn (S.S.); 15017778995@stu.gdou.edu.cn (J.S.); linpeiyi@gdou.edu.cn (P.L.);
+                                             tangwh@gdou.edu.cn (W.T.); 43811333vv@stu.gdou.edu.cn (W.Z.)
+                                         2   State Key Laboratory of Mechanical Transmission for Advanced Equipment, Chongqing University,
+                                             Chongqing 400044, China
+                                         *   Correspondence: mezhenchen@gdou.edu.cn
+
+
+                                         Abstract
+                                         Detecting surface defects on steel products is crucial for maintaining quality standards in
+                                         industrial manufacturing. However, existing detection algorithms face several challenges,
+                                         including the difficulty of capturing multi-scale defect characteristics with fixed receptive
+                                         fields, insufficient utilization of defect edge and frequency domain features, and simplistic
+                                         feature fusion strategies. In response to the above challenges, this paper proposed the
+                                         Multi-Scale Frequency-Enhanced YOLO (MSFE-YOLO) algorithm that integrates multi-
+                                         scale frequency domain enhancement with defect-aware attention mechanisms. First, a
+                                         Multi-Scale Frequency-Enhanced Convolution (MSFC) module was constructed, which
+                                         extracted multi-scale spatial features in parallel through depth-adaptive dilated convolu-
+                                         tions, explicitly modeled high-frequency edge information using the Laplacian operator,
+                                         and achieved adaptive fusion of multi-branch features via learnable weights. Second,
+                                         a Cross-Stage Partial with Multi-Scale Defect-Aware Attention (C2MSDA) module was
+                                         designed, integrating Sobel operator-based edge perception, multi-scale spatial attention,
+                                         and adaptive channel attention to collaboratively enhance features across spatial, channel,
+                                         and edge domains through a gated fusion strategy. Finally, an Adaptive Feature Fusion
+                                         Enhancement (AFFE) module was proposed to achieve adaptive aggregation of multi-
+                                         level features through a data-driven weight generation network and cross-scale feature
+                                         interaction mechanism. Experimental results on the NEU-DET and GC10-DET datasets
+                                         demonstrated that MSFE-YOLO achieved the mAP@0.5 of 79.8% and 66.7%, respectively,
+                                         which were 1.7% and 2.1% higher than the benchmark model YOLOv11s respectively,
+                                         while maintaining an inference speed of 89.3 FPS, which satisfied the real-time detection
+                                         requirements in industrial scenarios.
+Academic Editors: Xian-Bo Wang and
+Yunfeng Yan                              Keywords: multi-scale feature extraction; frequency domain enhancement; attention
+                                         mechanism; adaptive feature fusion; YOLOv11
+Received: 5 March 2026
+Revised: 2 April 2026
+Accepted: 7 April 2026
+Published: 9 April 2026
+Copyright: © 2026 by the authors.        1. Introduction
+Licensee MDPI, Basel, Switzerland.            The steel industry, as the cornerstone of modern manufacturing, plays a crucial role
+This article is an open access article
+                                         in other industries such as construction, automobiles, and aerospace [1]. According to
+distributed under the terms and
+                                         the World Steel in Figures 2025 released by the World Steel Association on 5 June 2025,
+conditions of the Creative Commons
+Attribution (CC BY) license.             the global crude steel production reached 1.885 billion tons in 2024, and the crude steel
+
+
+Sensors 2026, 26, 2311                                                                                            https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                               2 of 27
+
+
+
+                         production of China reached 1.005 billion tons, accounting for 53.3% of the total global
+                         output. With the in-depth promotion of Industry 4.0 and intelligent construction strategy,
+                         steel enterprises have established more stringent requirements for product quality control.
+                         During the steel production process, due to rolling temperature fluctuations, equipment
+                         wear, and uneven cooling, various surface defects are inevitable [2]. These defects not
+                         only affect the appearance quality of steel products but also reduce their mechanical
+                         properties, which may lead to structural failure and major safety accidents [3]. Common
+                         surface defects in steel can be broadly categorized into texture-type defects, such as crazing,
+                         scratches, and rolled-in scale, and morphology-type defects, including pitted surfaces,
+                         patches, and inclusions. These defects exhibit considerable diversity in terms of scale,
+                         morphology, and contrast, posing significant challenges to automated detection algorithms.
+                         Specifically, defect detection algorithms must simultaneously address multi-scale targets,
+                         complex textures, and varying degrees of foreground–background similarity. Therefore, it
+                         is extremely urgent to improve the accuracy of steel defect detection.
+                               The traditional defect detection method mainly relies on manual sampling inspec-
+                         tion [4]. By randomly sampling samples with the naked eye of the inspectors, there was
+                         an imbalance in sampling, which led to large errors in the detection results. Moreover, the
+                         detection results were highly dependent on the subjective judgment of the inspectors and
+                         were greatly influenced by environmental and personal experience differences. The defect
+                         detection method [5] based on machine learning realizes the automatic identification and
+                         classification of defects by learning feature patterns from steel sample data, and it has higher
+                         detection accuracy and adaptive ability than traditional methods. Liu et al. [6] extracted
+                         the surface defect texture features of steel strips using the Local Binary Pattern (LBP) and
+                         then input the features into the Extreme Learning Machine (ELM) classifier for recognition,
+                         effectively meeting the demand for rapid online defect detection. Zaghdoudi et al. [7]
+                         extracted defect features using two texture descriptors, LCCMSP and DCP, and then input
+                         the features into Support Vector Machine and Random Forest classifiers, respectively, to con-
+                         struct four basic models. Finally, they integrated the results of multiple classifiers through
+                         a Bayesian fusion strategy for defect classification. All the above-mentioned methods used
+                         traditional methods for feature extraction and then applied machine learning methods
+                         to classify the features. However, in actual steel production, most defects had irregular
+                         distribution and indistinct texture features. Therefore, it was difficult to accurately extract
+                         features relying solely on traditional feature extraction methods, which led to difficulties in
+                         the use of detection algorithms and low detection accuracy and efficiency.
+                               Deep learning methods automatically extract features from input data, not only re-
+                         taining the advantages of no need for human intervention and avoiding environmental
+                         influences but also eliminating the need for manual feature extraction. The single-stage
+                         object detection method regards object detection as a regression problem. It directly pre-
+                         dicts the bounding box position and category probability from the input image through a
+                         single neural network without generating candidate regions, which has the advantages of
+                         fast detection speed and simple model structure. To address the difficulties in detecting
+                         small targets and the interference of complex background textures in metal surface defect
+                         detection, Zhou et al. [8] used the CSPlayer module to replace the original C3 module.
+                         By introducing 5 × 5 depthwise convolution and depthwise separable convolution, they
+                         enhanced the feature extraction capability while maintaining lightweight. Additionally, the
+                         Global Attention Mechanism (GAMAttention) was embedded in the backbone network to
+                         enable the model to adaptively focus on target regions while suppressing background inter-
+                         ference. Ruan et al. [9] proposed the EPSC-YOLO algorithm, which enhanced multi-scale
+                         feature extraction by introducing an Efficient Multi-Scale Attention (EMA) module into the
+                         backbone network. Two pyramid convolution modules (PyConv2 and PyConv3) were de-
+
+
+
+                                                                                          https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                             3 of 27
+
+
+
+                         signed to extract multi-scale features in parallel using convolution kernels of varying sizes,
+                         reducing parameter count while improving feature capture capability. A CISBA module
+                         integrating channel attention, involution operations, and spatial attention was proposed to
+                         enhance local feature representation through dynamically generated convolution kernels.
+                                Although existing studies have achieved significant progress, steel defect detection
+                         still faces several challenges. The fixed receptive fields in current defect detection algo-
+                         rithms struggle to capture the multi-scale characteristics of defects [10]. Furthermore, the
+                         directional and frequency domain features of defects have not been fully exploited, and the
+                         feature fusion strategies remain overly simplistic, neglecting the differentiated contribu-
+                         tions of high-level semantic information and low-level detailed information across various
+                         detection tasks. Therefore, this paper proposed a steel surface defect detection algorithm
+                         based on multi-scale frequency domain and defect-aware attention, termed Multi-Scale
+                         Frequency-Enhanced YOLO (MSFE-YOLO). By deeply fusing multi-scale, multi-directional,
+                         and multi-frequency features, the proposed method achieved high-precision real-time
+                         detection. The main innovations and contributions of this paper were as follows:
+                         (1)   Aiming at the problem that the conventional convolution with a fixed receptive field
+                               was unable to capture the multi-scale defect features and the lack of frequency domain
+                               information modeling, this paper constructed the Multi-Scale Frequency-Enhanced
+                               Convolution (MSFC) module. Depth-adaptive dilated convolutions were employed
+                               for parallel multi-scale feature extraction, a Laplacian operator was incorporated to
+                               explicitly model high-frequency edge information, and an adaptive fusion strategy
+                               with learnable weights was utilized, enabling efficient extraction and enhancement of
+                               defects across varying scales and fine textures.
+                         (2)   In response to the shortcomings of Cross-Stage Partial with Position-Sensitive At-
+                               tention (C2PSA) in capturing defect edge details and modeling multi-scale features,
+                               this paper constructed a Cross-Stage Partial with Multi-Scale Defect-Aware Attention
+                               (C2MSDA) module. By introducing an edge-aware module based on Sobel operator,
+                               a multi-scale spatial attention mechanism, and an adaptive gating fusion strategy,
+                               the collaborative enhancement of spatial domain, channel domain, and edge domain
+                               features was achieved, significantly improving the detection accuracy of small-sized
+                               and low-contrast defects.
+                         (3)   In response to the shortcomings of traditional Concat operations with fixed weights
+                               and one-way feature transfer, this paper constructed an Adaptive Feature Fusion
+                               Enhancement (AFFE) module. By introducing a data-driven weight generation net-
+                               work, cross-scale feature interaction mechanism, and lightweight fusion strategy, it
+                               achieved adaptive aggregation of multi-scale features and cross-level information
+                               exchange, significantly improving the detection accuracy and robustness of defects at
+                               different scales.
+
+                         2. Related Works
+                         2.1. Convolution Module
+                              Convolutional neural networks, as the core technology of deep learning in the field of
+                         computer vision, have a direct impact on the quality of feature extraction and the compu-
+                         tational efficiency of the model through the design of their convolutional modules. With
+                         the continuous growth of industrial intelligence demand, researchers have proposed vari-
+                         ous innovative convolution structures based on standard convolution for target detection,
+                         especially industrial defect detection tasks. These structures significantly reduce computa-
+                         tional complexity and parameter count to provide the possibility for model deployment on
+                         resource-limited devices.
+
+
+
+
+                                                                                        https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                              4 of 27
+
+
+
+                               Conventional convolution, as the fundamental component of convolutional neural
+                         networks, extracts features by weighting and summing the local receptive fields of the input
+                         feature map. VGGNet [11] demonstrated the importance of network depth for performance
+                         improvement by stacking multiple 3 × 3 convolution kernels and achieved significant
+                         results on the ImageNet dataset. However, as the number of network layers increases, the
+                         disappearance of gradients and the sharp increase in computational complexity become the
+                         main factors restricting the deepening of the model. Based on this, ResNet [12] effectively
+                         solved the problem of difficulty in training deep networks by introducing residual learning
+                         framework and skip connections, making it possible to extend the network depth to
+                         152 layers.
+                               In order to reduce model complexity and improve inference speed, MobileNet [13]
+                         first applied depthwise separable convolution to mobile vision tasks. By integrating the
+                         conventional convolution into depthwise and pointwise convolution, the computational
+                         complexity can be reduced to 1/8–1/9 of the original, while minimizing the loss of accu-
+                         racy [14]. Dilated convolution expands the receptive field by inserting zero values between
+                         convolution kernel elements, capturing a larger range of contextual information without
+                         increasing the number of parameters [15]. The Atrous Spatial Pyramid Pooling module
+                         employed parallel dilated convolution branches with varying dilation rates to capture
+                         multi-scale context, achieving excellent performance in semantic segmentation tasks [16].
+                         The combination of dilated convolution and lightweight architectures provides an solution
+                         for real-time defect detection. A lightweight image classifier integrating dilated convo-
+                         lution and depthwise separable convolution has been proposed, which maintains high
+                         classification accuracy while reducing computational burden [17].
+                               The fixed sampling grid of the conventional convolution is not effective in modeling
+                         geometrically deformed targets. Deformable convolution [18] resolves this issue by also
+                         training 2D offsets at each 2D sampling point in order to shape the convolutional kernel
+                         of the sampling positions to follow the geometry of the target. For steel surface defect
+                         detection, Zhao et al. [19] added deformable convolution to the second and fourth stages
+                         of the ResNet-50 backbone and presented Feature Pyramid Network (FPN) to incorporate
+                         multi-scale feature fusion that resulted in an mAP of 75.2% on the NEU-DET dataset. Chen
+                         et al. [20] proposed DCAM-Net that integrated deformable convolution and attention mech-
+                         anisms to be able to locate strip steel surface defects fast. The advantages of deformable
+                         convolution in modeling complex-shaped defects have established it as a crucial technique
+                         in industrial inspection.
+                               The problem of identifying elongated and tortuous defects was overcome by Qi
+                         et al. [21], who introduced the concept of dynamic snake convolution that was formulated
+                         to work on tubular structure segmentation. This technique can be used to enable the convo-
+                         lutional kernel to meander across the target structure as a snake, avoiding the receptive
+                         field drifting into background scores by introducing deformation offsets with continuity
+                         constraints. Snake convolution reveals distinctive capabilities in the detection of linear
+                         and curvilinear defects in industrial detection. In case of long-marked defects on the steel
+                         surfaces, MDSC-YOLOv9 [22] employed multi-scale dynamic snake convolution to enhance
+                         feature representation capability and sensitivity for narrow defect patterns. SnakeNet [23]
+                         redesigns the neck network using dynamic snake convolution, enhancing the performance
+                         at the complex samples and large-scale defects of the model [22]. Snake convolution yields
+                         very fine local image features by changing the shape of the kernels dynamically, and, in this
+                         process, it has been proven that it has more ability to extract features, and feature capturing
+                         has also been shown to be reliable in the case of complex images [24].
+                               The integration through the application of different convolutional structures in the
+                         industrial defect detection shows an increasing tendency. Scholars do not only focus on one
+
+
+
+                                                                                         https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                              5 of 27
+
+
+
+                         type of convolution, but they combine and strategically integrate different types of convo-
+                         lutional designs depending on the demands of the detection task. For example, depthwise
+                         separable convolution is often used to build lightweight backbone network architecture in
+                         applications where resource-constrained edge device is used (such as deployment). Dilated
+                         convolution is widely used for capturing multi-scale information during feature fusion. For
+                         defect targets with complex shapes, deformable convolution and snake convolution provide
+                         geometry-adaptive modeling capabilities. This targeted modular design strategy enables
+                         detection models to achieve an optimal balance among accuracy, speed, and computational
+                         overhead, providing robust support for the practical deployment of intelligent industrial
+                         inspection systems. Similar modular integration strategies have also been validated in
+                         improved YOLO architectures for other challenging detection scenarios [25].
+
+                         2.2. Attention Mechanism
+                               Attention mechanisms can be used to simulate the selective attention properties of the
+                         human visual system with the neural networks selectively integrating salient information
+                         into the input features and inhibiting redundant information to efficiently feature-represent,
+                         as well as detect features, thus considerably increasing the capability of feature-representing
+                         and detection accuracy [26]. Attention mechanisms have become one of the key methods
+                         of enhancing the performance of a model in the object detection case. In the case of defect
+                         detection activities in stationary images, channel attention, channel-spatial joint attention,
+                         self-attention, and other new attention functions are the main focus of discussion in the
+                         present paper concerning the use and development of object detection.
+                               Channel attention mechanisms can learn the weights of the various channels of features
+                         to adaptively boost the information-giving channels and reduce the irrelevant channels and
+                         thus enhance feature discriminability. The Squeeze-and-Excitation Networks (SENet) [27]
+                         is a seminal contribution to channel attention, condensing spatial dimensions with a global
+                         average pool layer and utilizing fully connected layers to acquire inter-channel interaction.
+                         Nonetheless, its dimensionality reduction operation can also have caused the loss of
+                         channel information. Expanding on this, Efficient Channel Attention (ECA) [28] proposed
+                         an approach to building a 1D convolution strategy, which enabled the local cross-channel
+                         interaction with changing adaptive kernel size without loss of information in dimensionality
+                         reduction. In detecting surface defects in steel, Xiang et al. [29] suggested the Adaptive
+                         Graph Channel Attention (AGCA) module that is more novel and thus introduces the
+                         graph convolution theory to channel attention, where each channel is regarded as a graph
+                         node and the adjacency matrices are used to represent topological relationships among
+                         the channels.
+                               Even though both channel attention and spatial attention have been successful in
+                         enhancing features individually, single-dimensional attention processes find it difficult to
+                         fully address the complexity of defect features. The channel-spatial joint attention processes
+                         combine the two types of attention in series or parallel arrangement with organic integration
+                         of what to attend to and where to attend to. The technique allows both spatial and
+                         channel dimension refining of features, which greatly improves the feature representation
+                         ability of a network, as well as the accuracy of defect detection. As a representative work,
+                         Convolutional Block Attention Module (CBAM) [30] sequentially applied the Channel
+                         Attention Module (CAM) and Spatial Attention Module (SAM) to refine feature maps along
+                         channel and spatial dimensions, respectively. To deal with the lack of feature extraction
+                         capacity and poor feature fusion in the detection of defects on the surface of hot-rolled steel
+                         strips, Zhang et al. [31] introduced the multi-scale feature fusion (MSF) strategy, which
+                         can improve target defects contents by efficiently fusing both shallow and deep features,
+                         getting a higher semantic information without the loss of its resolution. Another thing
+
+
+
+                                                                                         https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                                 6 of 27
+
+
+
+                         that they presented is the CSPlayer Res2Attention block (CRA block), which incorporates
+                         both Res2Net block and CBAM attention mechanism into the CSPlayer, minimizing the
+                         loss of defect information during hierarchical propagation, improving fine-grained feature
+                         extraction capacity, and improving the perception of fine features and the overall features.
+                               Surface defects of steel have complicated spatial distributions and long-term interde-
+                         pendences. Self-attention mechanisms bring global contextual information by computing
+                         the correlation between any two positions in a sequence, which breaks the shortcomings
+                         of local receptive fields of CNNs and offers new technical avenues to the identification
+                         of intricate defect patterns. After self-attention mechanisms [32] were effective in natural
+                         language processing, Vision Transformer (ViT) [33] brought this new technique to the
+                         computer vision domain and was the first system to use pure attention-based architectures
+                         in visual tasks. Zhao et al. [34] presented RT-DETR (Real-Time Detection Transformer) in
+                         real-time object detection that separated multi-scale features into intra-scale interaction
+                         and cross-scale fusion by an effective encoder (hybrid encoder). The use of RT-DETR-R50
+                         with 53.1% AP at 108 FPS on the COCO dataset was the first time that transformer-based
+                         architectures had been shown to be better than the YOLO series in real-time detection.
+                               In response to inquiries on the weaknesses of traditional attention mechanisms in given
+                         situations, researchers have come up with a number of innovative attention mechanisms
+                         in both theories and practical application. Coordinate attention (CA) [35] addressed the
+                         problem of losing spatial positional information during global pooling in the conventional
+                         channel attention by splitting channel attention into two 1D encoding tasks that the inter-
+                         operating feature pools in two spatial dimensions, thereby retaining fine-grained positional
+                         information and learning long-range interactions at the same time. Yang et al. [36] also
+                         incorporated CA in the DCA-YOLOv8 cattle detection system, which increased the mAP of
+                         the system by 13, 4.9, and 15.1 percent over SSD, RetinaNet, and CornerNet respectively.
+                         Global Attention Mechanism (GAM) [37] was an information theoretic approach that used
+                         the sub-modules of serial channel and spatial attention in an encoder–decoder architec-
+                         ture using a two-layer MLP in order to increase cross-dimensional feature interaction to
+                         decrease information redundancy and increase global representation ability. To address the
+                         difficulties in detecting small targets and the interference of complex background textures
+                         in metal surface defect detection, Zhou et al. [8] used the CSPlayer module to replace
+                         the original C3 module. By introducing 5 × 5 depthwise convolution and depthwise
+                         separable convolution, they enhanced the feature extraction capability while maintaining
+                         a lightweight design. Additionally, Global Attention Mechanism (GAMAttention) was
+                         embedded in the backbone network to enable the model to adaptively focus on target
+                         regions while suppressing background interference.
+                               With the complexity and diversification of detection targets, the research of attention
+                         mechanism in the field of steel defect detection has developed from the application of a
+                         single module to the stage of multi mechanism cooperation. The channel attention is the
+                         best feature selection, spatial attention is the localization of key regions, self-attention is the
+                         global dependency modeling, and new mechanisms such as coordinate attention and global
+                         attention are devoted to particular problems, such as positional information storage and
+                         feature redundancy. The current research trend indicates that a single attention mechanism
+                         often fails to comprehensively address the multiple challenges of diverse scales, complex
+                         shapes, and low contrast of surface defects in steel. Therefore, how to reasonably select and
+                         combine different types of attention mechanisms based on the inherent properties of defect
+                         features while maintaining the model’s lightweight design and achieving collaborative
+                         enhancement of multi-dimensional features has become the key to improving detection per-
+                         formance. This development direction lays the theoretical foundation for building a more
+                         robust and efficient steel defect detection system. The integration of attention mechanisms
+
+
+
+                                                                                            https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                             7 of 27
+
+
+
+                         with state space models such as Mamba has emerged as a new paradigm, achieving im-
+                         proved trade-offs between long-range dependency modeling and computational efficiency
+                         in YOLO-based detection frameworks [38].
+
+                         2.3. Feature Fusion Module
+                               Deep neural networks extract features through convolution and pooling operations,
+                         and the shallow features are richly represented in spatial details and positioning. However,
+                         they have weak semantic representational ability, whereas deep features have strong
+                         semantic abstraction ability but lack serious spatial details loss during downsampling.
+                         The challenges faced by surface defect detection of steel lie in the large span of defect
+                         scales, complex background textures, and weak features of small-sized defects. Single level
+                         features are unable to simultaneously meet the dual requirements of positioning accuracy
+                         and semantic understanding. Therefore, effectively integrating features from different
+                         levels and enhancing semantic expression while preserving spatial details has become the
+                         key to improving detection performance.
+                               Channel concatenation (Concat) is the simplest form of the feature fusion technique
+                         that simply layers feature maps of two or more network layers directly along the channel
+                         dimension [39]. Mi et al. [40] compared between two fusion strategies—feature map
+                         addition (Add) and feature map concatenation (Concat)—in steel strip surface defect
+                         detection. The experimental results showed that the Concat operation evaded the loss of
+                         feature information and achieved better fusion of multi-level features compared to the Add
+                         method, which was better in terms of precision and average precision. But simple Concat
+                         functions place the same weight on all input features without any distinction of the various
+                         contributions of various feature layers to the representation of targets of different scales.
+                         To address the limitations of unidirectional information flow, Liu et al. [41] proposed the
+                         Path Aggregation Network (PANet), which provided the path enhancement structure of
+                         bottom-up on top of the top-down pathway of FPN. The bidirectional propagation process
+                         allowed localization signals of lower layers to propagate up the graph to higher layers
+                         more quickly, hence reducing the distance between the top features at lower levels and the
+                         top features. Nevertheless, PANet continued to adopt a fixed network topology and even
+                         feature weights, and it did not take the differentiated contribution of influences by features
+                         in different scales on the final detection results into consideration.
+                               To address the problem of fixed feature weights, Tan et al. [42] proposed the Bidi-
+                         rectional Feature Pyramid Network (BiFPN), which was a key breakthrough toward the
+                         transformation of feature fusion as a passive stacking to an active selection. BiFPN has
+                         developed an adaptable weighting of different input features, so that the network can intel-
+                         ligently learn fusion weights. At the same time, the network removes the nodes with only a
+                         single input and limits the cross-scale fusion in the same layer, which simplifies the network
+                         structure while maintaining the interpretability of the model. Zhang et al. [43] proposed
+                         the Cross-Scale Weighted Feature Fusion Network (CSWFFN) based on YOLOv5s. The
+                         network realized multi-scale feature fusion by embedding the residual module (C3-BiFPN)
+                         in the improved BiFPN and enhanced the edge features of defects combined with Laplace
+                         sharpening technology. It achieved 86.8% mAP on the NEU-DET dataset and performed
+                         well in the detection of small-scale defects. The improved YOLOv9 algorithm proposed
+                         by Zhang et al. [44] introduced the BiFPN module, which enhanced the information flow
+                         between different scales through the bidirectional feature fusion strategy and also achieved
+                         remarkable results in small target defect recognition. These studies have indicated that
+                         weighting schemes that are learnable have the ability to achieve greater adaptability to
+                         feature fusion. Nevertheless, BiFPN cannot be very flexible to complex situations due to
+                         the fixed topology of this model. Regarding the cross-domain application of feature fusion
+
+
+
+                                                                                        https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                              8 of 27
+
+
+
+                         strategies, Zhao et al. [45] proposed the Mussel-YOLO semi-supervised detection frame-
+                         work for mussel detection in underwater acoustic images. The progressive adaptive Feature
+                         Pyramid Network (PAFPN) incorporated in this framework achieves progressive fusion
+                         between adjacent hierarchical levels through an adaptive weight allocation mechanism,
+                         effectively alleviating the information discontinuity caused by direct cross-level fusion.
+                         This work validates the effectiveness of adaptive feature fusion strategies in detection tasks
+                         with complex backgrounds.
+                               The evolution path of feature fusion technology clearly shows the development context
+                         from simple splicing to intelligent aggregation, from fixed weight to adaptive weighting,
+                         and from unidirectional propagation to bidirectional interaction. Even though the im-
+                         plementation of early Concat operations was simple, the fixed weighting strategy had
+                         difficulties adapting to the complex industrial situation with a variety of defect magnitudes
+                         and a high inter-class similarity. PANet improved feature propagation performance by
+                         providing the bidirectional paths; however, it did not consider the issue of rational dis-
+                         tribution of feature weights. The adaptive paradigm of feature fusion represented by the
+                         learnable weighting mechanism of BiFPN moved feature fusion to a dynamically adaptive
+                         mechanism that could vary fusion strategies as data characteristics change. However, the
+                         current research still faces many challenges: how to achieve more refined feature selection
+                         under the premise of maintaining computational efficiency, how to design a more flexible
+                         fusion topology to adapt to different defect distribution characteristics, and how to establish
+                         a more effective interaction mechanism between global semantic information and local
+                         detail information. Solving these problems will further promote the development of steel
+                         defect detection technology to higher accuracy and stronger robustness.
+
+                         3. The Proposed MSFE-YOLO Algorithm
+                               To deal with the issues of the steel surface defect detection tasks, such as the impossi-
+                         bility of detecting multi-scale features with fixed receptive fields, the lack of multi-scale
+                         features in form of defect directionality and frequency domain features, and the simple
+                         ways of combining features, this paper proposed a steel surface defect detection algo-
+                         rithm named Multi-Scale Frequency-Enhanced YOLO (MSFE-YOLO) that was based on
+                         multi-scale frequency domain and defect-aware attention. YOLOv11s was selected as
+                         the baseline model because, compared with other recent YOLO variants, it achieved the
+                         best comprehensive trade-off among parameter count, computational cost, and detection
+                         accuracy across both experimental datasets. By deeply fusing multi-scale, multi-directional,
+                         and multi-frequency features, the proposed algorithm achieved high-precision real-time
+                         detection. The network architecture was illustrated in Figure 1. The MSFC module was
+                         constructed in the neck network. In this module, depth-adaptive dilated convolutions were
+                         employed for parallel multi-scale feature extraction, a Laplacian operator was incorpo-
+                         rated [46] to explicitly model high-frequency edge information, and an adaptive fusion
+                         strategy with learnable weights was utilized, enabling efficient extraction and enhance-
+                         ment of defects across varying scales and fine textures. The C2PSA module in the original
+                         YOLOv11s was replaced with the C2MSDA module. By integrating a Sobel operator-based
+                         edge-aware module [47], a multi-scale spatial attention mechanism and an adaptive gated
+                         fusion strategy, synergistic enhancement of spatial, channel, and edge-domain features
+                         were achieved. The AFFE module was developed in the feature fusion stage. Through the
+                         introduction of a data-driven weight generation network, a cross-scale feature interaction
+                         mechanism and a lightweight fusion strategy, adaptive aggregation of multi-scale features,
+                         and cross-level information exchange were enabled.
+
+
+
+
+                                                                                         https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                               9 of 27
+
+
+
+
+                           Backbone
+                              CBS
+
+
+                              CBS          Neck                         Head
+                                                                         P3
+                             C3K2                         C3K2
+                                             AMF                        Detect
+                            C3K=False                    C3K=False
+
+
+
+                              CBS           Upsample      MSFC
+
+
+                             C3K2            C3K2
+                                                          AMF
+                            C3K=False       C3K=False
+
+
+
+                              CBS
+                                                                         P4
+                             C3K2                         C3K2
+                                             AMF                        Detect
+                            C3K=True                     C3K=False
+
+
+
+                              CBS                         MSFC
+                                            Upsample
+
+                             C3K2
+                            C3K=True          CSE
+
+                                                          AMF
+                             SPPF
+                                                                         P5
+                                                          C3K2
+                            C2MSDA                                      Detect
+                                                         C3K=True
+
+
+
+
+                         Figure 1. Multi-Scale Frequency-Enhanced YOLO network architecture diagram.
+
+                         3.1. Multi-Scale Frequency Domain Enhanced Convolution Module
+                              Conventional convolution operations employ fixed-size convolution kernels, whose
+                         receptive fields are constrained by kernel size, making it difficult to simultaneously capture
+                         defect features at different scales [48]. However, in the actual industrial scene, steel surface
+                         defects have the characteristics of scale diversity. The size of tiny pitting defects may
+                         be only a few pixels, while large-area patch defects may occupy a significant area of the
+                         image. Conventional convolution often needs to expand the receptive field by stacking
+                         multilayer networks when dealing with such targets with significant scale differences,
+                         but this method not only increases the model depth and computational complexity but
+                         also may lead to the disappearance of small-scale defect features in the deep network. In
+                         addition, the key features of steel surface defects are often reflected in the changes in edge
+                         contour and texture, which are represented as high-frequency components in the frequency
+                         domain [49]. Conventional convolution lacks the ability to explicitly model the frequency
+                         domain information, resulting in limited ability to extract the defect boundaries and fine
+                         textures. At the same time, in the complex industrial background, defect features and
+                         background noise are often mixed together. How to adaptively strengthen effective features
+                         and suppress redundant information has become the key problem to improve the detection
+                         accuracy. Therefore, a Multi-Scale Frequency-Enhanced Convolution module (MSFC) was
+                         proposed in this paper. Through multi-scale parallel hole convolution, frequency domain
+                         high-frequency enhancement and adaptive dynamic fusion, the defect features of different
+                         scales were extracted and enhanced efficiently.
+                              The network architecture of the MSFC module was shown in Figure 2, including
+                         four main components: input feature projection, multi-scale parallel branching, frequency
+                         domain enhanced branching, and adaptive feature fusion. First, the input features were
+                         adjusted through 1 × 1 convolution. This process could be expressed as follows:
+
+                                                               X proj = Conv1×1 ( Xin )                                 (1)
+
+
+
+                                                                                          https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                                            10 of 27
+
+
+
+                         where Xin ∈ RC1 × H ×W and X proj ∈ RC2 × H ×W denote the input and output feature map.
+                         Conv1×1 represents a 1 × 1 convolution operation.
+
+
+                            CBG
+
+                             Conv2d       BN          GELU             + Element-wise Addition
+
+                                                         Multi-scale            Adaptive
+                                                       parallel branches      feature fusion
+                                                                                α1
+                                                         3×3 DWConv (d1)
+                                      Input feature
+                                       projection                               α2
+                                                         3×3 DWConv (d2)
+                                         CBG                                                   1×1Conv
+                                                                 ……             αn +
+                                                         3×3 DWConv (dn)
+                                                                               α n +1
+                                                             (C )
+                                                         Klap2         CBG
+
+                                                        Frequency domain
+                                                       enhancement branch
+
+
+                         Figure 2. Multi-Scale Frequency-Enhanced Convolution module network architecture diagram.
+
+                              In the multi-scale parallel branches, the module employed depthwise separable con-
+                         volutions with different dilation rates to extract multi-scale features in parallel. For the i-th
+                         branch with dilation rate di, the feature extraction process could be expressed as:
+
+                                                                 Xidw = DWConv3×3,di ( X proj )                                        (2)
+
+                         where DWConv3×3,di denotes a depthwise separable convolution, with a dilation rate of di
+                         and a 3 × 3 kernel.
+                               The MSFC module adaptively adjusted the dilation rate configuration according to the
+                         network depth. In the shallow network, the smaller dilation rate combination {1, 2, 3} was
+                         used, focusing on local details and small-scale defects. In the middle layer network, the
+                         medium dilation rate {1, 2, 4, 6} was adopted, taking into account local characteristics and
+                         global context. In the deep network, the larger dilation rate {1, 3, 5, 7} was used to capture
+                         the global semantic information. This deep adaptive strategy enabled the MSFC module to
+                         extract the most suitable scale features at different stages of the network.
+                               The frequency domain enhancement branch explicitly modeled high-frequency in-
+                         formation to strengthen the extraction of defect edges and textures, thereby improving
+                         the module’s sensitivity to subtle defects. Together with the multi-scale parallel branches,
+                         it established a synergistic relationship between the frequency domain and the spatial
+                         domain. Accordingly, this branch was required to respond to high-frequency variations
+                         in all orientations of the feature map. The Laplace operator is a second-order differential
+                         operator that produces strong responses in regions where the gray-level changes abruptly,
+                         such as edges and textures. Because of its isotropic nature, the Laplacian responds equally
+                         to rapid intensity changes in every direction, enabling it to capture the overall distribution
+                         of high-frequency energy across the feature map without directional bias. This property
+                         prevents defect textures oriented in particular directions from being overlooked. Its discrete
+                         convolution kernel was defined as:
+                                                                                   
+                                                                      0 −1 0
+                                                            Klap = −1 4 −1                                         (3)
+                                                                                   
+                                                                      0 −1 0
+
+
+
+
+                                                                                                         https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                          11 of 27
+
+
+
+                              The Laplace operator was used to perform the grouping convolution operation on the
+                         projected feature map to extract the high-frequency components of each channel, and then
+                         the channel dimension adjustment and information interaction were performed through
+                         1 × 1 convolution:
+                                                                            (C )
+                                                        X f req = Conv1×1 (Klap2 X proj )                      (4)
+                                 (C )
+                         where Klap2 ∈ RC2 ×1×3×3 indicates that the Laplacian kernel was copied C2 times in the
+                         channel dimension.
+                             The adaptive dynamic fusion mechanism realized the adaptive aggregation of multi-
+                         branch features through the learnable weight parameters. Let the total number of branches
+                         be N, including N − 1 multi-scale branch and one frequency domain branch. The fusion
+                         process was defined as:
+                                                                       N
+                                                            X f use = ∑i=1 αi Xi                                (5)
+
+                         where Xi denotes the output feature map of the i-th branch, and αi represents the corre-
+                         sponding fusion weight:
+                                                                  exp(wi )
+                                                          αi = N                                              (6)
+                                                               ∑ j=1 exp(wi )
+                         where wi denotes the learnable fusion parameter.
+                              The fused features underwent final feature transformation through the output projec-
+                         tion layer:
+                                                          Xout = Conv1×1 ( X f use )                           (7)
+
+                         3.2. Multi-Scale Defect-Aware Attention Module
+                               Although the C2PSA module of the original YOLOv11 algorithm showed good per-
+                         formance in feature extraction, it still had obvious limitations in industrial scenes such as
+                         steel surface defect detection. Firstly, the position-sensitive attention mechanism adopted
+                         by C2PSA mainly focused on the global relationship modeling of different positions in
+                         the feature map, but the ability to capture local details such as defect edges and shapes
+                         was insufficient. Secondly, the attention calculation process of this module lacked explicit
+                         modeling of multi-scale information, which was unable to effectively deal with the charac-
+                         teristics of large-scale changes and diverse forms of steel surface defects. In addition, the
+                         feature fusion strategy of C2PSA was relatively simple, and it failed to make full use of
+                         the complementarity of multi-dimensional information such as spatial domain, channel
+                         domain, and edge domain, resulting in the limited detection accuracy of small-size defects
+                         and low-contrast defects. Therefore, this paper replaced the PSA module in the C2PSA
+                         module with the MSDA module to construct the C2MSDA module. By introducing the
+                         mechanisms of edge perception, multi-scale spatial attention, and adaptive channel atten-
+                         tion, a more refined learning framework for defect feature representation was constructed.
+                         The network architecture of the MSDA module was shown in Figure 3. It was composed of
+                         the Defect Focus Module (DFM), which was internally integrated with edge-aware module
+                         (EAM), Multi-Scale Spatial Attention Module (MSSA), and Adaptive Channel Attention
+                         Module (ACA).
+                               The EAM sub-module provided explicit edge priors for the Defect Focus Module
+                         (DFM), guiding attention toward defect boundary regions. Unlike the frequency domain
+                         enhancement branch in MSFC, the EAM was not concerned with the overall distribution
+                         of high-frequency energy but rather with the orientation and gradient structure of edges.
+                         Common steel surface defects such as cracks and scratches typically manifest as abrupt
+                         gray-level transitions extending along specific directions, exhibiting pronounced directional
+                         characteristics. Such defect properties required the EAM to perceive gradient variations
+                         along different orientations separately. The network architecture of the EAM was illustrated
+
+
+                                                                                       https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                                                                                                     12 of 27
+
+
+
+                         in Figure 4. By introducing the Sobel operator, the module explicitly extracted edge gradient
+                         information from the feature maps to enhance boundary perception. The detailed workflow
+                         was as follows:
+
+                              C2PSA                                C2MSDA
+
+
+
+                                      CBS                            CBS                   Defect Focus Module
+                                                                                          ACA         MSSA
+                                      PSA                            MSDA
+                                                                                                               Concat                1×1Conv              +       1×1Conv    1×1Conv   +
+                          N           ……                     N       ……
+
+                                      PSA                            MSDA                 EAM        1×1Conv
+
+
+
+                                   Concat                            Concat
+
+
+
+                                      CBS                            CBS
+                                                                                                (b) Multi-Scale Defect-Aware Attention (MSDA)
+
+                                        (a) C2MSDA
+
+
+                                            Avg pool                                                           Avg pool   1×1 Conv     GeLU    1×1 Conv
+
+                                                                                                                                                                   Sigmoid
+                                            Max pool                                                                                                          +
+
+
+                                                                                                                          1×1 Conv             1×1 Conv
+                                                          Concat     1×1Conv   Sigmoid
+
+                                                                                                               Avg pool                GeLU
+                                                       0.5
+                                            Max pool
+                                                       0.5
+                                            Avg pool
+
+                                                                                                     (d) Adaptive Channel Attention (ACA)
+                                (c) Multi-Scale Spatial Attention (MSSA)
+
+                         Figure 3. Cross-Stage Partial with Multi-Scale Defect-Aware Attention module network architec-
+                         ture diagram.
+
+
+
+
+                         Figure 4. Edge-aware module network architecture diagram.
+
+                              For the input feature map Xin ∈ RC1 × H ×W , Sobel convolution kernels in horizontal
+                         and vertical directions were applied for edge detection. The horizontal Sobel operator was
+                         defined as:                                          
+                                                                     −1 0 1
+                                                             Gx =  −2 0 2                                      (8)
+                                                                              
+                                                                     −1 0 1
+                                 The vertical Sobel operator was defined as:
+                                                                                                        
+                                                                                                −1 −2 −1
+                                                                                         Gy =  0  0  0                                                                                        (9)
+                                                                                                        
+                                                                                                1  2  1
+
+                              The gradient responses in horizontal and vertical directions were computed via depth-
+                         wise convolution for each channel:
+
+                                                                                          Xx = DConvGx ( X )                                                                                  (10)
+
+                                                                                          Xy = DConvGy ( X )                                                                                  (11)
+
+                         where DConv denotes the depthwise convolution operation.
+
+
+                                                                                                                                                                  https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                             13 of 27
+
+
+
+                              The edge intensity map was calculated using gradient magnitude:
+                                                                     q
+                                                            Xmag =       Xx2 + Xy2 + ε                                (12)
+
+                         where ε = 10−6 is a numerical stability term.
+                             Finally, the edge features were semantically enhanced through 1 × 1 convolution:
+
+                                                            Xeam = Conv1×1 ( Xmag )                                   (13)
+
+                              The network architecture of the MSSA sub-module was illustrated in Figure 3c. By
+                         capturing spatial saliency information at different scales, the adaptability of the network to
+                         multi-scale defects was enhanced. The workflow was as follows:
+                              First, max pooling and average pooling along the channel dimension were computed
+                         to generate spatial descriptors:
+                                                              Xmax = MAX ( X )                                     (14)
+
+                                                               Xavg = GAP( X )                                        (15)
+
+                         where MAX (•) and GAP(•) denote max pooling and average pooling, respectively.
+                             To incorporate multi-scale information, pooling features with attenuation weights
+                         were constructed from the obtained spatial descriptors:
+
+                                                                 ′
+                                                                Xmax = 0.5Xmax                                        (16)
+
+                                                                 ′
+                                                                Xavg = 0.5Xavg                                        (17)
+
+                              The four spatial feature maps were concatenated along the channel dimension to
+                         obtain multi-scale spatial features:
+
+                                                                                  ′      ′
+                                                    Xcat = Concat( Xmax , Xavg , Xmax , Xavg )                        (18)
+
+                         where Concat(•) denotes the concatenation operation along the channel dimension.
+                             Finally, the spatial attention map was generated through 7 × 7 convolution and the
+                         Sigmoid activation function:
+
+                                                          Xmssa = σ (Conv7×7 ( Xcat ))                                (19)
+
+                         where Conv7×7 represents the 7 × 7 convolution operation, and σ denotes the Sigmoid function.
+                              The network architecture of the ACA sub-module was shown in Figure 3d. By mod-
+                         eling the inter-channel dependencies, the channel feature responses were adaptively re-
+                         calibrated to highlight discriminative channels relevant to defects. The workflow was
+                         as follows:
+                              First, global average pooling and global max pooling were employed to compress the
+                         spatial dimension information. The channel attention weights were then learned through a
+                         shared multilayer perceptron (MLP), with the reduction ratio set to 16:
+
+                                                              Wavg = MLP( Favg )                                      (20)
+
+                                                             Wmax = MLP( Fmax )                                       (21)
+
+                         where MLP(•) represents the multilayer perceptron consisting of two 1 × 1 convolutional
+                         layers. Favg and Fmax denote the channel-wise average-pooled and max-pooled feature
+                         maps, respectively.
+
+
+
+
+                                                                                          https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                             14 of 27
+
+
+
+                             Finally, the channel attention map was generated by fusing the outputs of the two
+                         branches with the Sigmoid activation function:
+
+                                                           Xaca = σ (Wavg + Wmax )                                    (22)
+
+                             The DFM synergistically integrated the multi-dimensional features produced by the
+                         above three sub-modules and achieved dynamic feature fusion through an adaptive gating
+                         mechanism. The module first applied channel attention followed by spatial attention to the
+                         input features X to obtain enhanced features:
+
+                                                           Xattn = X ⊙ Xaca ⊙ Xmssa                                   (23)
+
+                         where ⊙ denotes element-wise multiplication.
+                              The edge features Xeam output by the EAM sub-module generated adaptive weights
+                         through the gating network:
+
+                                                         Wedge = σ (Conv1×1 ( Xeam ))                                 (24)
+
+                              Therefore, the edge-enhanced features were:
+
+                                                              Xedge = X ⊙ Wedge                                       (25)
+
+                              The spatial-channel enhanced features and edge-enhanced features were concatenated
+                         along the channel dimension and then mapped back to the original channel dimension
+                         through 1 × 1 convolution:
+
+                                                   X f used = Conv1×1 (Concat( Xattn , Xedge ))                       (26)
+
+                             The MSDA module employed a residual connection strategy, adding the output of the
+                         a DFM to the input features:
+                                                         1
+                                                       Xout = X + X f used                                (27)
+
+                              To further enhance the feature representation capability, a convolutional feedforward
+                         layer was introduced for nonlinear transformation, which consisted of two 1 × 1 convolutions:
+
+                                                                                    1
+                                                      X f f n = Conv1×1 (Conv1×1 ( Xout ))                            (28)
+
+                              Therefore, the final output of the MSDA module was:
+
+                                                                                1
+                                                              Xout = X f f n + Xout                                   (29)
+
+                         3.3. Adaptive Feature Fusion Enhancement Module
+                              Traditional detection algorithms such as YOLOv11 typically employ simple channel
+                         concatenation operations to fuse features from different network layers, where multi-
+                         ple feature maps are directly concatenated along the channel dimension to form higher-
+                         dimensional feature representations. The simple concatenation operation assigns the same
+                         importance to all input features, ignoring the differential contribution of different feature
+                         layers in representing different scale targets, resulting in high redundancy and insufficient
+                         discrimination of the fused feature representation. Features from different depths have
+                         different semantic levels and spatial resolutions. Shallow features contain rich spatial
+                         details, but semantic information is weak. Deep features have strong semantic information,
+                         but spatial details are lost. Direct concatenation operation was unable to make full use
+                         of this complementarity. To address these limitations, this paper proposed an Adaptive
+
+
+
+                                                                                          https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                                                                          15 of 27
+
+
+
+                                    Feature Fusion Enhancement (AFFE) module, comprising an Adaptive Weighted Fusion
+                                    (AWF) sub-module and a Cross-Scale Enhancement (CSE) sub-module, as illustrated in
+                                    Figure 5. Compared with the traditional feature fusion method, the AFFE module realized
+                                    the adaptive feature fusion through the data-driven weight generation network, which
+                                    could dynamically adjust the contribution of different features according to the task re-
+                                    quirements and avoid the information redundancy caused by the fixed weight. The AFFE
+                                    module could explicitly model the cross-scale feature interaction, so that the deep features
+                                    could directly obtain the details of the shallow layer and enhance the detection ability of
+                                    small-scale defects.
+
+                                                                               Mul
+         X1                                                                                        X3      1×1Conv       Interpolate
+               Avg pool
+
+                                   1×1 Conv          1×1 Conv   Softmax
+                                                                          W1
+         X2
+                          Concat              ReLU                                   +             X4      1×1Conv       Interpolate      Concat    1×1Conv
+                                                                          W2
+               Avg pool
+                                                                                                    X5
+                                                                               Mul
+
+
+               (a) Adaptive Weighted Fusion (AWF)                                                   (b) Cross-Scale Enhancement (CSE)
+
+                                    Figure 5. Adaptive Feature Fusion Enhancement module network architecture diagram.
+
+                                          The network architecture of the AWF sub-module was illustrated in Figure 5a. The
+                                    AWF module employed a lightweight attention network to assign adaptive weights to
+                                    features from different sources, enabling the network to dynamically adjust the fusion
+                                    strategy based on the semantic content and spatial distribution of input features. The
+                                    workflow was described as follows:
+                                          Given N input feature maps Xi ∈ RCi × H ×W to be fused, global average pooling was
+                                    first applied to each feature map to extract global contextual information:
+
+                                                                                                     Gi = GAP( Xi )                                                (30)
+
+                                         The global descriptors of all features were concatenated along the channel dimension
+                                    to obtain an aggregated global feature representation:
+
+                                                                                         Gcat = Concat( G1 , . . . , Gi , . . . , Gn )                             (31)
+
+                                        The fusion weights for N features were learned through a multilayer perceptron (MLP)
+                                    and normalized using the Softmax activation function:
+
+                                                                                            Wi = So f tmax( MLP( Gcat ))                                           (32)
+
+                                    where So f tmax(•) denotes the Softmax activation function, as defined in Equation (6). The
+                                    MLP consisted of two 1 × 1 convolutional layers with a ReLU activation function. The first
+                                    layer compressed the concatenated global features from C dimensions to C/8 dimensions.
+                                    After ReLU activation, the second layer mapped the hidden representation back to the
+                                    original C-dimensional vector, which was then normalized by the Softmax function to
+                                    produce the fusion weights for each feature level.
+                                         The feature maps of different dimensions were then combined through weighted summation:
+                                                                                                                 N
+                                                                                                  Xaw f = ∑i=1 Wi Xi                                               (33)
+
+                                       The network architecture of the CSE sub-module was depicted in Figure 5b. The CSE
+                                    module enhanced the representational capacity of the deepest feature map through cross-
+
+
+
+                                                                                                                                       https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                                16 of 27
+
+
+
+                         level information interaction, enabling it to incorporate fine-grained details from shallow
+                         features while maintaining a large receptive field. The workflow proceeded as follows:
+                              The CSE sub-module received feature maps (X3 ∈ RC3 × H3 ×W3 , X4 ∈ RC4 × H4 ×W4 ,
+                         and X5 ∈ RC5 × H5 ×W5 ) from three different levels of the feature pyramid as input, where
+                         subscripts 3, 4, and 5 denote the three pyramid levels, typically satisfying H3 > H4 > H5
+                         and W3 > W4 > W5 .
+                              To achieve cross-scale information transmission, the CSE sub-module first performed
+                         channel mapping on features at different levels through 1 × 1 convolution:
+
+                                                                            (3→5)
+                                                            T3→5 = Conv1×1 ( X3 )                                        (34)
+
+                                                                            (4→5)
+                                                            T4→5 = Conv1×1 ( X4 )                                        (35)
+                                         (3→5)
+                         where Conv1×1 denotes a 1 × 1 convolution operation with C3 input channels and C5
+                         output channels.
+                              The feature maps were downsampled to match the spatial dimensions of X5 via
+                         bilinear interpolation:
+                                                 e3→5 = Interpolate( T3→5 , ( H5 , W5 ))
+                                                 T                                                     (36)
+                                                      e4→5 = Interpolate( T4→5 , ( H4 , W5 ))
+                                                      T                                                                  (37)
+
+                         where Interpolate(•) denotes the bilinear interpolation operation.
+                             The original X5 feature was concatenated with the projected features from other levels
+                         along the channel dimension:
+
+                                                        X5cat = Concat( X5 , T      e4→5 )
+                                                                             e3→5 , T                                    (38)
+
+                              Finally, the multi-scale features were mapped back to the original channel dimension
+                         through 1 × 1 convolution:
+
+                                                           X5enhanced = Conv1×1 ( X5cat )                                (39)
+
+                         4. Results and Analysis
+                         4.1. Experimental Platform
+                               All experiments in this paper were trained and tested on the same server. The server
+                         GPU was equipped with an NVIDIA GeForce RTX 3090, 24 g video memory (NVIDIA
+                         Corporation, Santa Clara, CA, USA) and the CPU was Intel Xeon e5-2680 v4@2.40 GHz
+                         (Intel Corporation, Santa Clara, CA, USA). The operating system was Ubuntu20.04, the deep
+                         learning framework was PyTorch 2.0.0, and the programming language was Python 3.8. In
+                         addition, to verify the deployment capability on edge devices, inference speed tests were
+                         conducted on the NVIDIA Jetson AGX Xavier platform. This platform is equipped with a
+                         512-core Volta GPU and 32 GB of shared memory, running the JetPack 5.1 environment,
+                         and is a commonly used edge computing device in industrial settings. All models were
+                         tested with the same inference settings as on the server side.
+
+                         4.2. Datasets
+                               This paper used NEU-DET [50] and GC10-DET [2] to verify the effectiveness of the
+                         proposed algorithm. The NEU-DET dataset was collected by Northeastern University
+                         and contained 1800 gray-scale images with a size of 200 × 200 pixels, covering six typical
+                         hot-rolled steel strip surface defect categories: crazing, inclusion, patches, pitted surface,
+                         rolled-in scale, and scratches. In this paper, NEU-DET dataset was divided into training set,
+                         verification set, and test set according to a 7:1:2 ratio. The GC10-DET dataset was collected
+
+
+
+                                                                                             https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                              17 of 27
+
+
+
+                         from real industrial scenes and contained 2294 images with a size of 2048 × 1000 pixels,
+                         covering 10 steel surface defect categories: punching hole, welding line, crescent gap, water
+                         spot, oil spot, silk spot, inclusion, rolled pit, crease, and waist folding. The GC10-DET
+                         dataset was also divided into training set, verification set and test set according to the
+                         7:1:2 ratio. The diversity of defect types across the two datasets, ranging from texture-based
+                         defects such as crazing and scratches to shape-based defects such as crescent gap and waist
+                         folding, provides a comprehensive evaluation of the proposed algorithm’s generalization
+                         capability under varying defect morphologies and imaging conditions.
+
+                         4.3. Experimental Settings
+                               All test parameters in this paper were basically set according to the parameter con-
+                         figuration recommended by YOLOv11. Two data enhancement methods, Mosaic [51] and
+                         MixUp [52] were used in the data preprocessing stage, and Mosaic enhancement was
+                         turned off in the last 10 epochs of training. The HSV color–space jittering was applied to
+                         the training images, with the hue shift coefficient set to 0.015, the saturation shift coefficient
+                         set to 0.7, and the value (brightness) shift coefficient set to 0.4. The probability of random
+                         horizontal flipping was set to 0.5, the random translation fraction was set to 0.1, and the
+                         random scaling fraction was set to 0.5. The input image was uniformly adjusted to the
+                         640 × 640 size, and the adaptive anchor box calculation strategy was adopted. In the train-
+                         ing phase, the stochastic gradient descent (SGD) optimizer was used to update the network
+                         parameters. The initial learning rate was set to 0.01, the learning rate momentum was 0.937,
+                         and the weight attenuation coefficient was 0.0005. The batch size was set to 16, the number
+                         of CPU threads was 8, and the number of training rounds (epoch) was 300.
+
+                         4.4. Evaluation Metrics
+                              In this paper, multiple metrics were used to comprehensively evaluate the performance
+                         of the model. Precision (P) represents the proportion of correctly detected targets in the
+                         predicted positive samples:
+                                                                    TP
+                                                             P=             × 100%                              (40)
+                                                                 TP + FP
+                              Recall (R) represents the proportion of actually detected targets relative to all ground-
+                         truth targets:
+                                                                    TP
+                                                           R=              × 100%                                   (41)
+                                                                 TP + FN
+                         where TP (true positive) denotes the number of correctly predicted positive samples, FP
+                         (false positive) denotes the number of negative samples incorrectly predicted as positive,
+                         and FN (false negative) denotes the number of positive samples incorrectly predicted
+                         as negative.
+                               Average precision (AP) is calculated as the area under the precision–recall curve:
+                                                                       Z 1
+                                                                AP =         P( R)dR                                   (42)
+                                                                         0
+
+                               Mean average precision (mAP) is computed as the average of AP values across
+                         all categories:
+                                                              1 n
+                                                      mAP = ∑ AP(i ) × 100%                            (43)
+                                                             n i =1
+
+                         where n denotes the total number of categories.
+                             The F1 score provides a harmonic mean of precision and recall:
+
+                                                                         2P × R
+                                                                  F1 =                                                 (44)
+                                                                          P+R
+
+
+                                                                                           https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                                    18 of 27
+
+
+
+                                     Additionally, the parameters, GFLOPs, and FPS (frames per second) were employed
+                                to evaluate model complexity and real-time performance.
+
+                                4.5. Experimental Results and Analysis
+                                4.5.1. Result Analysis of the MSFC Module
+                                     To verify the effectiveness of the proposed MSFC module in defect detection, the con-
+                                ventional convolutions in the neck network of the baseline YOLOv11s model were replaced
+                                with the MSFC, DynamicConv [53], DySnakeConv [21], LDConv [54], and MSCB [55]
+                                modules, respectively. The experimental results are presented in Table 1.
+
+                                Table 1. MSFC module results.
+
+ Method                  P       R         F1         mAP@0.5       mAP@0.5:0.95     Parameters    GFLOPs         FPS (f/s)
+ YOLOv11s                69.8    75.5      72.5       78.1          46.2             8.99          21.6           137.0
+ YOLOv11s-
+                         71.6    75.8      73.6       77.5          45.1             11.10         20.6           122.0
+ DynamicConv
+ YOLOv11s-
+                         75.1    73.2      74.1       78.5          45.2             12.08         30.0           70.9
+ DySnakeConv
+ YOLOv11s-
+                         71.6    72.6      72.1       78.3          45.6             8.54          21.1           95.2
+ LDConv
+ YOLOv11s-MSCB           70.8    74.2      72.5       77.5          44.9             8.95          22.2           128.2
+ YOLOv11s-MSFC           75.9    75.0      75.4       78.7          44.9             8.92          23.6           109.9
+
+
+                                     On the NEU-DET dataset, comparative experiments were conducted by replacing the
+                                conventional convolutions in the YOLOv11s neck network with five different convolution
+                                modules: MSFC, DynamicConv, DySnakeConv, LDConv, and MSCB. The experimental
+                                results demonstrated that the model equipped with the proposed MSFC module achieved a
+                                precision of 75.9%, representing an improvement of 6.1% over the baseline YOLOv11s. The
+                                F1 score reached 75.4%, which is 2.9% higher than the baseline, and mAP@0.5 reached 78.7%,
+                                an improvement of 0.6%. In terms of model complexity, the MSFC module had 8.92 M
+                                parameters, slightly lower than the baseline model’s 8.99 M, with a computational cost
+                                of 23.6 GFLOPs and an inference speed of 109.9 FPS. In contrast, although DySnakeConv
+                                achieved an mAP@0.5 of 78.5%, it required 12.08 M parameters and 30.0 GFLOPs, with
+                                an inference speed of only 70.9 FPS. Both DynamicConv and MSCB modules yielded
+                                an mAP@0.5 of 77.5%, which was lower than the baseline model, indicating that these
+                                two convolution structures were not suitable for steel surface defect detection tasks.
+                                     The multi-scale parallel dilated convolution branch, through its depth-adaptive di-
+                                lation rate configuration, could simultaneously capture defect features at different scales,
+                                effectively addressing the challenge of large-scale variations in steel surface defects. This
+                                enabled the model to achieve strong detection capability for both small-scale pitting de-
+                                fects and large-area patch defects. The frequency domain enhancement branch explic-
+                                itly modeled high-frequency edge information by incorporating the Laplacian operator,
+                                strengthening the network’s perception of defect contours and texture variations and com-
+                                pensating for the limitations of conventional convolutions in frequency domain feature
+                                extraction. This was particularly effective for scratches and cracks with prominent edge
+                                features. The adaptive dynamic fusion mechanism performed weighted aggregation of
+                                multi-branch features through learnable weight parameters, enabling the network to auto-
+                                matically adjust the contribution ratio of each branch according to the characteristics of the
+                                input data. This approach avoided the information redundancy problem caused by fixed
+                                weight fusion strategies while maintaining low computational overhead and improving
+                                detection accuracy.
+
+
+
+
+                                                                                               https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                                    19 of 27
+
+
+
+                                4.5.2. Result Analysis of the AWF Module
+                                     To verify the effectiveness of the proposed Adaptive Weighted Fusion (AWF) sub-
+                                module in feature fusion, comparative experiments were conducted by replacing the Concat
+                                operation in the neck network of the baseline YOLOv11s model with the BiFPN module [42]
+                                and the AWF module, respectively. The experimental results were presented in Table 2.
+                                The results showed that the model with the AWF module achieved a precision of 73.3%,
+                                which is 3.5% higher than the baseline YOLOv11s, and an mAP@0.5 of 78.5%, representing
+                                an improvement of 0.4% over the baseline. In terms of model complexity, the AWF module
+                                had 10.32 M parameters and a computational cost of 23.0 GFLOPs, with an inference speed
+                                of 109.9 FPS, which satisfied the requirements for real-time detection. In contrast, although
+                                the BiFPN module maintained the same parameter count and computational cost as the
+                                baseline model, its mAP@0.5 was only 78.4%, showing a slightly lower improvement
+                                compared to the AWF module.
+
+                                Table 2. AWF module results.
+
+ Method                  P       R         F1         mAP@0.5       mAP@0.5:0.95     Parameters GFLOPs            FPS (f/s)
+ YOLOv11s                69.8    75.5      72.5       78.1          46.2             8.99          21.6           137.0
+ YOLOv11s-
+                         73.4    73.4      73.4       78.4          45.3             8.99          21.6           129.9
+ BiFPN
+ YOLOv11s-AWF            73.3    72.8      73.0       78.5          45.2             10.32         23.0           109.9
+
+
+                                     BiFPN achieved multi-scale feature fusion through a bidirectional feature pyramid
+                                structure with simple learnable weights, where each input feature was weighted by only a
+                                single scalar parameter. In contrast, the proposed AWF module adopted a more refined
+                                weight generation strategy. It first extracted global contextual information from each feature
+                                layer through global average pooling, then employed a multilayer perceptron (MLP) to
+                                learn complex dependencies among features, and finally generated adaptive fusion weights
+                                through Softmax normalization. This data-driven weight generation mechanism could
+                                dynamically adjust the contribution ratio of each feature layer based on the semantic
+                                content and spatial distribution of input features, resulting in more discriminative fused
+                                feature representations.
+
+                                4.5.3. Ablation Experiment
+                                      To verify the contribution of each proposed module to the detection performance,
+                                ablation experiments were conducted on the NEU-DET dataset, and the results were pre-
+                                sented in Table 3. The baseline YOLOv11s model had 8.99 M parameters, a computational
+                                cost of 21.6 GFLOPs, an mAP@0.5 of 78.1%, an mAP@0.5:0.95 of 46.2%, and an inference
+                                speed of 137.0 FPS. When the MSFC module was added individually, mAP@0.5 increased
+                                to 78.7%, which represents an improvement of 0.6%. When the C2MSDA module was
+                                added individually, mAP@0.5 increased to 78.5%, which represents an improvement of
+                                0.4%. When the AFFE module was added individually, mAP@0.5 increased to 78.8%, which
+                                represents an improvement of 0.7%. When the MSFC and C2MSDA modules were added
+                                simultaneously, the model achieved an mAP@0.5 of 79.2%, representing an improvement
+                                of 1.1% over the baseline while maintaining the same parameter count of 8.99 M. When all
+                                three modules were incorporated, the MSFE-YOLO model achieved an mAP@0.5 of 79.8%,
+                                which is an improvement of 1.7% over the baseline, with an mAP@0.5:0.95 of 45.8%, 11.69 M
+                                parameters, a computational cost of 27.9 GFLOPs, and an inference speed of 89.3 FPS, which
+                                satisfied the real-time detection requirements in industrial scenarios. To further validate
+                                the feasibility of edge deployment, the inference speed of each configuration was tested on
+                                the Jetson AGX Xavier platform (last column of Table 3). The baseline YOLOv11s achieves
+
+
+                                                                                               https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                                                 20 of 27
+
+
+
+                                  32.3 FPS, while MSFE-YOLO achieves 22.1 FPS, a decrease of approximately 31.6%, which
+                                  is consistent with the reduction ratio observed on the RTX 3090. In practical hot-rolling
+                                  production lines, the frame rate requirement for quality inspection typically does not exceed
+                                  15 FPS, so 22.1 FPS fully satisfies the real-time detection requirement in industrial scenarios.
+                                  Moreover, the current tests are based on direct PyTorch inference, and further acceleration
+                                  is achievable in actual deployment through optimization techniques such as TensorRT.
+
+                                  Table 3. Ablation experiments.
+
+                                                                                                                          FPS (f/s)
+ YOLOv11s       MSFC       C2MSDA       AFFE       Parameters      GFLOPs       mAP@0.5/(%) mAP@0.5:0.95/(%)                      Xavier
+                                                                                                                RTX 3090
+                                                                                                                                  AGX
+     √
+     √             √                                   8.99          21.6           78.1          46.2            137.0               32.3
+     √                        √                        8.92          23.6           78.7          44.9            109.9               27.4
+     √                                    √            9.06          21.6           78.5          45.4            129.9               29.9
+     √             √          √                       11.70          25.8           78.8          44.9            113.6               27.8
+     √             √          √           √            8.99          23.7           79.2          44.5            109.9               26.6
+                                                      11.69          27.9           79.8          45.8             89.3               22.1
+                                  √
+                                      indicates that the model used includes this module.
+
+
+                                       The MSFC module extracts rich multi-scale features through multi-scale parallel di-
+                                  lated convolutions and the frequency domain enhancement mechanism, while the C2MSDA
+                                  module performs refined feature enhancement through edge perception, multi-scale spatial
+                                  attention, and adaptive channel attention. These two modules complement each other
+                                  at the feature extraction and feature enhancement levels, jointly improving the model’s
+                                  detection capability for different types of defects. The AFFE module further optimizes
+                                  the aggregation strategy of multi-scale features through Adaptive Weighted Fusion and
+                                  cross-scale feature enhancement mechanisms, enabling deep semantic information and
+                                  shallow detail information to fully interact and integrate. This further improved the de-
+                                  tection accuracy of the model building upon the MSFC and C2MSDA modules. The three
+                                  modules collaboratively optimize network performance from three dimensions: feature
+                                  extraction, feature enhancement, and feature fusion. The ablation experiment results fully
+                                  validate the effectiveness and necessity of each module design proposed in this paper.
+
+                                  4.5.4. Comparative Experiment Analysis
+                                       To verify the effectiveness of the proposed algorithm, MSFE-YOLO was compared
+                                  with Faster R-CNN [56], SSD [57], YOLOv5s, YOLOv8s, YOLOv9s [58], YOLOv10s [59],
+                                  and YOLOv11s on the NEU-DET and GC10-DET public datasets. The experimental results
+                                  are presented in Tables 4 and 5, respectively.
+
+                                  Table 4. Comparative experiment on the NEU-DET dataset.
+
+ Model                   Parameters      GFLOPs          P             R              F1          mAP@0.5/(%)       mAP@0.5:0.95/(%)
+ Faster R-CNN            136.79          369.8           19.1          81.6           31.0        55.1              25.6
+ SSD                     12.34           38.8            78.6          15.8           26.3        46.0              18.8
+ YOLOv5s                 6.71            16.0            73.3          74.5           73.9        77.3              41.2
+ YOLOv8s                 10.62           28.7            76.8          72.7           74.7        78.8              44.9
+ YOLOv9s                 6.83            26.7            73.7          72.7           73.2        78.3              44.6
+ YOLOv10s                6.89            21.4            72.8          72.1           72.5        76.4              43.8
+ YOLOv11s                8.99            21.6            69.8          75.5           72.5        78.1              46.2
+ MSFE-YOLO               11.69           27.9            78.9          72.6           75.6        79.8              45.8
+
+
+
+
+                                                                                                         https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                                       21 of 27
+
+
+
+                                  Table 5. Comparative experiment on the GC10-DET dataset.
+
+ Model                   Parameters   GFLOPs        P           R           F1               mAP@0.5/(%)       mAP@0.5:0.95/(%)
+ Faster R-CNN            136.87       369.9         17.8        46.6        25.8             35.3              16.1
+ SSD                     12.87        40.0          83.8        15.2        25.7             39.2              15.5
+ YOLOv5s                 6.72         16.0          74.3        58.7        65.6             63.6              32.7
+ YOLOv8s                 10.62        28.7          63.7        62.7        63.2             64.2              30.9
+ YOLOv9s                 6.84         26.7          72.6        55.4        62.8             64.2              30.8
+ YOLOv10s                6.89         21.4          61.8        53.9        57.6             59.3              30.2
+ YOLOv11s                8.99         21.6          67.8        59.5        63.4             64.6              32.0
+ MSFE-YOLO               11.69        27.9          64.0        61.6        62.8             66.7              34.4
+
+
+                                       On the NEU-DET dataset, the proposed MSFE-YOLO algorithm achieved the best
+                                  detection performance. As shown in Table 4, MSFE-YOLO achieved an mAP@0.5 of 79.8%,
+                                  an improvement of 1.7% over the baseline YOLOv11s model. The precision reached 78.9%,
+                                  which is an improvement of 9.1%, and the F1 score was 75.6%, which is an improvement of
+                                  3.1%. Compared with other algorithms, MSFE-YOLO outperformed Faster R-CNN, SSD,
+                                  YOLOv5s, YOLOv8s, YOLOv9s, and YOLOv10s in mAP@0.5 by 24.7%, 33.8%, 2.5%, 1.0%,
+                                  3.4%, and 1.7%, respectively. Although the two-stage detection algorithm Faster R-CNN
+                                  achieved a recall of 81.6%, its precision was only 19.1%, resulting in an mAP@0.5 of only
+                                  55.1%. The SSD algorithm had relatively high precision but extremely low recall, leading
+                                  to unsatisfactory overall performance. In terms of model complexity, MSFE-YOLO had
+                                  11.69 M parameters and a computational cost of 27.9 GFLOPs. Compared with Faster R-
+                                  CNN, which had 136.79 M parameters and 369.8 GFLOPs, MSFE-YOLO achieved significant
+                                  model lightweighting while substantially improving detection accuracy.
+                                       On the GC10-DET dataset, the proposed algorithm also demonstrated good detection
+                                  performance and generalization capability. As shown in Table 5, MSFE-YOLO achieved
+                                  an mAP@0.5 of 66.7%, which is an improvement of 2.1% over the baseline YOLOv11s
+                                  model, and an mAP@0.5:0.95 of 34.4%, which is an improvement of 2.4%. Compared
+                                  with YOLOv5s, YOLOv8s YOLOv9s, and YOLOv10s, MSFE-YOLO improved mAP@0.5 by
+                                  3.1%, 2.5%, 2.5%, and 7.4%, respectively. Faster R-CNN and SSD performed poorly on
+                                  this dataset, with mAP@0.5 of only 35.3% and 39.2%, respectively, struggling to handle
+                                  the characteristics of the GC10-DET dataset, which exhibits high inter-class similarity and
+                                  imbalanced sample distribution. MSFE-YOLO achieved a recall of 61.6%, which is an
+                                  improvement of 2.1% over YOLOv11s’s 59.5%, indicating that the proposed algorithm
+                                  provides better suppression of missed detections. Additionally, the mAP@0.5:0.95 of all
+                                  compared algorithms on the GC10-DET dataset remained at a relatively low level, which
+                                  was primarily attributed to the inherent characteristics of the dataset: the original image
+                                  resolution was 2048 × 1000, and scaling to the 640 × 640 input size introduced significant
+                                  geometric distortion; the 10 defect categories exhibited large morphological differences,
+                                  and horizontal rectangular bounding boxes had limited descriptive capability for irregular
+                                  defects such as crescent gaps and waist folding, which increased the matching difficulty
+                                  under high IoU thresholds. Nevertheless, MSFE-YOLO achieved an mAP@0.5:0.95 of 34.4%,
+                                  which was the highest among all compared methods and represented a 2.4% improvement
+                                  over the baseline.
+                                       The GC10-DET dataset contained 10 defect categories, with some images exhibiting
+                                  multiple coexisting defect types, which imposed higher requirements on feature extraction
+                                  and fusion capabilities. The frequency domain enhancement mechanism of the MSFC
+                                  module could effectively distinguish defects with similar textures but different categories,
+                                  such as water spots and oil spots. The multi-scale dilated convolution branch enhanced
+                                  adaptability to defects with large-scale variations, such as punching holes and rolled pits.
+
+
+
+                                                                                                    https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                                  22 of 27
+
+
+
+                                 The adaptive gated fusion strategy of the C2MSDA module dynamically adjusted the con-
+                                 tribution weights of each attention branch based on input features, effectively addressing
+                                 the feature confusion problem caused by high inter-class similarity. The cross-scale feature
+                                 enhancement mechanism of the AFFE module facilitated information interaction among fea-
+                                 tures at different levels, enabling the model to balance global semantic understanding and
+                                 local detail localization when handling scenarios with multiple coexisting defects, thereby
+                                 achieving stable and reliable detection performance in complex industrial scenarios.
+                                      To further visually demonstrate the detection effectiveness of the proposed algorithm,
+                                 typical samples were selected from the NEU-DET and GC10-DET datasets for visual
+                                 comparative analysis. The results are shown in Figures 6 and 7.
+
+
+
+
+           1
+
+
+
+
+           2
+
+
+
+
+           3
+
+
+
+
+           4
+
+
+                         Image             Ground Truth                  YOLOv11s              MSFE-YOLO
+                                 Figure 6. Visualization results on the NEU-DET dataset.
+
+
+
+
+                                                                                               https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                           23 of 27
+
+
+
+
+1
+
+
+
+
+ 2
+
+
+
+
+ 3
+
+
+
+
+ 4
+
+
+
+                  Image             Ground Truth                      YOLOv11s                  MSFE-YOLO
+
+                          Figure 7. Visualization results on the GC10-DET dataset.
+
+                               In the visualization results on the NEU-DET dataset, MSFE-YOLO demonstrated supe-
+                          rior detection performance compared to YOLOv11s. As shown in rows 1 and 2 of Figure 6,
+                          YOLOv11s exhibited false positives in complex background regions, misidentifying some
+                          background textures as defect targets, whereas MSFE-YOLO accurately identified the actual
+                          defect regions without generating false positives. As shown in row 3 of Figure 6, YOLOv11s
+                          missed some low-contrast and small-sized defects, while MSFE-YOLO successfully de-
+                          tected these defect targets. Furthermore, as shown in row 4 of Figure 6, for the same defect
+                          targets, the confidence scores output by MSFE-YOLO were significantly higher than those
+                          of YOLOv11s, indicating that the proposed algorithm possesses stronger discriminative
+                          capability for defect features.
+                               In the visualization results on the GC10-DET dataset, MSFE-YOLO also demonstrated
+                          clear advantages. As shown in rows 1 and 2 of Figure 7, YOLOv11s exhibits over-detection
+                          during the detection process, generating multiple redundant responses for defect regions,
+                          whereas MSFE-YOLO does not exhibit such issues. As shown in rows 3 and 4 of Figure 7,
+                          YOLOv11s suffered from missed detections, with some defect targets remaining undetected,
+                          while MSFE-YOLO achieved complete detection. Notably, row 4 of Figure 7 also reveals that
+                          YOLOv11s produced misclassifications, incorrectly identifying certain defect types as other
+                          categories, whereas MSFE-YOLO correctly recognized the defect types, demonstrating
+                          stronger category discrimination capability.
+
+                          5. Conclusions
+                               To address the challenges of difficult multi-scale feature extraction, insufficient edge
+                          information modeling, and low feature fusion efficiency in steel surface defect detection
+                          tasks, this paper proposed MSFE-YOLO, a detection algorithm that integrated multi-scale
+                          frequency domain enhancement with defect-aware attention. The algorithm achieved sig-
+                          nificant improvements in detection performance through the collaborative design of three
+                          core modules: the Multi-Scale Frequency-Enhanced Convolution module, which employed
+
+
+                                                                                        https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                                     24 of 27
+
+
+
+                         depthwise separable convolutions with different dilation rates to capture multi-scale spatial
+                         features, combined with the Laplacian operator to enhance high-frequency responses at
+                         defect edges, effectively overcoming the limitations of conventional convolutions in scale
+                         adaptability and frequency domain modeling; the Multi-Scale Defect-Aware Attention
+                         module, which achieved multi-dimensional enhancement of defect features by integrat-
+                         ing edge perception, spatial attention, and channel attention sub-modules, significantly
+                         improving detection accuracy for small-sized and low-contrast defects; and the Adaptive
+                         Feature Fusion Enhancement module, which dynamically allocated fusion weights through
+                         a lightweight attention network and facilitated information interaction among features at
+                         different levels via Cross-Scale Enhancement mechanisms, overcoming the limitation of
+                         fixed weights in traditional concatenation operations. Experiments on the NEU-DET and
+                         GC10-DET datasets validated the effectiveness of the proposed algorithm. MSFE-YOLO
+                         achieved superior detection accuracy compared to existing methods while maintaining
+                         high inference speed, and ablation experiments further demonstrated the rationality and
+                         necessity for each module design.
+                               Although the proposed algorithm has achieved promising results in steel defect detec-
+                         tion tasks, several limitations remain to be addressed. On one hand, the mAP@0.5:0.95 met-
+                         ric on the GC10-DET dataset, despite showing improvement, remains at a relatively low
+                         level, indicating that the localization accuracy of the model under high IoU thresholds
+                         requires further optimization. On the other hand, the introduction of multiple functional
+                         modules increases the model’s parameter count and computational cost, posing certain
+                         challenges for deployment on edge devices. Future research will proceed in the following
+                         directions: first, to address the limited localization accuracy under high IoU thresholds, fu-
+                         ture work will explore regression loss functions more suitable for industrial defect detection
+                         (e.g., Shape-IoU Loss), investigate adaptive aspect-ratio-preserving preprocessing strategies
+                         to reduce the geometric distortion caused by extreme aspect ratios and explore oriented
+                         bounding box detection methods to provide more precise localization for irregularly shaped
+                         defects; second, to explore more lightweight module designs to reduce model complexity
+                         while maintaining detection accuracy; and third, to incorporate knowledge distillation or
+                         model pruning techniques to further compress the model for resource-constrained indus-
+                         trial deployment environments; additionally, it could integrate richer data augmentation
+                         strategies and semi-supervised learning methods to address the issue of insufficient la-
+                         beled data in actual production, thereby promoting the migration and application of the
+                         algorithm to a broader range of industrial defect detection scenarios.
+
+                         Author Contributions: Conceptualization, S.S. and Z.C.; methodology, S.S. and J.S.; software, S.S.,
+                         J.S. and W.Z.; validation, S.S., J.S. and P.L.; formal analysis, S.S.; investigation, S.S., P.L. and W.T.;
+                         resources, Z.C. and W.T.; data curation, S.S., W.Z. and P.L.; writing—original draft preparation, S.S.
+                         and J.S.; writing—review and editing, Z.C., W.T. and P.L.; visualization, S.S. and W.Z.; supervision,
+                         Z.C.; project administration, Z.C. and W.T.; funding acquisition, Z.C. All authors have read and
+                         agreed to the published version of the manuscript.
+
+                         Funding: The authors would like to acknowledge the support of the National Natural Science Foun-
+                         dation of China (No. 52275073 and 52405056), the State Key Laboratory of Mechanical Transmission
+                         for Advanced Equipment, Chongqing University (No. SKLMT-MSKFKT-202416), the Zhanjiang
+                         Science and Technology Planning Project (No. 2025B01058), and the Program for Scientific Research
+                         Start-up Funds of Guangdong Ocean University (No. YJR23002, YJR22016, YJR23010 and YJR24019).
+
+                         Data Availability Statement: The raw data supporting the conclusions of this article will be made
+                         available by the authors on request.
+
+                         Conflicts of Interest: The authors declare that they have no conflicts of interest to report regarding
+                         the present study.
+
+
+
+
+                                                                                                https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                                            25 of 27
+
+
+
+References
+1.    Wen, X.; Shan, J.; He, Y.; Song, K. Steel Surface Defect Recognition: A Survey. Coatings 2022, 13, 17. [CrossRef]
+2.    Lv, X.; Duan, F.; Jiang, J.; Fu, X.; Gan, L. Deep Metallic Surface Defect Detection: The New Benchmark and Detection Network.
+      Sensors 2020, 20, 1562. [CrossRef]
+3.    Vasan, V.; Sridharan, N.V.; Vaithiyanathan, S.; Aghaei, M. Detection and Classification of Surface Defects on Hot-Rolled Steel
+      Using Vision Transformers. Heliyon 2024, 10, e38498. [CrossRef]
+4.    Chen, Z.; Feng, X.; Liu, L.; Jia, Z. Surface Defect Detection of Industrial Components Based on Vision. Sci. Rep. 2023, 13, 22136.
+      [CrossRef]
+5.    Zhao, F.; Chen, Y.; Xi, D.; Liu, Y.; Wang, J.; Tabeta, S.; Mizuno, K. Enhanced Hermit Crabs Detection Using Super-Resolution
+      Reconstruction and Improved YOLOv8 on UAV-Captured Imagery. Mar. Environ. Res. 2025, 210, 107313. [CrossRef]
+6.    Liu, Y.; Xu, K.; Wang, D. Online Surface Defect Identification of Cold Rolled Strips Based on Local Binary Pattern and Extreme
+      Learning Machine. Metals 2018, 8, 197. [CrossRef]
+7.    Zaghdoudi, R.; Bouguettaya, A.; Boudiaf, A. Steel Surface Defect Recognition Using Classifier Combination. Int. J. Adv. Manuf.
+      Technol. 2024, 132, 3489–3505. [CrossRef]
+8.    Zhou, C.; Lu, Z.; Lv, Z.; Meng, M.; Tan, Y.; Xia, K.; Liu, K.; Zuo, H. Metal Surface Defect Detection Based on Improved YOLOv5.
+      Sci. Rep. 2023, 13, 20803. [CrossRef]
+9.    Ruan, S.; Zhan, C.; Liu, B.; Wan, Q.; Song, K. A High Precision YOLO Model for Surface Defect Detection Based on PyConv and
+      CISBA. Sci. Rep. 2025, 15, 15841. [CrossRef] [PubMed]
+10.   Tian, R.; Jia, M. DCC-CenterNet: A Rapid Detection Method for Steel Surface Defects. Measurement 2022, 187, 110211. [CrossRef]
+11.   Simonyan, K.; Zisserman, A. Very Deep Convolutional Networks for Large-Scale Image Recognition. arXiv 2015, arXiv:1409.1556.
+      [CrossRef]
+12.   He, K.; Zhang, X.; Ren, S.; Sun, J. Deep Residual Learning for Image Recognition. In Proceedings of the 2016 IEEE Conference on
+      Computer Vision and Pattern Recognition (CVPR), Las Vegas, NV, USA, June 2016; IEEE: Piscataway, NJ, USA, 2016; pp. 770–778.
+13.   Howard, A.G.; Zhu, M.; Chen, B.; Kalenichenko, D.; Wang, W.; Weyand, T.; Andreetto, M.; Adam, H. MobileNets: Efficient
+      Convolutional Neural Networks for Mobile Vision Applications. arXiv 2017, arXiv:1704.04861. [CrossRef]
+14.   Chollet, F. Xception: Deep Learning with Depthwise Separable Convolutions. In Proceedings of the 2017 IEEE Conference on Computer
+      Vision and Pattern Recognition (CVPR), Honolulu, HI, USA, 21–26 July 2017; IEEE: Piscataway, NJ, USA, 2017; pp. 1800–1807.
+15.   Yu, F.; Koltun, V. Multi-Scale Context Aggregation by Dilated Convolutions. arXiv 2016, arXiv:1511.07122. [CrossRef]
+16.   Chen, L.-C.; Papandreou, G.; Kokkinos, I.; Murphy, K.; Yuille, A.L. DeepLab: Semantic Image Segmentation with Deep
+      Convolutional Nets, Atrous Convolution, and Fully Connected CRFs. IEEE Trans. Pattern Anal. Mach. Intell. 2018, 40, 834–848.
+      [CrossRef]
+17.   Sun, W.; Zhang, X.; He, X. Lightweight Image Classifier Using Dilated and Depthwise Separable Convolutions. J. Cloud Comput.
+      2020, 9, 55. [CrossRef]
+18.   Dai, J.; Qi, H.; Xiong, Y.; Li, Y.; Zhang, G.; Hu, H.; Wei, Y. Deformable Convolutional Networks. In Proceedings of the 2017 IEEE
+      International Conference on Computer Vision (ICCV), Venice, 22–29 October 2017; IEEE: Piscataway, NJ, USA, 2017; pp. 764–773.
+19.   Zhao, W.; Chen, F.; Huang, H.; Li, D.; Cheng, W. A New Steel Defect Detection Algorithm Based on Deep Learning. Comput. Intell.
+      Neurosci. 2021, 2021, 5592878. [CrossRef] [PubMed]
+20.   Chen, H.; Du, Y.; Fu, Y.; Zhu, J.; Zeng, H. DCAM-Net: A Rapid Detection Network for Strip Steel Surface Defects Based on
+      Deformable Convolution and Attention Mechanism. IEEE Trans. Instrum. Meas. 2023, 72, 5005312. [CrossRef]
+21.   Qi, Y.; He, Y.; Qi, X.; Zhang, Y.; Yang, G. Dynamic Snake Convolution Based on Topological Geometric Constraints for Tubular
+      Structure Segmentation. In Proceedings of the 2023 IEEE/CVF International Conference on Computer Vision (ICCV), Paris, France,
+      1 October 2023; IEEE: Piscataway, NJ, USA, 2023; pp. 6047–6056.
+22.   Chen, J.; Jin, W.; Liu, Y.; Huang, X.; Zhang, Y. Multi-Scale and Dynamic Snake Convolution-Based YOLOv9 for Steel Surface
+      Defect Detection. J. Supercomput. 2025, 81, 541. [CrossRef]
+23.   Tao, Z.; He, Y.; Lin, S.; Yi, T.; Li, M. SnakeNet: An Adaptive Network for Small Object and Complex Background for Insulator
+      Surface Defect Detection. Comput. Electr. Eng. 2024, 117, 109259. [CrossRef]
+24.   Tian, J.-H.; Feng, X.-F.; Li, F.; Xian, Q.-L.; Jia, Z.-H.; Liu, J.-L. An Improved YOLOv5n Algorithm for Detecting Surface Defects in
+      Industrial Components. Sci. Rep. 2025, 15, 9756. [CrossRef]
+25.   Zhao, F.; Ma, B.; Xi, D.; Wang, J.; Chen, Y.; Liu, Y.; Shao, X.; Zhang, M.; Zhang, G.; Chen, J.; et al. Deep Learning-based
+      Super-resolution Reconstruction and Improved YOLOv9 for Efficient Benthos Detection: A Case Study at Lake Hamana, Japan.
+      Remote Sens. Ecol. Conserv. 2026, rse2.70066. [CrossRef]
+26.   Corbetta, M.; Shulman, G.L. Control of Goal-Directed and Stimulus-Driven Attention in the Brain. Nat. Rev. Neurosci. 2002, 3,
+      201–215. [CrossRef] [PubMed]
+27.   Hu, J.; Shen, L.; Albanie, S.; Sun, G.; Wu, E. Squeeze-and-Excitation Networks. IEEE Trans. Pattern Anal. Mach. Intell. 2020, 42,
+      2011–2023. [CrossRef] [PubMed]
+
+
+
+                                                                                                        https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                                             26 of 27
+
+
+
+28.   Wang, Q.; Wu, B.; Zhu, P.; Li, P.; Zuo, W.; Hu, Q. ECA-Net: Efficient Channel Attention for Deep Convolutional Neural Networks.
+      In Proceedings of the 2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), Seattle, WA, USA, 14–19 June 2020;
+      IEEE: Piscataway, NJ, USA, 2020; pp. 11531–11539.
+29.   Xiang, X.; Wang, Z.; Zhang, J.; Xia, Y.; Chen, P.; Wang, B. AGCA: An Adaptive Graph Channel Attention Module for Steel Surface
+      Defect Detection. IEEE Trans. Instrum. Meas. 2023, 72, 5008812. [CrossRef]
+30.   Woo, S.; Park, J.; Lee, J.-Y.; Kweon, I.S. CBAM: Convolutional Block Attention Module. In Proceedings of the Computer Vision—ECCV
+      2018; Ferrari, V., Hebert, M., Sminchisescu, C., Weiss, Y., Eds.; Springer International Publishing: Cham, Switzerland, 2018;
+      Volume 11211, pp. 3–19.
+31.   Zhang, H.; Li, S.; Miao, Q.; Fang, R.; Xue, S.; Hu, Q.; Hu, J.; Chan, S. Surface Defect Detection of Hot Rolled Steel Based on
+      Multi-Scale Feature Fusion and Attention Mechanism Residual Block. Sci. Rep. 2024, 14, 7671. [CrossRef]
+32.   Vaswani, A.; Shazeer, N.; Parmar, N.; Uszkoreit, J.; Jones, L.; Gomez, A.N.; Kaiser, L.; Polosukhin, I. Attention Is All You Need. In
+      Advances in Neural Information Processing Systems 30, Proceedings of the NeurIPS 2017; MIT Press: Cambridge, MA, USA, 2017.
+33.   Dosovitskiy, A.; Beyer, L.; Kolesnikov, A.; Weissenborn, D.; Zhai, X.; Unterthiner, T.; Dehghani, M.; Minderer, M.; Heigold, G.;
+      Gelly, S.; et al. An Image Is Worth 16x16 Words: Transformers for Image Recognition at Scale. arXiv 2021, arXiv:2010.11929v2.
+      [CrossRef]
+34.   Zhao, Y.; Lv, W.; Xu, S.; Wei, J.; Wang, G.; Dang, Q.; Liu, Y.; Chen, J. DETRs Beat YOLOs on Real-Time Object Detection. In
+      Proceedings of the 2024 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), Seattle, WA, USA, 16 June 2024;
+      IEEE: Piscataway, NJ, USA, 2024; pp. 16965–16974.
+35.   Hou, Q.; Zhou, D.; Feng, J. Coordinate Attention for Efficient Mobile Network Design. In Proceedings of the 2021 IEEE/CVF
+      Conference on Computer Vision and Pattern Recognition (CVPR), Nashville, TN, USA, 20–25 June 2021; IEEE: Piscataway, NJ, USA,
+      2021; pp. 13708–13717.
+36.   Yang, W.; Wu, J.; Zhang, J.; Gao, K.; Du, R.; Wu, Z.; Firkat, E.; Li, D. Deformable Convolution and Coordinate Attention for Fast
+      Cattle Detection. Comput. Electron. Agric. 2023, 211, 108006. [CrossRef]
+37.   Liu, Y.; Shao, Z.; Hoffmann, N. Global Attention Mechanism: Retain Information to Enhance Channel-Spatial Interactions. arXiv
+      2021, arXiv:2112.05561. [CrossRef]
+38.   You, S.; Li, B.; Chen, Y.; Ren, Z.; Liu, Y.; Wu, Q.; Tao, J.; Zhang, Z.; Zhang, C.; Xue, F.; et al. Rose-Mamba-YOLO: An Enhanced
+      Framework for Efficient and Accurate Greenhouse Rose Monitoring. Front. Plant Sci. 2025, 16, 1607582. [CrossRef]
+39.   Huang, G.; Liu, Z.; Van Der Maaten, L.; Weinberger, K.Q. Densely Connected Convolutional Networks. In Proceedings of the 2017
+      IEEE Conference on Computer Vision and Pattern Recognition (CVPR), Honolulu, HI, USA, 21–26 July 2017; IEEE: Piscataway, NJ, USA,
+      2017; pp. 2261–2269.
+40.   Mi, Z.; Gao, Y.; Xu, X.; Tang, J. Steel Strip Surface Defect Detection Based on Multiscale Feature Sensing and Adaptive Feature
+      Fusion. AIP Adv. 2024, 14, 045005. [CrossRef]
+41.   Liu, S.; Qi, L.; Qin, H.; Shi, J.; Jia, J. Path Aggregation Network for Instance Segmentation. In Proceedings of the 2018 IEEE/CVF
+      Conference on Computer Vision and Pattern Recognition, Salt Lake City, UT, USA, 18–23 June 2018; IEEE: Piscataway, NJ, USA, 2018;
+      pp. 8759–8768.
+42.   Tan, M.; Pang, R.; Le, Q.V. EfficientDet: Scalable and Efficient Object Detection. In Proceedings of the 2020 IEEE/CVF Confer-
+      ence on Computer Vision and Pattern Recognition (CVPR), Seattle, WA, USA, 13–19 June 2020; IEEE: Piscataway, NJ, USA, 2020;
+      pp. 10778–10787.
+43.   Zhang, Y.; Wang, W.; Li, Z.; Shu, S.; Lang, X.; Zhang, T.; Dong, J. Development of a Cross-Scale Weighted Feature Fusion Network
+      for Hot-Rolled Steel Surface Defect Detection. Eng. Appl. Artif. Intell. 2023, 117, 105628. [CrossRef]
+44.   Chen, C.; Lee, H.; Chen, M. Steel Surface Defect Detection Method Based on Improved YOLOv9. Sci. Rep. 2025, 15, 25098.
+      [CrossRef]
+45.   Zhao, F.; Xu, D.; Ren, Z.; Shao, X.; Wu, Q.; Liu, Y.; Wang, J.; Song, J.; Chen, Y.; Zhang, G.; et al. Mamba-Based Super-Resolution
+      and Semi-Supervised YOLOv10 for Freshwater Mussel Detection Using Acoustic Video Camera: A Case Study at Lake Izunuma,
+      Japan. Ecol. Inform. 2025, 90, 103324. [CrossRef]
+46.   Wang, X. Laplacian Operator-Based Edge Detectors. IEEE Trans. Pattern Anal. Mach. Intell. 2007, 29, 886–890. [CrossRef]
+47.   Wang, Y.; Yin, T.; Chen, X.; Hauwa, A.S.; Deng, B.; Zhu, Y.; Gao, S.; Zang, H.; Zhao, H. A Steel Defect Detection Method Based on
+      Edge Feature Extraction via the Sobel Operator. Sci. Rep. 2024, 14, 27694. [CrossRef]
+48.   Pei, G.; Qian, X.; Zhou, B.; Liu, Z.; Wu, W. Research on Agricultural Disease Recognition Methods Based on Very Large Kernel
+      Convolutional Network-RepLKNet. Sci. Rep. 2025, 15, 16843. [CrossRef] [PubMed]
+49.   Zhang, H.; Zhou, J.; Wang, Q.; Zhu, C.; Shao, H. Classification-Detection of Metal Surfaces under Lower Edge Sharpness Using a
+      Deep Learning-Based Approach Combined with an Enhanced LoG Operator. Comput. Model. Eng. Sci. 2023, 137, 1551–1572.
+      [CrossRef]
+50.   He, Y.; Song, K.; Meng, Q.; Yan, Y. An End-to-End Steel Surface Defect Detection Approach via Fusing Multiple Hierarchical
+      Features. IEEE Trans. Instrum. Meas. 2020, 69, 1493–1504. [CrossRef]
+
+
+
+                                                                                                         https://doi.org/10.3390/s26082311
+Sensors 2026, 26, 2311                                                                                                            27 of 27
+
+
+
+51.   Bochkovskiy, A.; Wang, C.-Y.; Liao, H.-Y.M. YOLOv4: Optimal Speed and Accuracy of Object Detection. arXiv 2020,
+      arXiv:2004.10934. [CrossRef]
+52.   Zhang, H.; Cisse, M.; Dauphin, Y.N.; Lopez-Paz, D. Mixup: Beyond Empirical Risk Minimization. arXiv 2018, arXiv:1710.09412.
+      [CrossRef]
+53.   Chen, Y.; Dai, X.; Liu, M.; Chen, D.; Yuan, L.; Liu, Z. Dynamic Convolution: Attention Over Convolution Kernels. In Proceedings
+      of the 2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), Seattle, WA, USA, 13–19 June 2020; IEEE:
+      Piscataway, NJ, USA, 2020; pp. 11027–11036.
+54.   Zhang, X.; Song, Y.; Song, T.; Yang, D.; Ye, Y.; Zhou, J.; Zhang, L. LDConv: Linear Deformable Convolution for Improving
+      Convolutional Neural Networks. Image Vis. Comput. 2024, 149, 105190. [CrossRef]
+55.   Rahman, M.M.; Munir, M.; Marculescu, R. EMCAD: Efficient Multi-Scale Convolutional Attention Decoding for Medical Image
+      Segmentation. In Proceedings of the 2024 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), Seattle, WA, USA,
+      16 June 2024; IEEE: Piscataway, NJ, USA, 2024; pp. 11769–11779.
+56.   Ren, S.; He, K.; Girshick, R.; Sun, J. Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks. IEEE
+      Trans. Pattern Anal. Mach. Intell. 2017, 39, 1137–1149. [CrossRef] [PubMed]
+57.   Liu, W.; Anguelov, D.; Erhan, D.; Szegedy, C.; Reed, S.; Fu, C.-Y.; Berg, A.C. SSD: Single Shot MultiBox Detector. In Computer
+      Vision—ECCV 2016, Proceedings of the European Conference on Computer Vision 2016; Leibe, B., Matas, J., Sebe, N., Welling, M., Eds.;
+      Lecture Notes in Computer Science; Springer International Publishing: Cham, Switzerland, 2016; Volume 9905, pp. 21–37.
+58.   Wang, C.-Y.; Yeh, I.-H.; Mark Liao, H.-Y. YOLOv9: Learning What You Want to Learn Using Programmable Gradient Information.
+      In Computer Vision—ECCV 2024, Proceedings of the European Conference on Computer Vision 2024; Leonardis, A., Ricci, E., Roth,
+      S., Russakovsky, O., Sattler, T., Varol, G., Eds.; Lecture Notes in Computer Science; Springer Nature: Cham, Switzerland, 2025;
+      Volume 15089, pp. 1–21.
+59.   Wang, A.; Chen, H.; Liu, L.; Chen, K.; Lin, Z.; Han, J.; Ding, G. YOLOv10: Real-Time End-to-End Object Detection. In Advances in
+      Neural Information Processing Systems 37, Proceedings of the NeurIPS 2024; MIT Press: Cambridge, MA, USA, 2024.
+
+
+Disclaimer/Publisher’s Note: The statements, opinions and data contained in all publications are solely those of the individual
+author(s) and contributor(s) and not of MDPI and/or the editor(s). MDPI and/or the editor(s) disclaim responsibility for any injury to
+people or property resulting from any ideas, methods, instructions or products referred to in the content.
+
+
+
+
+                                                                                                        https://doi.org/10.3390/s26082311
+

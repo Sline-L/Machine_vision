@@ -1,0 +1,742 @@
+                                   Surface Defect Classification in Real-Time Using
+
+
+
+
+arXiv:1904.04671v1 [eess.IV] 7 Apr 2019
+                                           Convolutional Neural Networks
+
+                                                   Selim Arikan1 , Kiran Varanasi2 and Didier Stricker2
+                                             1
+                                                 Technical University of Kaiserslautern, selimarikan@gmail.com,
+                                                  2
+                                                    German Research Center for Artificial Intelligence (DFKI)
+                                                     Kiran.Varanasi@dfki.de, Didier.Stricker@dfki.de
+
+
+                                           Abstract. Surface inspection systems are an important application do-
+                                           main for computer vision, as they are used for defect detection and
+                                           classification in the manufacturing industry. Existing systems use hand-
+                                           crafted features which require extensive domain knowledge to create.
+                                           Even though Convolutional neural networks (CNNs) have proven suc-
+                                           cessful in many large-scale challenges, industrial inspection systems have
+                                           yet barely realized their potential due to two significant challenges: real-
+                                           time processing speed requirements and specialized narrow domain-specific
+                                           datasets which are sometimes limited in size. In this paper, we propose
+                                           CNN models that are specifically designed to handle capacity and real-
+                                           time speed requirements of surface inspection systems. To train and eval-
+                                           uate our network models, we created a surface image dataset containing
+                                           more than 22000 labeled images with many types of surface materials
+                                           and achieved 98.0% accuracy in binary defect classification. To solve the
+                                           class imbalance problem in our datasets, we introduce neural data aug-
+                                           mentation methods which are also applicable to similar domains that
+                                           suffer from the same problem. Our results show that deep learning based
+                                           methods are feasible to be used in surface inspection systems and outper-
+                                           form traditional methods in accuracy and inference time by considerable
+                                           margins.
+
+                                           Keywords: convolutional neural networks, image classification, neural
+                                           data augmentation
+
+
+                                 1        Introduction
+                                 Web manufacturing occupies a large portion of the industry around the globe.
+                                 A web is a continuously moving flat material such as foil, metal, paper, textile
+                                 or plastic film. In order to have a production line that can yield high quality and
+                                 low defect rate products to satisfy the customer demands, web manufacturers
+                                 use surface inspection systems to check the quality of webs. A defect can be
+                                 defined as ”any undesired outcome in the end-product that reduces the customer
+                                 satisfaction”. Defects can be introduced into the system at any stage and by any
+                                 system component.
+                                     Surface inspection systems usually utilize a three-tiered machine vision based
+                                 architecture. First (1) defects are detected and localized, then (2) image is seg-
+                                 mented and features of the defect are extracted and (3) the defect is classified.
+2      Selim Arikan, Kiran Varanasi and Didier Stricker
+
+
+
+
+      (a) Film     (b) Foil    (c) Glass   (d) Coated     (e) Steel   (f)   Non-
+                                           metal                      woven
+
+Fig. 1: Various defects from different types of surfaces. In simple cases like (a)
+and (d), defects can be extracted easily. Advanced cases like (b), (e) and (f)
+make classification a complex task
+
+
+Traditional systems rely on sophisticated models employing hand-crafted fea-
+tures created with apriori knowledge and high amount of domain expertise. Fur-
+thermore, traditional methods are mostly regarded as trademarks, therefore they
+remain private and difficult to test. Even though advancements in production
+techniques provide higher quality end products, the introduction of defects can-
+not be prevented completely as they originate from physical processes. Sample
+defect images from various materials can be seen in Figure 1.
+    Recently, Convolutional Neural Networks (CNNs) have pushed the envelope
+of classification performance in visual recognition problems with advancements
+in network architectures, applications of new ideas and availability of very large
+datasets which are trainable as a result of improvements in parallel processing [1]
+[2] [3] [4]. While human-level performance has been surpassed in generic image
+classification tasks with CNNs [5], industrial surface inspection systems barely
+utilized this potential because web manufacturing systems require methods that
+can handle classification in real-time. In this paper, we introduce a defect de-
+tection approach for surface inspection systems with a binary classifier using a
+newly created CNN architecture. Our CNN models employ recent developments
+in deep learning research and designed with surface inspection characteristics
+and requirements in mind.
+
+1.1   Contributions
+ 1. We created neural network models from the ground up, designed for surface
+    inspection systems by considering their capacity and very strict requirements
+    in inference time. Our main model achieves the state-of-the-art performance
+    with 99.7% accuracy on a standard surface dataset and 99.5% Top-1 accuracy
+    in public multi-class defect dataset (NEU) [6].
+ 2. We propose a methodology for collecting a general surface defect dataset and
+    validating the dataset by domain experts for the purpose of training CNN
+    models.
+ 3. We propose new data augmentation methods to be used with surface im-
+    ages that can improve the testing accuracy by 3.5%. Our proposed methods
+    employ multiple neural augmentation techniques to generate realistic defect
+    and non-defect material images based on individual class characteristics.
+                             Defect Classification in Real-Time using CNNs        3
+
+ 4. Along with the publication of the paper, we will share our deep learning
+    suite along with our models so that other researchers can benefit from our
+    methods, for surface inspection systems as well as for defect classification in
+    other narrow domains.
+
+
+2     Background and related work
+2.1   Convolutional Neural Network Architectures
+The typical structure of convolutional neural networks (CNNs) which arrange
+convolutional, pooling and fully-connected layers sequentially, started to become
+standardized after LeNet by LeCun et al. [7]. In 2012, Krizhevsky et al. made
+the breakthrough with AlexNet [1] in object recognition by winning the ILSVRC
+first time with a CNN.
+    Inspired by a neuroscience model of the primate visual cortex, GoogLeNet
+from Szegedy et al. used a complex network architecture which used the inputs
+at multiple levels to extract features using Inception modules [4].
+    The most common way to increase the performance of a CNNs is increasing
+their capacity with the cost of increased computational resource usage [4]. He et
+al. has shown that increased depth creates a degradation problem that saturates
+accuracy of networks without any overfitting [3]. To address the problem, He et
+al. introduced deep residual learning with 152-layer ResNet network with skip-
+connections between layers [3]. ResNet reduced the error rate in ILSVRC down
+to 3.57% and surpassed human recognition ability [3].
+
+2.2   Surface Inspection and Defect Detection
+Surface inspection and the defect detection problem can be generalized into
+the combination of feature extraction and classification problems. Even though
+CNNs are widely used in object detection and image classification tasks, indus-
+trial surface inspection systems barely utilize this potential.
+    Recently Masci et al. introduced Max-Pooling CNN model approach for su-
+pervised steel defect classification [8].
+    On a different approach, Soukup and Huber-Mörk trained a CNN with stereo
+imaging to detect steel surface defects [9]. But the stereo acquisition method
+limits the application and cause the inference speed of this approach to be slow.
+    Ke et al. tried using a CNN-based defect recognition in banknote images
+[10]. Even though the CNN performs better than traditional methods in results,
+study of the single type of (circular) defect, limits the usage in similar problems.
+    Faghih-Roohi et al. used deep learning approaches with multiple CNN models
+to detect and classify rail surface defects and achieved 92% accuracy with 5
+classes of defects [11].
+    Park et al. had a more holistic approach into surface inspection systems with
+their CNN-based system for surface defect inspection [12]. Park et al. shows that
+even though CNN-based classifiers perform better than traditional methods with
+92% accuracy, the inference time of 217ms is inferior to traditional methods [12].
+4       Selim Arikan, Kiran Varanasi and Didier Stricker
+
+    Weimer et al. used multiple CNN models to automate the feature extraction
+in inspection systems [13]. Even though results show remarkable accuracy on
+textured images, they only used the simple circular and linear type of defects
+but not complex defect types.
+    Recently Kim et al. applied transfer learning by using the VGG net that is
+trained on ImageNet [14] dataset [15].
+    Zhou et al. created a custom CNN model to classify 6 different types of
+steel defects [16]. In contrast, our method is more accurate, converges faster and
+focuses on not just steel but many materials to achieve surface invariance.
+
+2.3   Data Augmentation
+Krizhevsky et al. introduced several data augmentation techniques to artificially
+increase the dataset size using label-preserving transformations [1].
+    To have more variety in data, rather than only modifying the images, we
+would like to create new samples to expand our datasets. Recently Goodfellow et
+al. introduced Generative Adversarial Networks (GANs) to use neural networks
+to generate new samples using adversarial training [17] [18].
+    Using the conditional GANs, compared to other domain-specific methods,
+Isola et al. introduced a general-purpose paired image translation method also
+known as pix2pix [19].
+    Because obtaining paired image data is expensive and difficult, Zhu et al.
+introduced a cycle-consistent adversarial network architecture called CycleGAN
+for unpaired image translation problems [20].
+    With the advancements of synthetic image generation, it has become a com-
+mon practice to use generated images in training neural networks to avoid the
+high cost of creating large datasets with real images. Shrivastava et al. introduced
+an improved approach to image generation with Simulated+Unsupervised learn-
+ing (SimGAN) which uses synthetic images rather than random vectors as inputs
+to their GAN [21]. By using a self-regularization term and a local adversarial loss,
+SimGAN converts synthetic renderings into realistic images without using any
+labeled data [21]. Their method is able to achieve local changes without altering
+the global structure of the image. In contrast, we propose a data augmentation
+method for altering global scene composition in the image.
+
+3     Methodology
+3.1   Dataset Creation
+In order to create high-quality datasets, we established a three-step methodology,
+which we validated in a real world industrial setting for surface inspection.
+
+Aggregation Firstly, we collect raw images, other small datasets and individual
+samples from many sources. All of the collected images are converted into same
+format and channel/bitrate for standardization. Finally the images are divided
+into ’defect’ and ’non-defect’ classes.
+                             Defect Classification in Real-Time using CNNs        5
+
+Cleansing From the aggregated raw images, we delete the invalid images such as
+non-web surfaces, empty material edges and faulty samples that are completely
+black or white. If cleansing is not applied, models would try to use invalid samples
+and consequently, learn wrong features.
+
+
+Balancing Finally we balance our datasets by several criteria in order to cor-
+rectly represent different materials and defect types. It is important to contain
+many types of web materials in the dataset but having a balance between dif-
+ferent samples of different materials is equally important. Same principle also
+applies for defect types. Defect-free samples and some types of defects dominate
+the occurrence in the inspection systems. However the diversity and severity of
+various defects needs to be taken into account. A defect may occur only 1% of
+the time but can have severe consequences if not detected. An example for this
+in healthcare is the detection of cancer patients. If balancing is not done, some
+types of materials and defects would be under or overrepresented in the dataset,
+causing an imbalance which would affect the learning and prevent achieving high
+success rates.
+
+
+3.2   Data Augmentation
+
+We divide our data augmentation techniques into two phases. In the first phase,
+we employed offline affine and generative label-preserving methods where dataset
+size is directly increased by creating new samples from existing images. To realize
+this, we used a selection of GANs (pix2pix, CycleGAN) with paired and unpaired
+image samples to generate new defect and non-defect images respectively [19]
+[20].
+    In the second phase we used online affine methods where transformations are
+label-preserving and applied via an integrated operation of the framework at the
+mini-batch selection. We also have a process of validating the applicability of the
+synthetic images by asking domain experts to choose between real and synthetic
+images in a survey. More details about our data augmentation process can be
+found on Section 4.
+
+
+3.3   Network Architecture
+
+Since web manufacturing lines operate at very fast speeds, surface inspection
+systems have to work quickly (˜100 images/second, 10m/s) as well. Many of the
+famous network models aim for the highest classification accuracy but completely
+ignore the costs in inference time. Because of their long inference time and
+consequently higher computational resource and power consumption, practical
+and real-time applications of the common network models are extremely limited
+[22]. The main goal of our architecture is to capture defect information globally
+with the highest accuracy and as fast as possible to satisfy real-time requirements
+of surface inspection systems.
+6         Selim Arikan, Kiran Varanasi and Didier Stricker
+
+     Input image
+
+
+
+    Conv 5 × 5 / 2
+
+
+    Conv 1 × 1 / 1
+                                                               Input image
+
+    Conv 5 × 5 / 2
+
+                                           Conv 3 × 3 / 2     Conv 5 × 5 / 2    Conv 3 × 3 / 2
+    Conv 1 × 1 / 1
+
+                                           Conv 1 × 1 / 1     Conv 1 × 1 / 1
+    Conv 5 × 5 / 2                                                              Conv 1 × 1 / 1
+
+                           Input image     Conv 3 × 3 / 2     Conv 5 × 5 / 2
+    Conv 1 × 1 / 1
+                                                                               MaxPool 2 × 2 / 2
+                                           Conv 1 × 1 / 1     Conv 1 × 1 / 1
+    Conv 1 × 1 / 1        Conv 3 × 3 / 2
+                                                                                Conv 3 × 3 / 2
+                                           Conv 3 × 3 / 2     Conv 3 × 3 / 2
+    Conv 1 × 1 / 1        Conv 1 × 1 / 1
+
+
+    Conv 1 × 1 / 1        Conv 3 × 3 / 2                      Conv 1 × 1 / 1
+
+
+
+       FC n:2                FC n:2                              FC n:2
+
+    (a) SurfNet          (b) FastInf                        (c) MultiVis
+
+Fig. 2: Our network models: curved arrows indicate residual skip-connections.
+Stride value is shown with last number in each block.
+
+
+    As seen in Figure 2a, our main model (SurfNet) is generally inspired by the
+ideas of VGG net configurations [2] and the idea of residual learning [3].
+    We used ten layers with first nine are convolutional for feature extraction and
+the last is a fully-connected layer for the classification. All of the convolutional
+blocks contain a batch normalization [23] and an activation function layer.
+    We adopted parametric rectified linear unit (PReLU) from He et al. over
+ReLU for its benefits and ability to be optimized while training [5]. Following
+the practice in [23], we did not use any dropout [24] layers together with batch
+normalization [23]. To gain more speed, spatial size reduction is handled by
+convolution operations (stride = 2), therefore no pooling layers are used.
+    We employed two types of convolutional layers. The first type is used to
+extract features and it uses larger 5 × 5 receptive fields (i.e. kernel size), has
+6 pixels of padding and performs downsampling directly with a stride value of
+2. Padding values of the convolutional layers are selected appropriately so that
+spatial resolution is not altered by the kernel size. Second type of convolutional
+layer we use utilizes 1 × 1 receptive fields without padding and downsampling
+(stride = 1). At first glance, using 1 × 1 kernel may seem redundant but it
+serves many purposes: following the practice in Szegedy et al. , they are used
+as a dimension reduction method and to provide additional nonlinearity with
+their activation functions [4]. Lastly, we used 1 × 1 convolutional layers to apply
+residual learning [3] by adding shortcut connections over them.
+    We followed the practice in [3] [4] and did not use fully-connected layers
+because the benefit was negligible whereas the computational cost was much
+higher.
+                             Defect Classification in Real-Time using CNNs       7
+
+3.4   Training Process
+We used mini-batch training method with RMSProp optimizer and a negative
+log-likelihood loss function. We set the batch size to 10 and learning rate to
+1.10−4 . For regularization, weight decay (L2 ) method is used with 1.10−1 mul-
+tiplier. Learning rate (LR) is adjusted with a step function decreasing the LR
+every 3 epochs with a multiplier value of 0.8. We follow the practice in [3] to
+initialize the weights of our convolutional and batch normalization layers. The
+training and all of the experiments are done on a standard Windows desktop
+computer using an NVIDIA GTX 1080 Ti GPU with PyTorch [25] deep-learning
+framework up to 100 epochs depending on the configuration and dataset.
+    For each mini-batch, pre-processing operations applied to resize and crop the
+images to 128 × 128 pixels. For resizing and cropping, we followed the practice
+in [2].
+
+3.5   Testing Process
+Our test sets contain images cropped to their defective regions provided by
+domain experts in order to test the classification performance without performing
+localization. First, the image is scaled to 128 pixels with respect to its shorter
+side, then the center 128 × 128 patch is cropped for testing. Contrary to the
+training process, random horizontal flipping is not applied in testing.
+
+3.6   Alternative Network Configurations
+We experimented with many ideas and advancements in deep learning research.
+For a qualitative analysis of the different network models for the problem domain
+of surface inspection, we created two different network models and compared
+them with the original SurfNet model. Our first alternative model is aimed at
+achieving minimum inference time and our second model is aimed at parallel
+processing at multiple scales.
+
+Minimum Inference Time - FastInf The biggest trade-off in designing a
+CNN model is to achieve a balance between accuracy and inference time. Since
+surface inspection systems require real-time detection to keep up with the man-
+ufacturing speed requirements, we tried to achieve the best inference time while
+keeping the accuracy better than traditional classification methods. Rather than
+increasing the depth, we made the model wide with 1024 convolution channels.
+As a result, the FastInf configuration can achieve 0.23ms inference time per
+image in binary classification with a desktop computer using an NVIDIA GTX
+1080 Ti. Model can be seen in Figure 2b.
+
+Parallel Multi-Scale Processing - MultiVis The primate visual cortex rec-
+ognizes objects on multiple levels and scales. To imitate this process, we designed
+a model which has 3 parallel lanes with each of them processing the input in
+8       Selim Arikan, Kiran Varanasi and Didier Stricker
+
+different scales. The similar idea is used by Szegedy et al. [4] but as individual
+blocks known as Inception layers. Rather than using blocks, we used 3 parallel
+optimized fast inference network models to improve the capacity of the model.
+    After the input image is processed in 3 different parallel channels, results are
+concatenated and provided as input to the last 1 × 1 convolutional layer. Model
+can be seen in Figure 2c.
+
+
+4     Data augmentation
+The perfect method to train a CNN is to supply it with a lot of labeled data. Even
+though many general-purpose datasets are easily available, acquiring domain-
+specific labeled data is difficult and often the data is not evenly distributed
+between classes. The class imbalance is expected because occurrences for each
+class do not have the same frequency. Having insufficient amount of data po-
+tentially leads networks to overfit and prevents generalization. When obtaining
+more real data is not possible or expensive, data augmentation is the ideal way to
+increase the size of the datasets by creating new samples using various methods.
+    To evaluate the results of our augmentation methods, we created quantita-
+tive, qualitative and user A/B testing experiments. We have seen that, with
+our proposed method, test accuracies of our models increased by up to 3.5%.
+Also, user experiments show us that, even by domain experts, created images
+are almost indistinguishable from real samples.
+
+4.1   Classical Methods
+Affine transformations such as rotation, scaling, mirroring and shearing are the
+simplest methods that are performed as the first choice almost in any set because
+of their simple and quick implementation [26].
+
+4.2   Generative Neural Methods
+Even though the simple techniques derive new samples from existing images,
+they do not create unique images. Generating images using models is a well-
+studied topic that has beneficial uses in many fields.
+
+Paired Image Translation with Conditional Adversarial Networks Isola
+et al. introduced a paired image translation method using conditional adversar-
+ial networks which is known as pix2pix to create a general-purpose solution to
+image-to-image translation tasks [19].
+    In surface inspection, because defects originate from physical sources espe-
+cially from imperfections in production processes, they are localized and usually
+appear clustered in regions. Therefore we used the label-to-image conversion ca-
+pability of pix2pix for generating synthetic defect images. Using label-to-image
+translation allowed us to generate as many defect images as necessary. We au-
+tomated the label generation process and we can define any defect region with
+                              Defect Classification in Real-Time using CNNs      9
+
+any shape we want. Furthermore, custom label creation can be used by domain
+experts to tailor image generation process to reflect physical characteristics of
+the given web material, manufacturer, equipment and imperfection profiles to
+model the system better. Lastly, by creating necessary samples for the under-
+represented defect classes, our automatic label generation method can be used
+to solve the class imbalance problem.
+
+Unpaired Image Translation with Cycle-consistent Adversarial Net-
+works Not only acquiring paired data is difficult and often expensive, but also
+the paired datasets are rare and considerably smaller in size compared to stan-
+dard datasets. Zhu et al. offers a general-purpose solution to this problem with an
+unpaired image-to-image translation method using cycle-consistent adversarial
+networks that is called CycleGAN [20].
+
+
+
+
+            (a) Synthetic 1       (b) Synthetic 2      (c) Synthetic 3
+
+Fig. 3: We apply the unpaired image-to-image translation to create non-defect
+images using SetA and SetB datasets
+
+
+    Unlike defect images with local characteristics, non-defect material images
+do not have specific features that we can use directly. Non-defect images have
+global variations which are caused by natural processes, inspection system char-
+acteristics and web material features. Therefore, non-defect images require an
+augmentation method which can capture their global characteristics. We, there-
+fore, used style transfer capability of CycleGAN in augmenting non-defect images
+of our datasets with the goal of mixing and matching variations in different sets
+to create unique samples. Sample synthetic images can be seen in Figure 3.
+    In addition to non-defect image generation, we tried using unpaired image
+generation technique on defect images with the ambition of creating unique
+defects by learning features and style of defects on different surfaces. Using
+unpaired technique helps us bridge the gap between different characteristics of
+various defect classes. The result can be seen in Figure 4.
+
+4.3   Class Imbalance
+Class imbalance is a common problem in machine learning where some classes
+in a dataset are underrepresented (i.e. have fewer samples than other classes).
+10      Selim Arikan, Kiran Varanasi and Didier Stricker
+
+
+
+
+          (a) Real defect in B     (b) Synthetic      (c) Real defect in A
+
+Fig. 4: Using unpaired image generation for defects. It can be observed that
+network has learned to translate the bright and smooth defect characteristics of
+(c) to dark and high-contrast defect characteristics of (a), resulting image (b)
+with bright and smoother defect pixels
+
+
+Reasons for class imbalance can vary but commonly the problem arises when it
+is not possible or very difficult to gather more samples for a specific class such
+as fraud cases in banking and data of cancer patients in healthcare.
+    In surface inspection, defects are encountered in approximately 0.1% of the
+samples. On the contrary, since the inspection systems are aimed towards de-
+tecting defects and capturing images at extremely fast speeds, only the relevant
+images containing defects can be saved and the rest are discarded. This results
+in having almost no defect-free images in captured data.
+    To overcome this problem, we used classical as well as neural data augmen-
+tation techniques to derive and generate more samples. More details on image
+creation can be found in Section 4.4.
+
+
+4.4   Selected Methods
+
+For classical methods, we did not use any color based data augmentation meth-
+ods since our images are monochromatic. We used rotations at offline stage and
+used horizontal mirroring and scale-cropping randomly during runtime at image
+preprocessing step where mini-batches are prepared.
+    For neural augmentation methods, we used pix2pix and CycleGAN for defect
+and non-defect classes respectively considering class characteristics and capabil-
+ities of generative methods.
+    We trained pix2pix model with default parameters and ”UNet 256” generator
+with batch normalization for 200 epochs. We used label-to-image translation to
+create synthetic defect images. In order to create label images, we marked defec-
+tive regions positioned in specific locations and shapes in the image (e.g. closer to
+edges, non-rectangular concave shapes and diagonal stripes). Some examples of
+label images and their generated images can be seen in Figure 5. Furthermore, to
+automatize the process, we created a label generator which creates label images
+with parametric shapes in various sizes and in variable quantities. Automatically
+generated label image samples can be found in supplementary material.
+                              Defect Classification in Real-Time using CNNs          11
+
+
+
+
+    (a) Label 1     (b) Label 3      (c) Label 4      (d) Label 5      (e) Label 6
+
+
+
+
+ (f) Synthetic 1 (g) Synthetic 3 (h) Synthetic 4    (i) Synthetic 5   (j) Synthetic 6
+
+
+Fig. 5: We apply label-to-image translation for defect image generation. We
+translate the label images with green (defect-free) background and yellow re-
+gions (defective areas), to synthetic defect images which are visually realistic.
+
+
+    For non-defect image generation, we trained CycleGAN model using default
+parameters without dropout for 200 epochs. We used the non-defect material
+image classes of the two sets (SetA and SetB) as A and B sets for the network
+to learn the translation G : A → B between them. Sample results of the unpaired
+image translation between different datasets can be seen in Figure 3 and 4. More
+samples can be found in supplementary material.
+
+4.5    Evaluation
+Evaluating the quality of synthetic images is a difficult problem because there
+is not a simple way to determine whether an image looks real or not. Neural
+augmentation methods such as GANs also do not contain an objective function
+to determine the ”authenticity” of the images. For quantitative evaluation, we
+created a basic A/B testing to be presented to domain experts for them to pick
+which image they think in the given A/B pair is synthetic. From the provided
+10 image pairs, domain experts were able to choose the synthetic images with
+only 60% accuracy which indicates synthetic images are realistic enough for test
+takers to convince them. More details about our quality evaluation test can be
+found in supplementary material.
+
+5     Results
+5.1    Performance Evaluation Metrics
+For evaluating the performance of the models, we used the standard classification
+metrics, specifically, accuracy, precision, recall (sensitivity) and specificity [27].
+12      Selim Arikan, Kiran Varanasi and Didier Stricker
+
+5.2   Datasets
+
+For training and experiments, we used five datasets in which two of them (SetA
+and SetB) are being used as a standard to evaluate the accuracy of currently used
+C5.0 classifiers. The third dataset SetAB combines SetA and SetB. We created
+the fourth dataset (SurfMix) using our dataset collection method explained in
+Section 3.1 with the goal of creating a surface-type-invariant binary classifier to
+be used in any system with any type of surface. Numerical details about the
+internal datasets can be seen in Table 1.
+    Industrial datasets are unfortunately almost always private and hinder re-
+producibility of the methods. Because of that, as the fifth, we also tested our
+methods using the public NEU multi-class steel defect dataset [6]. NEU consists 6
+classes (crazing, inclusion, patches, pitted surface, rolled-in-scale and scratches)
+each containing 300 images. As the NEU dataset does not provide separate train
+and test samples, we used 10-fold cross-validation for training and test.
+
+
+                             Non-augmented       Augmented
+                   Dataset Defect Non-defect Defect Non-defect
+                   SetA       351     256     1403       1022
+                   SetB      147       214     588       856
+                   SetAB      498     470     2470      2288
+                   SurfMix   8359     7173    33436     28692
+Table 1: Training images in internal datasets. SetA and SetB are standard clas-
+sifier evaluation sets. SurfMix is our newly created dataset.
+
+
+
+
+5.3   Model Comparison
+
+We achieved state-of-the-art binary classification performance in the datasets
+with all of our models compared to currently used classifiers. Best accuracy is
+achieved by SurfNet model resulting 100.0% in SetA, 97.7% in SetB and 98.0%
+in SurfMix dataset with 1.9 ms inference time. The fastest inference time is
+achieved by FastInf model with 0.3 ms on 99.3% accuracy in SetA and 88.6%
+accuracy in SetB datasets. Details about the network models can be found in
+Section 3.3.
+    The currently used traditional classifiers we compare to are C5.0 decision
+trees with over 400 hand-crafted features that require extensive domain knowl-
+edge. Even though the effort of developing the traditional classifiers is high,
+they are not robust to small changes and achieved accuracy rates do not seem
+to reflect this effort. Comparison of classifiers can be seen in Table 2.
+    Our model achieved state-of-the-art Top-1 accuracy in the NEU dataset while
+keeping real-time inference requirements. Comparisons can be seen in Table 3.
+                               Defect Classification in Real-Time using CNNs            13
+
+
+                         SetA accuracy             SetB accuracy
+Model               Overall Defect Non-defect Overall Defect Non-defect Inference time
+Traditional (C5.0) 0.874 0.922       0.827     0.777 0.863      0.691          15.0ms
+SurfNet (CNN)      0.993 0.988       1.000     0.945 0.977      0.870          1.9ms
+MultiVis (CNN)     0.990 0.983       1.000     0.957 0.960      0.950          3.5ms
+FastInf (CNN)      0.990 0.983       1.000     0.863 0.988      0.690          0.3ms
+Table 2: All of our models achieve better results compared to C5.0 classifier. For
+a correct comparison, models are trained on non-augmented datasets. Inference
+time is calculated per image (batch size = 1) and from an average of 10 runs.
+
+
+Model               Top-1 accuracy    Epochs    Learning rate         L2   Inference time
+Zhou et al.               0.990          100        0.001        0.0005
+Zhou et al.               0.992          300        0.001        0.0005
+Zhou et al.               0.993          500        0.001        0.0005
+SurfNet (ours)            0.995          100        0.0007        0.02         1.9ms
+MultiVis (ours)           0.984           50         0.001        0.01         3.4ms
+FastInf (ours)            0.944          100         0.001       0.003         0.2ms
+Table 3: Public NEU dataset results. Our main model achieve almost perfect
+result in test accuracy while keeping the real-time performance. Results are
+average of 10-folds. For experiments, batch size is 10 and image size is 64 × 64.
+Zhou et al. used 40 × 40 images and batch size of 50. Inference time is per image
+
+
+
+Additional results, hyperparameter evaluations and training graphs can be found
+in supplementary material.
+
+
+5.4     Benefits of Data Augmentation
+
+We trained our models both on non-augmented and augmented datasets to com-
+pare the accuracy values. Methods we use improve the test accuracy up to 3.2%.
+Detailed results can be seen in Table 4.
+
+
+  Model           SetA SetA (Aug)     SetB SetB (Aug)        SurfMix SurfMix (Aug)
+  SurfNet      0.993       1.000     0.945      0.977         0.980          0.983
+  FastInf      0.990       0.993     0.863      0.886         0.949          0.941
+Table 4: Test accuracy values after 30 epochs. Our augmentation methods pro-
+vide up to 3.2% increase in accuracy. We observe that data augmentation provide
+more benefits to the network model that has more learning capacity (i.e. SurfNet)
+compared to the FastInf model. The negligible accuracy difference in augmented
+SurfMix shows that dataset is already diverse.
+14      Selim Arikan, Kiran Varanasi and Didier Stricker
+
+6    Training and Inference Time (Ours vs common models)
+We compare our network model with famous models (ResNet, DenseNet etc.)
+with respect to training time and inference time. Results show that our model
+is almost 20 times faster in inference time than the DenseNet model with only
+1% drop in test accuracy. The results can be seen in Table 5.
+
+
+                 Model            Accuracy Train time Inference time
+                 SurfNet (ours)    0.980    158m22s      1.92ms
+                 ResNet18          0.982    162m45s      11.53ms
+                 DenseNet          0.990    665m50s      39.12ms
+Table 5: Comparison of our model with common models using SurfMix dataset.
+ResNet [3], DenseNet[28]. Trained for 30 epochs using 224 × 224 image size.
+
+
+
+
+7    Conclusions
+In this paper, we proposed new convolutional neural network models for binary
+classification of surface defects and compared it to traditional classifiers. Our
+model is fast and accurate, making it suitable for deployment in the industrial
+setting. Contrary to individual design and tailoring of classifiers per surface type,
+customer, manufacturing line and even per system, we used a surface-invariant
+and generalized approach. First, we proposed a methodology for data set ac-
+quisition in this domain, and created a new surface data set containing images
+from 23 different actively-used systems with many types of surface materials
+such as steel, paper, foil, glass, plastic and film. We designed 3 new CNN models
+from ground-up with practical applicability and real-time requirements of sur-
+face inspection systems in focus. We used neural data augmentation methods
+that are novel in surface inspection domain to solve class imbalance problems in
+our datasets. Consequently, we tested our network models with five data sets and
+achieved 98.0% accuracy in general SurfMix dataset and outperforming standard
+classifiers in all tests. To further verify our methodology, we tested our models
+with public NEU dataset and achieved 99.5% Top-1 accuracy with real-time in-
+ference. Thus, our results conclude that CNNs are viable alternatives to standard
+hand-crafted classifiers in binary classification of surface images.
+    Since our solution tackles a general object recognition task, our models and
+methods are not only applicable for commercial surface inspection systems but
+also beneficial for other problems with similar domain characteristics (goal of
+pattern recognition, scarcity of samples and problem of class imbalance). In
+future work, these models can be extended to handle more complex changes such
+as in viewpoint, illumination and other domain-specific geometric variability. We
+share our deep learning suite and network models to encourage such future works
+in various application domains requiring real-time response.
+                               Defect Classification in Real-Time using CNNs          15
+
+References
+ 1. Krizhevsky, A., Sutskever, I., Hinton, G.E.: ImageNet Classification with Deep
+    Convolutional Neural Networks. In: Advances In Neural Information Processing
+    Systems. (2012) 1–9 2, 3, 4
+ 2. Simonyan, K., Zisserman, A.: Very Deep Convolutional Networks for Large-Scale
+    Image Recognition. International Conference on Learning Representations (ICRL)
+    (sep 2015) 1–14 2, 5, 7
+ 3. He, K., Zhang, X., Ren, S., Sun, J.: Deep Residual Learning for Image Recognition.
+    Technical report (2015) 2, 3, 5, 6, 7, 14
+ 4. Szegedy, C., Liu, W., Jia, Y., Sermanet, P., Reed, S., Anguelov, D., Erhan, D.,
+    Vanhoucke, V., Rabinovich, A., Hill, C., Arbor, A.: Going Deeper with Convolu-
+    tions. In: Proceedings of the {IEEE} {Conference} on {Computer} {Vision} and
+    {Pattern} {Recognition}. (2014) 1–9 2, 3, 6, 8
+ 5. He, K., Zhang, X., Ren, S., Sun, J.: Delving Deep into Rectifiers: Surpassing
+    Human-Level Performance on ImageNet Classification. (feb 2015) 2, 6
+ 6. Song, K., Yan, Y.: A noise robust method based on completed local binary patterns
+    for hot-rolled steel strip surface defects. Applied Surface Science 285(PARTB) (nov
+    2013) 858–864 2, 12
+ 7. LeCun, Y., Boser, B., Denker, J.S., Henderson, D., Howard, R.E., Hubbard, W.,
+    Jackel, L.D.: Backpropagation Applied to Handwritten Zip Code Recognition.
+    Neural Computation 1(4) (1989) 541–551 3
+ 8. Masci, J., Meier, U., Ciresan, D., Schmidhuber, J., Fricout, G.: Steel defect classi-
+    fication with Max-Pooling Convolutional Neural Networks. In: The 2012 Interna-
+    tional Joint Conference on Neural Networks (IJCNN), IEEE (jun 2012) 1–6 3
+ 9. Soukup, D., Huber-Mörk, R.: Convolutional neural networks for steel surface defect
+    detection from photometric stereo images. Advances in Visual Computing 8887
+    (2014) 668–677 3
+10. Ke, W., Huiqin, W., Yue, S., Li, M., Fengyan, Q.: Banknote Image Defect Recog-
+    nition Method Based on Convolution Neural Network. International Journal of
+    Security and Its Applications 10(6) (2016) 269–280 3
+11. Faghih-Roohi, S., Hajizadeh, S., Núñez, A., Babuska, R., Schutter, B.D.: Deep
+    convolutional neural networks for detection of rail surface defects. In: 2016 Inter-
+    national Joint Conference on Neural Networks (IJCNN). (2016) 2584–2589 3
+12. Park, J.K., Kwon, B.K., Park, J.H., Kang, D.J.: Machine learning-based imaging
+    system for surface defect inspection. International Journal of Precision Engineering
+    and Manufacturing-Green Technology 3(3) (jul 2016) 303–310 3
+13. Weimer, D., Scholz-Reiter, B., Shpitalni, M.: Design of deep convolutional neural
+    network architectures for automated feature extraction in industrial inspection.
+    CIRP Annals - Manufacturing Technology 65(1) (jan 2016) 417–420 4
+14. Russakovsky, O., Deng, J., Su, H., Krause, J., Satheesh, S., Ma, S., Huang, Z.,
+    Karpathy, A., Khosla, A., Bernstein, M., Berg, A.C., Fei-Fei, L.: ImageNet Large
+    Scale Visual Recognition Challenge. International Journal of Computer Vision
+    115(3) (2015) 211–252 4
+15. Kim, S., Kim, W., Noh, Y.K., Park, F.C.: Transfer learning for automated optical
+    inspection. In: 2017 International Joint Conference on Neural Networks (IJCNN),
+    IEEE (may 2017) 2517–2524 4
+16. Zhou, S., Chen, Y., Zhang, D., Xie, J., Zhou, Y.: Classification of surface defects
+    on steel sheet using convolutional neural networks. Materiali in Tehnologije 51(1)
+    (2017) 123–131 4
+16      Selim Arikan, Kiran Varanasi and Didier Stricker
+
+17. Goodfellow, I.J., Shlens, J., Szegedy, C.: Explaining and Harnessing Adversarial
+    Examples. Iclr 2015 (2015) 1–11 4
+18. Goodfellow, I., Pouget-Abadie, J., Mirza, M.: Generative Adversarial Networks.
+    arXiv preprint arXiv: . . . (2014) 1–9 4
+19. Isola, P., Zhu, J.Y., Zhou, T., Efros, A.A.: Image-to-Image Translation with Con-
+    ditional Adversarial Networks. arXiv (2016) 16 4, 5, 8
+20. Zhu, J.Y., Park, T., Isola, P., Efros, A.A.: Unpaired image-to-image translation us-
+    ing cycle-consistent adversarial networks. arXiv preprint arXiv:1703.10593 (2017)
+    4, 5, 9
+21. Shrivastava, A., Pfister, T., Tuzel, O., Susskind, J., Wang, W., Webb, R.: Learn-
+    ing from Simulated and Unsupervised Images through Adversarial Training.
+    arXiv:112.07828 (2016) 16 4
+22. Canziani, A., Paszke, A., Culurciello, E.: An Analysis of Deep Neural Network
+    Models for Practical Applications. (may 2016) 5
+23. Ioffe, S., Szegedy, C.: Batch Normalization: Accelerating Deep Network Training
+    by Reducing Internal Covariate Shift. (feb 2015) 6
+24. Hinton, G.E., Srivastava, N., Krizhevsky, A., Sutskever, I., Salakhutdinov, R.R.:
+    Improving neural networks by preventing co-adaptation of feature detectors. (2012)
+    6
+25. PyTorch: PyTorch (2017) [Online; accessed 29-November-2017]. 7
+26. Howard, A.G.: Some Improvements on Deep Convolutional Neural Network Based
+    Image Classification. arXiv preprint arXiv:1312.5402 (dec 2013) 1–6 8
+27. Sokolova, M., Lapalme, G.: A systematic analysis of performance measures for
+    classification tasks. Information Processing and Management 45(4) (2009) 427–
+    437 11
+28. Huang, G., Liu, Z., Weinberger, K.Q., van der Maaten, L.: Densely Connected
+    Convolutional Networks. (aug 2016) 14
+

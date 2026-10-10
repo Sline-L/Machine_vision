@@ -1,0 +1,81 @@
+{
+  "file": "reports/GearPro_技术报告/文献综述_重写版_5000字.md",
+  "sha256": "8caed62b002bd938970c6916a18563bab0d589b2a2f1f7f7083316c829f252a4",
+  "body_han_including_title_abstract_keywords_headings_table": 5126,
+  "body_han_excluding_front_matter": 4918,
+  "all_han_including_references": 5168,
+  "chapter_han": [
+    {
+      "label": "# 基于机器视觉的金属齿轮外观缺陷检测技术综述",
+      "han": 208
+    },
+    {
+      "label": "## 一、齿轮外观缺陷检测的研究背景",
+      "han": 714
+    },
+    {
+      "label": "## 二、常见的表面缺陷检测方法介绍",
+      "han": 1055
+    },
+    {
+      "label": "## 三、齿轮外观检测的关键问题与代表性文献研究",
+      "han": 2112
+    },
+    {
+      "label": "## 四、结论与对GearPro齿轮质检项目的启发",
+      "han": 1037
+    }
+  ],
+  "citation_first_occurrence_old": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22
+  ],
+  "citation_mapping_old_to_new": {
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9,
+    "10": 10,
+    "11": 11,
+    "12": 12,
+    "13": 13,
+    "14": 14,
+    "15": 15,
+    "16": 16,
+    "17": 17,
+    "18": 18,
+    "19": 19,
+    "20": 20,
+    "21": 21,
+    "22": 22
+  },
+  "unused_old_references": [],
+  "reference_count_final": 22,
+  "body_in_4800_5200": true,
+  "prose_only_han_excluding_tables_and_headings": 4738
+}

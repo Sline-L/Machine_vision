@@ -1,0 +1,63 @@
+% !TEX root = ../main.tex
+
+%* 设置页面布局
+\geometry{
+    %? 补药乱加空行
+    a4paper,            % 纸张大小
+    %? 双面打印
+    inner=2.5cm,        % 内边距（靠装订线的边距）
+    outer=2.5cm,        % 外边距
+    %? 单面打印，少用
+    % left=3cm,         % 左边距（靠装订线的边距）
+    % right=2.5cm,      % 右边距
+    top=3cm,            % 上边距
+    bottom=2.5cm,       % 下边距
+    headsep=1cm,        % 页眉与正文之间的距离
+    headheight=14pt,    % 页眉高度
+    footskip=1.5cm,     % 页脚与正文之间的距离
+    bindingoffset=0cm   % 装订线偏移
+}
+
+%* 设置标题格式
+\ctexset{
+    section = {
+        format = \raggedright\zihao{-3},
+        number = \chinese{section},
+        aftername = \hspace{1em}
+    },
+    subsection = {
+        format = \raggedright\zihao{4},
+        number = \arabic{subsection},
+        aftername = \hspace{0.8em}
+    },
+    subsubsection = {
+        format = \raggedright\zihao{-4},
+        number = \arabic{section}.\arabic{subsection}.\arabic{subsubsection},
+        aftername = \hspace{0.5em}
+    }
+}
+
+%* 设置行距
+\setstretch{1.25}       % 设置全局行距为1.25倍
+
+%* 设置页眉页脚 
+\pagestyle{fancy}                       % 设置页眉页脚样式
+% \renewcommand{\headrulewidth}{0pt}    % 设置页眉线宽
+\fancyhf{}                              % 清除默认设置
+\fancyhead[R]{}                         % 页眉右侧
+\fancyfoot[C]{\thepage}                 % 当前页码
+
+%* 设置页码样式
+% \pagenumbering{gobble}    % 关闭
+% \pagenumbering{roman}
+\pagenumbering{arabic}
+
+%* 设置目录深度
+\setcounter{tocdepth}{3}
+
+%* 设置参考文献标题格式
+% \renewcommand{\refname}{\zihao{5}\bfseries\heiti 参考文献：}
+
+%* 设置多栏格式
+% \setlength{\columnsep}{0.8cm}   % 设置两栏之间的间距
+% \columnseprule 0.4pt          % 如果需要两栏中间有分隔线（可选，默认为0）

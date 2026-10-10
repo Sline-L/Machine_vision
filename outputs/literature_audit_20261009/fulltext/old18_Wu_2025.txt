@@ -1,0 +1,945 @@
+                                                                                                        www.nature.com/scientificdata
+
+
+
+
+                A dataset for surface defect
+               OPEN
+
+Data Descriptor detection on complex structured
+
+                parts based on photometric stereo
+                               Lin Wu1, Yu Ran1, Li Yan2, Yixing Liu3, You Song4 ✉ & Dongran Han1 ✉
+
+                               Automated Optical Inspection (AOI) technology is crucial for industrial defect detection but struggles
+                               with shadows and surface reflectivity, resulting in false positives and missed detections, especially
+                               on non-planar parts. To address these issues, a novel defect detection technique based on deep
+                               learning and photometric stereo vision was proposed, along with the creation of the Metal Surface
+                               Defect Dataset (MSDD). The proposed Stroboscopic Illuminant Image Acquisition (SIIA) method uses
+                               a specially arranged illuminant setup and a Taylor Series Channel Mixer (TSCM) to blend multi-angle
+                               illumination images into pseudo-color images. This approach enables end-to-end defect detection
+                               using universal object detectors. The method involves mapping color space transformations to spatial
+                               domain transformations and utilizing hue randomization for data augmentation. Four object detection
+                               methods (FCOS, YOLOv5, YOLOv8, and RT-DETR) were validated on the MSDD, achieving an mAP of
+                               86.1%, surpassing traditional methods. The MSDD includes 138,585 single-channel images and 9,239
+                               mixed images, covering eight defect types. This dataset is essential for automated visual inspection of
+                               metal surfaces and is freely accessible for research purposes.
+
+
+
+                               Background & Summary
+                               Surface defect detection is essential in industrial production, ensuring the aesthetic quality and mechanical
+                               integrity of metal parts. Common defects such as slag inclusions, dents, cracks, insufficient casting, and pitting
+                               can significantly compromise product performance and pose serious safety risks. As reported by the NHTSA’s
+                               2022 Annual Recalls Report, over 30.8 million vehicles were recalled in the United States due to quality issues,
+                               resulting in economic losses exceeding trillions of dollars for the automotive industry1.
+                                   Automated Optical Inspection (AOI)2 technology has become increasingly important in detecting surface
+                               defects in metal products, offering several advantages over manual inspection, such as high efficiency, labor
+                               cost savings, and reduced susceptibility to subjective interference. The fundamental principle of AOI systems
+                               lies in utilizing the optical properties of metal surfaces. Under specific optical imaging conditions, defects
+                               exhibit distinct image features that differ from the background. 2D imaging systems and 3D imaging systems are
+                               subsequently employed to identify and localize defects or anomalies3.
+                               2D imaging systems.            Previous research in this field has predominantly focused on defect detection using
+                               2D imaging systems4–8, which heavily rely on the Lambertian reflection model9. When light interacts with a
+                               metal surface, it produces Lambertian, directional, and specular reflections. Various lighting techniques such as
+                               bright-field, dark-field, diffuse reflection, and backlighting10 are applied, as illustrated in Fig. 1(a-c). From these
+                               reflections, 2D images are captured, and defects are identified and located based on the contrast in brightness lev-
+                               els between the defects and the background. Several surface defect detection datasets have been established based
+                               on 2D imaging technologies, with the most commonly used ones being the Northeastern University Surface
+                               Defect Database (NEU-DET)11 and the GC10-DET. These datasets have been utilized for surface defect detection
+                               using general-purpose object detection models12–14.
+                                   While these studies have made some progress in enhancing the efficiency and accuracy of the models, they
+                               are restricted to 2D static images and lack critical advancements in optical system design, causing two main
+
+                               1
+                                School of Life Sciences, Beijing University of Chinese Medicine, Beijing, 102488, China. 2School of Humanities,
+                               Beijing University of Chinese Medicine, Beijing, 102488, China. 3School of Management, Beijing University of
+                               Chinese Medicine, Beijing, 102488, China. 4School of Software, Beihang University, Beijing, 100191, China. ✉e-mail:
+                               songyou@buaa.edu.cn; handongr@gmail.com
+
+
+  Scientific Data |   (2025) 12:276 | https://doi.org/10.1038/s41597-025-04454-6                                                                    1
+www.nature.com/scientificdata/                                                                         www.nature.com/scientificdata
+
+
+
+
+                             Fig. 1 Comparison between 2D imaging system and our method. Traditional methods (a–c) use bright-field
+                             illumination, dark-field illumination, and diffuse reflection illumination to obtain 2D images (d). Our approach
+                             utilizes an illuminate array (e) to capture images under multi-angle illumination (f). Subsequently, deep
+                             learning is employed to obtain pseudo-color images containing 3D depth information (g). 2D image lacks of
+                             depth information, as shown in (d), making it difficult to distinguish shadows from stains; Pseudo-color image
+                             with 3D depth information, as shown in (g), making it easier for manual detection and recognition of defects.
+
+
+                             limitations. Firstly, their optical systems are typically highly sensitive to the angle of the lighting direction, which
+                             heavily depends on the expertise of optical engineers15. This dependency can lead to highly variable and less
+                             reliable detection results. Secondly, 2D images lack depth and 3D information such as normal direction, making
+                             it challenging to differentiate between shadows and stains, thereby resulting in a high false detection rate.
+
+                             3D imaging systems. Therefore, 3D imaging technology has been applied in recent studies to address these
+                             challenges. 3D information is utilized to enhance the resolution of surface defect detection systems, significantly
+                             improving the resolution capability of surface defect detection systems16, as shown in Table 1. Research indi-
+                             cates that different imaging modalities are complementary, and using a composite illuminant imaging system can
+                             effectively enhance the identification accuracy and stability of surface inspections17–19. Based on the composite
+                             illuminant imaging scheme, Woodham R. J. proposed the Photometric Stereo (PS) method20. This method utilizes
+                             three spatially distinct but identically illuminated illuminants to construct depth information based on the gradi-
+                             ent of the measured surface, thereby achieving the acquisition of 3D depth image information. Other studies use
+                             structured light, stereo vision, and scanning methods for 3D defect detection17,21,22.
+
+                             Applications and challenges. These studies have achieved significant results and have been successfully
+                             applied in the production of products such as cold-rolled and hot-rolled steel strips and high-temperature contin-
+                             uous casting slabs. However, these investigations are still in their early stages. Most of these studies primarily focus
+                             on products with planar structures, and many significant challenges remain to be addressed for the detection of
+                             defects in parts with complex 3D structures, highlighting the necessity of advanced 3D inspection technologies:
+
+                             (a) Complex structures and diverse defects. Most metal cast parts exhibit complex structures and diverse
+                                 defect types that are only clearly visible under specific lighting conditions, posing challenges for 2D
+                                 imaging systems. Meanwhile, 3D imaging systems are also significantly restricted by their limited working
+                                 range, restricted field of view and inadequate spatial resolution, which impede their applicability in online
+                                 real-time detection tasks.
+
+
+Scientific Data |   (2025) 12:276 | https://doi.org/10.1038/s41597-025-04454-6                                                                     2
+www.nature.com/scientificdata/                                                                                           www.nature.com/scientificdata
+
+
+            Aspect                  2D Imaging Systems                                                    3D Imaging Systems
+
+
+
+
+            Sample Image
+
+
+
+
+                                    Utilizing variations in brightness levels based on Lambertian         Utilizing depth information and surface gradients (e.g., photometric
+            Imaging Principle
+                                    reflection models (e.g., bright-field, dark-field)                    stereo, structured light, stereo vision)
+                                    Lacking the critical depth information necessary for accurate defect Capturing depth information for better differentiation between
+            Depth Information
+                                    identification                                                       defects, shadows, and stains
+                                                                                                          Limited field of view, often requiring scanning and struggling with
+            Field of View           Capturing a wide area, which is suitable for planar surfaces
+                                                                                                          large or complex 3D structures
+                                    Suitable for flat, simple surfaces, struggling with parts that have   Suitable for more complex and curved surfaces, and better at
+            Surface Complexity
+                                    complex geometries or diverse defect types                            handling diverse defect types
+                                                                                                          Slower due to the need for scanning, limiting real-time detection
+            Speed                   Faster in terms of image capture, processing, and inspection
+                                                                                                          capabilities
+                                    Suitable for real-time applications due to fast image capture and     Less suitable for real-time detection because scanning and
+            Real-Time Application
+                                    processing                                                            reconstruction processes are slower
+            Cost                    With lower cost for simpler and less expensive hardware               With higher cost due to complex and expensive hardware
+
+                                 Table 1. Comparisons between 2D and 3D Imaging Systems.
+
+
+                                 (b) Reliance on expertise. The configuration of illumination paths frequently hinges on the subjective expertise
+                                     of optical engineers, which can result in highly variable and less reliable detection results.
+                                 (c) Data scarcity. There is still a scarcity of large-scale, standardized metal surface defect detection datasets.
+                                     Many studies do not publicly release their datasets due to limited defect samples, category imbalances, and
+                                     high annotation costs. The high hardware costs of 3D sensors make these approaches difficult to replicate,
+                                     and there are no publicly available 3D imaging datasets, further limiting their widespread adoption.
+
+
+                                 Contributions of this research.           To address the existing challenges in metal surface defect detection, par-
+                                 ticularly the sensitivity to lighting angles and the impact of low reflectivity on complex surfaces, this paper pre-
+                                 sents several notable contributions. These contributions focus on innovative imaging techniques, dataset creation,
+                                 and comprehensive method validation. The major contributions are as follows:
+
+                                 (a) Development of an imaging method for non-planar parts with complex structures: This study establishes a
+                                     real-time 3D imaging defect detection framework based on photometric stereo and deep learning. A Stro-
+                                     boscopic Illuminant Image Acquisition (SIIA) method is proposed for capturing images from light sources
+                                     at all surrounding angles to address the issue of complex surface structures of parts, as shown in Fig. 1(e).
+                                     By mapping color space transformations to spatial domain transformations, end-to-end optimization of
+                                     the imaging system and surface defect detectors is achieved, effectively addressing sensitivity to illuminant
+                                     angles and the difficulties in designing complex optical systems.
+                                 (b) Collecting and constructing of the Metal Surface Defect Detection dataset: The MSDD aluminum casting
+                                     surface defect detection dataset is created, consisting of 9,332 annotated images covering eight defect types,
+                                     valuable for metal part surface defect detection research. It is demonstrated that metal castings produced
+                                     by the gravity casting process exhibit consistent defect patterns, making this dataset highly valuable for
+                                     research in metal part surface defect detection technology.
+
+                                    These contributions collectively advance the field by addressing key limitations in current metal surface
+                                 defect detection techniques, fostering the development of more accurate, efficient, and scalable solutions for
+                                 industrial use.
+
+                                 Methods
+                                 The pipeline of this method consists of six steps:
+
+                                 (a) Optical imaging. Capturing images from various angles using the Strobe Illuminant Imaging Method
+                                     (SIIM) for indirect 3D imaging based on photometric stereo (Fig. 1d);
+                                 (b) Image mixing. Combining images taken from different illuminant angles into a single RGB pseudo-color
+                                     image with depth information using deep learning, by incorporating a KAN-based Taylor Series Channel
+                                     Mixer for precise mixing (Fig. 1f);
+
+
+Scientific Data |      (2025) 12:276 | https://doi.org/10.1038/s41597-025-04454-6                                                                                               3
+www.nature.com/scientificdata/                                                                        www.nature.com/scientificdata
+
+
+
+
+                             Fig. 2 Hue transformation fitting illuminant spatial transformation. Each illuminant flashes sequentially (a),
+                             capturing n images with different illumination angles, and stacking them into Tensor A, Tensor B and Tensor C
+                             (b). The three tensors are respectively input into the TSCM with shared parameters, each outputting a tensor of
+                             w × h × 1., serving as the Red, Green, and Blue channels of the mixed image to form an RGB pseudo-color
+                             image (c). As shown in (c), for any pixel (x, y) on the metal surface, when performing a hue shift transformation
+                             on the mixed image, the hue change dH is approximately equivalent to all illuminant angles rotating by an angle
+                             dθ, where dθ ≈ T ∗ dH (d).
+                                                    120
+
+
+
+                             (c) Feature extraction (Optional). The Phase-Invariant Feature Module (PIFM) extracts lighting-invariant features
+                                 by creating a stable latent space, integrating seamlessly into object detection networks by replacing early layers;
+                             (d) Data preprocessing. Cutting images for annotation and training;
+                             (e) Data annotation. Collecting and annotating the MSDD dataset by applying hue shift transformations to
+                                 simulate lighting variations for robust feature extraction;
+                             (f) Defect detection. Integrating with object detection networks for metal surface defect detection, with
+                                 end-to-end optimization of optical parameters.
+
+
+                             Optical imaging.           We propose the SIIM based on photometric stereo. This method uses m CCD cameras
+                             and n illuminants arranged circumferentially around the detection object (Fig. 2a). While the schematic diagram
+                             simplifies the arrangement into a ring for clarity, in actual application, the cameras and illuminants are positioned
+                             at different heights to illuminate from various vertical and horizontal angles, capturing richer surface detail infor-
+                             mation. A programmable logic controller (PLC) alternates and synchronizes the strobing of these illuminants
+                             with the cameras, obtaining images illuminated from different angles and perspectives, as shown in Fig. 2(a).
+                             Each camera works in conjunction with the illuminants at 30 frames per second (FPS), allowing the entire image
+                             acquisition process to be completed within 0.96 seconds, which is sufficient to meet the production cycle require-
+                             ments of 300 pieces per hour on a typical aluminum alloy casting line.
+                                 The classic photometric stereo method estimates the normal direction and reflectance of each point on the
+                             surface by the changes in brightness of each point under different illuminants. For each illuminant direction Li,
+                             the pixel brightness at (x, y) can be expressed by Eq. (1):
+
+
+Scientific Data |   (2025) 12:276 | https://doi.org/10.1038/s41597-025-04454-6                                                                    4
+www.nature.com/scientificdata/                                                                              www.nature.com/scientificdata
+
+
+
+
+                             Fig. 3 Taylor series channel mixer. The multi-channel image undergoes a nonlinear activation layer (b),
+                             followed by a linear activation layer, which are then combined to produce the mixed three-channel image (a).
+
+
+
+
+                                                                  I (x, y, l ) = ρ(x, y )max(n(x, y ) ⋅ l , 0)                                    (1)
+                             Where ρ(x, y) is the reflectance at (x, y), n(x, y) is the surface normal vector at (x, y), and l is the direction vector
+                             of the illuminant. The n images captured are mixed in various proportion, resulting in a system of equations:
+
+                                                               R(x, y, l ) = Σρ(x, y )max(θin(x, y ) ⋅ ri, 0)
+                                                               
+                                                                G (x, y, l ) = Σρ(x, y )max(θ n(x, y ) ⋅ g , 0)
+                                                                                                  i            i
+                                                                 
+                                                                   B(x, y, l ) = Σρ(x, y )max(θin(x, y ) ⋅ bi , 0)                             (2)
+                             Where R(x, y, l), G(x, y, l), and B(x, y,l) are the brightness values of a pixel at (x, y) in the RGB channels, ρ(x, y)
+                             is the reflectance at (x, y), n(x, y) is the normal vector at that point, ri, gi, and bi are the direction vectors of the
+                             illuminants in different groups, and θi are the parameters to be optimized for the channel mixer. By illuminating
+                             with three groups of illuminants, three equations can be obtained, thus solving for the reflectance and normal
+                             direction at point (x, y). The depth information of the surface can then be further solved using the integrated
+                             normal field or other geometric constraints methods.
+
+                             Image mixing. This paper proposes a Taylor Series Channel Mixer (TSCM) that combines images from
+                             the three channels into an RGB pseudo-color image as shown in Fig. 2(c). The n illuminants are arranged in a
+                             cyclic symmetric manner, with an angle T between adjacent illuminants (Fig. 2a). First, each illuminant flashes
+                             sequentially, capturing n images with different illumination angles, denoted as 0, 1, 2, …, n-1, and stacking them
+                             into Tensor A of shape w × h × n. Next, as shown in Fig. 2(b), all channels are cyclically shifted by one position
+                             along the stacking direction to obtain Tensor B, and the shifting operation continues to obtain Tensor C. The
+                             three tensors are respectively input into the TSCM with shared parameters, each outputting a tensor of w × h × 1.,
+                             serving as the Red, Green, and Blue channels of the mixed image to form an RGB pseudo-color image. Under
+                             these conditions, in the local region, for any point (x, y) on the metal surface, the positional relationship of the
+                             nearest three illuminants Lk, Lk+1, and Lk+2 is as shown in Fig. 2(d), staggered in the height direction (z-axis). By
+                             optimizing the mixing parameters, the influence of illuminants farther away, such as Lk–1, and Lk+3, etc., whose
+                             angular deviation is greater than the reflective lobe range of the metal surface, on the color values at (x, y) is min-
+                             imized and can thus be ignored.
+                                 The structure of the channel mixer, as illustrated in Fig. 3, includes a nonlinear activation layer and a linear
+                             activation layer. This design draws inspiration from the Kolmogorov-Arnold Network (KAN). According to the
+                             Kolmogorov-Arnold theorem, if f is a multivariate continuous function defined on a bounded domain, then f
+                             can be expressed as a finite composition of continuous functions of a single variable and the binary operation
+                             of addition. Unlike the classical KAN, which utilizes B-Splines, the channel mixer’s nonlinear layer employs a
+                             fourth-order Taylor series expansion, followed by summation in the linear activation layer.
+                                 Assuming the existence of an ideal mixing function fmix, it can be approximated using the Taylor series
+                             expansion formula around a point a as follows:
+
+
+Scientific Data |   (2025) 12:276 | https://doi.org/10.1038/s41597-025-04454-6                                                                      5
+www.nature.com/scientificdata/                                                                                   www.nature.com/scientificdata
+
+
+
+
+                             Fig. 4 Optimization of the TSCM. The Original images collected by the strobe illuminant are mixed into an
+                             RGB image through the Taylor Series Channel Mixer; The VQ-VAE optimizes the channel mixer through self-
+                             supervised learning to achieve the mixer with the least information loss (a); The Encoder down-samples through
+                             two convolutional layers, then obtains the encoding vector z through stacked residual blocks; The Decoder decodes
+                             z through stacked residual blocks and then up-samples through transposed convolution to restore resolution (b);
+                             The Codebook learns discrete representations of feature vectors in the Latent space and is optimized through
+                             Quantization loss; The MSE loss between the Original image and the Reconstructed images is used to optimize the
+                             parameters of the Taylor Series Channel Mixer and the VQ-VAE; The Phase-Invariant Feature Module learns features
+                             invariant to hue transformations by learning feature vectors before the hue transformation (c); Quantization loss
+                             brings the feature vectors closer to the codebook vectors in the latent space while updating the codebook vectors (d).
+
+
+
+                                                                               f ′′ (a )                 f ′′′ (a )                 f ′′′′ (a )
+                                     fmix (x ) ≈ f (a ) + f ′ (a )(x − a ) +               (x − a )2 +                (x − a )3 +                 (x − a )4
+                                                                                 2!                         3!                         4!                     (3)
+                             where f(a) is the function value at a, f ′(a ), f ′′(a ), f ′′′(a ) and f ′′′′(a ) are the first through fourth derivatives of
+                             fmix at a, and (x − a ) represents the deviation from a.
+                                 Given that the image pixel values are normalized between 0 and 1, this fourth-order Taylor series expansion
+                             can approximate any ideal mixing function fmix with high precision within this range. Additionally, the channel
+                             mixer, consisting of only two layers, avoids issues related to gradient vanishing and explosion during backprop-
+                             agation, thereby ensuring more stable network convergence compared to the Multi-Layer Perceptron (MLP)
+                             structures in traditional CNN architectures.
+                                 Under these conditions, the RGB image is transformed into the HSV space, and the hue H(x, y) of each pixel
+                             (x, y) can be expressed as:
+                                                                     
+                                                                       60 ×  G − B mod 6 if C
+                                                                                                ′   ′
+                                                                                                                              ′
+                                                                                                               max = R
+                                                                                           Cmax − Cmin
+                                                                                                                 
+                                                                        
+                                                                                      B′ − R′                
+                                                        H (x, y ) =  60 ×                           mod 6 if Cmax = G ′
+                                                                                      Cmax − Cmin          
+                                                                           
+                                                                                     R′ − G ′               
+                                                                              60 ×                  mod 6 if Cmax = B′
+                                                                                   
+                                                                                       Cmax − Cmin           
+                                                                                                                                                       (4)
+
+Scientific Data |   (2025) 12:276 | https://doi.org/10.1038/s41597-025-04454-6                                                                                 6
+www.nature.com/scientificdata/                                                                                        www.nature.com/scientificdata
+
+
+                              Input: A set of parts requiring defect annotation
+                              Output: Annotated defects for each part
+                              for each part in the set do
+                                  Inspectors inspect the part manually to identify possible defects
+                                  Inspector_1 annotates defects on the part
+                                  Inspector_2 independently annotates defects on the same part
+                                  Compare annotations from Inspector_1 and Inspector_2
+                                  Initialize an empty list for final annotations
+                                  for each annotation_pair (A1, A2) from Inspector_1 and Inspector_2 do
+                                        Compute IoU(A1, A2)
+                                        if IoU(A1, A2) > 0.8 then
+                                                 Compute average_box = average(A1, A2)
+                                                 Add average_box to final annotations
+                                        else
+                                                 Submit A1 and A2 to Quality Supervisor for review
+                                                 Add reviewed_box to final annotations after approval
+                                        end if
+                                  end for
+                                  Save final annotations for the part
+                              end for
+
+
+
+                             where Cmin = max(R′ , G′ , B′), and Cmin = min(R′ , G′ , B′).
+                                 Regarding the overall layout, the relationship between these three tensors approximates the new images
+                             obtained by sequentially rotating the entire illuminant array by an angle T and illuminating them, while being
+                             mixed through the same channel mixer. Under this conditions, the three channels of the mixed image in the
+                             HSV color space are equivalent to a hue transformation rotated by 120 degrees. This method allows us to simu-
+                             late approximately any direction of illumination conditions without moving the physical illuminants, eliminat-
+                             ing the problem of small defects being extremely sensitive to the lighting angle.
+                                 The nonlinear layer employs a fourth-order Taylor series expansion. Because the image pixel values are nor-
+                             malized to the range of 0–1, this fourth-order Taylor expansion can approximate any ideal mixing function fmix
+                             with high accuracy within this range. Additionally, compared to the MLP structure in classic CNN networks,
+                             the TSCM consists of only two layers, which helps avoid issues such as gradient vanishing and exploding during
+                             backpropagation, thereby leading to more stable network convergence.
+                                 The channel mixer is parameter-optimized using a Vector Quantized Variational Autoencoder (VQ-VAE)23,
+                             as shown in Fig. 4. The w × h × 3. mixed image is input into the autoencoder, outputting a w ×h × n. recon-
+                             structed image, and calculating the loss with the original w × h × n. image. The loss function employs Mean
+                             Squared Error Loss (MSE Loss), Structural Similarity Loss (SSIM Loss), Vector Quantizer Loss (Vector
+                             Quantizer Loss), and Commitment Loss (Commitment Loss). The MSE Loss minimizes the information loss
+                             after image mixing, while the SSIM Loss helps eliminate the “screen door” effect and detail blurring in the recon-
+                             structed image. The Vector Quantizer Loss Lvq makes the codebook vector e approximate the latent variable z
+                             output by the encoder, while the Commitment Loss Lcommit makes the latent variable z output by the encoder
+                             approximate the codebook vector e. They can be expressed as:
+
+                                                                                        L vq = ||sg (z ) − e||2                                  (5)
+
+                                                                                     Lcommit = β || z − sg (e ) ||2                              (6)
+                             where sg denotes stop gradient, and β is a hyperparameter used to balance the speed at which z approximates the
+                             codebook vector and e approximates the latent variable, as shown in Fig. 4(d).
+
+                             Feature extraction (Optional).             This paper proposes a Phase-Invariant Feature Module (PIFM) to extract
+                             shallow feature information from images that is invariant to hue transformations, thereby eliminating the sensi-
+                             tivity of defect detection models to lighting angles. Notably, this step is optional. Unlike VQ-VAE, this method
+                             reconstructs images directly using the latent variable z to reduce information loss, while using e as the learning
+                             target for PIFM, as shown in Fig. 4(c). Quantization loss plays a crucial role in the autoencoder. By constructing
+                             a discrete and stable latent space, it helps the model learn features that are insensitive to subtle changes in lighting
+                             in the input image. By mapping continuous latent representations into a finite, predefined codebook space, the
+                             discrete vectors of the vectorized representation reduce the network’s sensitivity to changes in lighting angles,
+                             encouraging the network to learn consistent, abstract, and conceptual information under different lighting con-
+                             ditions. This modular design allows the PIFM module to be easily integrated into other object detection networks.
+                             The encoder is designed as an independent feature extraction module responsible for extracting features from the
+                             image that are invariant to lighting angles, and can directly replace the P1 and P2 layers of many object detection
+                             networks, training the network using conventional methods.
+
+
+
+Scientific Data |   (2025) 12:276 | https://doi.org/10.1038/s41597-025-04454-6                                                                        7
+www.nature.com/scientificdata/                                                                      www.nature.com/scientificdata
+
+
+
+
+                             Fig. 5 Overall network architecture. (a) In this design, the P1-P3 stages of the backbones from conventional
+                             defect detection models is replaced by the PIFM, allowing the model to extract illumination-invariant features.
+                             This replacement enables end-to-end optimization of the TSCM, enhancing the model’s robustness to lighting
+                             variations. (b) FCOS uses Res-Blocks in its backbone for multi-scale feature extraction, employing an anchor-
+                             free detection method. This approach reduces the complexity of anchor design and tuning, simplifying object
+                             detection while maintaining high accuracy. (c) YOLOv5/YOLOv8 utilize the Cross Stage Partial Block (C3
+                             module) and CSPNet2 Modified Block (C2f module), which focuses on optimizing the separation and merging
+                             of feature maps. This design allows for more efficient computation and better feature representation by improving
+                             gradient flow and reducing redundancy in feature extraction. (d) RT-DETR incorporates the Hourglass Block
+                             (HG-Block) for effective multi-scale feature extraction and spatial context aggregation. Furthermore, it leverages
+                             a transformer architecture, allowing the model to capture global dependencies within images.
+
+
+                             Data preprocessing. The dataset collected 1,507 metal parts with defects. Images were captured multiple
+                             times under different lighting conditions by six cameras, resulting in an initially large dataset. This method uti-
+                             lizes high-resolution cameras (up to 2560 × 1920 pixels) to detect defects as small as 0.5 mm. These images enable
+                             the model to effectively identify tiny defect features. To manage large image sizes, a sliding window technique
+                             divides images into 640 × 640 patches, with a 15% overlap to ensure complete defect detection. All images were
+                             slightly distorted, scaled, and sheared to obscure the true dimensions and shapes of the products. Additionally,
+                             all logos and identifying marks were removed to prevent potential commercial disputes. Experimental results
+                             indicate that these modifications did not significantly affect defect detection performance.
+
+                             Data annotation.          The data annotation process was completed by two professionally trained inspectors and
+                             one quality supervisor. Before starting, the inspectors manually confirmed the defects on the parts to avoid any
+                             influence from optical enhancement methods. Then, the two inspectors collected images of the parts and inde-
+                             pendently annotated the enhanced images. After both inspectors completed their annotations, the IoU of the
+                             annotation boxes was used to determine whether a review by the quality supervisor was needed. If a review was
+                             necessary, the quality supervisor finalized the annotations; otherwise, the average of the two annotation boxes was
+                             taken as the final result. The annotation process can be represented by the following pseudocode:
+
+
+
+
+Scientific Data |   (2025) 12:276 | https://doi.org/10.1038/s41597-025-04454-6                                                                8
+www.nature.com/scientificdata/                                                                      www.nature.com/scientificdata
+
+
+                             Defect detection.          The images collected in this study can be utilized for training and detection in general
+                             object detection models by simply inputting the TSCM-mixed RGB pseudo-color images into these networks,
+                             similar to how other defect detection datasets are used. To incorporate the PIFM and enable end-to-end optimi-
+                             zation, the P1-P3 stages of the backbones in conventional defect detection models can be replaced with the PIFM,
+                             as illustrated in Fig. 5a. This modification is independent of the object detection model architecture, whether
+                             it is anchor-free, anchor-based, or ViT-based. Accordingly, we have tested this approach on FCOS24 (Fig. 5b),
+                             YOLOv525, YOLOv826 (Fig. 5c), and RT-DETR27 (Fig. 5d). The Ultralytics26 framework was utilized to facilitate
+                             the rapid construction of object detection networks, although it is not essential to our method.
+                                  The fully modular design endows this network with robust generalization capabilities, enabling the replace-
+                             ment of the object detector with any standard object detection network architecture. The encoder is responsible
+                             for extracting features from the image that are invariant to lighting angles, and can directly replace the P1-P3
+                             layers of many object detection networks, training the network using conventional methods. By pre-training the
+                             model’s feature extraction layers in this way, convergence speed and detection accuracy can be improved. The
+                             hue transformation is entirely implemented on tensors to maintain gradient flow, making the proposed method
+                             end-to-end optimizable, allowing fine-tuning of the channel mixer and feature extractor even in the final stages
+                             of defect detection. Compared to static mixing methods, this approach not only addresses the sensitivity to illu-
+                             minant angles but also provides stronger feature representation capabilities.
+
+                             Data Records
+                             The entire dataset is stored in the ‘datasets’ folder, which includes three subfolders: ‘OrigImages’, contain-
+                             ing images with multi-angle illumination, ‘JPEGImages’, containing the mixed pseudo-color images, and
+                             ‘Annotations’, containing the annotation files. The dataset28 has been uploaded to the Science Data Bank and can
+                             be accessed at https://doi.org/10.57760/sciencedb.10794.
+
+                             Defect categories definitions.       There are eight types of defects, namely Misrun, Inclusion, Dent, Parting
+                             line crack, Stamp collapse, Pockmarks, Mould scuffing, and Cut marks. The definitions of the defect categories
+                             are provided in Table 2.
+
+                             Dataset structure. The folder structure of the dataset is shown in Fig. 6. The dataset consists of image files
+                             and annotation files, stored in the Images and Annotations folders respectively. Each image has a corresponding
+                             annotation file, with filenames containing the date, time, and device ID of the image capture. The annotation files
+                             use the VOC format and include the filename, dimensions, and the category and bounding box location of each
+                             defect in the image.
+
+                             Technical Validation
+                             The experiments were conducted on a computer with an Intel Xeon(R) Silver 4110 CPU @ 2.10 GHz processor,
+                             32 GB memory, 24 GB NVIDIA GeForce 3090 GPU, and Windows 10 operating system. The network was built
+                             using the Pytorch 1.10.1 framework. The dataset used was the MSDD dataset, split into training and testing sets
+                             in a 4:1 ratio.
+                                 To verify the performance improvement of the proposed method, ablation experiments were conducted
+                             using various improved methods to evaluate their impact on the model’s performance. As mentioned earlier, the
+                             improvements mainly include:
+
+                             (a) Linear channel mixer;
+                             (b) Adding a nonlinear expression branch utilizing CNN and ReLU to give the channel mixer nonlinear
+                                 expression capability;
+                             (c) Using TSCM;
+                             (d) Using a Vector Quantization layer to construct a discrete latent space, and applying random hue phase shift
+                                 transformations to make the defect detection network insensitive to subtle changes in illuminant direction,
+                                 and improving the robustness of the detection model.
+
+                                The ablation experiments mainly compared the reconstruction image errors of different mixing methods
+                             on the test set, including Mean Squared Error (MSE), Peak Signal-to-Noise Ratio (PSNR), Structural Similarity
+                             Index (SSIM), and mean Average Precision (mAP) at IoU threshold 0.50 (mAP50) for defect detection.
+                                The results of the ablation experiments are shown in Table 3. The results indicate that the TSCM improved
+                             the PSNR by 6.02 to 6.03. The vector quantization layer had an insignificant impact on reconstruction quality
+                             but increased the mean Average Precision for defect detection by 1.6%. The former shows blurred details and
+                             some information loss, while the latter produces reconstructed images almost indistinguishable from the orig-
+                             inal images to the naked eye.
+                                To further verify the effectiveness of this method, we compared it with state-of-the-art general object
+                             detection networks, including FCOS, YOLOv5, YOLOv8, and RT-DETR. The baseline version used a static
+                             image mixing method, with mixing parameters optimized by the autoencoder; the improved version used an
+                             end-to-end optimized image mixing method with gradient-based random phase shift transformations for data
+                             augmentation. Additionally, as a control, the model input channels were modified to n, and the n-channel orig-
+                             inal images were directly input into the model for training without mixing.
+                                The experimental results are shown in Table 4. Due to the small sample sizes of misrun and pockmarks
+                             defects, which are not statistically significant, the experiment only compared five types of defects: dent, inclu-
+                             sion, parting line crack, stamp collapse, and mould scuffing. The results indicate that the method of defect detec-
+                             tion using static mixed RGB images significantly outperformed the direct training without mixing. Regardless
+
+
+Scientific Data |   (2025) 12:276 | https://doi.org/10.1038/s41597-025-04454-6                                                                9
+www.nature.com/scientificdata/                                                                                         www.nature.com/scientificdata
+
+
+                                                                                 Comparison of Non-Defects and Defects
+             Defect Categories Defect Definition                                 Non-defect                            Defect
+
+
+
+
+                               Internal or surface defects caused by
+             Inclusion         non-metallic impurities in the metal melt.
+                               Depth > 0.5 mm
+
+
+
+
+                                                                                 Surface stain with low reflectivity   Hole with depth > 0.5mm, inclusion defect;
+
+
+
+
+                               Knife marks or scratches caused by improper
+                               clamping of the part or unstable movement
+             Cut marks
+                               of the cutting tool during riser cutting.
+                               Depth > 0.1 mm
+
+
+
+
+                                                                                 Smooth surface                        Lines caused by tool vibration during cutting
+
+
+
+
+                               Local collapse on the casting surface caused by
+             Stamp collapse    deep stamping of dates or marks on the mold.
+                               Depth or height > 0.5 mm
+
+
+
+
+                                                                                 Stamp flush with the part surface     Stamp lower or higher than the surface
+
+
+
+
+                               Local defects on the casting caused by uneven
+                               distribution of mold release agent, leading
+             Mould scuffing
+                               to metal sticking to the mold surface during
+                               demolding. Depth > 0.5 mm
+
+
+
+
+                                                                                                                       Defects caused by metal sticking to the mold during
+                                                                                 Normal demolded surface
+                                                                                                                       demolding
+
+
+
+
+                               Surface depressions caused by impacts on the
+             Dent
+                               casting before heat treatment. Depth > 0.5 mm
+
+
+
+
+                                                                                 Normal deformation caused by part     Dent caused by impact before heat treatment
+
+
+
+
+                               Numerous small pits or round depressions on
+                               the casting surface, usually caused by rapid
+             Pockmarks
+                               local cooling or high hydrogen content in the
+                               aluminum melt. Depth > 0.5 mm
+
+
+
+
+                                                                                 Numerous but shallow small holes      Numerous small deep holes
+             Continued
+
+Scientific Data |    (2025) 12:276 | https://doi.org/10.1038/s41597-025-04454-6                                                                                        10
+www.nature.com/scientificdata/                                                                                           www.nature.com/scientificdata
+
+
+                                                                                    Comparison of Non-Defects and Defects
+             Defect Categories Defect Definition                                    Non-defect                           Defect
+
+
+
+
+                                  Irregular gaps at the mold parting line due to
+             Parting line crack   thin metal layers adhering to the mold surface.
+                                  Depth > 0.5 mm
+
+
+
+
+                                                                                    Stain at the parting line with low
+                                                                                                                         Deep hole or crack at the parting line
+                                                                                    reflectivity
+
+
+
+
+                                  Incomplete part shape due to molten metal
+             Misrun
+                                  failing to fully fill the mold. Depth > 0.5 mm
+
+
+
+
+                                                                                    Normal random deformation at the     Defect at the part edge due to insufficient molten
+                                                                                    part edge                            aluminum temperature
+
+                                  Table 2. Defect category definitions29.
+
+
+
+
+                                  Fig. 6 Dataset structure.
+
+
+                                  of the object detection network used, the PIFM module implemented with phase shift transformations brought
+                                  an average precision improvement of 4.1% to 5.5% compared to the static mixing scheme. The end-to-end opti-
+                                  mized channel mixer provided an additional average precision improvement of 1.1% to 2.1%. The YOLOv8-l
+                                  network performed best on the MSDDs dataset, achieving mAP50 of 0.854, as shown in Fig. 7. The accuracy of
+                                  the YOLOv8-m network was almost identical to that of YOLOv8-l but with faster detection speed, making it the
+                                  best overall performer.
+                                      From the perspective of specific defect categories, the phase shift transformation had a minimal impact
+                                  on the defects of stamp collapse and parting line crack, only improving the average precision by about 1%.
+                                  This is likely because these defects occur in relatively fixed positions and are less sensitive to illuminant angles.
+                                  However, the dent and inclusion defects, which have variable positions on the parts and are greatly affected by
+
+
+Scientific Data |     (2025) 12:276 | https://doi.org/10.1038/s41597-025-04454-6                                                                                              11
+www.nature.com/scientificdata/                                                                                   www.nature.com/scientificdata
+
+
+                                   Linear Mixer CNN + ReLU   TSCM     Vector Quantization   MSEtest      PSNRtest     SSIMtest   mAP50
+                                   √                                                        0.00071      31.49        0.0782     0.759
+                                                 √                                          0.00062      32.21        0.0760     0.765
+                                                             √                              0.00015      38.24        0.0299     0.768
+                                   √                                  √                     0.00061      32.15        0.0782     0.777
+                                                 √                    √                     0.00056      32.52        0.0716     0.780
+                                                             √        √                     0.00014      38.54        0.0287     0.784
+
+                                Table 3. Ablation experiment result.
+
+
+                                                                            mAP50
+                                                             End-to-End
+              Models           Static Mixing TSCM    PIFM    Optimization   All Classes Dent      Inclusion         Parting Line Crack Stamp Collapse Scraping
+                                                                            —          —          —                 —                    —            —
+                                             √                              0.628      0.318      0.677             0.695                0.923        0.748
+              FCOS + ATSS      √
+                                             √       √                      0.669      0.379      0.769             0.702                0.940        0.742
+                                             √       √       √              0.680      0.453      0.756             0.706                0.950        0.763
+                                                                            0.704      0.604      0.800             0.770                0.931        0.790
+                                             √                              0.774      0.533      0.827             0.792                0.968        0.881
+              YOLOv5-m6        √
+                                             √       √                      0.819      0.650      0.869             0.806                0.972        0.845
+                                             √       √       √              0.840      0.696      0.853             0.834                0.97         0.877
+                                                                            0.722      0.516      0.743             0.766                0.941        0.792
+                                             √                              0.783      0.508      0.791             0.802                0.966        0.857
+              YOLOv8-m         √
+                                             √       √                      0.838      0.664      0.867             0.845                0.970        0.867
+                                             √       √       √              0.853      0.671      0.87              0.847                0.975        0.890
+                                                                            0.748      0.693      0.574             0.590                0.980        0.846
+                                             √                              0.783      0.508      0.791             0.802                0.926        0.857
+              YOLOv8-l         √
+                                             √       √                      0.847      0.723      0.872             0.819                0.978        0.892
+                                             √       √       √              0.861      0.708      0.874             0.823                0.977        0.940
+                                                                            0.711      0.496      0.763             0.773                0.943        0.781
+                                             √                              0.759      0.523      0.807             0.777                0.964        0.840
+              RT-DETR-l        √
+                                             √       √                      0.799      0.523      0.831             0.854                0.956        0.815
+                                             √       √       √              0.815      0.532      0.807             0.787                0.967        0.841
+
+                                Table 4. Comparison of object detection model performance: Static Mixing, TSCM, PIFM and End-to-End
+                                Optimization.
+
+
+
+
+                                Fig. 7 Comparison of detection performance. (a) YOLOv8-l with Static Mixing; (b) YOLOv8-l with Phase Shift
+                                Transformation and End-to-End Optimization.
+
+
+
+
+Scientific Data |      (2025) 12:276 | https://doi.org/10.1038/s41597-025-04454-6                                                                             12
+www.nature.com/scientificdata/                                                                       www.nature.com/scientificdata
+
+
+
+
+                             Fig. 8 Comparison of Detection Results between Static Mixing and Improved Methods. For the best three
+                             models (YOLOv5-m6, YOLOv8-m, and RT-DETR), the detection performance of the Improved method is
+                             significantly better than that of the Static mixing method.
+
+
+                             illuminant angles, saw an increase of up to 18.7% in average precision, with significant improvements in accu-
+                             racy and recall rates, as shown in Fig. 8.
+                                 The complex geometric shapes of the materials cause 100% of the samples to be affected by shadows and
+                             occlusions, significantly impacting detection performance. Additionally, low reflectivity caused by stains is chal-
+                             lenging to quantify since stains, as non-defects, are not annotated. However, as aluminum alloy casting blanks
+                             are often stored outdoors, they are exposed to environmental factors such as rain and hurricanes, leading to
+                             batch occurrences of stains, which contributes to a significant number of false detections in real-world settings.
+                                 To address these challenges, the proposed method integrates photometric stereo-based strobe imaging and
+                             deep learning to enhance metal surface defect detection. Its effectiveness is validated using the high-quality
+                             MSDD dataset. As shown in Table 5, compared to NEU-DET and GC10-DET, the MSDD dataset includes not
+                             only a larger collection of grayscale images but also RGB pseudo-color images with depth information, adding
+                             an extra layer of detail for more accurate detection. This makes the MSDD dataset an essential tool for address-
+                             ing surface defect detection on non-planar materials, a critical challenge in industrial applications.
+                                 The key elements of the proposed method to overcome these challenges are outlined below:
+
+                             (a) Imaging and illumination. The Stroboscopic Illuminant Image Acquisition (SIIA) method captures im-
+                                 ages from multiple angles to address complex surface geometries, combining them into RGB pseudo-color
+                                 images with depth information using the Taylor Series Channel Mixer (TSCM). This method enhances
+                                 robustness to varying lighting conditions.
+                             (b) Dataset quality. The MSDD dataset, with 9,332 annotated images covering eight defect types, ensures
+                                 high model performance. The dataset’s diverse coverage of gravity-cast metal part defects enables effective
+                                 model training for various industrial applications.
+                             (c) Scalability. The method has demonstrated adaptability across different model architectures, including
+                                 anchor-free, anchor-based, and ViT-based models. These general object detection models exhibit superior
+                                 performance on the MSDD dataset compared to traditional static lighting approaches, highlighting the
+                                 method’s flexibility. This shows that the method is independent of the underlying model architecture, mak-
+                                 ing it scalable and suitable for detecting defects on surfaces with complex geometries and under various
+                                 lighting conditions. This flexibility allows it to be integrated across different industrial settings, broadening
+                                 its application potential.
+
+                               Figure 9 shows the comparison of effects between traditional static ring illumination and photometric stereo
+                             imaging. Achieving globally uniform diffuse reflection illumination with static ring light makes it difficult to
+
+
+Scientific Data |   (2025) 12:276 | https://doi.org/10.1038/s41597-025-04454-6                                                                 13
+www.nature.com/scientificdata/                                                                                           www.nature.com/scientificdata
+
+
+         Aspect                       NEU-DET                                        GC10-DET                                    MSDD
+
+
+
+
+         Sample Image
+
+
+
+
+         Gray Images                  1800                                           2280                                        149312
+         RGB Images                   —                                              —                                           9332
+                                                                                     Crack, Welding Line, Inclusion, Scratch,     Inclusion, Cut marks, Stamp collapse, Mould
+                                      Crazing, Inclusion, Patches, Pitted Surface,
+         Defects Type                                                                Pit, Bump, Break, Rolled-in Scale, Oil Spot, scuffing, Dent, Pockmarks, Parting line
+                                      Rolled-in Scale, Scratches
+                                                                                     Dirty Spot                                   crack, Misrun
+         Image Size                   200 × 200                                      2048 × 1000                                 640 × 640
+         Structural Complexity        Plane                                          Plane                                       Non-plane
+
+                                 Table 5. Comparison of the NEU-DET, GC10-DET and MSDD.
+
+
+
+
+                                 Fig. 9 Comparison between 2D imaging system and our method. (a) Left: The concave shapes are not clearly
+                                 visible; Right: The concave shapes are clearly delineated using our method; (b) Left: Distinguishing between
+                                 shadows and stains is challenging in traditional methods; Right: It is easier in the pseudo-color image;
+                                 (c) Left: In the 2D image, two black spots are visible; Right: Only one is an inclusion (red box), while the other
+                                 is a shadow caused by a protrusion (green box); (d) Left: The diffuse lighting source reduces the contrast of cut
+                                 marks; Right: In the pseudo-color image, cut marks are more prominently featured.
+
+
+                                 distinguish between low reflectivity caused by surface stains and shadow areas; whereas in the pseudo-color
+                                 image, the local concave shape of the defect is very clear, significantly improving the recall rate for both manual
+                                 inspection and defect detection models.
+
+                                 Limitations.         While our method has shown strong performance, there are several limitations that should be
+                                 noted:
+
+                                 (a) SIIA method on reflective surfaces. One of the key challenges we encountered is that the SIIA (Strobe
+                                     Imaging Illumination Adjustment) method struggles with highly reflective surfaces. The complex arrange-
+                                     ment of light sources tends to produce clear reflections on smooth surfaces, which can interfere with defect
+
+
+Scientific Data |       (2025) 12:276 | https://doi.org/10.1038/s41597-025-04454-6                                                                                        14
+www.nature.com/scientificdata/                                                                                     www.nature.com/scientificdata
+
+
+                                 detection by creating visual artifacts that obscure the defects themselves. This is a significant issue when
+                                 applying the model to surfaces like polished metals or glass.
+                             (b) Imbalanced data. Another limitation involves the issue of data imbalance in our dataset, which could im-
+                                 pact the model’s ability to generalize across various defect types. This is particularly evident when certain
+                                 defect categories are underrepresented, potentially leading to skewed results or lower detection rates for
+                                 rarer defects.
+
+
+                             Future research directions.         To improve the model and bring it closer to industrial application, several
+                             future research directions are worth exploring:
+
+                             (a) Addressing imbalanced data. Continued data collection is essential to address the issue of imbalanced
+                                 data categories. Expanding the dataset to include more diverse samples will improve the model’s ability to
+                                 handle underrepresented defect types, leading to more robust performance across a variety of industrial
+                                 scenarios.
+                             (b) Testing on non-metallic surfaces. While initial experiments have demonstrated that the method works well
+                                 on non-metallic surfaces, such as wood, leather, and fabric, showing promising extensibility, further exper-
+                                 imentation and validation are necessary to confirm these findings across a wider variety of non-metallic
+                                 materials.
+                             (c) Improving detection accuracy. Additional efforts are required to improve the model’s detection accuracy
+                                 to meet the stringent standards demanded by industrial environments. This can be achieved by optimizing
+                                 the network architecture or incorporating more diverse training data to refine the model’s performance.
+
+
+                             Usage Notes
+                             In actual production, the majority of parts are defect-free, yet it is common to erroneously classify qualified parts
+                             as defective. Therefore, this dataset includes a certain number of background images without defects to help
+                             the model learn the patterns of normal parts. When training the dataset using general object detection models,
+                             Translate, Scale, Mosaic, Random-Affine, MixUp, Augment HSV, and Horizontal Flip have been verified as
+                             effective data augmentation methods. Additionally, unlike general object detection tasks, the features of surface
+                             defects are highly correlated with the features of their surrounding background. Therefore, the positive and neg-
+                             ative sample labeling strategy has a significant impact on the performance of the detection model.
+                             Code availability
+                             The code used for technical validation in this paper is available at https://github.com/Destinyia/Metal-Surface-
+                             Defect-Detection. The code follows the Apache-2.0 license and can be accessed freely for non-commercial use.
+                             We provide demo scripts for key steps: ‘train_tscm.py’ demonstrates training the TSCM, ‘train_pifm.py’ is used
+                             for pre-training the PIFM, and ‘train_detector.py’ shows the training process of the defect detector. Additionally,
+                             partial training results are retained in the ‘runs’ directory for reference.
+
+                             Received: 6 August 2024; Accepted: 13 January 2025;
+                             Published: xx xx xxxx
+
+                             References
+                              1. National Highway Traffic Safety Administration. Vehicle Safety Recalls Week 2023. https://www.nhtsa.gov/press-releases/vehicle-
+                                 safety-recalls-week-2023 (2023).
+                              2. Lu, R., Wu, A., Zhang, T. & Wang, Y. Review on Automated Optical (Visual) Inspection and Its Applications in Defect Detection.
+                                 Acta Optica Sinica 38, 0815002 (2018).
+                              3. Lu, C.-K., Shen, F., Zhang, Z.-T. & Zhang, F. Review of image anomaly detection. Acta Automatica Sinica 48, 1402–1428 (2022).
+                              4. Wang, C.-Y., Bochkovskiy, A. & Liao, H.-Y. M. Scaled-yolov4: Scaling cross stage partial network. in Proceedings of the IEEE/CVF
+                                 Conference on Computer Vision and Pattern Recognition 13029-13038 (2021).
+                              5. Usamentiaga, R., Lema, D. G., Pedrayes, O. D. & Garcia, D. F. Automated Surface Defect Detection in Metals: A Comparative Review
+                                 of Object Detection and Semantic Segmentation Using Deep Learning. IEEE Trans. Ind. Appl. 58, 4203–4213 (2022).
+                              6. Anthony, A., Ho, E. S. L., Woo, W. L. & Gao, B. A Review and Benchmark on State-of-The-Art Steel Defects Detection. Available at
+                                 SSRN: https://ssrn.com/abstract=4121951 or https://doi.org/10.2139/ssrn.4121951 (2022).
+                              7. Song, G., Liu, Y. & Wang, X. Revisiting the sibling head in object detector. in Proceedings of the IEEE/CVF Conference on Computer
+                                 Vision and Pattern Recognition 11563-11572 (2020).
+                              8. Ma, P., Ma, J. & Wang, X. Deformable convolutional networks for multi‐view 3D shape classification. Electron. Lett. 54, 1373–1375
+                                 (2018).
+                              9. Nayar, S. K., Ikeuchi, K. & Kanade, T. Surface reflection: physical and geometrical perspectives. IEEE Trans. Pattern Anal. Mach.
+                                 Intell. 13, 611–634 (1991).
+                             10. Porter, T. F., Sylvester, R. A. & Bouyoucas, T. W. Automatic strip surface defect detection system. Iron Steel Eng. 65, 17–20 (1988).
+                             11. He, Y., Song, K., Meng, Q. & Yan, Y. An End-to-End Steel Surface Defect Detection Approach via Fusing Multiple Hierarchical
+                                 Features. IEEE Trans. Instrum. Meas. 69, 1493–1504 (2020).
+                             12. Huang, X. Algorithm on Surface Defect Detection of Strip Based on Improved FCOS. Artif. Intell. Robot. Res. 11, 8 (2022).
+                             13. Lu, H., Fang, M., Qiu, Y. & Xu, W. An Anchor-Free Defect Detector for Complex Background Based on Pixelwise Adaptive
+                                 Multiscale Feature Fusion. IEEE Trans. Instrum. Meas. 72, 1–12 (2023).
+                             14. Zhu, B. et al. Autoassign: Differentiable label assignment for dense object detection. arXiv preprint arXiv:2007.03496 (2020).
+                             15. Lu, R., Wu, A., Zhang, T. & Wang, Y. Review on Automated Optical (Visual) Inspection and Its Applications in Defect Detection.
+                                 Acta Optica Sinica 38, 15–50 (2018).
+                             16. Wang, Z., Bovik, A. C., Sheikh, H. R. & Simoncelli, E. P. Image quality assessment: from error visibility to structural similarity. IEEE
+                                 Trans. Image Process. 13, 600–612 (2004).
+
+
+
+Scientific Data |   (2025) 12:276 | https://doi.org/10.1038/s41597-025-04454-6                                                                                       15
+www.nature.com/scientificdata/                                                                                   www.nature.com/scientificdata
+
+
+                             17. Wu, Q. Theoretical and Applied Research on Online Detection of 3D Surface Defects Based on Line Structured Light Scanning.
+                                 Doctoral dissertation, Huazhong University of Science and Technology (2013).
+                             18. Rodrick, T. J. Software controlled on-line surface inspection. Steel Times Int. 22, 30 (1998).
+                             19. Song, L. et al. Surface defect detection of stamping parts based on double light pattern matching. Forging & Stamping Technol. 11
+                                 (2018).
+                             20. Woodham, R. J. Photometric method for determining shape from shading. Doctoral dissertation, University of British Columbia
+                                 (1984).
+                             21. Wang, J. F., Zhang, B. Y. & Wen, C. C. Detection approach of metal surface defects by four-light-source photometric stereo method
+                                 based on HALCON software. Manuf. Technol. Mach. Tool 3, 157–161 (2022).
+                             22. Zhou, P., Xu, K. & Wang, D. Rail profile measurement based on line-structured light vision. IEEE Access 6, 16423–16431 (2018).
+                             23. Van den Oord, A., Vinyals, O. & Kavukcuoglu, K. Neural Discrete Representation Learning. Advances in Neural Information
+                                 Processing Systems 30 (NIPS 2017).
+                             24. Tian, Z., Shen, C., Chen, H., He, T. FCOS: Fully convolutional one-stage object detection. In Proceedings of the IEEE/CVF
+                                 International Conference on Computer Vision, Seoul, Republic of Korea, 27 October–2 November 2019; pp. 9626–9635.
+                             25. Wang, K., Teng, Z., & Zou, T. Metal defect detection based on Yolov5. In Journal of Physics: Conference Series (Vol. 2218, No. 1, p.
+                                 012050). (2022, March).
+                             26. Rath, S. Yolov8 ultralytics: State-of-the-art yolo models. LearnOpenCV–Learn OpenCV, PyTorch, Keras, TensorflowWith Examples
+                                 and Tutorials. (2023).
+                             27. Zhao, Y. et al. Detrs beat yolos on real-time object detection. In Proceedings of the IEEE/CVF Conference on Computer Vision and
+                                 Pattern Recognition (pp. 16965-16974) (2024).
+                             28. Wu, L. Metal Surface Defect Dataset [DS/OL]. V1. Science Data Bank. https://doi.org/10.57760/sciencedb.10794 (2024).
+                             29. Vander Voort, G. F. et al. ASM handbook. Metallography and microstructures 9, 44073–0002 (2004).
+
+                             Acknowledgements
+                             I am deeply grateful to my teachers and classmates for their constructive criticism and continuous encouragement,
+                             which have played a crucial role in my research work. I also extend my heartfelt thanks to clients and industry
+                             partners; their cooperation and support have been essential to the success of this project. Lastly, I want to thank
+                             the diligent workers who, despite difficult conditions, performed patient and meticulous annotation work,
+                             providing a vital foundation for this research. This project was partially funded by the Ministry of Education of
+                             China under Contract No. 90020371420002.
+
+                             Author contributions
+                             Lin Wu and Yu Ran are co-first authors of this paper. Lin Wu completed the writing of the paper, designed the
+                             method, implemented the code, and conducted the technical validation. Yu Ran contributed to the organization
+                             and creation of the dataset and provided valuable suggestions for the writing of the paper. Li Yan helped with the
+                             grammatical revision and language polishing. Professor Dongran Han and Professor You Song, as the supervising
+                             teacher, guided the research work and conducted the final review of the paper.
+
+                             Competing interests
+                             The authors declare no competing interests.
+
+                             Additional information
+                             Supplementary information The online version contains supplementary material available at https://doi.org/
+                             10.1038/s41597-025-04454-6.
+                             Correspondence and requests for materials should be addressed to Y.S. or D.H.
+                             Reprints and permissions information is available at www.nature.com/reprints.
+                             Publisher’s note Springer Nature remains neutral with regard to jurisdictional claims in published maps and
+                             institutional affiliations.
+                                          Open Access This article is licensed under a Creative Commons Attribution-NonCommercial-
+                                          NoDerivatives 4.0 International License, which permits any non-commercial use, sharing, distribu-
+                             tion and reproduction in any medium or format, as long as you give appropriate credit to the original author(s)
+                             and the source, provide a link to the Creative Commons licence, and indicate if you modified the licensed mate-
+                             rial. You do not have permission under this licence to share adapted material derived from this article or parts of
+                             it. The images or other third party material in this article are included in the article’s Creative Commons licence,
+                             unless indicated otherwise in a credit line to the material. If material is not included in the article’s Creative
+                             Commons licence and your intended use is not permitted by statutory regulation or exceeds the permitted
+                             use, you will need to obtain permission directly from the copyright holder. To view a copy of this licence, visit
+                             http://creativecommons.org/licenses/by-nc-nd/4.0/.
+
+                             © The Author(s) 2025
+
+
+
+
+Scientific Data |   (2025) 12:276 | https://doi.org/10.1038/s41597-025-04454-6                                                                                   16
+

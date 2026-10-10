@@ -1,0 +1,634 @@
+        MVTec AD — A Comprehensive Real-World Dataset for Unsupervised
+                           Anomaly Detection
+
+           Paul Bergmann                Michael Fauser           David Sattlegger              Carsten Steger
+
+                                                 MVTec Software GmbH
+                                                       www.mvtec.com
+                            {paul.bergmann, fauser, sattleger, steger}@mvtec.com
+
+
+
+                         Abstract
+
+    The detection of anomalous structures in natural image
+data is of utmost importance for numerous tasks in the field
+of computer vision. The development of methods for unsu-
+pervised anomaly detection requires data on which to train
+and evaluate new approaches and ideas. We introduce the
+MVTec Anomaly Detection (MVTec AD) dataset containing
+5354 high-resolution color images of different object and
+texture categories. It contains normal, i.e., defect-free, im-
+ages intended for training and images with anomalies in-
+tended for testing. The anomalies manifest themselves in the
+form of over 70 different types of defects such as scratches,
+dents, contaminations, and various structural changes. In        Figure 1: Two objects and one texture from the MVTec AD
+addition, we provide pixel-precise ground truth regions for      dataset. For each of them, one defect-free image and two
+all anomalies. We also conduct a thorough evaluation             images that contain anomalies are displayed. Anomalous
+of current state-of-the-art unsupervised anomaly detection       regions are highlighted in close-up figures together with
+methods based on deep architectures such as convolutional        their pixel-precise ground truth labels. The dataset contains
+autoencoders, generative adversarial networks, and fea-          objects and textures from several domains and covers var-
+ture descriptors using pre-trained convolutional neural net-     ious anomalies that differ in attributes such as size, color,
+works, as well as classical computer vision methods. This        and structure.
+initial benchmark indicates that there is considerable room
+for improvement. To the best of our knowledge, this is
+the first comprehensive, multi-object, multi-defect dataset
+                                                                 kinds of defects may appear. In active learning systems,
+for anomaly detection that provides pixel-accurate ground
+                                                                 structures that are identified as anomalous might indicate
+truth regions and focuses on real-world applications.
+                                                                 the necessity of including a specific image for training.
+                                                                 Therefore, it is not surprising that recently a significant
+1. Introduction                                                  amount of interest has been directed towards novelty detec-
+                                                                 tion in natural image data using modern machine learning
+    Humans are very good at recognizing if an image is sim-      architectures. A number of algorithms have been proposed
+ilar to what they have previously observed or if it is some-     that test whether a network is able to detect if new input
+thing novel or anomalous. So far, machine learning sys-          data matches the distribution of the training data. Many of
+tems, however, seem to have difficulties with such tasks.        these algorithms, however, focus on classification settings
+    There are many relevant applications that must rely on       in which the inlier and outlier distributions differ signif-
+unsupervised algorithms that can detect anomalous regions.       icantly. This is commonly known as outlier detection or
+In the manufacturing industry, for example, optical inspec-      one-class-classification. A common evaluation protocol is
+tion tasks often lack defective samples or it is unclear what    to arbitrarily label a number of classes from existing object
+classification datasets as outlier classes and use the remain-       • We conduct a thorough evaluation of current state-of-
+ing classes as inliers for training. It is then measured how           the-art methods as well as more traditional methods for
+well the trained algorithm can distinguish between previ-              unsupervised anomaly detection on the dataset. Their
+ously unseen outlier and inlier samples.                               performance for both segmentation and classification
+    While this classification on an image level is important,          of anomalous images is assessed. Furthermore, we
+it is unclear how current state-of-the-art methods perform             provide a well-defined way to detect anomalous re-
+on what we call anomaly detection tasks. The problem set-              gions in test images using hyperparameters that are es-
+ting is to find novelties in images that are very close to the         timated without the knowledge of any anomalous im-
+training data and differ only in subtle deviations in possibly         ages. We show that the evaluated methods do not per-
+very small, confined regions. Clearly, to develop machine              form equally well across object and defect categories
+learning models for such and other challenging scenarios               and that there is considerable room for improvement.
+we require suitable data. Curiously, there is a lack of com-
+prehensive real-world datasets available for such scenarios.
+    Large-scale datasets have led to incredible advances in        2. Related Work
+many areas of computer vision in the last few years. Just
+consider how closely intertwined the development of new            2.1. Existing Datasets for Anomaly Detection
+classification methods is with the introduction of datasets
+such as MNIST [16], CIFAR10 [14], or ImageNet [15].                   We first give a brief overview of datasets that are com-
+                                                                   monly used for anomaly detection in natural images and
+    To the best of our knowledge, no comparable dataset ex-
+                                                                   demonstrate the need for our novel dataset. We distinguish
+ists for the task of unsupervised anomaly detection. As a
+                                                                   between datasets where a simple binary decision between
+first step to fill this gap and to spark further research in the
+                                                                   defect and defect-free images must be made and datasets
+development of methods for unsupervised anomaly detec-
+                                                                   that allow for the segmentation of anomalous regions.
+tion, we introduce the MVTec Anomaly Detection (MVTec
+AD or MAD for short) dataset1 that facilitates a thorough
+evaluation of such methods. We identify industrial inspec-
+tion tasks as an ideal and challenging real-world use-case         2.1.1   Classification of Anomalous Images
+for these scenarios. Defect-free example images of objects
+or textures are used to train a model that must determine          When evaluating methods for outlier detection in mutli-
+whether an anomaly is present during test time. Unsuper-           class classification scenarios, a common practice is to adapt
+vised methods play a significant role here since it is of-         existing classification datasets for which class labels are al-
+ten unknown beforehand what types of defects might occur           ready available. The most prominent examples are MNIST
+during manufacturing. In addition, industrial processes are        [16], CIFAR10 [14], and ImageNet [15]. A popular ap-
+optimized to produce a minimum amount of defective sam-            proach [1, 7, 21] is to select an arbitrary subset of classes,
+ples. Therefore, only a very limited amount of images with         re-label them as outliers, and train a novelty detection sys-
+defects is available, in contrast to a vast amount of defect-      tem solely on the remaining inlier classes. During the test-
+free samples that can be used for training. Ideally, methods       ing phase, it is checked whether the trained model is able
+should provide a pixel-accurate segmentation of anomalous          to correctly predict whether a test sample belongs to one of
+regions. All this makes industrial inspection tasks perfect        the inliner classes. While this immediately provides a large
+benchmarks for unsupervised anomaly detection methods              amount of training and testing data, the anomalous samples
+that work on natural images. Our contribution is twofold:          differ significantly from the samples drawn from the train-
+                                                                   ing distribution. Therefore, when performing evaluations
+  • We introduce a novel and comprehensive dataset for             on such datasets, it is unclear how a proposed method would
+    the task of unsupervised anomaly detection in natu-            generalize to data where anomalies manifest themselves in
+    ral image data. It mimics real-world industrial inspec-        less significant differences from the training data manifold.
+    tion scenarios and consists of 5354 high-resolution im-
+    ages of five unique textures and ten unique objects               For this purpose, Saleh et al. [22] propose a dataset that
+    from different domains. There are 73 different types           contains six categories of abnormally shaped objects, such
+    of anomalies in the form of defects in the objects or          as oddly shaped cars, airplanes, and boats, obtained from in-
+    textures. For each defect image, we provide pixel-             ternet search engines that should be distinguished from reg-
+    accurate ground truth regions (1888 in total) that allow       ular samples of the same class in the PASCAL VOC dataset
+    to evaluate methods for both one-class classification          [8]. While their data might be closer to the training data
+    and anomaly detection.                                         manifold, the decision is again based on entire images rather
+                                                                   than finding the parts of the images that make them novel or
+  1 www.mvtec.com/company/research/datasets                        anomalous.
+2.1.2   Segmentation of Anomalous Regions
+
+For the evaluation of methods that segment anomalies in
+images, only very few public datasets are currently avail-
+able. All of them focus on the inspection of textured sur-
+faces and, to the best of our knowledge, there does not yet
+exist a comprehensive dataset that allows for the segmenta-
+tion of anomalous regions in natural images.
+    Carrera et al. [6] provide NanoTWICE,2 a dataset of
+45 gray-scale images that show a nanofibrous material ac-
+quired by a scanning electron microscope. Five defect-free
+images can be used for training. The remaining 40 images
+contain anomalous regions in the form of specks of dust or
+flattened areas. Since the dataset only provides a single kind
+of texture, it is unclear how well algorithms that are evalu-
+ated on this dataset generalize to other textures of different
+domains.
+    A dataset that is specifically designed for optical in-
+spection of textured surfaces was proposed during a 2007
+DAGM workshop by Wieler and Hahn [28]. They provide
+ten classes of artificially generated gray-scale textures with
+defects weakly annotated in the form of ellipses. Each class
+comprises 1000 defect-free texture patches for training and
+150 defective patches for testing. However, their annota-
+tions are quite coarse and since the textures were generated
+by very similar texture models, the variance in appearance
+between the different textures is quite low. Furthermore, ar-
+tificially generated datasets can only be seen as an approxi-
+mation to the real world.
+
+2.2. Methods
+   The landscape of methods for unsupervised anomaly de-
+tection is diverse and many approaches have been suggested
+to tackle the problem [1, 19]. Pimentel et al. [20] give a
+comprehensive review of existing work. We restrict our-
+selves to a brief overview of current state-of-the art meth-
+ods, focusing on those that serve as baseline for our initial
+benchmark on the dataset.                                        Figure 2: Example images for all five textures and ten ob-
+                                                                 ject categories of the MVTec AD dataset. For each cate-
+                                                                 gory, the top row shows an anomaly-free image. The middle
+2.2.1   Generative Adversarial Networks                          row shows an anomalous example for which, in the bottom
+Schlegl et al. [23] propose to model the manifold of the         row, a close-up view that highlights the anomalous region is
+training data by a generative adversarial network (GAN)          given.
+[10] that is trained solely on defect-free images. The gener-
+ator is able to produce realistically looking images that fool
+a simultaneously trained discriminator network in an adver-      2.2.2   Deep Convolutional Autoencoders
+sarial way. For anomaly detection, the algorithm searches
+for a latent sample that reproduces a given input image and      Convolutional Autoencoders (CAEs) [9] are commonly
+manages to fool the discriminator. An anomaly segmenta-          used as a base architecture in unsupervised anomaly detec-
+tion can be obtained by a per-pixel comparison of the recon-     tion settings. They attempt to reconstruct defect-free train-
+structed image with the original input.                          ing samples through a bottleneck (latent space). During
+                                                                 testing, they fail to reproduce images that differ from the
+  2 www.mi.imati.cnr.it/ettore/NanoTWICE/                        data that was observed during training. Anomalies are de-
+                                   # Test     # Test      # Defect   # Defect      Image
+            Category     # Train
+                                   (good)   (defective)    groups    regions    side length
+                                                                                              anomaly or not. In order to obtain a spatial anomaly map,
+              Carpet      280        28         89            5          97         1024      the classifier must be evaluated at multiple image locations,
+ Textures
+               Grid       264        21         57            5        170          1024
+             Leather      245        32         92            5          99         1024      ideally at each single pixel. This quickly becomes a per-
+               Tile       230        33         84            5          86          840      formance bottleneck for large images. To increase perfor-
+              Wood        247        19         60            5         168         1024
+              Bottle      209        20         63            3         68           900      mance in practice, not every pixel location is evaluated and
+              Cable       224        58         92            8         151         1024      the resulting anomaly maps are coarse.
+             Capsule      219        23        109            5         114         1000
+             Hazelnut     391        40         70            4         136         1024
+
+ Objects
+            Metal Nut     220        22         93            4         132          700
+                Pill      267        26        141            7         245          800      2.2.4   Traditional Methods
+              Screw       320        41        119            5         135         1024
+            Toothbrush     60        12         30            1         66          1024      In addition to the methods described above, we consider two
+            Transistor    213        60         40            4          44         1024
+              Zipper      240        32        119            7         177         1024      traditional methods for our benchmark. Böttger and Ulrich
+               Total      3629      467       1258           73        1888           -
+                                                                                              [5] extract hand-crafted feature descriptors from defect-free
+                                                                                              texture images. The distribution of feature vectors is mod-
+Table 1: Statistical overview of the MVTec AD dataset. For                                    eled by a Gaussian Mixture Model (GMM) and anomalies
+each category, the number of training and test images is                                      are detected for extracted feature descriptors for which the
+given together with additional information about the defects                                  GMM yields a low probability. Their algorithm can only be
+present in the respective test images.                                                        applied to images of regular textures.
+                                                                                                  In order to obtain a simple baseline for the non-texture
+                                                                                              objects in the dataset, we consider the variation model [26,
+tected by a per-pixel comparison of the input with its re-
+                                                                                              Chapter 3.4.1.4]. This method requires a prior alignment
+construction. Recently, Bergmann et al. [4] pointed out the
+                                                                                              of the object contours and calculates the mean and standard
+disadvantages of per-pixel loss functions in autoencoding
+                                                                                              deviation for each pixel. This models the gray-value statis-
+frameworks when used in anomaly segmentation scenar-
+                                                                                              tics of the training images. During testing, a statistical test is
+ios and proposed to incorporate spatial information of local
+                                                                                              performed for each image pixel that measures the deviation
+patch regions using structural similarity [27] for improved
+                                                                                              of the pixel’s gray-value from the mean. If the deviation is
+segmentation results.
+                                                                                              larger than a threshold, an anomalous pixel is detected.
+    There exist various extensions to CAEs such as the vari-
+ational autoencoders (VAEs) [13] that have been used by
+                                                                                              3. Dataset Description
+Baur et al. [3] for the unsupervised segmentation of anoma-
+lies in brain MR scans. Baur et al., however, do not report                                       The MVTec Anomaly Detection dataset comprises 15
+significant improvements over using standard CAEs. This                                       categories with 3629 images for training and validation and
+coincides with the observations made by Bergmann et al.                                       1725 images for testing. The training set contains only im-
+[4]. Nalisnick et al. [17] and Hendrycks et al. [12] provide                                  ages without defects. The test set contains both: images
+further evidence that probabilities obtained from VAEs and                                    containing various types of defects and defect-free images.
+other deep generative models might fail to model the true                                     Table 1 gives an overview for each object category. Some
+likelihood of the training data. Therefore, we restrict our-                                  example images for every category together with an ex-
+selves to deterministic autoencoder frameworks in the ini-                                    ample defect are shown in Figure 2. We provide further
+tial evaluation of the dataset below.                                                         example images of the dataset in the supplementary mate-
+                                                                                              rial. Five categories cover different types of regular (car-
+2.2.3           Features of Pre-trained Convolutional Neural                                  pet, grid) or random (leather, tile, wood) textures, while
+                Networks                                                                      the remaining ten categories represent various types of ob-
+                                                                                              jects. Some of these objects are rigid with a fixed appear-
+The aforementioned approaches attempt to learn feature                                        ance (bottle, metal nut), while others are deformable (cable)
+representations solely from the provided training data. In                                    or include natural variations (hazelnut). A subset of objects
+addition, there exist a number of methods that use feature                                    was acquired in a roughly aligned pose (e.g., toothbrush,
+descriptors obtained from CNNs that have been pre-trained                                     capsule, and pill) while others were placed in front of the
+on a separate image classification task.                                                      camera with a random rotation (e.g., metal nut, screw, and
+   Napoletano et al. [18] propose to use clustered feature                                    hazelnut). The test images of anomalous samples contain
+descriptions obtained from the activations of a ResNet-18                                     a variety of defects, such as defects on the objects’ surface
+[11] classification network pre-trained on ImageNet [15]                                      (e.g., scratches, dents), structural defects like distorted ob-
+to distinguish normal from anomalous data. They achieve                                       ject parts, or defects that manifest themselves by the ab-
+state-of-the-art results on the NanoTWICE dataset. Being                                      sence of certain object parts. In total, 73 different defect
+designed for one-class classification, their method only pro-                                 types are present, on average five per category. The defects
+vides a binary decision whether an input image contains an                                    were manually generated with the aim to produce realistic
+anomalies as they would occur in real-world industrial in-       performed with a horizontal and vertical stride of 128 pix-
+spection scenarios.                                              els. In general, one could also imagine to choose a smaller
+   All images were acquired using a 2048 × 2048 pixel            stride and average the estimated anomaly scores. However,
+high-resolution industrial RGB sensor in combination with        this is not feasible due to the relatively long runtimes of
+two bilateral telecentric lenses [26, Chapter 2.2.4.2] with      AnoGAN’s latent-space optimization.
+magnification factors of 1:5 and 1:1, respectively. After-
+wards, the images were cropped to a suitable output size.
+All image resolutions are in the range between 700 × 700         4.1.2   L2 and SSIM Autoencoder
+and 1024 × 1024 pixels. Since gray-scale images are also
+common in industrial inspection, three object categories         For the evaluation of the L2 and SSIM autoencoder on the
+(grid, screw, and zipper) are made available solely as single-   texture images, we use the same CAE architecture as de-
+channel images. The images were acquired under highly            scribed by Bergmann et al. [4]. They reconstruct texture
+controlled illumination conditions. For some object classes,     patches of size 128 × 128, employing either a per-pixel
+however, the illumination was altered intentionally to in-       `2 loss or a loss based on the structural similiarity index
+crease variability. We provide pixel-precise ground truth        (SSIM). For the latter, we find an SSIM window size of
+labels for each defective image region. In total, the dataset    11 × 11 pixels to work well in our experiments. The latent
+contains almost 1900 manually annotated regions. Some            space dimension is chosen to be 100. Larger latent space
+examples of labels for selected anomalous images are dis-        dimensions do not yield significant improvements in recon-
+played in Figure 1.                                              struction quality while lower dimensions lead to degenerate
+                                                                 reconstructions.
+4. Benchmark                                                        Since we deem an image size of 128 × 128 too small for
+                                                                 the reconstruction of entire objects in the dataset, we extend
+    We conduct a thorough evaluation of multiple state-of-       the architecture used for textures by an additional convolu-
+the-art methods for unsupervised anomaly detection as an         tion layer to process object images at resolution 256 × 256.
+initial benchmark on our dataset. It is intended to serve           For objects, anomaly maps are generated by passing an
+as a baseline for future methods. Moreover, we provide           image through the autoencoder and comparing the recon-
+a well-defined way to detect anomalous regions in test           struction with its respective input using either per-pixel `2
+images using hyperparameters that are estimated solely           comparisons or SSIM. For textures, we reconstruct patches
+from anomaly-free validation images. We then discuss the         at a stride of 30 pixels and average the resulting anomaly
+strengths and weaknesses of each method on the various ob-       maps. Since SSIM does not operate on color images, for
+jects and textures of the dataset. We show that, while each      the training and evaluation of the SSIM-autoencoder the
+method can detect anomalies of certain types, none of the        images are converted to gray-scale. Data augmentation is
+evaluated methods manages to excel for the entire dataset.       performed as described in Section 4.2.
+4.1. Evaluated Methods
+4.1.1   AnoGAN                                                   4.1.3   CNN Feature Dictionary
+For the evaluation of AnoGAN, we use the publicly avail-
+                                                                 We use our own implemenation of the CNN feature dic-
+able implementation on Github.3 The GAN’s latent space
+                                                                 tionary proposed by Napoletano et al. [18], which ex-
+dimension is fixed to 64 and generated images are of size
+                                                                 tracts features from the 512-dimensional avgpool layer of
+128 × 128 pixels, which results in relatively stable training
+                                                                 a ResNet-18 pretrained on ImageNet. Principal Component
+for all categories of the dataset. Training is conducted for
+                                                                 Analysis (PCA) is performed on the extracted features to
+50 epochs with an initial learning rate of 0.0002. During
+                                                                 explain 95% of the variance, which typically results in a
+testing, 300 iterations of latent space search are performed
+                                                                 reduction to a feature vector with around 100 components.
+with an initial learning rate of 0.02. Anomaly maps are ob-
+                                                                 For K-means, we vary the number of cluster centers and
+tained by a per-pixel `2 -comparison of the input image with
+                                                                 identify ten cluster centers to be a good value, which agrees
+the generated output.
+                                                                 with the findings of Napoletano et al. We extract patches
+   For the evaluation of objects, both training and testing
+                                                                 of size 16 × 16 for both the textures and objects. Objects
+images are zoomed to the input size of 128 × 128 pixels.
+                                                                 are evaluated on image size 256 × 256 and texture images
+For textures, we zoom all dataset images to size 512 × 512
+                                                                 are zoomed to size 512 × 512. For evaluation, a stride of
+and extract training patches of size 128 × 128. For train-
+                                                                 four pixels is chosen to create a coarse anomaly map. For
+ing, data augmentation techniques are used as described
+                                                                 gray-scale images, the channels are triplicated for ResNet
+in Section 4.2. During testing, a patchwise evaluation is
+                                                                 feature extraction since the feature extractor only operates
+  3 www.github.com/LeeDoYup/AnoGAN                               on three-channel input images.
+                                                     CNN
+              Category
+                            AE     AE
+                                          AnoGAN    Feature
+                                                                 Texture     Variation   ment is not possible for every object in the dataset, we re-
+                          (SSIM)   (L2)                         Inspection    Model
+                                                   Dictionary                            strict the evaluation of this method to a subset of objects
+                          0.43     0.57    0.82       0.89        0.57
+               Carpet
+                          0.90     0.42    0.16       0.36        0.61
+                                                                                 -       (Table 2). We use 30 randomly selected training images of
+               Grid
+                          0.38     0.57    0.90       0.57        1.00
+                                                                                 -       each object category in its original size to train the mean
+                          1.00     0.98    0.12       0.33        0.05
+                                                                                         and variance parameters at each pixel location. All images
+ Textures
+                          0.00     0.06    0.91       0.63        0.00
+              Leather                                                            -
+                          0.92     0.82    0.12       0.71        0.99                   are converted to gray-scale before evaluation.
+                          1.00     1.00    0.97       0.97        1.00
+                Tile
+                          0.04     0.54    0.05       0.44        0.43
+                                                                                 -           Anomaly maps are obtained by computing the distance
+               Wood
+                          0.84     1.00    0.89       0.79        0.42
+                                                                                 -       of each test pixel’s gray value to the predicted pixel mean
+                          0.82     0.47    0.47       0.88        1.00
+                          0.85     0.70    0.95       1.00                     1.00      relative to its predicted standard deviation. As for the
+               Bottle                                               -
+                          0.90     0.89    0.43       0.06                     0.13      GMM-based texture inspection, we use the optimized im-
+                          0.74     0.93    0.98       0.97
+               Cable                                                -            -       plementation of the HALCON machine vision library.
+                          0.48     0.18    0.07       0.24
+                          0.78     1.00    0.96       0.78                     1.00
+              Capsule                                               -
+                          0.43     0.24    0.20       0.03                     0.03
+                          1.00     0.93    0.83       0.90
+                                                                                         4.2. Data Augmentation
+              Hazelnut                                              -            -
+                          0.07     0.84    0.16       0.07
+                          1.00     0.68    0.86       0.55                     0.32          Since the evaluated methods based on deep architectures
+             Metal nut                                              -
+
+ Objects
+                          0.08     0.77    0.13       0.74                     0.83      are typically trained on large datasets, data augmentation is
+                          0.92     1.00    1.00       0.85                     1.00
+                Pill                                                -                    performed for these methods for both textures and objects.
+                          0.28     0.23    0.24       0.06                     0.13
+                          0.95     0.98    0.41       0.73                     1.00
+               Screw
+                          0.06     0.39    0.28       0.13
+                                                                    -
+                                                                               0.10
+                                                                                         For the texture images, we randomly crop rotated rectangu-
+             Toothbrush
+                          0.75     1.00    1.00       1.00
+                                                                    -
+                                                                               1.00      lar patches of fixed size from the training images. For each
+                          0.73     0.97    0.13       0.03                     0.60
+                          1.00     0.97    0.98       1.00
+                                                                                         object category, we apply a random translation and rotation.
+             Transistor                                             -            -
+                          0.03     0.45    0.35       0.15                               Additional mirroring is applied where the object permits it.
+                          1.00     0.97    0.78       0.78
+               Zipper
+                          0.60     0.63    0.40       0.29
+                                                                    -            -       We augment each category to create 10000 training patches.
+
+                                                                                         4.3. Evaluation Metric
+Table 2: Results of the evaluated methods when ap-
+plied to the classification of anomalous images. For each                                    Each of the evaluated methods provides a one-channel
+dataset category, the ratio of correctly classified samples                              spatial map in which large values indicate that a certain
+of anomaly-free (top row) and anomalous images (bottom                                   pixel belongs to an anomalous region. To obtain a final seg-
+row) is given. The method with the highest mean of these                                 mentation result and make a binary decision for each pixel,
+two values is highlighted in boldface for each texture and                               a threshold must be determined. Only the GMM-based tex-
+object category.                                                                         ture inspection provides a suitable threshold out of the box.
+                                                                                         For all other methods, we propose a well-defined way to
+                                                                                         estimate the threshold from a set of randomly selected vali-
+4.1.4            GMM-Based Texture Inspection Model                                      dation images that we exclude from the training set.
+                                                                                             For every category, we define a minimum defect area
+For the texture inspection model [5], an optimized imple-
+                                                                                         that a connected component in the thresholded anomaly
+mentation is available in the HALCON machine vision li-
+                                                                                         map must have to be classified as a defective region. For
+brary.4 Texture images are downscaled to an input size of
+                                                                                         each evaluated method, we then successively segment the
+400 × 400 pixels and a four-layer image pyramid is con-
+                                                                                         anomaly maps of the anomaly-free validation set with in-
+structed for training and evaluation. The patch size of exam-
+                                                                                         creasing thresholds. This procedure is stopped when the
+ined texture regions on each pyramid level is set to 7×7 pix-
+                                                                                         area of the largest anomalous region on the validation set
+els. We use a total of ten randomly selected images from the
+                                                                                         is just below the user-defined area and the threshold that
+original training set for training the texture model. Anomaly
+                                                                                         yielded this segmentation is used for further evaluation.
+maps are obtained by evaluating the negative log-likelihood
+for each image pixel using the trained GMM. The method                                       Given this threshold, we evaluate the performance of
+automatically provides a threshold that can be used to con-                              each method when applied to both the anomaly classifica-
+vert continuous anomaly maps to binarized segmentations                                  tion and segmentation task. For the classification scenario,
+of anomalous regions.                                                                    we compute the accuracy of correctly classified images for
+                                                                                         anomalous and anomaly-free test images. To assess seg-
+                                                                                         mentation performance, we evaluate the relative per-region
+4.1.5            Variation Model                                                         overlap of the segmentation with the ground truth. To get
+For the evaluation of object categories using the variation                              an additional performance measure that is independent of
+model, we first attempt to align each category using shape-                              the determined threshold, we compute the area under the
+based matching [24, 25]. Since near pixel-accurate align-                                receiver operating characteristic curve (ROC AUC). We de-
+                                                                                         fine the true positive rate as the percentage of pixels that
+            4 www.mvtec.com/products/halcon                                              were correctly classified as anomalous across an evaluated
+                         (a)                            (b)                                 (c)                        (d)                      (e)
+
+Figure 3: Qualitative anomaly segmentation results for AnoGAN (a), Autoencoders (b), the CNN Feature Dictionary (c), the
+Texture Inspection Model (d) and the Variation Model (e). For each evaluated method, the top row shows an image for which
+the method worked well and the bottom row illustrates failure cases. The ground-truth defect region is outlined in red, while
+the detection result generated by the respective method is shown in green.
+
+                                                        CNN
+            Category
+                             AE       AE
+                                             AnoGAN    Feature
+                                                                    Texture     Variation         4.4. Results
+                           (SSIM)     (L2)                         Inspection    Model
+                                                      Dictionary
+                               0.69   0.38    0.34       0.20        0.29                             Evaluation results for the classification of anomalous im-
+              Carpet                                                                -
+                               0.87   0.59    0.54       0.72        0.88
+              Grid
+                               0.88   0.83    0.04       0.02        0.01
+                                                                                    -
+                                                                                                  ages and segmentation of anomalous regions are given for
+                               0.94   0.90    0.58       0.59        0.72
+                                                                                                  all methods and dataset categories in Tables 2 and 3, re-
+ Textures
+                               0.71   0.67    0.34       0.74        0.98
+             Leather                                                                -
+                               0.78   0.75    0.64       0.87        0.97                         spectively. None of the methods manages to consistently
+                               0.04   0.23    0.08       0.14        0.11
+               Tile
+                               0.59   0.51    0.50       0.93        0.41
+                                                                                    -             perform well across all object and texture classes.
+                               0.36   0.29    0.14       0.47        0.51
+              Wood
+                               0.73   0.73    0.62       0.91        0.78
+                                                                                    -                Looking at the five texture categories as a whole, none
+              Bottle
+                               0.15   0.22    0.05       0.07
+                                                                       -
+                                                                                  0.03            of the evaluated methods emerges as a clear winner. Con-
+                               0.93   0.86    0.86       0.78                     0.82
+                               0.01   0.05    0.01       0.13                                     sidering only the ROC AUC, the CNN Feature Dictionary
+              Cable                                                    -            -
+                               0.82   0.86    0.78       0.79                                     manages to perform the most consistently.
+                               0.09   0.11    0.04       0.00                     0.01
+             Capsule                                                   -
+                               0.94   0.88    0.84       0.84                     0.76               For the ten object categories, the autoencoder architec-
+                               0.00   0.41    0.02       0.00
+             Hazelnut
+                               0.97   0.95    0.87       0.72
+                                                                       -            -             tures achieve the best results. Which one of these two per-
+                               0.01   0.26    0.00       0.13                     0.19            forms better depends on the object under consideration. The
+            Metal Nut                                                  -
+
+ Objects
+                               0.89   0.86    0.76       0.82                     0.60
+                               0.07   0.25    0.17       0.00                     0.13            L2 autoencoder achieves better per-region overlap values,
+               Pill                                                    -
+                               0.91   0.85    0.87       0.68                     0.83            indicating that the estimation of the anomaly threshold may
+                               0.03   0.34    0.01       0.00                     0.12
+              Screw                                                    -                          have worked better for this method.
+                               0.96   0.96    0.80       0.87                     0.94
+                               0.08   0.51    0.07       0.00                     0.24
+            Toothbrush                                                 -
+                               0.92   0.93    0.90       0.77                     0.68                Table 3 shows that a high ROC AUC does not necessar-
+                               0.01   0.22    0.08       0.03
+            Transistor
+                               0.90   0.86    0.80       0.66
+                                                                       -            -             ily coincide with a high per-region overlap of the segmen-
+              Zipper
+                               0.10   0.13    0.01       0.00
+                                                                       -            -
+                                                                                                  tation for the estimated threshold. In these cases, the ROC
+                               0.88   0.77    0.78       0.76
+                                                                                                  AUC shows that the anomaly maps successfully represent
+                                                                                                  anomalies in the images but the segmentation nevertheless
+Table 3: Results of the evaluated methods when applied to
+                                                                                                  fails due to bad estimation of the threshold. This highlights
+the segmentation of anomalous regions. For each dataset
+                                                                                                  the difficulty in trying to find a good threshold based solely
+category, the relative per-region overlap (top row) and the
+                                                                                                  on a set of anomaly-free images. In a supervised setting,
+ROC AUC (bottom row) are given. The best performing
+                                                                                                  i.e., with knowledge of a set of anomalous images, this es-
+method is highlighted in boldface.
+                                                                                                  timation might often be an easier task.
+                                                                                                     We now discuss for each method its overall evaluation
+dataset category. The false positive rate is the percentage of                                    result and provide examples for both failure cases and im-
+pixels that were wrongly classified as anomalous.                                                 ages for which the methods worked well (Figure 3).
+4.4.1   AnoGAN                                                    Furthermore, since it only operates on gray-scale images, it
+                                                                  fails to detect most color-based defects.
+We observe a tendency of GAN training to result in mode
+collapse [2]. The generator then often completely fails to
+reproduce a given test image since all latent samples gen-        4.4.5   Variation Model
+erate more or less the same image. As a consequence,
+                                                                  For the variation model, good performance can be observed
+AnoGAN has great difficulties with object categories for
+                                                                  on screw, toothbrush, and bottle, while it yields compara-
+which the objects appear in various shapes or orientations
+                                                                  bly bad results for metal nut and capsule. This is mostly
+in the dataset. It performs better for object categories that
+                                                                  due to the fact that the latter objects contain certain random
+contain less variations, such as bottle and pill. This can be
+                                                                  variations on the objects’ surfaces, which prevents the vari-
+seen in Figure 3a, where AnoGAN manages to detect the
+                                                                  ation model from learning reasonable mean and variance
+crack on the pill. However, it fails to generate small de-
+                                                                  values for most of the image pixels. Figure 3e illustrates
+tails on the pill such as the colored speckles, which it also
+                                                                  this behavior: since the imprint on the capsule can appear at
+detects as anomalies. For the category carpet, AnoGAN is
+                                                                  various locations, it will always be misclassified as a defect.
+unable to model all the subtle variations of the textural pat-
+tern, which results in a complete failure of the method as
+can be seen in the bottom row of Figure 3a.
+                                                                  5. Conclusions
+                                                                     We introduce the MVTec Anomaly Detection dataset, a
+                                                                  novel dataset for unsupervised anomaly detection mimick-
+4.4.2   L2 and SSIM Autoencoder
+                                                                  ing real-world industrial inspection scenarios. The dataset
+We observe stable training across all dataset categories          provides the possibility to evaluate unsupervised anomaly
+with reasonable reconstructions for both the SSIM and L2          detection methods on various texture and object classes with
+autoencoder. Especially for the object categories of the          different types of anomalies. Because pixel-precise ground
+dataset, both autoencoders outperform all other evaluated         truth labels for anomalous regions in the images are pro-
+methods in the majority of cases. For some categories, how-       vided, it is possible to evaluate anomaly detection methods
+ever, both autoencoders fail to model small details, which        for both image-level classification as well as pixel-level seg-
+results in rather blurry image reconstructions. This is es-       mentation.
+pecially the case for high-frequency textures, which appear,         Several state-of-the-art methods as well as two classi-
+for example, in tile and zipper. The bottom row of Fig-           cal methods were thoroughly evaluated on this dataset. The
+ure 3b shows that for tile, the L2 autoencoder, in addition       evaluations provide a first benchmark on this dataset and
+to the cracked surface, detects many false positive regions       show that there is still considerable room for improvement.
+across the entire image. A similar behavior can be observed          It is our hope that the proposed dataset will stimulate the
+for the SSIM autoencoder.                                         development of new unsupervised anomaly detection meth-
+                                                                  ods.
+4.4.3   CNN Feature Dictionary
+                                                                  References
+As a method proposed for the detection of anomalous re-            [1] J. An and S. Cho. Variational Autoencoder based Anomaly
+gions in textured surfaces, the feature dictionary based on            Detection using Reconstruction Probability. Technical re-
+CNN features achieves satisfactory results for all textures            port, SNU Data Mining Center, 2015.
+except grid. Since it does not incorporate additional in-          [2] M. Arjovsky and L. Bottou. Towards Principled Methods
+formation about the spatial location of the extracted fea-             for Training Generative Adversarial Networks. International
+tures, its performance degenerates when evaluated on ob-               Conference on Learning Representations, 2017.
+jects. Figure 3c demonstrates good anomaly segmentation            [3] C. Baur, B. Wiestler, S. Albarqouni, and N. Navab. Deep
+performance for carpet with only few false positives, while            Autoencoding Models for Unsupervised Anomaly Segmen-
+the color defect on metal nut is only partially found.                 tation in Brain MR Images. In A. Crimi, S. Bakas, H. Kuijf,
+                                                                       F. Keyvan, M. Reyes, and T. van Walsum, editors, Brain-
+                                                                       lesion: Glioma, Multiple Sclerosis, Stroke and Traumatic
+4.4.4   GMM-Based Texture Inspection Model                             Brain Injuries, pages 161–169, Cham, 2019. Springer Inter-
+                                                                       national Publishing.
+Specifically designed to operate on texture images, the            [4] P. Bergmann, S. Löwe, M. Fauser, D. Sattlegger, and C. Ste-
+GMM-based texture inspection model performs well across                ger. Improving Unsupervised Defect Segmentation by Ap-
+most texture categories of the dataset. On grid, however,              plying Structural Similarity to Autoencoders. In A. Tremeau,
+it cannot achieve satisfactory results due to many small de-           G. Farinella, and J. Braz, editors, 14th International Joint
+fects for which its sensitivity is not high enough (Figure 3d).        Conference on Computer Vision, Imaging and Computer
+     Graphics Theory and Applications, volume 5: VISAPP,             [21] L. Ruff, R. Vandermeulen, N. Goernitz, L. Deecke, S. A. Sid-
+     pages 372–380, Setúbal, 2019. Scitepress.                           diqui, A. Binder, E. Müller, and M. Kloft. Deep One-Class
+ [5] T. Böttger and M. Ulrich. Real-time Texture Error Detec-            Classification. In J. Dy and A. Krause, editors, Proceedings
+     tion on Textured Surfaces with Compressed Sensing. Pattern           of the 35th International Conference on Machine Learning,
+     Recognition and Image Analysis, 26(1):88–94, 2016.                   volume 80 of Proceedings of Machine Learning Research,
+ [6] D. Carrera, F. Manganini, G. Boracchi, and E. Lanzarone.             pages 4393–4402. PMLR, 2018.
+     Defect Detection in SEM Images of Nanofibrous Materi-           [22] B. Saleh, A. Farahdi, and A. Elgammal. Object-Centric
+     als. IEEE Transactions on Industrial Informatics, 13(2):551–         Anomaly Detection by Attribute-Based Reasoning. IEEE
+     561, 2017.                                                           Conference on Computer Vision and Pattern Recognition,
+ [7] R. Chalapathy, A. K. Menon, and S. Chawla. Anomaly De-               pages 787–794, 2013.
+     tection using One-Class Neural Networks. arXiv preprint         [23] T. Schlegl, P. Seeböck, S. M. Waldstein, U. Schmidt-Erfurth,
+     arXiv:1802.06360, 2018.                                              and G. Langs. Unsupervised Anomaly Detection with Gen-
+                                                                          erative Adversarial Networks to Guide Marker Discovery. In
+ [8] M. Everingham, S. M. A. Eslami, L. Van Gool, C. K. I.
+                                                                          International Conference on Information Processing in Med-
+     Williams, J. Winn, and A. Zisserman. The Pascal Visual
+                                                                          ical Imaging, pages 146–157. Springer, 2017.
+     Object Classes Challenge: A Retrospective. International
+     Journal of Computer Vision, 111(1):98–136, Jan. 2015.           [24] C. Steger. Similarity Measures for Occlusion, Clutter, and
+                                                                          Illumination Invariant Object Recognition. In B. Radig and
+ [9] I. Goodfellow, Y. Bengio, and A. Courville. Deep Learning.
+                                                                          S. Florczyk, editors, Pattern Recognition, volume 2191 of
+     MIT Press, Cambridge, MA, 2016.
+                                                                          Lecture Notes in Computer Science, pages 148–154, Berlin,
+[10] I. Goodfellow, J. Pouget-Abadie, M. Mirza, B. Xu,                    2001. Springer-Verlag.
+     D. Warde-Farley, S. Ozair, A. Courville, and Y. Bengio. Gen-
+                                                                     [25] C. Steger. Occlusion, Clutter, and Illumination Invariant Ob-
+     erative Adversarial Nets. In Advances in Neural Information
+                                                                          ject Recognition. In International Archives of Photogram-
+     Processing Systems, pages 2672–2680, 2014.
+                                                                          metry and Remote Sensing, volume XXXIV, part 3A, pages
+[11] K. He, X. Zhang, S. Ren, and J. Sun. Deep Residual Learning          345–350, 2002.
+     for Image Recognition. In IEEE Conference on Computer           [26] C. Steger, M. Ulrich, and C. Wiedemann. Machine Vision
+     Vision and Pattern Recognition, pages 770–778, 2016.                 Algorithms and Applications. Wiley-VCH, Weinheim, 2nd
+[12] D. Hendrycks, M. Mazeika, and T. Dietterich. Deep                    edition, 2018.
+     Anomaly Detection with Outlier Exposure. Proceedings of         [27] Z. Wang, A. C. Bovik, H. R. Sheikh, and E. P. Simoncelli.
+     the International Conference on Learning Representations,            Image quality assessment: from error visibility to struc-
+     2019.                                                                tural similarity. IEEE Transactions on Image Processing,
+[13] D. P. Kingma and M. Welling. Auto-Encoding Variational               13(4):600–612, 2004.
+     Bayes. International Conference on Learning Representa-         [28] M. Wieler and T. Hahn. Weakly Supervised Learning
+     tions, 2014.                                                         for Industrial Optical Inspection. Online: resources.mpi-
+[14] A. Krizhevsky and G. Hinton. Learning multiple layers of             inf.mpg.de/conference/dagm/2007/prizes.html.        Accessed
+     features from tiny images. Technical report, University of           2018-11-16.
+     Toronto, 2009.
+[15] A. Krizhevsky, I. Sutskever, and G. E. Hinton. ImageNet
+     Classification with Deep Convolutional Neural Networks. In
+     Proceedings of the 25th International Conference on Neu-
+     ral Information Processing Systems - Volume 1, pages 1097–
+     1105, 2012.
+[16] Y. LeCun, L. Bottou, Y. Bengio, and P. Haffner. Gradient-
+     based learning applied to document recognition. Proceed-
+     ings of the IEEE, 86(11):2278–2324, 1998.
+[17] E. Nalisnick, A. Matsukawa, Y. W. Teh, D. Gorur, and
+     B. Lakshminarayanan. Do Deep Generative Models Know
+     What They Don’t Know?          International Conference on
+     Learning Representations, 2019.
+[18] P. Napoletano, F. Piccoli, and R. Schettini. Anomaly
+     Detection in Nanofibrous Materials by CNN-Based Self-
+     Similarity. Sensors, 18(1):209, 2018.
+[19] P. Perera and V. M. Patel. Learning Deep Features for
+     One-Class Classification. arXiv preprint arXiv:1801.05365,
+     2018.
+[20] M. A. Pimentel, D. A. Clifton, L. Clifton, and L. Tarassenko.
+     A review of novelty detection. Signal Processing, 99:215–
+     249, 2014.
+

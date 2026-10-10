@@ -1,0 +1,1112 @@
+                                         Segmentation-Based Deep-Learning Approach for Surface-Defect
+                                         Detection
+                                         Domen Tabernik · Samo Šela · Jure Skvarč · Danijel Skočaj
+
+
+
+
+arXiv:1903.08536v3 [cs.CV] 11 Jun 2019
+                                         Abstract Automated surface-anomaly detection using ma-                 defective samples is limited. The dataset is also made pub-
+                                         chine learning has become an interesting and promising area            licly available to encourage the development and evaluation
+                                         of research, with a very high and direct impact on the ap-             of new methods for surface-defect detection.
+                                         plication domain of visual inspection. Deep-learning meth-
+                                         ods have become the most suitable approaches for this task.            Keywords Surface-defect detection · Visual inspection ·
+                                         They allow the inspection system to learn to detect the sur-           Quality control · Deep learning · Computer vision ·
+                                         face anomaly by simply showing it a number of exemplar                 Segmentation networks · Industry 4.0
+                                         images. This paper presents a segmentation-based deep-learn-
+                                         ing architecture that is designed for the detection and seg-
+                                         mentation of surface anomalies and is demonstrated on a                Introduction
+                                         specific domain of surface-crack detection. The design of
+                                         the architecture enables the model to be trained using a small         In industrial processes, one of the most important tasks when
+                                         number of samples, which is an important requirement for               it comes to ensuring the proper quality of the finished prod-
+                                         practical applications. The proposed model is compared with            uct is inspection of the product’s surfaces. Often, surface-
+                                         the related deep-learning methods, including the state-of-             quality control is carried out manually and workers are trained
+                                         the-art commercial software, showing that the proposed ap-             to identify complex surface defects. Such control is, how-
+                                         proach outperforms the related methods on the specific do-             ever, very time consuming, inefficient, and can contribute to
+                                         main of surface-crack detection. The large number of exper-            a serious limitation of the production capacity.
+                                         iments also shed light on the required precision of the anno-              In the past, classic machine-vision methods were suffi-
+                                         tation, the number of required training samples and on the             cient to address these issues (Paniagua et al 2010; Bulnes
+                                         required computational cost. Experiments are performed on              et al 2016); however, with the Industry 4.0 paradigm the
+                                         a newly created dataset based on a real-world quality control          trend is moving towards the generalization of the produc-
+                                         case and demonstrates that the proposed approach is able to            tion line, where rapid adaptation to a new product is re-
+                                         learn on a small number of defected surfaces, using only               quired (Oztemel and Gursev 2018). Classical machine-vision
+                                         approximately 25-30 defective training samples, instead of             methods are unable to ensure such flexibility. Typically, in
+                                         hundreds or thousands, which is usually the case in deep-              a classical machine-vision approach features must be hand-
+                                         learning applications. This makes the deep-learning method             crafted to suit the particular domain. A decision is then made
+                                         practical for use in industry where the number of available            using a hand-crafted rule-based approach or using learning-
+                                                                                                                based classifiers such as SVM, decision trees or kNN. Since
+                                         D. Tabernik · D. Skočaj                                               such classifiers are less powerful than deep-learning meth-
+                                         University of Ljubljana, Faculty of Computer and Information Science   ods, the hand-crafted features play a very important role.
+                                         Večna pot 113, 1000 Ljubljana, Slovenia
+                                         E-mail: domen.tabernik@fri.uni-lj.si, danijel.skocaj@fri.uni-lj.si
+                                                                                                                Various filter banks, histograms, wavelet transforms, mor-
+                                                                                                                phological operations and other techniques are used to hand-
+                                         S. Šela1 · J. Skvarč2
+                                                                                                                craft appropriate features. Hand-engineering of features, there-
+                                         1
+                                           Kolektor Group d. o. o., 2 Kolektor Orodjarna d. o. o.               fore, plays an important role in classical approaches, but
+                                         Vojkova 10, 5280 Idrija, Slovenia                                      such features are not suited for different task and lead to long
+                                                                                                                development cycles when machine-vision methods must be
+2                                                                                                           Domen Tabernik et al.
+
+
+
+
+Fig. 1 The proposed scheme for the detection of surface defects
+
+
+manually adapted to different products. A solution that al-    number of defected training samples, but can still achieve
+lows for improved flexibility can be found in data-driven,     state-of-the-art results.
+machine-learning approaches where the developed methods            An extensive evaluation of the proposed method is per-
+can be quickly adapted to new types of products and sur-       formed on a novel, real-world dataset termed Kolektor Sur-
+face defects using only the appropriate number of training     face-Defect Dataset (KolektorSDD). The dataset represents
+images.                                                        a real-world problem of surface-defect detection for an in-
+                                                               dustrial semi-finished product where the number of defec-
+    This paper focuses on using state-of-the-art machine-      tive items available for the training is limited. The proposed
+learning methods to address the detection of visual surface    approach is demonstrated to be already suitable for the stud-
+defects. The focus is primarily on deep-learning methods       ied application by highlighting three important aspects: (a)
+that have, in recent years, become the most common ap-         the required manual inspection to achieve a 100% detection
+proach in the field of computer vision. When applied to the    rate (by additional manual verification of detections), (b) the
+problem of surface-quality control (Chen and Ho 2016; Faghih- required details of annotation and the number of training
+Roohi et al 2016; Weimer et al 2013; Kuo et al 2014), deep-    samples leading to the required human labor costs and (c)
+learning methods can achieve excellent results and can be      the required computational cost. On the studied domain, the
+adapted to different products. Compared to classical machine- designed network is shown to outperform the related state-
+vision methods, the deep learning can directly learn fea-      of-the-art methods, including the latest commercial product
+tures from low-level data, and has higher capacity to rep-     and two standard segmentation networks.
+resent complex structures, thus completely replacing hand-         The remainder of the paper is structured as follows. The
+engineering of features with automated learning process. With related work is presented in “Related work” section, with
+a rapid adaptation to new products this method becomes         details of the segmentation and decision net in “Proposed
+very suitable for the flexible production lines required in    approach” section. An extensive evaluation of the proposed
+Industry 4.0. Nevertheless, the open question remains: how     network is detailed in “Segmentation and decision network
+much annotated data is required and how precise do the an-     evaluation” section, and a comparison with the state-of-the-
+notations need to be in order to achieve a performance suit-   art commercial solution is presented in “Comparison with
+able for practical applications? This is a particularly impor- the state of the art” section. The paper concludes with a dis-
+tant question when dealing with deep-learning approaches       cussion in “Discussion and conclusion” section.
+as deep models with millions of learnable parameters often
+require thousands of images, which in practice is often dif-
+ficult to obtain.                                              Related work
+
+     This paper explores suitable deep-learning approaches        Deep-learning methods began being applied more often to
+for the surface-quality control. In particular, the paper stud-   surface-defect classification problems shortly after the in-
+ies deep-learning approaches applied to a surface-crack de-       troduction of AlexNet (Krizhevsky et al 2012). The work
+tection of an industrial product (see Fig. 1). Suitable net-      by Masci et al (2012) showed that for surface-defect classi-
+work architectures are explored, not only from their overall      fication the deep-learning approach can outperform classic
+classification performance, but also from the point of view       machine-vision approaches where hand-engineered features
+of three characteristics that are particularly important for      are combined with support vector machines. They demon-
+Industry 4.0: (a) annotation requirements, (b) the number         strated this on the image classification of several steel de-
+of required training samples and (c) computational require-       fect types using a convolutional neural network with five
+ments. The data requirement is addressed by utilizing an ef-      layers. They achieved excellent results; however, their work
+ficient approach with a deep convolutional network based          was limited to a shallow network, as they did not use ReLU
+on a two-stage architecture. Novel segmentation and deci-         and batch normalization. A similar architecture was used
+sion network is proposed that is suited to learn from a small     by Faghih-Roohi et al (2016) for the detection of rail-surface
+Segmentation-Based Deep-Learning Approach for Surface-Defect Detection                                                           3
+
+
+defects. They used ReLU for the activation function and             tecture by Rački et al (2018). However, the proposed ap-
+evaluated several network sizes for the specific problem of         proach incorporates several changes to the architecture of
+classifying rail defects.                                           the segmentation and decision networks with the goal to in-
+    In a modern implementation of convolutional networks            crease the receptive field size and to increase the network’s
+Chen and Ho (2016) applied the OverFeat (Sermanet and               ability to capture small details. As opposed to some related
+Eigen 2014) network to detect five different types of surface       works (Rački et al 2018; Weimer et al 2016), the proposed
+errors. They identified a large number of labeled data, as an       network is applied to real-world examples instead of us-
+important problem for deep networks, and proposed to miti-          ing synthetic ones. The used dataset in this study also con-
+gate this using an existing pre-trained network. They utilized      sists of only a small number of defective training samples
+the OverFeat network trained on 1.2 million images of gen-          (i.e., 30 defective samples), instead of hundreds (Rački et al
+eral visual objects from the ILSVRC2013 dataset and used            2018; Weimer et al 2016) or thousands (Lin et al 2018).
+it as feature extractor for the images with surface defects.        This makes some related architectures, such as LEDNet (Lin
+They utilized a support vector machine to learn the classifier      et al 2018), that use only per-image annotation and a large
+on top of deep features and showed that pre-trained features        batch size, inappropriate for the task at hand. Since a small
+outperform LBP features. With the proposed Approximate              number of samples makes the choice of the network de-
+Surface Roughness heuristic they were able to further im-           sign more important, this paper evaluates the effect of re-
+prove on that result; however, their method does not learn          placing the segmentation network with two different stan-
+the network on the target domain and is therefore not using         dard network designs, normally used for the semantic seg-
+the full potential of deep learning.                                mentation, namely with DeepLabv3+ (Chen et al 2018) and
+    Weimer et al (2016) evaluated several deep-learning ar-         U-Net (Ronneberger et al 2015). The impact of using pre-
+chitectures with varying depths of layers for surface-anomaly       trained models is also evaluated by using the DeepLabv3+
+detection. They applied networks ranging from having only           network that is pre-trained on over 1.2 million images from
+5 layers to a network having 11 layers. Their evaluation fo-        the ImageNet (Russakovsky et al 2015) and the MS COCO
+cused on 6 different types of synthetic errors and showed           (Lin et al 2014) datasets.
+that the deep network outperformed any classic method, with
+an average accuracy of 99.2% on the synthetic dataset. Their
+approach was also able to localize the error within several         Proposed approach
+pixels of accuracy; however, their approach to localization
+                                                                    The problem of surface-anomaly detection is addressed as
+was inefficient as it extracted small patches from each im-
+                                                                    a binary-image-classification problem. This is suitable for
+age and classified each individual image patch separately.
+                                                                    surface-quality control, where an accurate per-image classi-
+    A more efficient network for explicitly performing the
+                                                                    fication of the anomaly’s presence is often more important
+segmentation of defects was proposed by Rački et al (2018).
+                                                                    than an accurate localization of the defect. However, to over-
+They implemented a fully convolutional network with 10
+                                                                    come the issue of a small number of samples in deep learn-
+layers, using both ReLU and batch normalization to perform
+                                                                    ing, the proposed approach is formulated as a two-stage de-
+the segmentation of the defects. Furthermore, they proposed
+                                                                    sign, as depicted in Fig. 2. The first stage implements a seg-
+an additional decision network on top of the features from
+                                                                    mentation network that performs a pixel-wise localization of
+the segmentation network to perform a per-image classifi-
+                                                                    the surface defect. Training this network with a pixel-wise
+cation of a defect’s presence. This allowed them to improve
+                                                                    loss effectively considers each pixel as an individual train-
+the classification accuracy on the dataset of synthetic surface
+                                                                    ing sample, thus increasing the effective number of train-
+defects.
+                                                                    ing samples and preventing overfitting. The second stage,
+    Recently, Lin et al (2018) proposed the LEDNet archi-           where binary-image classification is performed, includes an
+tecture for the detection of defects on images of LED chips         additional network that is built on top of the segmentation
+using a dataset with 30,000 low-resolution images. Their            network and uses both the segmentation output as well as
+proposed network follows the AlexNet architecture, but re-          features of the segmentation net. The first-stage network is
+moves the fully connected layers and instead incorporates           referred to as the segmentation network, while the second-
+class-activation maps (CAMs), similar to (Zhou et al 2016).         stage network, as the decision network.
+This design allows them to learn using only per-image la-
+bels and using CAMs for the localization of the defects. The
+proposed LEDNet showed a significant improvement in the             Segmentation network
+defect-detection rate compared to traditional methods.
+    Compared to the related methods, the approach proposed          The proposed network consists of 11 convolutional layers
+in this paper follows a two-stage design with the segmenta-         and three max-pooling layers that each reduce the resolu-
+tion network and the decision network, similar to the archi-        tion by a factor of two. Each convolutional layer is followed
+4                                                                                                                 Domen Tabernik et al.
+
+
+
+
+Fig. 2 The proposed architecture with the segmentation and decision networks
+
+
+by a feature normalization and a non-linear ReLU layer,                 Decision network
+which both help to increase the rate of convergence during
+the learning. Feature normalization normalizes each chan-               The architecture of the decision network uses the output
+nel to a zero-mean distribution with a unit variance. The first         from the segmentation network as the input for the deci-
+nine convolutional layers use 5×5 kernel sizes, while the last          sion network. The network takes the output of the last con-
+two layers use 15 × 15 and 1 × 1 kernel sizes, respectively.            volutional layer of the segmentation network (1024 chan-
+A different number of channels is allocated for different lay-          nels) concatenated with a single-channel segmentation out-
+ers, as can be seen in a detailed depiction of the network ar-          put map. This results in 1025-channel volume that repre-
+chitecture in Fig. 2. The final output mask is obtained after           sents the input for the remaining layers with a max-pooling
+applying 1 × 1 convolution layer that reduces the number                layer and a convolutional layer with 5×5 kernel sizes. Com-
+of output channels. This results in a single-channel output             bination of both layers is repeated 3 times, with 8, 16 and 32
+map with an 8-times-reduced resolution of the input image.              channels in the first, second and third convolutional layer,
+Drop-out is not utilized in this approach, since the weight             respectively. A detailed depiction of the architecture is given
+sharing in convolutional layers provides sufficient regular-            in Fig. 2. The number of channels was chosen to increase as
+ization.                                                                the resolution of the features decreases, therefore resulting
+                                                                        in the same computational requirement for each layer. The
+                                                                        proposed design effectively results in a 64-times-smaller res-
+                                                                        olution of the last convolutional layer than that of the orig-
+    The design of the proposed segmentation network fo-                 inal image. Finally, the network performs global maximum
+cuses on the detection of small surface defects in a large-             and average pooling, resulting in 64 output neurons. Addi-
+resolution image. To achieve this the network is designed               tionally, the result of the global maximum and average pool-
+with two important requirements: (a) the requirement for a              ing on the segmentation output map are concatenated as two
+large receptive field size in a high-resolution image and (b)           output neurons, to provide a shortcut for cases where the
+the requirement to capture small feature details. This results          segmentation map already ensures perfect detection. This
+in several significant changes of the architecture compared             design results in 66 output neurons that are combined with
+to the related work of (Rački et al 2018). First, an additional        linear weights into the final output neuron.
+down-sampling layer and large kernel sizes in higher lay-                   The design of the decision network follows two impor-
+ers are used to significantly increase the receptive field size.        tant principles. First, the appropriate capacity for large com-
+Second, the number of layers between each down-sampling                 plex shapes is ensured by using several layers of convolu-
+is changed to having fewer layers in the lower sections of              tion and down-sampling. This enables the network to cap-
+the architectures and having more layers in the higher sec-             ture not only the local shapes, but also the global ones that
+tions. This increases the capacity of features with large re-           span a large area of the image. Second, the decision network
+ceptive field sizes. Finally, the down-sampling is achieved             uses not only output feature volume of the last convolutional
+using max-pooling instead of convolutions with a large stride.          operation from the segmentation network before channel re-
+This ensures small but important details survive the down-              duction with 1 × 1 kernel, but also the final segmentation
+sampling process, which is particularly important in this net-          output map obtained after the channel reduction with 1 × 1
+work with additional down-sampling layers.                              kernel. This introduces a shortcut that the network can uti-
+Segmentation-Based Deep-Learning Approach for Surface-Defect Detection                                                             5
+
+
+lize to avoid using a large number of feature maps, if they are     losses proved not only more difficult to implement in prac-
+not needed. It also reduces the overfitting to a large number       tice than using a separate learning mechanism, but it also did
+of parameters. The shortcuts are implemented at two lev-            not introduce any performance gain. The two-stage learning
+els: one at the beginning of the decision network where the         mechanism therefore proved to be a better choice and was
+segmentation output map is fed into several convolutional           subsequently employed in all experiments.
+layers of the decision network, and another one at the end
+of the decision network where the global average and max-
+imum values of the segmentation output map are appended             Inference
+to the input of the final fully-connected layer. The shortcut at
+the beginning of the decision network and the several convo-        The input into the proposed network is a gray-scale image.
+lutional layers with down-sampling are an important distinc-        The network architecture is independent of the input size,
+tion with respect to the related work of Rački et al (2018). In    similar to fully convolutional networks (Long et al 2015),
+contrast to the proposed work, they use only a single layer         since fully connected layers are not used in feature maps,
+and no down-sampling in the decision layers, and do not             but only after the spatial dimension is eliminated with global
+use a segmentation output map directly in the convolution           average and max pooling. Input images can therefore be of
+but only indirectly through global max and average pooling.         a high or a low resolution, depending on the problem. Two
+This limits the complexity of the decision network and pre-         image resolutions are explored in this paper: 1408×512 and
+vents it from capturing large global shapes.                        704 × 256.
+                                                                         The proposed network model returns two outputs. The
+                                                                    first output is a segmentation mask as an output from the
+Learning                                                            segmentation network. The segmentation mask outputs the
+                                                                    probability of a defect for an 8 × 8 group of input pixels;
+The segmentation network is learned as a binary-segmenta-           therefore, the output resolution is reduced by 8 times with
+tion problem; therefore, the classification is performed at the     respect to the input resolution. The output map is not inter-
+level of individual image pixels. Two different training ap-        polated back to the original image size since the classifica-
+proaches were evaluated: (a) using a regression with a mean         tion of 8 × 8 pixel blocks in high-resolution images suffices
+squared error loss (MSE) and (b) using a binary classifi-           for the problem at hand. The second output is the probabil-
+cation with a cross-entropy loss. The models are not pre-           ity score in the range of [0, 1] and represents the probability
+trained on other classification datasets, but instead are ini-      of an anomaly’s presence in the image, as returned by the
+tialized randomly using a normal distribution.                      decision network.
+     The decision network is trained with the cross-entropy
+loss function. Learning takes place separately from the seg-
+mentation network. First, only the segmentation network is          Segmentation and decision network evaluation
+independently trained, then the weights for the segmenta-
+tion network are frozen and only the decision network layers        The proposed network is extensively evaluated on a surface-
+are trained. By fine tuning only the decision layers the net-       crack detection in an industrial product. This section first
+work avoids the issue of overfitting from the large number of       presents the details of the dataset and then presents the de-
+weights in the segmentation network. This is more important         tails of the evaluation and its results.
+during the stage of learning the decision layers than during
+the stage of learning the segmentation layers. The restric-
+tions of the GPU memory limit the batch size to only one            The Kolektor surface-defect dataset
+or two samples per batch when learning the decision layers,
+but when learning the segmentation layers each pixel of the         In the absence of publicly available datasets with real images
+image is considered as a separate training sample, therefore        of annotated surface defects a new dataset termed Kolek-
+increasing the effective batch size by several folds.               tor surface-defect dataset (KolektorSDD) was created1 . The
+                                                                    dataset is constructed from images of defected electrical com-
+     The simultaneous learning of both the segmentation and
+                                                                    mutators (see Fig. 1) that were provided and annotated by
+decision networks was considered as well. The type of loss
+                                                                    Kolektor Group d. o. o.. Specifically, microscopic fractions
+function played an important role in this case. Simultane-
+                                                                    or cracks were observed on the surface of the plastic em-
+ous learning was possible only when cross entropy was used
+                                                                    bedding in electrical commutators. The surface area of each
+for both networks. Since the losses are applied for differ-
+                                                                    commutator was captured in eight non-overlapping images.
+ent scopes, i.e., one at the per-pixel level and one at the
+per-image level, the accurate normalization of both layers               1
+                                                                         The Kolektor surface-defect dataset is publicly available at
+played a crucial role. In the end, properly normalizing both        http://www.vicos.si/Downloads/KolektorSDD
+6                                                                                                                          Domen Tabernik et al.
+
+
+
+
+Fig. 3 Several examples of surface images with visible defects and their annotation masks in the top, and defect-free surfaces in the bottom
+
+
+The images were captured in a controlled environment, en-                  manual (a) and four generated ones (b-e), are depicted in
+suring high-quality images with a resolution of 1408 × 512                 Fig. 4.
+pixels. The dataset consists of 50 defected electrical com-
+mutators, each with up to eight relevant surfaces. This re-
+sulted in a total of 399 images. In two items the defect is                Experiments
+visible in two images while for remaining items the defect
+is only visible in a single image, which means there were                  The proposed network is first evaluated under several differ-
+52 images where the defects are visible (i.e., defective or                ent training setups, which include different types of annota-
+positive samples). For each image a detailed pixel-wise an-                tions, input-data rotation and different loss functions for the
+notation mask is provided. The remaining 347 images serve                  segmentation network. Altogether, the network was evalu-
+as negative examples with non-defective surfaces. Examples                 ated under four configuration groups:
+of such images with visible defects and ones without them
+are depicted in Fig. 3.                                                      – five annotation types,
+                                                                             – two loss-function types for the segmentation network
+                                                                               (mean squared error and cross entropy),
+     In addition, the dataset is annotated with several differ-              – two sizes of input image (full size and half size),
+ent types of annotations. This enables an evaluation of the                  – without and with 90◦ input-image rotation.
+proposed approach under different accuracies of the annota-
+tion. Annotation accuracy is particularly important in indus-                  Each configuration group makes it possible to assess the
+trial settings since it is fairly time consuming and the human             performance of the network from four aspects. Different an-
+labor spent on annotation should be minimized. For this pur-               notation types allow an assessment of the impact of the an-
+pose, four more annotation types were generated by dilating                notation’s precision, while different image resolutions allow
+the original annotations with the morphological operation                  an assessment of the impacts on the classification perfor-
+using different kernel sizes, i.e., 5, 9, 13 and 17 pixels. Note           mance at a lower computational cost. Additionally, the im-
+that this is applied to images of the original resolution, and             pact of different loss functions and the impact of augmenting
+in the experiments with half the resolution the annotation                 the training data by rotating the images with the probability
+mask is reduced after being dilated. All the annotations, one              of 0.5 are also assessed.
+
+
+
+
+Fig. 4 Example of five different annotation types generated by dilating the original annotation shown in (a) with different morphological kernel
+sizes: (b) dilate=5, (c) dilate=9, (d) dilate=13 and (e) dilate=15
+Segmentation-Based Deep-Learning Approach for Surface-Defect Detection                                                                                                                                            7
+
+                                               MSE loss               Cross-entropy loss                   MSE loss                                     Cross-entropy loss
+                                                  95.5                        98.1             2                       4                            1       1
+
+
+
+
+              D=17 D=13 D=9 D=5 D=0
+                                                  94.9                        98.0             2                            5                       1           2
+                                                    98.8                       99.9            2               2                                    1
+
+
+1408x512 px
+                                                  95.2                        97.7             2                   3                                1           2
+                                                   98.3                        99.6                3                                                1       1
+                                                  95.6                        96.6                4       1                                         1       1
+                                                    98.5                      97.6            1 1                                                   1       1
+                                                   96.1                       98.4             2        3                                           1       1
+                                                    98.4                      96.7             2    1                                               1       1
+                                                  93.6                        98.5             2      2                                                 2
+
+                                              79.9                            99.8                                     8                      16      2
+
+
+
+
+              D=17 D=13 D=9 D=5 D=0
+                                      53.5                                   97.3                                      8                      29    1     2
+                                               80.0                           98.6                                     10                           1 1 13
+
+
+704x256 px
+                                             72.4                            96.0                                      21                                 4     1                                       9
+                                                   97.6                       99.7             2                   3                                  2
+                                                 89.9                         99.0                 3                                5                   3     1
+                                                   99.6                       99.7             2                                                      2     1
+                                                  96.4                        99.3                 3                            4                       3
+                                                   99.6                       99.6             2           1                                          2
+                                                 91.5                        97.8                  3               1                                  2
+
+                               40 50 60 70 80 90 100 40 50 60 70 80 90 100 0                           2               4                6     8 0               2    4      6   8   Fig. 5 Results of the proposed
+                                       Average Precision (%)          Average Precision (%)    False count (FP + FN)                                    False count (FP + FN)       approach on the KolektorSDD
+                                                           Dilate=0       Dilate=5         Dilate=9       Dilate=13                                             Dilate=17           (false positives (FP) shown in a
+                                                                                                                                                                                    dark colors and false negatives
+                                                                                  No rotation       Rotation                                                                        (FN) in light colors)
+
+
+    For the purpose of this evaluation, the problem of surface-                                                                             tures the performance in datasets with a large number of
+defect detection is translated into a binary-image-classifica-                                                                              negative (i.e., non-defective) samples than does the AUC.
+tion problem. The main objective is to classify the image
+into two classes: (a) defect is present and (b) defect is not                                                                               Implementation and learning details
+present. Although pixel-wise segmentation of the defect can
+be obtained from the segmentation network the evaluation                                                                                    The network architecture was implemented in the Tensor-
+does not measure the pixel-wise error, since it is not cru-                                                                                 Flow framework (Abadi et al 2015) and both networks are
+cial in industrial settings. Instead, only the per-image binary-                                                                            trained using a stochastic gradient descend without momen-
+image-classification error is measured. The segmentation out-                                                                               tum. A learning rate of 0.005 was used for the mean squared
+put is only used for visualization purposes.                                                                                                error (MSE) and 0.1 for the cross-entropy loss. Only a sin-
+                                                                                                                                            gle image per iteration was used, i.e., the batch size was set
+                                                                                                                                            to one, mostly due to the large image sizes and the GPU
+Performance metrics                                                                                                                         memory limitations.
+                                                                                                                                                During the learning process the training samples were
+The evaluation is performed with a 3-fold cross validation,                                                                                 selected randomly; however, the selection process was mod-
+while ensuring all the images of the same physical product                                                                                  ified to ensure that the network observed a balanced number
+are in the same fold and therefore never appear in the train-                                                                               of defective and non-defective images. This was achieved
+ing and test set simultaneously. All the evaluated networks                                                                                 by taking images with defects for every even iteration, and
+are compared considering three different classification met-                                                                                images without defects for every odd iteration. This mecha-
+rics: (a) average precision (AP), (b) number of false nega-                                                                                 nism ensures that the system observes defective images at a
+tives (FN) and (c) number of false positives (FP). Note, the                                                                                constant rate; otherwise the learning is unbalanced in favor
+positive sample is referred to as an image with a visible de-                                                                               of the non-defective samples and would have learned sig-
+fect, and the negative sample, as an image with no visible                                                                                  nificantly more slowly due to a larger set of non-defective
+defect. The primary metric used in the evaluation is average                                                                                images in the dataset. It should be noted that this leads to
+precision. This is more appropriate than FP or FN, since av-                                                                                training that is not done exclusively by the epochs, as the
+erage precision is calculated as the area under the precision-                                                                              number of non-defective images is 8-times higher than the
+recall curve and accurately captures the performance of the                                                                                 number of defective ones and the network receives the same
+model under different threshold values in a single value. On                                                                                defective image before receiving all the non-defective im-
+the other hand, the number of miss-classifications (FP and                                                                                  ages.
+FN) are dependent on the specific threshold applied to the                                                                                      Both networks were trained for up to 6600 steps. With 33
+classification score. We report the number of miss-classi-                                                                                  defective images per training set in one fold and alternating
+fications at a threshold value where the best F-measure is                                                                                  between defective and non-defective images in each step this
+achieved. Also, note that AP was chosen instead of the area                                                                                 translates to 100 epochs. One epoch is only considered to
+under the ROC curve (AUC) since AP more accurately cap-                                                                                     be over when all the defective images are observed at least
+8                                                                                                                                                                              Domen Tabernik et al.
+
+
+once, but not all the non-defective images are necessarily
+observed.                                                                               Image
+                                                                                       rotation
+                                                                                        Cross
+                                                                                       entropy
+Segmentation and decision network                                   Half image
+                                                                     resolution
+The proposed network that consists of both the segmenta-                                                                  15          10         5        0             5         10     15       20
+                                                                                                                                           Average change in AP (pp)
+tion network in the first stage and the decision network in
+the second stage is evaluated first. Detailed results are pre-    Fig. 6 Average changes in AP (average precision) as contributed by
+sented in Fig. 5. This graph shows the results of experiments     different changes to the learning configuration
+for different annotation types in different colors and exper-                                                       MSE loss                         Cross-entropy loss
+iments for using image rotation in dashed bars. The experi-
+                                                                                                                     89.2              +6.4                     96.1             +2.0
+
+
+
+
+                                                                                D=17 D=13 D=9 D=5 D=0
+ments for full image resolution are reported in the top group                                                     81.9              +13.0                      94.3             +3.6
+                                                                                                                       94.0              +4.9                 90.3             +9.6
+and experiments for half of the resolution at the bottom. The
+                                                                  1408x512 px
+                                                                                                                     89.3              +5.9                    94.4             +3.2
+                                                                                                                      91.5              +6.8                     98.2             +1.4
+best-performing results were obtained with annotations di-                                                          87.7              +8.0                     93.2            +3.4
+                                                                                                                       92.6              +5.9                  94.7             +2.9
+lated with 5 × 5 kernel sizes (dilate=5), cross-entropy loss                                                         89.7              +6.3                    94.1             +4.3
+                                                                                                                      90.3              +8.1                    96.5            +0.2
+function, full image resolution and without any image rota-                                                      76.4             +17.2                         96.8             +1.7
+tions. The network in this configuration achieved an average
+                                                                                                             63.8        +16.2                               95.4                +4.3
+precision (AP) of 99.9%, had zero false positive (FP) and
+
+
+
+                                                                                D=17 D=13 D=9 D=5 D=0
+                                                                                                        45.1+8.4                                          84.2               +13.1            Dilate=0
+one false negative (FN).                                                                                          81.8         -1.8                          94.6                +4.0         Dilate=5
+                                                                                                                 75.9       -3.5                            92.2               +3.8
+
+                                                                  704x256 px
+                                                                                                                      91.2             +6.4                  95.4                +4.3         Dilate=9
+     Next, the impact of an individual learning setup can be                                                         88.0          +1.9                       97.6                +1.4        Dilate=13
+assessed by observing the averaged improvement in perfor-                                                              95.3
+                                                                                                                    85.6            +10.8
+                                                                                                                                         +4.3                95.2
+                                                                                                                                                              97.4
+                                                                                                                                                                                 +4.5
+                                                                                                                                                                                  +1.9
+                                                                                                                                                                                              Dilate=17
+mance for each specific change of the setting. An impact on                                                         85.1
+                                                                                                                     87.4
+                                                                                                                                     +14.5
+                                                                                                                                    +4.1
+                                                                                                                                                              97.3
+                                                                                                                                                              97.7
+                                                                                                                                                                                  +2.3
+                                                                                                                                                                                  +0.0        No rotation
+the performance is reported for the following changes to the                                                                                                                                  Rotation
+                                                                                                 40         50      60   70      80   90    100 40   50   60      70    80   90    100
+settings: (a) a change to the cross-entropy loss function for                                                Average Precision (%)                   Average Precision (%)
+the segmentation network from a mean-squared-error loss,          Fig. 7 Improvements in the average precision contributed by the deci-
+(b) a change to a smaller image resolution from the full im-      sion network
+age resolution, and (c) a change in the input data rotation by
+90◦ from no rotation. Improvements in AP averaged over all
+                                                                  Image resolution The network with the reduced image res-
+the experiments are reported in Fig. 6. The results for a spe-
+                                                                  olution on average performed with a 5-percent points worse
+cific change of setting, e.g., for a change to half the image
+                                                                  AP as seen in Fig. 6. A close inspection of Fig. 5 shows
+resolution from the full image resolution, are obtained by
+                                                                  that smaller images negatively impact mostly on networks
+first computing the AP of all the possible configurations of
+                                                                  trained with the MSE loss function, while networks trained
+all the settings (reported in Fig. 5) and then computing the
+                                                                  with the cross entropy are not impacted. Cross entropy is
+differences in the AP between two experiments where only
+                                                                  less sensitive to the reduced image resolution and in some
+the setting in question was changed, e.g., between the exper-
+                                                                  cases images with the reduced resolution perform marginally
+iment that used the half image resolution and one that used
+                                                                  better (approximately one percent in AP).
+the full image resolution, but had all the other settings the
+same. The overall improvement in performance is captured
+through the average of the differences in AP over all the         Image rotation Randomly rotating images, on the other hand,
+other settings that remained the same. Standard deviations        did not prove as useful and did not lead to any significant
+are also reported separately for the positive and negative di-    performance gains. In some cases the gain was at most one
+rections.                                                         percent point; however, in other cases the performance was
+                                                                  reduced by much more.
+
+Loss function When comparing the mean squared error loss          Annotation types Finally, comparing different annotation types
+(MSE) and the cross-entropy loss functions in Fig. 5 it is        in Fig. 5 results in only a slightly negative impact on the
+clear that the best performance is obtained with networks         performance when training with smaller annotations (orig-
+trained using the cross-entropy loss function. This is reflect-   inal or dilation with small kernels) and when considering
+ed in the AP metric and in the FP/FN count, as well as in im-     the cross-entropy loss. The difference is more pronounced
+provements to the cross entropy averaged over all the other       in the MSE loss function. Overall, the best results seem to
+settings in Fig. 6. On average, the cross entropy achieved a      be achieving annotations dilated with medium-to-large dila-
+7-percent points (pp) better AP.                                  tion rates.
+Segmentation-Based Deep-Learning Approach for Surface-Defect Detection                                                                                                               9
+
+
+                                                                                                           96.4                                  3                   1
+
+
+                                                                         1408x512 px
+                                                                                       Big                 97.1                              2             1
+
+                                                                                       Coarse
+                                                                                                            99.7                         1       1
+                                                                                                           96.6                                        4                 1
+
+Fig. 8 Two additional annotations: (a) big and (b) coarse                                                  98.4                              2             1
+
+
+                                                                         704x256 px
+                                                                                       Big                 98.7                          1             2
+
+                                                                                       Coarse
+                                                                                                           99.2                              2
+Contribution of the decision network                                                                       99.2                                        4                 1
+                                                                                            40   50   60    70     80   90   100   0.0           1.5           3.0       4.5   6.0
+The contribution of the decision network to the final per-                                       Average Precision (%)                       False count (FP + FN)
+formance is also evaluated. This contribution is measured                                                               Big         Coarse
+by comparing the results from the previous section with the                                                         No rotation       Rotation
+segmentation network without the decision network. Instead          Fig. 9 Results with the big and the coarse annotations
+of the decision network, a simple two-dimensional descrip-
+tor and logistic regression are employed. A two-dimensional
+descriptor was created from the values of the global max and
+                                                                    network to capture the global shape of the defect. Global
+average pooling of the segmentation output map, which is
+                                                                    shape is important for the classification, but it is not impor-
+then used as a feature for the logistic regression, which is
+                                                                    tant for the pixel-wise segmentation.
+learned separately from the segmentation network after the
+network has already been trained.
+    The results are presented in Fig. 7. When focusing on
+models with a cross-entropy loss it is clear that the network
+with only the segmentation network already achieves fairly
+good results. The best configuration as obtained by dilate=9        Required precision of the annotation
+annotation achieves an average precision (AP) of 98.2%,
+zero false positives (FP) and four false negatives (FN). The
+                                                                    Experiments from the previous section already demonstrat-
+decision network, however, improves this result across most
+                                                                    ed that large annotations perform better than the finer ones.
+of the experiments. The contribution of the decision network
+                                                                    This is further explored in this section by assessing the im-
+is larger for the MSE loss. The average precision with the
+                                                                    pact of even coarser annotations on the classification perfor-
+MSE loss function achieves an AP of less than 90% when
+                                                                    mance. For this purpose two additional types of annotation
+only the segmentation network is used, while with the de-
+                                                                    were created, termed: (a) big annotation with a bounding
+cision network the AP is above 95% for the MSE loss. For
+                                                                    box and (b) coarse annotation with a rotated bounding box.
+the network trained with the cross entropy the decision net-
+                                                                    Both annotations are shown in Fig. 8. This type of annota-
+work contributes to the performance gain as well, but since
+                                                                    tion is less time consuming for a human annotator to per-
+the segmentation network already performs well, the im-
+                                                                    form and would be better in an industrial setting.
+provements are slightly smaller, improving the AP by 3.6-
+percent points to more than 98% on average for the deci-                 The results are presented in Fig. 9. Only networks with
+sion network. The same trend is observed in the number of           a cross-entropy loss were used for this experiment, as the
+miss-classifications at the ideal threshold, where on average       MSE loss proved less capable in previous experiments. The
+4 miss-classifications for the segmentation network are re-         experiments show large annotations perform almost as well
+duced to 2 miss-classifications on average when the decision        as the finer ones. The annotation denoted as big performs
+network is included.                                                slightly worse, with a best AP of 98.7% and 3 miss-clas-
+    These results point to the important role of the deci-          sifications, while the coarse annotation achieves an AP of
+sion network. Simple per-pixel output segmentation does             99.7% and 2 miss-classifications. Note that with a smaller
+not appear to have enough information to predict the pres-          image resolution both annotations achieve similar APs with
+ence of the defect in the image equally well as can the deci-       the same number of miss-classifications.
+sion network. On the other hand, the proposed decision net-             These results are comparable to the results obtained with
+work is able to capture information from the rich features          finer annotations in the previous section where an AP of
+of the last segmentation layers, and through additional deci-       99.9% is achieved with only one miss-classification. Finer
+sion layers, it is able to separate the noise from the correct      annotations do achieve slightly better results; however, con-
+features. Additional down-sampling in the decision network          sidering that this level of detail is time consuming to anno-
+have also contributed to the improved performance since this        tate, it would still be feasible to use coarse annotations with
+increased the receptive field size and enabled the decision         minimal or no performance loss.
+10                                                                                                                                                                                                                                              Domen Tabernik et al.
+
+                                               No rotation                                   Rotation                              No rotation                                                       Rotation
+                                                    96.8                                      90.8                      3 4                                             3               6
+
+
+
+
+              D=17 D=13 D=9 D=5 D=0
+                                                  93.1                                        92.2                     2        8                                           5              6
+                                                 89.1                                        88.1                        4          11                              1                   11
+                                                     99.0                                      93.7                       5                                             8                        3
+
+
+
+1408x512 px
+                                                  93.2                                        90.5                    1      7                                      1      9
+                                                 89.7                                        89.6                        4        8                                   3                         12
+                                                    98.5                                        96.4                   2 5                                           2 4
+                                                  93.4                                          95.7                    3      5                                     2    6
+                                                  93.2                                        90.6                      3       6                                   1      9
+                                                        98.5                                       97.1                2 2                                            3 3
+                                                       97.1                                       96.1                1 4                                            2 5
+                                                      94.1                                       93.2                        9                                      1     8
+                                                        98.9                                       97.0               1 5                                             3    5
+                                                       96.7                                       95.1                1 5                                            2 5
+                                                      95.6                                      91.4                       6                                         2 5
+
+
+                                                      93.2                                    91.2                      3      7                                    1               8
+
+
+
+
+              D=17 D=13 D=9 D=5 D=0
+                                               81.1                                        82.7                         3             16                                        7                      13
+                                      61.8                                       60.0                                  2                           31                           14                                          25
+                                                       96.7                                       95.9                1 6                                               3      6
+                                               84.0                                        82.9                         3            15                                   6                           12
+
+
+704x256 px
+                                        68.0                                      64.1                                  3                     25                             11                                       23
+                                                  94.1                                          95.5                  1 5                                              2     6
+                                                 89.0                                        85.6                         5         9                                           14
+                                       66.6                                         69.9                                    9                           21                 7                                     22
+                                                    96.4                                          96.1                1 5                                               3      6
+                                                 89.7                                           89.2                   2         12                                           12
+                                               83.0                                   71.2                              3             16                                   7                                    20
+                                                    96.4                                         94.2                   3 3                                                 5               4
+                                                 90.3                                           91.9                        10                                              5                   6
+                                               83.4                                      77.3                            4           13                                      6                             17
+
+                               40     50       60       70     80    90 100 40   50        60       70    80   90 100 0       6          12        18        24    0                    6            12          18    24
+                                      Average Precision (%)                      Average Precision (%)                       False count (FP + FN)                                  False count (FP + FN)
+                                                                                                                                                                                                                                 Fig. 10 Evaluation of the commercial
+                                                                    Dilate=0         Dilate=5                     Dilate=9                    Dilate=13         Dilate=17                                                        software Cognex ViDi Suite on Kolek-
+                                                                          Feature-size=20                       Feature-size=40                     Feature-size=60                                                              torSDD
+
+
+Comparison with the state of the art                                                                                                                                  In this paper all the experiments using the Cognex ViDi
+                                                                                                                                                                  Suite v2.1 were performed using the ViDi Red Tool in a su-
+Several state-of-the-art models are further evaluated to as-                                                                                                      pervised mode. The software is extensively evaluated under
+sess the performance of the proposed approach in the con-                                                                                                         different learning configurations to find the best conditions
+text of the related work. This section first demonstrates the                                                                                                     for a fair comparison with the proposed approach in the next
+performance of a state-of-the-art commercial product and                                                                                                          section. The following learning configurations are varied for
+two standard segmentation networks under different train-                                                                                                         this evaluation:
+ing configuration. This provides the best training configu-
+ration for each state-of-the-art method and allows for a fair                                                                                                      – five annotation types,
+comparison with the proposed network architecture, which                                                                                                           – three feature sizes (20, 40, 60 pixels),
+is performed at the end of this section.                                                                                                                           – two sizes of input image (full size and half size),
+                                                                                                                                                                   – with/without 90◦ input data rotation.
+
+                                                                     The settings that are varied are similar to ones in the
+Commercial software                                              “Segmentation and decision network evaluation” section, with
+                                                                 the difference being that different loss functions are not eval-
+The deep-learning-based state-of-the-art commercial soft-        uated since the software does not provide such a detailed
+ware for industrial image analysis, Cognex ViDi Suite (Cognex level of control. Instead, different sizes of the features are
+2018), is evaluated first. The Vidi company emerged from         evaluated, which have proven to play a crucial role on the
+CSEM in 2012, a private, non-profit, Swiss research and          proposed dataset. Features of size from 20 to 60 pixels are
+technology organization, and was acquired by Cognex in           evaluated. Features of less than 15 pixels are not recom-
+2017. The software package has three different deep-learning     mended based on the documentation, while features larger
+tools: ViDi blue (fixturing, localization), Vidi Red (segmen-    than 60 pixels produced worse results.
+tation and anomaly detection), ViDi green (object and scene
+classification).                                                 Implementation details Access to the learning and inference
+     Vidi Red is a tool for anomaly detection, aesthetic vi-     core of the ViDi Suite is possible through the production and
+sual inspection and segmentation. The tool can run in an         training API. All of the experiments were done in the C#.Net
+unsupervised or supervised mode. In the former case only         programming language. The evaluation was performed with
+the images of non-defective samples are required, and in the     a 3-fold cross validation and the same train/test split as in the
+latter only images of defective samples. The user can adjust     previous experiments, using a gray-scale image (number of
+various parameters from four distinctive regions: sampling       color channels set to one) and learning for 100 epochs. The
+(feature size, color), training (count epochs, train selection), training was performed on all the images from the train fold;
+perturbation (rotation, scale, aspect-ratio, shear, flip, lumi-  therefore, using a parameter training selection of 100%. The
+nance, contrast) and processing (sampling density, simple        models were exported and evaluated in the production mode
+regions).                                                        on the test folds with the parameter simple regions enabled
+Segmentation-Based Deep-Learning Approach for Surface-Defect Detection                                                                                                              11
+
+
+and the sampling density set to one. This ensures an equiv-                                                94.2                               3 6
+
+
+
+
+                                                                     D=17 D=13 D=9 D=5 D=0
+alent processing procedure as used in the proposed deep-                                          70.5                                              37                       10
+learning model. We used default values as recommended by                                                   93.5                             5 3
+                                                                                                          91.0                              5 5
+the vendor for the sampling density. Experiments with val-                                                   98.0                          2 4
+ues that represent denser sampling at the expense of slower                                                 96.1                            5 4
+                                                                                                            96.2                             8 2
+inference were also performed, but this did not improve the                                               92.1                                11 4
+result.                                                                                                   91.2                               9 4
+                                                                                                         88.0                                 12   9
+                                                                                      40     50      60       70     80        90   100   0         10     20      30      40
+Results The results are presented in Fig. 10. Among the dif-                                  Average Precision (%)                                 False count (FP + FN)
+ferent learning setups, the best performance was achieved                                     Dilate=0              Dilate=5         Dilate=9          Dilate=13        Dilate=17
+using the model trained with the dilate=5 annotations, us-                                                                     DeepLabv3+           U-Net
+ing the smallest feature size (20 pixels), without rotating         Fig. 11 Evaluation of two standard                                               segmentation networks
+the images and using the original image size. The model             (DeepLabv3+ and U-Net)
+achieved AP of 99.0%, and 5 miss-classifications, i.e., five
+FN and zero FP. Note that one model achieved only 4 miss-
+classifications, although with an overall lower AP.              model. Both models were evaluated under different annota-
+                                                                 tions, but only cross entropy is considered for the loss func-
+Annotation sizes Among the different annotation types, the       tion and only full-resolution image sizes without data ro-
+dilated annotations perform better than non-dilated ones. How- tation are used, since those settings proved to be the best
+ever, among the different dilation rates the performance gain    performing in the previous experiments.
+is minimal with only 0.1pp difference between dilate=5 and
+dilate=17.                                                       Implementation details Both segmentation methods were em-
+                                                                 bedded into the proposed approach by replacing the segmen-
+Feature sizes Comparing the different feature sizes, the mod- tation part of the proposed network. A TensorFlow imple-
+el with small features consistently outperforms models with      mentation of both networks was embedded in the proposed
+larger features, regardless of the annotation precision. This    network. The DeepLabv3+ used in these experiments was
+can be contributed to the specifics of the dataset with a high   based on the Xception (Chollet 2017) architecture contain-
+image resolution and many small surface defects. Further-        ing 65 convolutional layers, trained and evaluated on a sin-
+more, experiments with the half-resolution image reveal that     gle scale and using an output stride of 16. The U-Net used in
+large features perform significantly worse than the smaller      these experiments was a modified U-Net architecture with
+features in this case. This leads to the conclusion that large   24 convolutional layers, where the only modification is an
+feature sizes cannot capture smaller details, which are im-      added batch normalization for each convolution. The orig-
+portant for the classification.                                  inal U-Net also outputs the segmentation in the full input
+                                                                 resolution; however, since the pixel-wise accurate segmenta-
+Image size and rotation Finally, the experiments also reveal     tion in full resolution is not in the interests of this experiment
+that neither the half-resolution image nor randomly rotating     the output-map resolution was reduced by 8 times. This cor-
+the input data by 90◦ results in an improved performance.        responds to the same output resolutions as in the proposed
+The performance decreases slightly in both cases, although       network.
+the performance drop for both is minor.                               For both segmentation networks the segmentation lay-
+                                                                 ers were trained separately from the decision layers, similar
+                                                                 to the proposed approach, using 3-fold cross validation with
+Using state-of-the-art segmentation networks                     the same train/test split as in all the previous experiments.
+                                                                 Both methods were also evaluated with logistic regression
+Next, two standard segmentation networks are evaluated,          that replaces the decision network, but this proved to per-
+namely, DeepLabv3+ (Chen et al 2018) and U-Net (Ron-             form worse. The parameters of the DeepLabv3+ network
+neberger et al 2015). The DeepLab architecture was selected      were initialized with a model that was pre-trained on the Im-
+as a representative of the pre-trained model that achieves       ageNet (Russakovsky et al 2015) and the COCO dataset (Lin
+state-of-the-art results on current semantic segmentation bench- et al 2014), while the parameters of the U-Net network were
+marks, while the U-Net architecture was selected as a rep-       initialized randomly using a normal distribution, similar to
+resentative of the models designed for a precise pixel-wise      the initialization of the network presented in this paper. Both
+segmentation. The reader is referred to (Chen et al 2018) for    networks were trained for 100 epochs with the same learn-
+more detailed information about the DeepLabv3+ method            ing procedure as used for the proposed model, i.e, using a
+and to (Ronneberger et al 2015) for details about the U-Net      learning rate of 0.1 without momentum, a batch size of 1,
+12                                                                                                                                                                                                                   Domen Tabernik et al.
+
+                        100.0
+
+
+
+
+                                                                                                                                          False count (FP) at recall=100%
+                                                                                              8                                                                             100
+                         97.5
+
+
+
+
+Average Precision (%)                                                 False count (FP + FN)
+                         95.0                                                                                                    4
+                                                                                                                                                                            80
+                                                                                              6
+                         92.5
+                                                                                                                                                                            60
+                         90.0   99.9     99.0                                                                                                                                                            108
+                                                  98.0                                        4                           4
+                         87.5                             96.1                                                                                                              40
+                                                                                                               5                 5                                                                68              Fig.     12 Comparison
+                         85.0                                                                 2                                                                                                                   with the state-of-the-art
+                                                                                                                                                                            20
+                         82.5                                                                                             2                                                                                       on KolektorSDD (in
+                                                                                                   1                                                                                      7
+                         80.0                                                                 0                                                                              0     3                              the middle graph: false
+                                Our      ViDi   DeepLab U-Net                                     Our         ViDi     DeepLab U-Net                                              Our    ViDi   DeepLab U-Net
+                                                                                                                                                                                                                  positives in dark colors
+                                Segmentation net                 Cognex ViDi Suite                                   DeepLab v3+ [Chen2018]                                        U-Net [Ronneberger2015]        and false negatives in
+                                with decision net (our)                                                                                                                                                           light)
+
+
+and alternating between defective and non-defective images                                                                              sults when trained using dilate=9 annotation. Selected con-
+for each step.                                                                                                                          figuration setups for each are shown in Table 1.
+
+Results The results are shown in Fig. 11. Of the standard
+                                                              Results The results are presented in Fig. 12. The proposed
+networks, the best-performing model, i.e., DeepLabv3+ trained
+                                                              approach, shown in the left-most bar, outperformed all the
+using dilate=9 annotations, achieved an AP of 98.0%, and
+                                                              state-of-the-art methods in all metrics. The commercial prod-
+obtained two FP and four FN at an ideal F-measure. Over-
+                                                              uct performed the second best, while both standard segmen-
+all, slightly dilated annotations were shown to achieve the
+                                                              tation methods preformed the worst, with the DeepLabv3+
+best results, while the annotations dilated with larger ker-
+                                                              architecture performing slightly better than the U-Net. Ob-
+nels gave worse results. On average, DeepLabv3+ also out-
+                                                              serving the number of miss-classifications at the ideal F-
+performed U-Net architecture by 2 − 3 percent points in av-
+                                                              measure reveals that the proposed segmentation and deci-
+erage precision, regardless of the annotation type.
+                                                              sion network was able to reduce the miss-classification to
+                                                              only one false negative, while all the remaining methods in-
+Comparison with the proposed approach                         troduced 5 or more miss-classifications.
+                                                                  Several miss-classified images for all methods are pre-
+Finally, all three state-of-the-art approaches are compared   sented in Fig. 13 and 14. True-positive and false-negative
+against the network proposed in this paper. The state-of-the- detections, as shown in Fig. 13, reveal a single missing de-
+art methods are compared with the combined segmentation       tection for the proposed method in the first column. This
+and decision network. For a fair comparison all the meth-     sample contains a small defect that is difficult to detect and
+ods reported in this section were selected based on the best- was not detected with any of the remaining methods as well.
+performing training setup from the evaluation in the previ-   For the remaining examples the method proposed in this pa-
+ous sections. For all methods this included using the origi-  per was able to correctly predict the presence of the defect,
+nal image size (1408 × 512 resolution), no input image ro-    including a small defect seen in the last column. The pro-
+tation, using the smallest feature size of 20 pixels for the  posed method was also able to localize the defects with ex-
+commercial software and using the cross-entropy loss func-    cellent accuracy. Good localization can also be observed in
+tion for all the remaining methods. For the annotation type   the related methods; however, the prediction of the presence
+different methods performed the best at different annota-     or absence of a defect was poor. Note that in some cases the
+tions. The commercial software and the proposed approach      score was large; however, to correctly separate all the defects
+with the segmentation and decision network both achieved      from the non-defects the threshold needed to be set high as
+the best performance when trained on the dilate=5 annota-     well, pointing to many false positives on the images with-
+tions, while DeepLabv3+ and U-Net achieved the best re-       out defects. This is well demonstrated in Fig. 14, showing
+
+
+Table 1 Learning hyper-parameters with fixed learning values in the first three columns and the best selected learning configuration setup in the
+remaining four columns
+
+                                                                  Number                          Learning                                      Annotation                                               Data       Loss         Feature
+                   Method                                                                                              Initialization                                                   Image size
+                                                                  epochs                            rate                                          type                                                   rot.     function        size
+                   Segmentation/decision net (our)                   100                                0.1              N (0.01)                               Dilate=5                1408 × 512        No    Cross-entropy     N/A
+                   U-Net (Ronneberger et al 2015)                    100                                0.1              N (0.01)                               Dilate=9                1408 × 512        No    Cross-entropy     N/A
+                   DeepLab v3+ (Chen et al 2018)                     100                                0.1             Pre-trained                             Dilate=9                1408 × 512        No    Cross-entropy     N/A
+                   Cognex ViDi Suite                                 100                                N/A                N/A                                  Dilate=5                1408 × 512        No        N/A            60
+Segmentation-Based Deep-Learning Approach for Surface-Defect Detection                                                                    13
+
+
+
+
+Fig. 13 Examples of true-positive (green solid border) and false-negative (red dashed border) detections with the segmentation output and the
+corresponding classification (the actual defect is circled in the first row)
+
+
+several false detections. False positives with high scores can          Results in the context of an industrial environment When
+be observed in all the related methods, except in the method            considering to use the proposed model in industrial settings
+proposed in this paper and in the commercial software. In               it is important to ensure the detection of all the defected
+particular, U-Net returned an output with a large amount of             items, even at the expense of more false positives. Since pre-
+noise, which prevented clean separation of true defects from            vious metrics do not capture the performance under those
+false detections, even with the additional decision network.            conditions, this section sheds additional light on the number
+The proposed method, on the other hand, did not have any                of false positives that would be obtained if a zero-miss rate
+problems with the false positives and was correctly able to             would be required, i.e., if a recall rate of 100% is required.
+predict the absence of the defect in those images.                      These false positives then represent the number of items that
+                                                                        would be needed to be manually verified by a skilled worker
+
+
+
+
+Fig. 14 Examples of true-negative (green solid border) and false-positive (red dashed border) detections with the segmentation output and the
+corresponding classification score
+14                                                                                                                                                                             Domen Tabernik et al.
+
+
+                         90
+
+
+
+
+ Average Precision (%)
+                         75
+                         60
+                              99.9 99.2 98.1 98.6 96.7 96.1            99.0 97.4 95.7 97.1 95.6                   98.0 92.0 98.6 98.3                       96.1
+                         45                                                                            89.2                                                               84.6 84.0 91.9
+                                                                                                                                                                   74.6                    69.8
+                         30
+                                                                                                                                        46.5
+                         15
+                                                                                                                                               16.5
+                         0
+                                              Our                                      ViDi                                 DeepLab                                        U-Net
+                         25                                                                                                             29 12
+                                                                                                                                           194                     15                      13
+
+
+
+
+ False count (FP + FN)
+                         20                                                                                                                                                8
+
+                         15                                                                                                                                                          6
+                                                                                                                                        25                                       3
+                         10                                                                            12
+                                                            1                 3                                        11                                          17 17                   17
+                                                                                              5                                                              4
+                         5                              2                                         10                       2                                                    11 11
+                                                            7                 7    8                               4
+                                          1         3   4               5                     4         3               3 4 31                               5
+                         0     1    1     2                                                                        2
+                                              Our                                      ViDi                               DeepLab                                          U-Net
+                                        Segmentation net                    Cognex ViDi Suite                 DeepLab v3+ [Chen2018]                  U-Net [Ronneberger2015]
+                                        with decision net (our)
+                                                                N=33              N=25                 N=20        N=15           N=10                N=5
+Fig. 15 Classification performance on KolektorSDD at varying number of positive (defective) training samples
+
+
+and directly point to the amount of work required to achieve                                                  The same training and testing procedure was followed as in
+the desired accuracy.                                                                                         all previous experiments.
+    The results, as reported in the right-most graphs in Fig. 12,                                                  The proposed segmentation and decision network is com-
+show that the model as proposed in this paper introduces                                                      pared with the commercial software Cognex ViDi Suite and
+only 3 false positives at a zero-miss rate out of all 399 im-                                                 two state-of-the-art segmentation networks. All methods are
+ages. This represents 0.75% of all images. On the other hand,                                                 evaluated using the best performing training setup deter-
+the related methods achieved worse results, with the com-                                                     mined in the experiments presented in the previous sections,
+mercial product requiring the manual verification of 7 im-                                                    i.e., using dilated=5 annotations (or dilated dilated=9 for
+ages, while the standard segmentation networks required 68                                                    segmentation networks), full image resolution, cross-entropy
+and 108 manual verifications, for DeepLabv3+ and U-Net,                                                       loss and no image rotation. Results are reported in Figure 15.
+respectively. Note that the results reported for both stan-                                                   The proposed segmentation and decision network retains the
+dard segmentations included using the proposed decision                                                       same result of over 99% AP and a single miss-classification
+network. Using logistic regression instead of the proposed                                                    when using only 25 defective training samples. When using
+decision network resulted in significantly worse performance.                                                 even less training samples the results drop, but the proposed
+                                                                                                              method still achieves AP of around 96% when only 5 de-
+                                                                                                              fective training samples were used. More pronounced drop
+                                                                                                              in performance can be observed for the Cognex ViDi Suite,
+Sensitivity to the number of training samples
+                                                                                                              however, in this case the results drop already at N=25 to
+                                                                                                              AP of 97.4%. When using only 5 defective training sam-
+In industrial settings a very important factor is also the re-
+                                                                                                              ples the commercial software achieved AP of slightly below
+quired number of defective training samples, therefore we
+                                                                                                              90%. The same trend is observed in the number of miss-
+also evaluated the effect of smaller training sample size. The
+                                                                                                              classifications depicted in the bottom half of Figure 15 with
+evaluation was performed using a 3-fold cross-validation with
+                                                                                                              the dark colors representing false positives and the light col-
+the same train/test split as used in all previous experiments,
+                                                                                                              ors representing false negatives.
+thus effectively using 33 positive (defective) samples in each
+fold when trained on all the training samples. The number                                                         The DeepLab v3+ and U-Net, on the other hand, per-
+of positive training samples was then reduced to effectively                                                  form worse than the proposed approach when less training
+obtain the training size N of 25, 20, 15, 10 and 5 samples                                                    samples are used. The performance of U-Net quickly drops,
+for each fold, while the test set for each fold remained un-                                                  while DeepLab retains fairly good results even for only 15
+changed. The removed training samples were randomly se-                                                       defected training samples. Note that the performance at 20
+lected, but the same samples were removed for all methods.                                                    and 15 defected training samples slightly outperforms the
+Segmentation-Based Deep-Learning Approach for Surface-Defect Detection                                                                                           15
+
+
+Table 2 Comparison with the state-of-the-art methods in the number                               100.0
+of learnable parameters and average precision
+                                                                                                  97.5
+
+
+
+
+                                                                         Average precision [%]
+                                          Number of    Average
+ Method
+                                          parameters   precision                                  95.0
+ Segmentation/decision net (our)           15.7 mio      99.9
+ Cognex ViDi Suite                           N/A         98.9                                     92.5
+ DeepLab v3+ (Chen et al 2018)             41.1 mio      97.9
+ U-Net (Ronneberger et al 2015)            31.1 mio      96.1                                     90.0       Segmentation net with
+                                                                                                             decision net (our)
+                                                                                                             Cognex ViDi Suite
+                                                                                                  87.5       DeepLab v3+ [Chen2018]          1408x512 px
+                                                                                                             U-Net [Ronneberger2015]         704x256 px
+results obtained with all training samples, indicating that                                       85.0
+DeepLab is fairly sensitive to specific training examples and                                            0     50         100          150   200           250
+removing such samples helps in improving the performance.                                                              Detection time [ms]
+U-Net is significantly more sensitive to the decrease of the         Fig. 16 Detection (forward pass) time with respect to the classification
+number of training samples; the results varied from 75% to           performance for a single image
+slightly above 90% in average precision. However, for 10
+and 5 defective training samples, DeepLab performed the
+worst with AP of only 46% and 16%, respectively.                     Discussion and conclusion
+    Overall, the experimental results show that the proposed
+method retains superior and stable performance also when             This paper explored a deep-learning approach to surface-
+smaller number of training samples are available.                    defect detection with a segmentation network from the point
+                                                                     of view of specific industrial application. A two-stage ap-
+                                                                     proach was presented. The first stage included a segmen-
+Computational cost                                                   tation network trained on pixel-wise labels of the defect,
+                                                                     while the second stage included an additional decision net-
+The approach proposed in this paper is superior to the state-        work build on top of the segmentation network to predict the
+of-the-art segmentation methods in terms of computational            presence of the anomaly for the whole image. An extensive
+cost and is competitive with the commercial software. For-           evaluation of the proposed approach was made on a semi-
+ward-pass times with respect to the average precision are re-        finished industrial product, i.e., an electrical commutator,
+ported in Fig. 16. Results were obtained on a single NVIDIA          where the surface defects appeared as fractures of the mate-
+TITAN X (Pascal) GPU. The proposed method is shown to                rial. This problem domain has been made publicly available
+be significantly faster than DeepLab v3+ and U-Net, with             as a benchmark dataset, termed the Kolektor Surface-Defect
+a better accuracy as well. This is achieved with a smaller           Dataset (KolektorSDD). The proposed approach was com-
+number of parameters, which is reflected in the marker size          pared on this domain with several state-of-the-art methods,
+in Fig. 16 and is shown in Table 2 as well. This performance         including proprietary software and two standard segmenta-
+is achieved using only 15.7 mio parameters for the proposed          tion methods based on deep learning.
+model, while U-Net and DeepLab v3+ have more than twice                   The experiments on KolektorSDD demonstrated that the
+as many parameters, with 31.1 mio and 41.1 mio parame-               proposed model achieves significantly better results than re-
+ters, respectively. The number of parameters for the Cognex          lated methods with only one miss-classification, while the
+ViDi Suite is not publicly available. The proposed method            related methods achieve five or more miss-classifications.
+and commercial software are also shown at half the resolu-           This can be attributed to the proposed two-stage design with
+tion depicted with the star marker in Fig. 16. This shows            the segmentation and the decision network, as well as to
+that the proposed method results in a 3-times faster forward         the improved receptive field size and an increased capacity
+pass than with full resolution—33 ms for the half-resolution         to capture the fine details of the defect. The related meth-
+and 110 ms for the full-resolution image. The fastest perfor-        ods are missing some of those characteristics. For instance,
+mance is achieved with the commercial software, Cognex               the worst-performing segmentation method, U-Net, has a
+ViDi Suite, with 10 ms per image. However, when using half           limited receptive field size, with only 45 pixels versus 205
+the image resolution the proposed best-performing model              pixels of the proposed method. Although DeepLabv3+ im-
+achieves a similar performance with only a slightly larger           proves the receptive field size, it does this at the expense
+computational cost. Note that the proposed model achieved            of too many parameters, which cause the model to overfit,
+this performance in the TensorFlow framework without ap-             despite being pre-trained on separate datasets.
+plying any computational optimization, while it can be safely             On the other hand, it is difficult to assess the differ-
+assumed that the commercial software has been highly opti-           ences with the commercial software, since the details of the
+mized to reduce the computational cost as much as possible.          method are not publicly known. Nevertheless, the experi-
+16                                                                                                                Domen Tabernik et al.
+
+
+
+
+Fig. 17 Examples of true-positive (the upper three rows) and true-negative (the bottom row) detections on KolektorSDD with the proposed
+approach (classification score is depicted in the top-left corner for each example)
+
+
+ments show that the commercial software performs signifi-            than using fine annotations. This conclusion is seemingly
+cantly worse than the proposed method when using lower-              counter-intuitive; however, a possible explanation can be found
+resolution images. This experiment is an indication that the         in the receptive field size used to classify each pixel. The
+commercial software struggles to capture finer details of the        receptive field for a pixel that is slightly away from the de-
+defect and requires a higher resolution for good performance.        fective area will still cover part of the defective area and can
+However, it still cannot attain the same performance as the          therefore contribute towards finding features that are impor-
+proposed method even when high-resolution images are used.           tant for their detection, if they are annotated correctly. This
+    The performance of the proposed method was achieved              conclusion can result in reduced manual work when adapt-
+by learning from only 33 defective samples. Several exam-            ing methods to new domains and will lead to reduced labor
+ples of correct classification are depicted in Figure 17. More-      costs and the increased flexibility of production lines.
+over, using only 25 defective samples showed that good per-               The proposed approach is, however, limited to the spe-
+formance can still be attained, while related methods achieved       cific type of tasks. In particular, the architecture was de-
+worse results in this case. This indicates that the proposed         signed for tasks that can be framed as a segmentation prob-
+deep-learning approach is suitable for the studied industrial        lem with pixel-wise annotation. Other quality-control prob-
+application with a limited number of defected samples avail-         lems exist for which a segmentation-based solution is less
+able. Moreover, to further consider applications for the in-         suitable. For instance, quality control of complex 3D ob-
+dustrial environment, three important characteristics were           jects may require detection of broken or missing parts. Such
+evaluated: (a) the performance to achieve 100% detection             problems could be addressed by detection methods, such as
+rate, (b) details of the annotation and (c) the computational        Mask R-CNN (Kaiming et al 2017).
+cost. In terms of the performance to achieve a 100% detec-                This study demonstrated the performance of the pro-
+tion rate the proposed model has been shown to require only          posed approach on a specific task (crack detection) and on a
+three images for the manual inspection out of all 399 im-            specific surface type, but the architecture of the network was
+ages, leading to a 0.75% inspection rate. Large and coarse           not designed for this specific domain only. Learning on new
+annotations also turned out to be sufficient to achieve a per-       domains is possible without any modification. The architec-
+formance similar to the one with finer annotations. In some          ture can be applied to images that contain multiple complex
+cases larger annotations even resulted in better performance         surfaces, or it can be applied to detect other different defect
+Segmentation-Based Deep-Learning Approach for Surface-Defect Detection                                                                        17
+
+
+patterns, such as scratches, smudges or other irregularities,             Kaiming H, Gkioxara G, Dollar P, Girshick R (2017) Mask R-CNN.
+providing that a sufficient number of defected training sam-                  In: ICCV, pp 2961–2969 16
+                                                                          Krizhevsky A, Sutskever I, Hinton GE (2012) ImageNet Classification
+ples is available and that the task of the particular defect
+                                                                              with Deep Convolutional Neural Networks. In: Advances In Neu-
+detection can be framed as a surface segmentation problem.                    ral Information Processing Systems 25, pp 1097–1105 2
+However, to further evaluate this, new datasets are needed.               Kuo CFJ, Hsu CTM, Liu ZX, Wu HC (2014) Automatic inspection
+To the best to our knowledge, the DAGM dataset (Weimer                        system of LED chip using two-stages back-propagation neural
+                                                                              network. Journal of Intelligent Manufacturing 25(6):1235–1243,
+et al 2016) is the only publicly available annotated dataset
+                                                                              DOI 10.1007/s10845-012-0725-7 2
+with a diverse set of surfaces and defect types suitable for              Lin H, Li B, Wang X, Shu Y, Niu S (2018) Automated de-
+evaluation of learning-based approaches. The proposed ap-                     fect inspection of LED chip using deep convolutional neural
+proach achieves perfect results on this dataset, which is, how-               network. Journal of Intelligent Manufacturing pp 1–10, DOI
+                                                                              10.1007/s10845-018-1415-x, URL https://doi.org/10.
+ever, synthetically generated and also saturated according                    1007/s10845-018-1415-x 3
+to the obtained results. Future effort should, therefore, be              Lin TY, Maire M, Belongie S, Hays J, Perona P, Ramanan D, Dollár P,
+focused also on acquiring new complex datasets based on                       Zitnick CL (2014) Microsoft COCO: Common objects in context.
+real-world visual inspection problems, where deep-learning                    LNCS 8693 LNCS(PART 5):740–755 3, 11
+                                                                          Long J, Shelhamer E, Darrell T (2015) Fully Convolutional Networks
+(and other) methods could be realistically evaluated in full                  for Semantic Segmentation. In: Proceedings of the IEEE Confer-
+extent; the dataset presented in this paper is a first step in                ence on Computer Vision and Pattern Recognition, vol 8828, pp
+this direction.                                                               3431–3440, DOI 10.1109/CVPR.2015.7298965 5
+                                                                          Masci J, Meier U, Ciresan D, Schmidhuber J, Fricout G (2012) Steel
+                                                                              defect classification with Max-Pooling Convolutional Neural Net-
+Acknowledgements This work was supported in part by the following             works. In: Proceedings of the International Joint Conference on
+research projects and programs: GOSTOP program C3330-16-529000                Neural Networks, DOI 10.1109/IJCNN.2012.6252468 2
+co-financed by the Republic of Slovenia and the European Regional         Oztemel E, Gursev S (2018) Literature review of Industry 4.0 and
+Development Fund, ARRS research project J2-9433 (DIVID), and ARRS             related technologies. Journal of Intelligent Manufacturing DOI
+research programme P2-0214. We would also like to thank the com-              10.1007/s10845-018-1433-8, URL https://doi.org/10.
+pany Kolektor Orodjarna d. o. o. for providing images for the proposed        1007/s10845-018-1433-8 1
+dataset as well as for providing high quality annotations.                Paniagua B, Vega-Rodrı́guez MA, Gomez-Pulido JA, Sanchez-Perez
+                                                                              JM (2010) Improving the industrial classification of cork stoppers
+                                                                              by using image processing and Neuro-Fuzzy computing. Jour-
+                                                                              nal of Intelligent Manufacturing 21(6):745–760, DOI 10.1007/
+References
+                                                                              s10845-009-0251-4 1
+                                                                          Rački D, Tomaževič D, Skočaj D (2018) A compact convolutional
+Abadi M, Agarwal A, Barham P, Brevdo E, Chen Z, Citro C, Cor-                 neural network for textured surface anomaly detection. In: IEEE
+    rado GS, Davis A, Dean J, Devin M, Ghemawat S, Goodfellow I,              Winter Conference on Applications of Computer Vision, pp 1331–
+    Harp A, Irving G, Isard M, Jia Y, Jozefowicz R, Kaiser L, Kud-            1339, DOI 10.1109/WACV.2018.00150 3, 4, 5
+    lur M, Levenberg J, Mané D, Monga R, Moore S, Murray D,              Ronneberger O, Fischer P, Brox T (2015) U-Net: Convolutional Net-
+    Olah C, Schuster M, Shlens J, Steiner B, Sutskever I, Talwar K,           works for Biomedical Image Segmentation. In: Medical Image
+    Tucker P, Vanhoucke V, Vasudevan V, Viégas F, Vinyals O, War-            Computing and Computer-Assisted Intervention – MICCAI 2015,
+    den P, Wattenberg M, Wicke M, Yu Y, Zheng X (2015) Tensor-                pp 234–241 3, 11, 12, 15
+    Flow: Large-Scale Machine Learning on Heterogeneous Systems.          Russakovsky O, Deng J, Su H, Krause J, Satheesh S, Ma S, Huang Z,
+    URL https://www.tensorflow.org/ 7                                         Karpathy A, Khosla A, Bernstein M, Berg AC, Fei-Fei L (2015)
+Bulnes FG, Usamentiaga R, Garcia DF, Molleda J (2016) An                      ImageNet Large Scale Visual Recognition Challenge. Interna-
+    efficient method for defect detection during the manufactur-              tional Journal of Computer Vision 115(3):211–252, DOI 10.1007/
+    ing of web materials. Journal of Intelligent Manufacturing                s11263-015-0816-y, URL http://dx.doi.org/10.1007/
+    27(2):431–445, DOI 10.1007/s10845-014-0876-9, URL http:                   s11263-015-0816-y 3, 11
+    //dx.doi.org/10.1007/s10845-014-0876-9 1                              Sermanet P, Eigen D (2014) OverFeat : Integrated Recognition, Lo-
+Chen LC, Zhu Y, Papandreou G, Schroff F, Adam H (2018) Encoder-               calization and Detection using Convolutional Networks. In: In-
+    Decoder with Atrous Separable Convolution for Semantic Image              ternational Conference on Learning Representations (ICLR2014),
+    Segmentation. Tech. rep. 3, 11, 12, 15                                    CBLS, April 2014 3
+Chen PH, Ho SS (2016) Is Overfeat Useful for Image-Based Surface          Weimer D, Thamer H, Scholz-Reiter B (2013) Learning defect clas-
+    Defect Classification Tasks? In: IEEE International Conference on         sifiers for textured surfaces using neural networks and statistical
+    Image Processing (ICIP), pp 749–753 2, 3                                  feature representations. Procedia CIRP 7:347–352, DOI 10.1016/
+Chollet F (2017) Xception: Deep learning with depthwise sepa-                 j.procir.2013.05.059, URL http://dx.doi.org/10.1016/
+    rable convolutions. Computer Vision and Pattern Recognition               j.procir.2013.05.059 2
+    2017:1800–1807, DOI 10.1109/CVPR.2017.195 11                          Weimer D, Scholz-Reiter B, Shpitalni M (2016) Design of deep
+Cognex (2018) VISIONPRO VIDI: Deep learning-based                             convolutional neural network architectures for automated fea-
+    software for industrial image analysis. URL https:                        ture extraction in industrial inspection. CIRP Annals - Manu-
+    //www.cognex.com/products/machine-vision/                                 facturing Technology 65(1):417–420, DOI 10.1016/j.cirp.2016.
+    vision-software/visionpro-vidi 10                                         04.072, URL http://dx.doi.org/10.1016/j.cirp.
+Faghih-Roohi S, Hajizadeh S, Núñez A, Babuska R, Schutter BD                2016.04.072 3, 17
+    (2016) Deep Convolutional Neural Networks for Detection of Rail       Zhou B, Khosla A, Lapedriza A, Oliva A, Torralba A (2016) Learn-
+    Surface Defects Deep Convolutional Neural Networks for Detec-             ing Deep Features for Discriminative Localization. In: Computer
+    tion of Rail Surface Defects. In: International Joint Conference on       Vision and Pattern Recognition 3
+    Neural Networks, October, pp 2584–2589 2
+
