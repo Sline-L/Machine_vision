@@ -1,0 +1,101 @@
+% !TEX root = ../main.tex
+
+%* 默认字体
+\setmainfont{Times New Roman}
+\setCJKmainfont[AutoFakeBold=2.5]{SimSun}
+\setCJKmonofont{WenQuanYi Zen Hei Mono}
+\setmathfont{Latin Modern Math}
+
+%* 字体加粗
+\xeCJKsetup{AutoFakeBold=true}
+\newCJKfontfamily{\cuheiti}[AutoFakeBold={2.5}]{Microsoft YaHei}
+\newCJKfontfamily{\cusongti}[AutoFakeBold={2.5}]{SimSun}
+% \newCJKfontfamily{\cukaishu}[AutoFakeBold={2.5}]{SimKai}
+\newCJKfontfamily{\cufangsong}[AutoFakeBold={2.5}]{FZFangSong-Z02}
+\newCJKfontfamily{\cuyahei}[AutoFakeBold={2.5}]{Microsoft YaHei}
+
+%* 定理样式设置
+\theoremstyle{definition}
+\newtheorem{definition}{定义}[section]
+\newtheorem{example}[definition]{例}
+\newtheorem{problem}[definition]{问题}
+\newtheorem{assumption}[definition]{假设}
+\newtheorem{solution}[definition]{解}
+\newtheorem{theorem}[definition]{定理}
+\newtheorem{lemma}[definition]{引理}
+\newtheorem{corollary}[definition]{推论}
+\newtheorem{conjecture}[definition]{猜想}
+\newtheorem{axiom}[definition]{公理}
+\newtheorem{principle}[definition]{定律}
+
+% * 自定义字体
+\DeclareCaptionFont{heismall}{\zihao{-5}\heiti}
+
+%* 代码环境
+\setmonofont{Consolas}    % 设置等宽字体，比如 Consolas
+%* 默认
+
+\lstset{
+    %* 行号
+    numbers             =   left,               % 行号的位置在左边
+    numberstyle         =   \zihao{-5}\ttfamily\color{gray},
+    showspaces          =   false,              % 是否显示空格，显示了有点乱，所以不现实了
+    showstringspaces    =   false,
+    %* 边框
+    captionpos          =   t,                  % 这段代码的名字所呈现的位置，t指的是top上面
+    frame               =   lrtb,               % 显示边框
+    rulecolor           =   \color{gray!45},    % 边框颜色
+    %* 字体
+    basicstyle          =   \zihao{-5}\ttfamily,
+    keywordstyle        =   \color{blue},
+    keywordstyle        =   [2] \color{red},
+    stringstyle         =   \color{magenta},
+    commentstyle        =   \color{teal}\ttfamily,
+    %* 排版
+    breaklines          =   true,               % 自动换行，建议不要写太长的行
+    columns             =   fixed,              % 如果不加这一句，字间距就不固定，很丑，必须加
+    basewidth           =   0.5em,
+    tabsize             =   4,
+    %* 背景
+    backgroundcolor     =   \color{gray!5},     % 代码背景色
+    %* 其他
+    extendedchars       =   true,               % 允许使用扩展字符（如中文）
+    inputencoding       =   utf8,               % 代码文件编码
+    upquote             =   true,               % 修复反引号显示问题
+    xleftmargin         =   1em,                % 代码块左边距
+    xrightmargin        =   1em,                % 代码块右边距
+    aboveskip           =   1em,                % 代码块上方间距
+    belowskip           =   1em                 % 代码块下方间距
+}
+
+%* 表格标题格式
+% \captionsetup[table]{
+%     font={small,  bf},        % 设置字号（small 约等于小五）和加粗
+%     labelsep=quad,            % 分隔符：编号和文字间留出一个空格
+%     labelfont=bf,             % 编号（如“表 1”）加粗
+%     textfont={bf},            % 标题文字本身不加粗
+%     justification=centering   % 居中显示
+% }
+% \captionsetup[table]{
+%     font=heismall,            % 全体（标签+文字）使用小五黑体
+%     justification=centering   % 强制居中
+% }
+
+%* 四级标题
+% 设置编号深度到第4层 (paragraph)
+\setcounter{secnumdepth}{4}
+% 设置目录深度到第4层
+\setcounter{tocdepth}{4}
+
+\titleformat{\paragraph}[hang]{\normalfont\zihao{-4}\bfseries}{\arabic{subsection}.\arabic{subsubsection}.\arabic{paragraph}}{0.5em}{}
+\titlespacing*{\paragraph}{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+%* 目录格式
+% 调整 Section 编号与标题的间距 (默认通常是 1.5em)
+\setlength{\cftsecnumwidth}{0em}
+% 调整 Subsection 编号与标题的间距 (默认通常是 2.3em)
+\setlength{\cftsubsecnumwidth}{1em}
+% 如果有 Subsubsection，也可以一并调整
+\setlength{\cftsubsubsecnumwidth}{2em}
+\setlength{\cftparanumwidth}{2em}
+\definecolor{mygreen}{RGB}{0, 150, 0} % 调低第二个数值可变深

@@ -1,0 +1,557 @@
+% !TEX root = main_GearPro_项目进展情况小结_精简版.tex
+% 由 GearPro_项目进展情况小结_精简版.md 转换；保持严谨求实的工科语言风格与规范的技术排版。
+
+\begin{center}
+{\zihao{3}\bfseries 项目进展情况小结\par}
+\end{center}
+
+\section*{项目阶段进展简要概括}
+
+针对工业传动齿轮在加工与装配过程中容易出现微细划痕与齿部缺损的问题，本项目研制了一套齿轮外观缺陷检测系统。团队自主采集 50 个真实齿轮，构建了涵盖 6 种标签体系与基于感知哈希（dHash）“近重复组”防泄漏机制的数据集；历经 6 轮算法演进，确立了齿轮 ROI 提取加局部识别的二级级联流水线，设计了全局 CNN 与局部 P2-YOLO 的异构融合架构，并通过负对数似然最小化进行温度缩放校准，利用 TPE 贝叶斯优化确定集成权重，依据经验奈曼–皮尔逊准则确定工作阈值，在决策层采用“或规则”报警。在 150 张离线测试集上，系统取得 88.73\% 召回率与 22.78\% 误报率。硬件方面完成第一代整机实物搭建，实现平皮带逐件送料、透明亚克力载台无遮挡采光、步进电机平滑加减速旋转分拣、上下双工业相机漫射采光，打通了 STM32 下位机串口通信与 Jetson Orin NX 边缘部署闭环（定位模型 TensorRT FP16 耗时压缩至 26.7 ms）。目前系统仍存在未搭建光度立体视觉（Photometric Stereo）多光源成像系统、数据未进行物理实体工件 ID 严格隔离等不足，后续将持续优化。
+
+\section*{一、 项目背景与实际质检问题}
+
+齿轮作为机械动力传动系统的核心基础零部件，其表面质量直接影响传动平稳性与啮合寿命。在切削加工、热处理及车间流转装配环节中，齿面易受工装划擦产生微细划痕，或因碰撞产生齿顶、齿侧及齿根缺损。传统质检主要依赖质检工人肉眼目检，存在劳动强度大、连续注视易疲劳漏检以及判决标准主观波动等实际问题。
+
+本项目旨在开发一套基于机器视觉的\textbf{工业零件缺陷检测系统}，在流水线连续输送中自动识别疑似缺陷齿轮供人工重点复核，从而降低漏检风险并减轻工人负担。
+
+需要明确的是，现阶段系统定位为\textbf{辅助人工复核的在线筛查工具}，算法判决依据为可见图像异常形貌，不能直接等同于齿轮机械性能与疲劳强度的最终安全定性。
+
+% 在分工上，团队由 3 名大三工科学生协作开展：本人负责缺陷数据集整理与标注机制设计、算法演进、多模型异构融合校准及上位机软件编写；其余两名成员分别负责机械结构台架搭建、光学光源选型以及基于 STM32 的下位机电控开发。
+
+% \section*{二、 文献研读与技术路线启发}
+
+% 针对金属高反光、细小缺陷特征提取困难以及空间遮挡等问题，我们在指导教师指导下研读了国内外相关文献，获得了具体技术启发：
+
+% \begin{enumerate}
+%     \item \textbf{高反光金属打光与成像方案的启发}：阅读 Saiz 等人与 Wu 等人关于金属表面质检的文献，我们认识到金属表面镜面反射形成的强光斑与暗影是掩盖微细缺陷的主因。单纯依靠直射光极易在渐开线齿面形成局部过曝与反光死角。结合文献分析，我们在台架中配置了白色漫射光源与导光罩，并架设上下双工业相机，有效抑制了表面反光对微细划痕的遮蔽，改善了成像均匀性。
+%     \item \textbf{微细划痕特征保留的方法借鉴}：在阅读 Lin 等人（FPN）与 Liu 等人（ConCNN）关于多尺度特征网络的研究后，我们了解到深层卷积的多次下采样极易导致细小空间纹理丢失。齿轮微细划痕宽度通常仅数个像素，过深的网络容易产生特征虚化。为此，我们借鉴文献思想在目标检测网络中引入保留浅层高分辨率特征的 \textbf{P2 检测层}，专门捕获细小划痕，提升了浅层特征保留能力。
+%     \item \textbf{旋转多视角拍摄与连续帧判定启发}：研读 Allam 等人关于汽车齿轮表面损伤检测的文献，我们认识到由于齿轮圆周齿廓的几何遮挡，必须通过旋转多视角采集才能覆盖全齿面；同时作者指出单帧静态判定易受偶然光斑干扰导致误报，建议引入多帧连续判定以滤除瞬态反光。这为我们后续设计旋转分拣机构及规划多帧时序去重提供了重要思路。
+% \end{enumerate}
+
+\section*{二、 数据构建、算法演进与决策依据}
+
+% 算法研究紧密围绕数据规范、流水线解耦、模型融合校准及阈值优化层层推进：
+
+\subsection*{1. 自主数据集构建与“近重复组”防泄漏划分}
+团队自主采购并定制了 50 个真实金属齿轮（正常 10 个、划痕 15 个、侧面缺损 15 个、齿角缺损 10 个），使用工业相机在不同光照与角度下采集图像。经过前期标注试验，确立了 6 种标签体系：\texttt{normal}（正常外观）、\texttt{scratch}（微细划痕）、三种细分缺损位置（\texttt{bottom} 齿根碰伤、\texttt{oblique} 齿面斜向缺损、\texttt{side} 齿侧剥落），以及针对人眼极难判定的边界样本设置的 \texttt{difficult} 标签。
+
+针对多角度连续拍摄导致图像高度相似的问题，为防止数据泄漏，我们设计了“近重复组”聚类划分机制：基于 64 位感知哈希（dHash 汉明距离 $\le 2$）、文件序号临近性与视角粗分类（正视、斜视、侧视）将高度相似图像聚为一个独立组，随后以组为最小单位通过分层抽样划分训练集、验证集与测试集，并在划分后交叉校验跨集汉明距离，有效消除了同一齿轮高度相似图像在不同集合交叉出现的过拟合隐患。
+
+\subsection*{2. ROI 提取与二级级联流水线}
+针对整幅图像背景杂乱的问题，算法确立了“第一阶段定位齿轮裁剪感兴趣区域（ROI 外扩 4\%），第二阶段对 ROI 局部区域实施缺陷精准识别”的二级级联流水线，排除了外围背景对算法注意力的干扰。
+
+\subsection*{3. 六轮算法实验演进历程}
+算法方案经历了六轮迭代与试错：
+\begin{itemize}
+    \item \textbf{第 1 轮（传统图像处理）}：尝试 Canny 边缘检测与自适应阈值分割，受齿面强反光亮斑与复杂渐开线伪边缘干扰，方法完全失效；
+    \item \textbf{第 2 轮（整图端到端检测）}：直接在无 ROI 约束的原图上训练通用目标检测模型，漏检严重；
+    \item \textbf{第 3 轮（引入 ROI 二级流水线）}：引入 ROI 定位裁剪后，对比了整图分类（ResNet18、EfficientNet-B0等） 与框级定位两种技术路线的差异；
+    \item \textbf{第 4 轮（统一缺陷大模型受挫）}：将划痕与缺损合并训练统一模型，由于两类缺陷表征悬殊，微细划痕漏检依旧，盲目堆叠模型未能带来收益；
+    \item \textbf{第 5 轮（分缺陷分别建模）}：针对划痕的线状弱对比特性与缺损的块状几何破坏特性，确立分别建模与独立选型；
+    \item \textbf{第 6 轮（决策级融合与或规则）}：两套子系统独立输出置信度，在决策层采用“或规则（OR Rule）”合并报警，任一子系统报警即判为疑似缺陷，实现分项专精与联合兜底。
+\end{itemize}
+
+\subsection*{4. 异构模型融合、概率校准与决策依据}
+针对单一模型判决能力局限，我们构建了多模型异构融合架构：
+\begin{itemize}
+    \item \textbf{异构互补设计}：将擅长全局语义提取的 CNN 分类网络（ResNet18 与 EfficientNet-B0）与擅长局部细微定位的检测网络（含 P2 层的 P2-YOLO）进行互补集成；
+    \item \textbf{温度缩放（Temperature Scaling）概率校准}：异构网络输出的 logit 分布尺度不一，直接加权会导致概率失真。我们在验证集上通过网格搜索最小化负对数似然（NLL），为每个模型学习独立温度参数 $T$（划痕模型 $T$ 分别为 0.700、2.050、2.125；缺损模型 $T$ 分别为 1.000、2.375、1.850），通过 $p_T = \sigma(\text{logit}(p)/T)$ 将分数对齐至可靠概率刻度；
+    \item \textbf{TPE 贝叶斯优化集成权重}：在验证集上采用基于树状 Parzen 估计器（TPE）的贝叶斯优化算法搜索最优加权系数。最终划痕子系统分配检测权重 0.75、两分类模型各 0.125；缺损子系统分配均衡权重（检测 0.50、两分类各 0.25）；
+    \item \textbf{经验奈曼–皮尔逊准则（Empirical NP Rule）确定阈值}：在验证集上严格施加假阳性率上限约束（$\text{FPR} \le 0.20$），寻找召回率最大化的最优阈值，确定划痕报警阈值 $\tau_{\text{scratch}} \approx 0.3003$，缺损报警阈值 $\tau_{\text{missing}} \approx 0.3413$；
+    \item \textbf{离线测试集表现}：在包含 71 张缺陷图与 79 张正常图的 150 张离线测试集上，系统检出 63 张缺陷，召回率达 88.73\%；误报 18 张正常件，误报率为 22.78\%。相比早期统一基线，检出净增 9 张，误报减少 15 张，误报率从 41.77\% 降至 22.78\%。
+\end{itemize}
+
+\section*{三、 第一代整机硬件设计与闭环联调}
+
+团队完成了第一代整机实物的设计装配，实现了从机械传送到旋转分拣的全链路闭环：
+
+\begin{enumerate}
+    \item \textbf{机械传送与透明检测平台}：搭建了由步进电机驱动的平皮带输送机构，实现齿轮“单件连续输送”；在检测区制作了高透光率的透明亚克力托盘载台，在承托齿轮的同时为上下双工业相机提供无遮挡采光通道。
+    \item \textbf{旋转分拣平台与平滑加减速控制}：设计装配了步进电机驱动的旋转分拣平台，根据判决信号将工件旋转送入合格区域或缺陷区域。在底层电控中编写了\textbf{步进电机梯形平滑加减速算法}，避免了起停冲击及离心力导致的齿轮脱盘位移。
+    \item \textbf{光学采集配置}：选用两台工业相机架设于载台上下两侧，搭配白色漫射照明与遮光罩，保证双面成像均匀。
+    \item \textbf{底层电气控制与通信}：选用 STM32 单片机作为底层控制核心，精确调度输送带启停与分拣平台运动。下位机与上位机通过硬件串口通信。
+    \item \textbf{边缘计算部署与整机闭环验证}：系统部署于 NVIDIA Jetson Orin NX 嵌入式边缘计算平台运行。齿轮定位模型成功编译为 \textbf{TensorRT FP16 引擎}，P95 单帧推理耗时从 65.0 ms 压缩降至 26.7 ms；Web 监控端实时显示质检结果。实物整机打通了“输送带进料 $\rightarrow$ 双相机采集 $\rightarrow$ Orin NX 本地推理 $\rightarrow$ 串口指令下发 $\rightarrow$ STM32 步进电机旋转分拣”全流程闭环。
+\end{enumerate}
+
+\section*{四、 当前存在的不足与未来改进方向}
+
+结合前期实训测试，系统仍存在以下具体不足与工程局限：
+
+\begin{enumerate}
+    \item \textbf{未搭建基于光度立体视觉（Photometric Stereo）的多光源成像系统}：目前采用稳态白色漫射照明，虽然弱化了部分强反光，但在渐开线复杂曲面齿面上，微细划痕依然易受局部高光淹没。文献指出，通过四方向可控光源分时频闪点亮并解耦提取表面反射率、法向量梯度与曲率特征，是从物理成像根源分离反光与形貌缺陷的有效手段。受实训时间限制，团队未来得及研制该多光源高频同步系统。
+    \item \textbf{测试数据尚未进行物理实体工件 ID 严格隔离}：目前自建数据集采用图像级编号与 dHash 近重复聚类防泄漏，尚未在数据底层建立物理实体工件 ID 的绝对追踪与隔离，对全新批次实体齿轮的泛化能力仍需补充独立验证。
+    \item \textbf{数据集规模与标注细化待拓展}：现有物理齿轮样件仅 50 个，样本覆盖度与缺陷形态丰富度仍显不足；后续需采集更多批次工件，建立更严格的标注规范与基于工件 ID 严格隔离的数据集划分。
+    \item \textbf{边缘端深度部署探索较少}：目前仅定位模型完成 TensorRT FP16 加速验证，后端缺陷识别多模型仍运行于常规环境，尚未开展 INT8 量化感知训练、结构化剪枝、知识蒸馏以及整机在工业环境长时间连续运行下的散热功耗测试。
+\end{enumerate}
+
+针对上述不足，团队后续将按计划开展四向频闪光度立体成像模组研制、实体工件 ID 盲测集扩充、连续帧时空判定算法开发以及 Jetson Orin NX 上的 INT8 深度量化部署，持续完善系统工程实用性。
+
+% \section*{【结语】}
+
+% 本项目是大三阶段开展的一次软硬件一体化工程实训探索。团队从查阅文献、样件建库、标签规范设计出发，通过六轮算法试错确立了二级级联与校准融合架构，并搭建了第一代整机实物原型，打通了机电信号与算法判决闭环。后续团队将在指导教师指导下，针对高反光光学硬件与模型轻量化部署等核心短板开展深入研究。
+
+% 由文献综述_重写版_5000字.md转换；仅转换标记与排版，正文及引用保持原文。
+
+\newpage
+
+\begin{center}
+{\zihao{3}\bfseries 基于机器视觉的金属齿轮外观缺陷检测技术综述\par}
+\end{center}
+
+\textbf{摘要}：齿轮是机械设备中核心的传动零件，其表面的质量直接关系到传动的平稳性、噪音与使用寿命。在齿轮制造过程中，微小划痕与局部齿部缺损是两类经常出现的缺陷。过去主要依靠人工目视抽检，容易因疲劳产生漏检，且不同人员标准不一，难以满足现代工厂自动化全检的要求。本文针对金属零件与齿轮外观缺陷的机器视觉检测技术进行文献调研与综述。首先介绍了齿轮质检背景以及金属反光、加工刀纹和立体曲面等实际困难；然后简要介绍了传统的图像处理方法、深度学习检测方法以及无监督异常检测方法的基本原理与特点；接着针对金属反光、微小划痕识别、旋转多角度拍照判定以及缺陷样本少这四个核心问题，详细介绍了多篇代表性文献的具体实验、数据结果和结论；最后总结了各类方法的优缺点，并结合我们团队开展的 GearPro 齿轮质检项目，总结了对实际系统开发的四点工程启发。
+
+\textbf{关键词}：齿轮外观检测；机器视觉；深度学习；目标检测；多视角判定；缺陷分类
+
+
+\section*{一、 齿轮外观缺陷检测的研究背景}
+
+\subsection*{1. 齿轮质检的意义与人工目检的问题}
+在汽车、变速箱以及各种机械装备制造中，齿轮是传递动力和运动最基础的零件。齿轮在切削加工（滚齿、磨齿）、热处理和车间搬运时，表面容易产生各种外观缺陷。其中，表面浅划痕和局部的齿部缺损（如齿侧碰伤、齿角崩缺）是本文关注的两类缺陷。
+
+如果带有这些缺陷的齿轮被装进机器，在高速旋转和交变冲击下，缺损边缘极易产生应力集中，不仅会让齿轮运转时的噪音变大、磨损变快，严重时还可能导致断齿损坏，造成安全隐患。
+
+过去车间主要依靠质检工人用肉眼或放大镜进行人工抽检。但人工目视检查存在明显缺点：第一，工人长时间工作容易视觉疲劳，工作后期的漏检率明显增加；第二，每个人对划痕和磕碰的判定尺度不一，主观性较强；第三，抽检无法做到每个零件都检查，依然会有坏件流入下道工序。因此，开发自动化的机器视觉检测系统，用工业相机和算法代替人眼实现每件必检，是现代制造质量控制的重要方向[\hyperlink{ref:1}{1},\hyperlink{ref:2}{2}]。
+
+\subsection*{2. 齿轮视觉检测遇到的实际困难}
+将机器视觉用到金属齿轮外观检测时，会遇到几个很棘手的实际困难[\hyperlink{ref:3}{3}]：
+\begin{itemize}
+\item \textbf{金属反光和加工刀痕的干扰}：齿轮表面经车磨精加工后非常光滑，容易产生镜面反光。普通光照下易出现局部高光亮斑使浅划痕湮没；同时，磨削留下的细密刀纹在图像上与浅划痕很像，模型容易把正常刀纹误判为划痕。
+\item \textbf{渐开线齿面曲率与齿根阴影}：齿轮表面为弯曲的渐开线齿廓，光线在不同位置的反射角度急剧变化；特别是狭窄的齿根过渡圆角处容易形成阴影遮挡与多次互反射，给均匀打光带来极大困难。
+\item \textbf{需要旋转多角度拍摄与连续判断}：单个固定相机无法拍到立体齿轮的全貌，必须用旋转机构带动齿轮自转并配合多相机连续拍照[\hyperlink{ref:5}{5}]。这导致缺陷在多张图像中动态移动，算法不能只看单张照片，必须综合多张照片来决定整个齿轮是否合格。
+
+\end{itemize}
+\subsection*{3. 本文综述的主要内容与范围}
+一套完整的视觉检测系统包括打光照明、相机拍照、图像算法处理以及机械电气分选等环节[\hyperlink{ref:1}{1}]。本文主要关注机械制造过程中，\textbf{怎样利用图像算法自动识别齿轮表面的微小划痕和齿部缺损，以及怎样根据多角度照片综合判断齿轮是否合格}。
+
+需要说明的是，出厂验收涉及的齿形齿向公差测量，以及用超声波探伤内部缺陷、测量传动运转时的振动噪音和寿命预测等，不属于本文讨论的制造外观质检范围。
+
+本文围绕“怎么拍清楚、怎么用算法识别出来，到怎么综合判断整个齿轮”的过程，先梳理常见检测方法，再精读关键文献，最后结合我们正在做的齿轮检测项目总结经验与启发。
+
+
+\section*{二、 常见的表面缺陷检测方法介绍}
+
+通过对文献的调研，目前的检测方法主要分为传统图像处理方法、深度学习监督检测方法以及无监督异常检测方法三大类[\hyperlink{ref:2}{2}]。
+
+\subsection*{1. 传统的图像处理与人工特征方法}
+在深度学习普及前，工业视觉主要依靠工程师手动设计特征提取公式和判断规则。通常先提取图像局部的边缘、灰度或纹理特征，再通过设定固定阈值或简单分类器（如支持向量机 SVM、极限学习机 ELM）完成判断。
+
+常用方法包括提取微观纹理的局部二值模式（LBP）[\hyperlink{ref:6}{6},\hyperlink{ref:7}{7}]、灰度共生矩阵，以及提取局部角点特征的 SIFT 和 SURF 算子[\hyperlink{ref:7}{7}]。传统方法的优点是\textbf{原理简单直观、计算量小、运行速度非常快（通常几毫秒至十几毫秒）}，在打光完全固定、工件位置固定且缺陷规律的场景下表现良好。但其缺点是对光照变化极度敏感，车间光照稍微变化或零件稍有偏转就容易失效，换零件时重新调参非常繁琐。
+
+\subsection*{2. 深度学习监督检测方法}
+深度卷积神经网络（CNN）出现后，不再需要人工编写提取规则，而是由网络自动从大量样本中学习特征，对光照和复杂背景的适应能力大大增强[\hyperlink{ref:2}{2}]。根据输出形式不同，主要有三种任务：
+\begin{itemize}
+\item \textbf{图像分类（如 ResNet、EfficientNet）}：输出整张图片有无缺陷的概率[\hyperlink{ref:8}{8},\hyperlink{ref:11}{11},\hyperlink{ref:12}{12}]。优点是速度快、模型小且标注最省事（只需打合格/不合格标签）；缺点是无法给出缺陷具体位置，容易漏掉细小划痕，适合产线快速粗筛。
+\item \textbf{目标检测（如 Faster R-CNN、YOLO 系列）}：用矩形框把缺陷圈出并给出类别和置信度[\hyperlink{ref:13}{13},\hyperlink{ref:14}{14},\hyperlink{ref:21}{21}]。目标检测非常直观，方便人工复核，标注只需画框，是工业界使用最普遍的方案；但对细长弯曲划痕，矩形框会包含较多正常背景。
+\item \textbf{语义分割（如 U-Net）}：对每个像素分类，精确描绘不规则缺损轮廓[\hyperlink{ref:15}{15}]。优点是能精确测量缺损面积；缺点是训练需要逐像素勾线抠图，标注成本极高，在多规格产线上很难推广。
+
+\end{itemize}
+监督学习效果好，但前提是\textbf{必须先收集到大量标好的真实缺陷图片}，而在实际工厂里获取这些缺陷样本往往代价很大。
+
+\subsection*{3. 无监督异常检测方法}
+针对工厂里“正常合格品占绝大多数（>99\%）、真实缺陷样本极难收集”的痛点，研究人员提出了无监督异常检测方法[\hyperlink{ref:9}{9}]。
+
+其基本思路是：\textbf{不再学习各类缺陷，而是只学习正常工件的外观分布}。训练时只使用易收集的正常合格品照片建立特征基准；测试时对比新照片与正常模式的差异，偏离了正常规律就判定为异常并输出热力图。代表算法如 PaDiM[\hyperlink{ref:17}{17}]和 PatchCore[\hyperlink{ref:10}{10}]，PaDiM 利用预训练卷积网络提取局部图像块特征，在特征图的每个空间位置独立拟合一个多元高斯分布，测试时通过计算待测特征与正常高斯分布的马氏距离得到异常得分，既保留了空间位置信息，又省去了网络训练过程。PatchCore 利用预训练模型提取正常图片的局部特征构建特征记忆库，采用贪心核心集采样压缩存储空间；测试时通过计算待测特征与记忆库中邻近特征的最近邻欧氏距离来判定异常。
+
+无监督异常检测省去了收集缺陷样本与人工画框标注的麻烦，能有效检测未知新缺陷；但难点在于容易受到工件正常装夹微小位移和正常刀纹波动的干扰，在复杂金属加工表面上容易产生误报警。
+
+
+\section*{三、 齿轮外观检测的关键问题与代表性文献研究}
+
+在实际齿轮检测中，往往面临金属反光、微小划痕拍不清、旋转多角度拍照以及缺陷样本少这四个具体问题。下面结合代表性文献进行介绍和对比。
+
+\subsection*{1. 解决金属表面反光与加工纹理的研究}
+金属表面强反光和切削刀痕是引起模型误报和漏检的主要物理原因。单纯靠改动网络结构很难彻底解决，必须在拍照打光上下功夫。
+
+Saiz等[\hyperlink{ref:4}{4}]专门针对高反光金属零件表面缺陷检测进行了研究。为了消除反光干扰，他们搭建了基于光度立体视觉（Photometric Stereo）的拍照系统：在固定相机周围安装多个不同方向的可控 LED 光源，快速交替点亮并拍摄同一零件在不同打光角度下的多张照片。接着根据反射模型计算出零件表面的高低起伏图和曲率图，并与原始灰度照片合并成多通道图片，送入其设计的自定义卷积分割网络（并将 U-Net[\hyperlink{ref:15}{15}] 与 DFANet 作为基线对比）。
+
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.82\linewidth,height=0.27\textheight,keepaspectratio]{pictures/fig1_photometric_modality_ablation.png}
+\caption*{图 1 光度立体多模态（RGB）与单纹理模态（Texture-Only）在三种金属材质下的缺陷分割性能消融对比（数据引自文献[\hyperlink{ref:4}{4}]）}
+\end{figure}
+
+对比实验表明：只用普通单张灰度照片时，反光亮斑边缘极易被误判成缺损；而加入表面高低起伏信息后，模型能清楚分辨出反光发白区域并没有物理凹陷，从而准确区分出真实缺损和反光亮斑[\hyperlink{ref:4}{4}]。Wu等[\hyperlink{ref:18}{18}]在 2025 年构建的复杂零件数据集中，也同样证明了多角度受控打光对消除反光、凸显微弱缺陷的核心作用。这说明：\textbf{解决金属反光的第一道防线是在硬件打光上}，把凹凸特征拍清楚能从根本上降低算法难度。
+
+\subsection*{2. 检测微小划痕与多尺度缺陷的研究}
+齿轮表面缺陷大小差别很大：有些磕碰面积较大，而有些浅划痕只有几个像素宽，在卷积网络多次下采样后极易被抹平丢失。
+
+Liu等[\hyperlink{ref:8}{8}]针对钢材表面缺陷分类，提出轻量级多尺度卷积网络 ConCNN，该网络设计了 CNN-1 与 CNN-2 两路结构完全相同的卷积分支，分别输入 $200\times 200$ 与 $400\times 400$ 两种不同分辨率的图像，两路分支各自完成完整的卷积特征提取后，在全连接层前通过特征向量拼接实现晚期特征融合。在 NEU-CLS 六类钢材缺陷数据集（每类仅 60 张训练图）上的实验表明，ConCNN 分类准确率达到 98.89\%，相比未采用多尺度融合的单分支基线（92.14\%）提升了 6.75 个百分点[\hyperlink{ref:8}{8}]，证明在浅层保留高分辨率特征对识别细小缺陷非常有效。
+
+Lin等[\hyperlink{ref:20}{20}]提出的特征金字塔（FPN）通过将深层特征传递回浅层特征图，让网络兼顾大缺陷与小划痕。Su等[\hyperlink{ref:19}{19}]在 2026 年提出的 MSFE-YOLO 将频域特征引入钢材检测，在 NEU-DET 上把 mAP@0.5 从 78.1\% 提升至 79.8\%；但频域计算使 RTX 3090 上的检测速度从 137.0 FPS 降至 89.3 FPS[\hyperlink{ref:19}{19}]。这告诉我们：在检测微小划痕时，\textbf{在 YOLO 中增设小目标 P2 检测层或采用多尺度特征融合能提升检出率}，但要控制模型复杂度以保证产线运行速度。
+
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.9\linewidth]{pictures/fig2_msfe_yolo_pareto_tradeoff.png}
+\caption*{图 2 YOLOv11s 基线与 MSFE-YOLO 在精确率、推理速度与参数量上的帕累托权衡关系（数据引自文献[\hyperlink{ref:19}{19}]）}
+\end{figure}
+
+\subsection*{3. 旋转多角度拍摄与齿轮整件判定的研究}
+在专门针对齿轮立体检测的研究中，Allam等[\hyperlink{ref:5}{5}]针对汽车齿轮损伤搭建了包含旋转台和上下双相机的系统，在旋转中分别拍摄端面和侧面齿廓，并使用 Faster R-CNN 识别齿部损伤。
+
+为解决单张照片因偶发反光引起的误报，作者提出了\textbf{连续多帧检出判定规则}——缺陷必须在连续旋转拍摄的多张照片中都被检出，才判定齿轮不合格。在 30 个缺陷齿轮和 100 个正常齿轮的实测中：
+\begin{itemize}
+\item 采用置信度阈值 0.90 且“连续三帧检出”规则时，成功检出全部 30/30 个缺陷齿轮（100\% 检出），但在 100 个正常齿轮中产生了 34 个误报；
+\item 提高到“连续四帧检出”时误报减少，但漏检了部分仅在特定旋转角度短暂可见的轻微缺陷[\hyperlink{ref:5}{5}]。扫描单个齿轮耗时约 90 秒。
+
+\end{itemize}
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.9\linewidth,height=0.29\textheight,keepaspectratio]{pictures/fig3_temporal_voting_tradeoff.png}
+\caption*{图 3 时序多帧投票机制下连续判定帧数对缺陷检出率与正常件误报数的双轴权衡曲线（数据引自文献[\hyperlink{ref:5}{5}]）}
+\end{figure}
+
+这给我们的启发是：\textbf{单张图片的算法检出率不等于整个齿轮的合格率}。多角度连续拍照利用多帧规则可过滤假报警；但规则太严又易漏检短暂可见缺陷；且 34\% 的误报率意味着每 100 个好零件就有 34 个被误拦，会给工人带来沉重复核负担。
+
+\subsection*{4. 缺陷样本少与标注困难的解决方法}
+针对手头样本少、微小划痕边界难以精确画准的问题，一些学者的实验给出了实用解决思路。
+
+Tabernik等[\hyperlink{ref:16}{16}]在换向器裂纹检测中对比了两种标注方式（50 个工件，共 399 张图，其中仅 52 张有裂纹）：一种是逐像素描边的精细标注，另一种是直接画框的粗标注。实验结果表明：在最终判断“是否有裂纹”的任务中，用粗框训练出的模型效果与精细抠图标注几乎没有差别；同时训练时通过在训练迭代中交替抽取正样本与负样本实现跨迭代的平衡采样，有效稳定了小样本训练[\hyperlink{ref:16}{16}]。
+
+Božič等[\hyperlink{ref:22}{22}]研究的混合监督方法表明，利用少量精确标注配合大量仅带“有/无缺陷”标签的图片联合训练，模型能以极低标注成本达到接近全精细标注的检测精度[\hyperlink{ref:22}{22}]。这指导我们：在样本有限且主要是筛出坏件时，\textbf{没必要花大量时间做像素级描边，采用粗框标注或暂时剔除连人眼都难界定的模糊样本（difficult 样本），同样能训练出稳定可靠的模型}。
+
+
+\section*{四、 结论与对 GearPro 齿轮质检项目的启发}
+
+\subsection*{1. 几种检测方法的对比与总结}
+通过对上述文献的学习，我们将几种主要表面缺陷检测方法的优缺点与适用场景归纳在表 1 中。
+
+
+\begin{table}[!htbp]
+\centering
+\caption*{\textbf{表 1　常见的工业表面视觉检测方法对比}}
+\small
+\renewcommand{\arraystretch}{1.2}
+\setlength{\tabcolsep}{5pt}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{2.5cm}*{3}{>{\raggedright\arraybackslash}X}@{}}
+\toprule
+检测方法 & 特征与原理 & 训练标签需求 & 主要输出形式 \\
+\midrule
+\textbf{传统图像处理}[\hyperlink{ref:6}{6},\hyperlink{ref:7}{7}] & 灰度差分、LBP 纹理、手工阈值 & 样本很少；手工设定几何阈值 & 规则或二值判断 \\
+\textbf{图像分类网络}[\hyperlink{ref:8}{8},\hyperlink{ref:11}{11}] & 卷积多层提取整图语义 & 图片级标签（合格/不合格） & 整图类别和置信度 \\
+\textbf{目标检测网络}[\hyperlink{ref:5}{5},\hyperlink{ref:14}{14}] & 网格回归定位、FPN 特征金字塔 & 矩形框和缺陷类别 & 预测框位置、类别及置信度 \\
+\textbf{无监督异常检测}[\hyperlink{ref:9}{9},\hyperlink{ref:10}{10},\hyperlink{ref:17}{17}] & 局部高斯分布、正常特征记忆库 & 仅需正常合格品图片 & 异常偏离分数和热力图 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[!htbp]
+\centering
+\caption*{\textbf{表 1（续）}}
+\small
+\renewcommand{\arraystretch}{1.2}
+\setlength{\tabcolsep}{5pt}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{2.5cm}*{3}{>{\raggedright\arraybackslash}X}@{}}
+\toprule
+检测方法 & 优点 & 缺点 & 适用场景 \\
+\midrule
+\textbf{传统图像处理}[\hyperlink{ref:6}{6},\hyperlink{ref:7}{7}] & 原理简单，计算极快，算力要求小 & 对光照和反光极敏感，换零件需重新调参 & 光照稳定、缺陷形态固定的工位 \\
+\textbf{图像分类网络}[\hyperlink{ref:8}{8},\hyperlink{ref:11}{11}] & 标注成本最低，速度极快，适合粗筛 & 无法给出具体位置，易漏微小划痕 & 产线高速过检、已知缺陷快速分选 \\
+\textbf{目标检测网络}[\hyperlink{ref:5}{5},\hyperlink{ref:14}{14}] & 能标出具体位置，方便复核，标注适中 & 矩形框包含背景，细长划痕定位较粗 & 需指出缺陷位置指导分拣与人工复核 \\
+\textbf{无监督异常检测}[\hyperlink{ref:9}{9},\hyperlink{ref:10}{10},\hyperlink{ref:17}{17}] & 不需要缺陷样本，能防范未知新缺陷 & 易受正常刀纹波动或微小位移干扰 & 缺陷极少、形态不固定的高精度初检 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection*{2. 对我们做 GearPro 齿轮检测项目的启发}
+通过学习上述文献的实验和结论，结合我们正在研发的 \textbf{GearPro 齿轮外观缺陷检测系统}（包含上下双相机、旋转机构、Jetson NX 工控机及算法），我们总结了以下四点实在的工程体会：
+
+\begin{enumerate}
+\item \textbf{先把光打好、把照片拍全，硬件是算法的基础}：
+文献[\hyperlink{ref:4}{4}]和[\hyperlink{ref:18}{18}]表明，若照片反光严重或有死角没拍到，后面用多复杂的算法也很难补救。针对齿轮高反光、渐开线曲面和齿根阴影，必须采用漫射光源压制亮斑；同时借鉴 Allam 等[\hyperlink{ref:5}{5}]的双相机思路，我们在 GearPro 中采用上下两台工业相机配合自转，分别对准上端面、齿面和齿根，从硬件上尽量消除拍摄盲区。
+\item \textbf{划痕和缺损分开建模，把分类和目标检测结合起来}：
+划痕属细长弱对比缺陷，齿部缺损属块状几何缺陷。文献[\hyperlink{ref:8}{8}]和[\hyperlink{ref:20}{20}]启发我们，针对划痕检测在 YOLO 中增加保留高分辨率特征的 P2 小目标检测层；而在整体方案上，分类模型擅长大局判断（不易被局部噪点带偏），目标检测模型擅长找具体小框（不易漏小目标）。GearPro 把分类分数与 YOLO 检测分数加权融合，结合了两者的优点。
+\item \textbf{不能只看单张图片，必须建立旋转连续多帧的判定规则}：
+Allam 等[\hyperlink{ref:5}{5}]在齿轮上的实测说明，产线最终要判断的是整个齿轮能否使用，而非单张照片。齿轮旋转拍照时单张图片易因反光闪烁出现偶发误报。我们必须在软件中建立多帧滑动窗口规则，只有某个缺陷在旋转多张照片里连续被检出才触发报警，在保证不漏检的同时把误报压下来。
+\item \textbf{测试集必须按齿轮独立划分，同时要严格控制误报率}：
+Tabernik 等[\hyperlink{ref:16}{16}]证明剔除模糊标注框（difficult 框）有助于模型稳定训练；更重要的是，文献[\hyperlink{ref:23}{23}]提醒我们，测试模型时必须用未参与训练的新齿轮照片，绝对不能把同一个齿轮不同视角的照片混在训练和测试集里；文献[\hyperlink{ref:24}{24}]提醒我们，产线误报率过高会导致大量正常齿轮被误拦复核，因此挑选判定阈值时，必须在“尽量少漏检”和“控制工人复核工作量”之间找到合理平衡点。
+
+\end{enumerate}
+
+\begingroup
+\setstretch{1.08}
+\section*{参考文献}
+
+{\small\noindent\hangindent=2em\hangafter=1 \hypertarget{ref:1}{}[1] NEWMAN T S, JAIN A K. A Survey of Automated Visual Inspection[J]. Computer Vision and Image Understanding, 1995, 61(2): 231–262.\par}
+
+{\small\noindent\hangindent=2em\hangafter=1 \hypertarget{ref:2}{}[2] 罗东亮, 蔡雨萱, 杨子豪, 章哲彦, 周瑜, 白翔. 工业缺陷检测深度学习方法综述[J]. 中国科学: 信息科学, 2022, 52(6): 1002–1039.\par}
+
+{\small\noindent\hangindent=2em\hangafter=1 \hypertarget{ref:3}{}[3] LUO Q, FANG X, LIU L, YANG C, SUN Y. Automated Visual Defect Detection for Flat Steel Surface: A Survey[J]. IEEE Transactions on Instrumentation and Measurement, 2020, 69(3): 626–644.\par}
+
+{\small\noindent\hangindent=2em\hangafter=1 \hypertarget{ref:4}{}[4] SAIZ F A, BARANDIARAN I, ARBELAIZ A, GRAÑA M. Photometric Stereo-Based Defect Detection System for Steel Components Manufacturing Using a Deep Segmentation Network[J]. Sensors, 2022, 22(3): 882.\par}
+
+{\small\noindent\hangindent=2em\hangafter=1 \hypertarget{ref:5}{}[5] ALLAM A, MOUSSA M, TARRY C, VERES M. Detecting Teeth Defects on Automotive Gears Using Deep Learning[J]. Sensors, 2021, 21(24): 8480.\par}
+
+{\small\noindent\hangindent=2em\hangafter=1 \hypertarget{ref:6}{}[6] SONG K, YAN Y. A noise robust method based on completed local binary patterns for hot-rolled steel strip surface defects[J]. Applied Surface Science, 2013, 285: 858–864.\par}
+
+{\small\noindent\hangindent=2em\hangafter=1 \hypertarget{ref:7}{}[7] LIU Y, XU K, WANG D. Online Surface Defect Identification of Cold Rolled Strips Based on Local Binary Pattern and Extreme Learning Machine[J]. Metals, 2018, 8(3): 197.\par}
+
+{\small\noindent\hangindent=2em\hangafter=1 \hypertarget{ref:8}{}[8] LIU Y, YUAN Y, BALTA C, LIU J. A Light-Weight Deep-Learning Model with Multi-Scale Features for Steel Surface Defect Classification[J]. Materials, 2020, 13(20): 4629.\par}
+
+{\small\noindent\hangindent=2em\hangafter=1 \hypertarget{ref:9}{}[9] BERGMANN P, FAUSER M, SATTLEGGER D, STEGER C. MVTec AD — A Comprehensive Real-World Dataset for Unsupervised Anomaly Detection[C]//Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR). 2019: 9592–9600.\par}
+
+{\small\noindent\hangindent=2em\hangafter=1 \hypertarget{ref:10}{}[10] ROTH K, PEMULA L, ZEPEDA J, SCHÖLKOPF B, BROX T, GEHLER P. Towards Total Recall in Industrial Anomaly Detection[C]//Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR). 2022: 14318–14328.\par}
+
+{\small\noindent\hangindent=2em\hangafter=1 \hypertarget{ref:11}{}[11] NAGY A M, CZÚNI L. Classification and Fast Few-Shot Learning of Steel Surface Defects with Randomized Network[J]. Applied Sciences, 2022, 12(8): 3967.\par}
+
+{\small\noindent\hangindent=2em\hangafter=1 \hypertarget{ref:12}{}[12] ARIKAN S, VARANASI K, STRICKER D. Surface Defect Classification in Real-Time Using Convolutional Neural Networks[EB/OL]. arXiv:1904.04671, 2019.\par}
+
+{\small\noindent\hangindent=2em\hangafter=1 \hypertarget{ref:13}{}[13] REN S, HE K, GIRSHICK R, SUN J. Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks[C]//Advances in Neural Information Processing Systems (NeurIPS 28). 2015.\par}
+
+{\small\noindent\hangindent=2em\hangafter=1 \hypertarget{ref:14}{}[14] REDMON J, DIVVALA S, GIRSHICK R, FARHADI A. You Only Look Once: Unified, Real-Time Object Detection[C]//Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR). 2016: 779–788.\par}
+
+{\small\noindent\hangindent=2em\hangafter=1 \hypertarget{ref:15}{}[15] RONNEBERGER O, FISCHER P, BROX T. U-Net: Convolutional Networks for Biomedical Image Segmentation[C]//MICCAI 2015. 2015: 234–241.\par}
+
+{\small\noindent\hangindent=2em\hangafter=1 \hypertarget{ref:16}{}[16] TABERNIK D, ŠELA S, SKVARČ J, SKOČAJ D. Segmentation-based deep-learning approach for surface-defect detection[J]. Journal of Intelligent Manufacturing, 2020, 31: 759–776.\par}
+
+{\small\noindent\hangindent=2em\hangafter=1 \hypertarget{ref:17}{}[17] DEFARD T, SETKOV A, LOESCH A, AUDIGIER R. PaDiM: A Patch Distribution Modeling Framework for Anomaly Detection and Localization[C]//ICPR Workshops. 2021: 475–489.\par}
+
+{\small\noindent\hangindent=2em\hangafter=1 \hypertarget{ref:18}{}[18] WU L, RAN Y, YAN L, LIU Y, SONG Y, HAN D. A dataset for surface defect detection on complex structured parts based on photometric stereo[J]. Scientific Data, 2025, 12: 276.\par}
+
+{\small\noindent\hangindent=2em\hangafter=1 \hypertarget{ref:19}{}[19] SU S, SHEN J, LIN P, TANG W, ZHANG W, CHEN Z. MSFE-YOLO: A Steel Surface Defect Detection Algorithm Integrating Multi-Scale Frequency Domain and Defect-Aware Attention[J]. Sensors, 2026, 26(8): 2311.\par}
+
+{\small\noindent\hangindent=2em\hangafter=1 \hypertarget{ref:20}{}[20] LIN T Y, DOLLÁR P, GIRSHICK R, HE K, HARIHARAN B, BELONGIE S. Feature Pyramid Networks for Object Detection[C]//Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR). 2017: 2117–2125.\par}
+
+{\small\noindent\hangindent=2em\hangafter=1 \hypertarget{ref:21}{}[21] DING R, DAI L, LI G, LIU H. TDD-net: a tiny defect detection network for printed circuit boards[J]. CAAI Transactions on Intelligence Technology, 2019, 4(2): 110–116.\par}
+
+{\small\noindent\hangindent=2em\hangafter=1 \hypertarget{ref:22}{}[22] BOŽIČ J, TABERNIK D, SKOČAJ D. Mixed supervision for surface-defect detection: From weakly to fully supervised learning[J]. Computers in Industry, 2021, 129: 103459.\par}
+
+{\small\noindent\hangindent=2em\hangafter=1 \hypertarget{ref:23}{}[23] CAWLEY G C, TALBOT N L C. On Over-fitting in Model Selection and Subsequent Selection Bias in Performance Evaluation[J]. Journal of Machine Learning Research, 2010, 11: 2079–2107.\par}
+
+{\small\noindent\hangindent=2em\hangafter=1 \hypertarget{ref:24}{}[24] SAITO T, REHMSMEIER M. The Precision-Recall Plot Is More Informative than the ROC Plot When Evaluating Binary Classifiers on Imbalanced Datasets[J]. PLOS ONE, 2015, 10(3): e0118432.\par}
+\endgroup
+
+% 由 前期项目研究总结.md 转换；保持严谨求实的工科语言风格与真实实验数据。
+
+\newpage
+
+\begin{center}
+{\zihao{3}\bfseries GearPro 齿轮外观缺陷检测系统：前期项目研究总结\par}
+\end{center}
+
+\section*{一、 项目选题的背景}
+
+齿轮是机械动力传动中核心的基础构件。在机械加工、热处理与装配过程中，齿面极易受到工具划擦或零件间外力磕碰，产生表面微细划痕与局部齿部缺损（主要表现为齿侧碰伤与齿角崩缺），这类缺陷容易在高速运转下诱发剧烈啮合振动与局部应力集中。传统车间主要依靠质检工人手持放大镜进行人工目检，工人劳动强度大，长时间连续作业极易产生视觉疲劳导致漏检，且不同检验员之间的评判尺度存在较强的主观性差异。
+
+本项目源于我们在参观工厂生产车间时，目睹了质检工人肉眼排查齿面瑕疵的繁重工作，深切体会到采用自动化机器视觉检测替代人工肉眼质检的迫切性与工程价值。结合团队此前在 Python 编程、OpenCV 图像处理、PyTorch 深度学习以及 STM32 嵌入式开发上积累的实践基础，我们确立了“工业零件缺陷检测系统”这一实训研发方向。需要说明的是，系统现阶段明确界定为\textbf{辅助人工复核的筛查工具}，旨在流水线上自动初筛出疑似缺陷件供质检员重点复核，有效减轻人工肉眼负担。
+
+\section*{二、 项目成员组成、特长、分工及协作配合与导师情况}
+
+团队由 3 名大三工科学生组成跨方向协作小组：
+\begin{itemize}
+    \item \textbf{队长夏秋桐}：统筹规划总体进度，推进成员分工协作，负责 Jetson NX 边缘端部署、底层 STM32 微控制器编程、步进电机梯形平滑加减速控制算法编写
+    \item \textbf{队员胡笑歌}：主要负责硬件设计版块，包括底层 STM32 微控制器编程、硬件串口通信协议联调，整体硬件架构设计与调试工作
+    \item \textbf{队员陆怡澄}：主要负责软件与算法开发，包括自建数据集构建与标注、6 大轮算法演进、多模型异构融合与 Web 监控界面的编写
+\end{itemize}
+
+团队内部职责明确、定期召开技术研讨会，各环节配合默契。
+
+\section*{三、 项目的创新点与特色}
+
+项目的创新点与特色主要体现在数据集构建，模型优化与工程实现三个层面：
+
+\subsection*{1. 数据集构建：“近重复组”划分与标签体系}
+针对立体齿轮在多角度旋转拍摄过程中极易导致同一工件高度相似照片跨集合渗透的问题，团队设计了基于 64 位感知哈希（dHash，汉明距离 $\le 2$ 聚类合并）、拍摄时间序号及长宽比推断视角的“近重复组”聚类方法，严格以“组”为最小单元进行分层抽样划分数据集，减弱了数据泄漏导致的性能虚高；在标注规范上，历经多轮迭代确立了涵盖正常（\texttt{normal}）、微细划痕（\texttt{scratch}）、三种细分缺损位置（\texttt{bottom} 齿根、\texttt{oblique} 齿面、\texttt{side} 齿侧）以及困难样本（\texttt{difficult=1}，在训练集中予以剔除以防模糊边界导致梯度震荡）的 6 种严谨标签体系，保障了模型收敛稳定性与评测客观性。
+
+\subsection*{2. 模型优化：分缺陷建模与多模型异构融合}
+微细划痕（呈线状低对比度分布）与齿部缺损（呈块状局部几何形态破坏）在图像物理表征上形态差异极大。项目放弃了主流的通用单一模型检测方法，采用分缺陷分别建模策略：划痕子系统在 YOLO 目标检测主干中引入专门保留浅层高分辨率特征的 P2 检测层，并融合 EfficientNet-B0 与 ResNet18 图像分类网络；缺损子系统则结合单类 YOLO 与分类模型重点捕获形态突变。
+
+针对异构模型输出置信度尺度不一的难题，项目在模型融合前通过验证集样本最小化负对数似然（NLL）进行温度缩放校准，独立学习各模型温度参数 $T$（如划痕子系统三成员分别校准为 0.700、2.050、2.125）；随后利用基于树状 Parzen 估计器（TPE）的贝叶斯优化算法在验证集上全局寻优确定最优集成权重（划痕子系统赋予目标检测器 0.75 高权重，缺损子系统均衡分配 0.50 权重）；最终在决策层采用“逻辑或规则（OR Rule）”合并两路报警，有效实现了分项专精与联合兜底。
+
+\subsection*{3. 工程实现：软硬件闭环的全链路设计}
+项目面向车间流水线在线初筛的实际工况，设计了“输送带逐件进料 $\rightarrow$ 透明亚克力载台无遮挡采光 $\rightarrow$ 上下双工业相机多视角覆盖 $\rightarrow$ Jetson Orin NX 本地推理 $\rightarrow$ STM32 控制步进电机平滑加减速分拣”的软硬件协同流水线。在科学价值上，深入探索了金属工业工件微弱缺陷在受控光照、多尺度特征提取与异构多模型融合下的识别规律；在工程应用价值上，作为一套低成本、轻量化的在线辅助筛查工具，能够显著降低质检工人的重复肉眼劳动强度。
+
+\section*{四、 项目实施的进展情况及已取得的创新成果}
+
+经过前期的扎实实验探索与软硬件工程开发，项目已圆满完成从实验室算法设计到第一代台架实物联调的阶段性任务：
+
+\subsection*{1. 具体实施进度与技术演进历程}
+\begin{itemize}
+    \item \textbf{自主数据建库与 2 级流水线确立}：自行采购与定制 50 个真实齿轮，采集多视角图像并以“近重复组”防泄漏机制严格划分；确立了“ROI 快速定位外扩 4\% 裁剪 + 局部缺陷识别”的 2 级级联检测流水线，排除了整帧背景杂光干扰。
+    \item \textbf{算法模型的 6 大轮演进探索}：
+    \begin{enumerate}
+        \item 第 1 轮尝试 Canny 边缘检测与自适应阈值分割等传统方法，受金属强反光亮斑及齿廓伪边缘干扰严重失效；
+        \item 第 2 轮在整图直接训练通用 YOLO，微细划痕与车削刀纹高度混淆，漏检严重；
+        \item 第 3 轮引入 ROI 裁剪二级流水线，对比了分类网络（整图粗判）与检测模型（框级定位）的指标差异；
+        \item 第 4 轮尝试统一二分类大模型，微细划痕漏检依旧，盲目增加融合模型徒增计算开销；
+        \item 第 5 轮确立分缺陷分别建模路线，分别构建划痕子系统与缺齿子系统；
+        \item 第 6 轮确立温度缩放概率校准、TPE 贝叶斯权重寻优、经验奈曼–皮尔逊准则（FPR $\le 0.20$ 约束下选阈值）以及决策级“或规则”联合合并方案。
+    \end{enumerate}
+    \item \textbf{第一代整机实物台架搭建与闭环调试}：设计装配了平皮带输送机构与透明亚克力检测工位托盘载台；安装了上下双工业相机与白色漫射光源；开发了 STM32 步进电机梯形平滑加减速算法防止甩齿，定义了硬件串口（UART）指令；部署了本地 Jetson Orin NX 边缘端并完成定位模型 TensorRT FP16 编译加速，打通了“送料 $\rightarrow$ 采集 $\rightarrow$ 本地推理 $\rightarrow$ Web 监控 $\rightarrow$ 串口通信 $\rightarrow$ STM32 旋转分拣”的全物理闭环。
+\end{itemize}
+
+\subsection*{2. 已取得的阶段性创新成果}
+\begin{itemize}
+    \item \textbf{离线测试集检出能力显著改善}：在严格锁定的 150 张离线测试集（31 划痕、44 缺损、4 兼具，共 71 真实缺陷、79 正常）上，最终第 6 轮方案检出 63/71 张缺陷图，召回率达到 88.73\%；误报 18/79 张正常图，误报率为 22.78\%。相比早期第 4 轮统一分类基线（检出 54/71、误报 33/79），在相同数据下正确检出数净增 9 张，误报数减少 15 张，误报率从 41.77\% 下降至 22.78\%，验证了分缺陷建模、概率校准与贝叶斯权重寻优的综合效能。
+    \item \textbf{实现了边缘端加速与成套可视化监控软件开发}：将齿轮定位模型成功编译为 TensorRT FP16 引擎，在 Orin NX 上的单环节耗时降至 26.7 ms，降低了系统端到端时延；上位机开发了轻量级 Web 监控界面，现场实时呈现多路图像、红框标记缺陷坐标、置信度得分及 PASS/REJECT 运行状态。
+\end{itemize}
+
+\newpage
+
+% !TEX root = main.tex
+% 由 项目后期研究方案.md 转换；保持严谨求实的工科语言风格与规范的技术路线排版。
+
+\begin{center}
+{\zihao{3}\bfseries GearPro 齿轮外观缺陷检测系统：项目后期研究方案\par}
+\end{center}
+
+% \section*{一、 后期研究总体目标与技术路线}
+
+% \subsection*{1. 总体研发目标}
+% 在前期完成的第一代实物台架搭建、6 轮算法实验演进以及 150 张离线测试集评测（检出率 88.73\%、误报率 22.78\%）的基础上，后期的核心目标是：\textbf{推动检测系统从当前的“实验室离线单图验证”平稳过渡到“流水线工件级连续稳定运行”}。
+
+% 具体而言，后期研究将针对前期暴露出的实际局限，力求达成以下具体目标：
+% \begin{enumerate}
+%     \item \textbf{成像硬件升级}：研制基于光度立体视觉的多光源受控频闪成像系统，从物理源头抑制金属反光干扰；
+%     \item \textbf{数据独立性验证}：采购全新批次齿轮建立实体工件 ID 数据库，提供客观可靠的独立泛化证据；
+%     \item \textbf{判定逻辑完善}：在软件中实现双相机工件级联合判定，并引入连续多帧时序滑动窗口去重算法，将整件误报率控制在较低水平；
+%     \item \textbf{边缘端深度部署}：将核心缺陷识别多模型在 Jetson Orin NX 上实施深度 TensorRT 量化与多线程调度优化，实测长时温升稳定性与连续生产节拍；
+%     \item \textbf{作业规程规范}：完善人机协同复核操作流程，形成闭环质量控制规范。
+% \end{enumerate}
+
+% \subsection*{2. 总体技术路线规划}
+% 后期研究的技术路线紧密围绕“\textbf{多光源成像改造 $\rightarrow$ 新工件盲测建库 $\rightarrow$ 多帧时序去重与双路判定 $\rightarrow$ 边缘端 INT8 量化 $\rightarrow$ 闭环联调与复核规范}”五个有机环节展开，技术实施路线演进关系如图所示：
+
+% \begin{center}
+% \begin{minipage}{0.96\linewidth}
+% \begin{lstlisting}[basicstyle=\zihao{-5}\ttfamily, frame=single, rulecolor=\color{gray!40}, backgroundcolor=\color{gray!4}, captionpos=b, xleftmargin=0.5em, xrightmargin=0.5em]
+%                  【后期研究总体实施路线演进图】
+% +-------------------------------------------------------------+
+% | 1. 光度立体成像系统研制 (四方向可控频闪 + 纹理/梯度/曲率解耦) |
+% +------------------------------+------------------------------+
+%                                |
+%                                v
+% +-------------------------------------------------------------+
+% | 2. 独立工件盲测集构建 (采购全新批次齿轮 + 物理工件 ID 严格隔离) |
+% +------------------------------+------------------------------+
+%                                |
+%                                v
+% +-------------------------------------------------------------+
+% | 3. 多帧时序去重与双相机软件判定 (滑动窗口去重 + 双路画面取或)   |
+% +------------------------------+------------------------------+
+%                                |
+%                                v
+% +-------------------------------------------------------------+
+% | 4. Jetson Orin NX 深度量化部署 (多模型 TensorRT/INT8 + 异步调度)|
+% +------------------------------+------------------------------+
+%                                |
+%                                v
+% +-------------------------------------------------------------+
+% | 5. 整机长时运转压测与复核 SOP (连续运转温升 + REJECT复核/抽检)|
+% +-------------------------------------------------------------+
+% \end{lstlisting}
+% \end{minipage}
+% \end{center}
+
+\section*{一、 重点研究内容与技术实施方案}
+
+\subsection*{1. 基于光度立体视觉（Photometric Stereo）的多光源成像系统研制}
+\begin{itemize}
+    \item \textbf{研究背景与针对问题}：
+    前期实验表明，金属齿轮表面的强烈镜面反射亮斑与暗影是引起微细划痕漏检和正常刀纹误报的主要物理根源。第一代台架仅采用了稳态白色漫射光源，尚无法从物理成像源头将表面真实几何形貌缺陷与单纯的光照亮斑区分开来。
+    \item \textbf{文献依据与具体方案}：
+    通过研读 Saiz 等人与 Wu 等人关于高反光金属工件外观检测的研究，我们了解到光度立体视觉是分离几何凹凸与反射光斑的成熟有效手段。其实施方案规划如下：
+    \begin{enumerate}
+        \item \textbf{硬件模组设计与装配}：在工业相机镜头周围设计并装配四方向可控的高亮度 LED 环形光源阵列，由 STM32 单片机输出微秒级 PWM 脉冲进行精确的高速频闪同步控制；
+        \item \textbf{时序拍摄逻辑}：当输送带将齿轮送至透明亚克力载台并处于短暂平稳状态时，触发单片机控制四方向光源快速交替点亮，工业相机在极短时间内连续抓拍 4 帧不同打光角度下的图像；
+        \item \textbf{算法解耦与多通道融合}：算法端基于光度立体法向量方程，解耦计算出原始灰度纹理图（Texture）、反映局部边缘剧烈变化的图像梯度幅值范围图（Range）以及表面平均与高斯曲率图（Curvature）；随后将这三通道特征合成为单张 RGB 伪彩色图像输入下游网络。由于纯反射亮斑在梯度和曲率图上不会产生几何深度突变，而真实划痕与磕碰缺损具有明显的物理凹陷与边缘梯度，该方法能够在物理源头有效剔除反光虚警。
+    \end{enumerate}
+\end{itemize}
+
+% \subsection*{2. 齿轮物 ID 严格隔离与独立盲测集构建}
+% \begin{itemize}
+%     \item \textbf{研究背景与针对问题}：
+%     前期自建的 50 个真实齿轮数据集是以图像编号进行管理的。尽管前期采用了 64 位感知哈希（dHash）进行了近重复组聚类防泄漏，但尚未在数据库底层建立严格的实体工件 ID 溯源。目前的 88.73\% 召回率是在现有测试图片上的表现，面对未见过的全新批次齿轮时的泛化能力仍需补充独立测试证据。
+%     \item \textbf{具体实施方案}：
+%     \begin{enumerate}
+%         \item \textbf{实体工件 ID 数据库重构}：对现有 50 个齿轮的历史照片进行全面复核，建立 \texttt{Gear\_Entity\_ID} $\rightarrow$ \texttt{View\_Images} 的底层实体溯源标签；
+%         \item \textbf{增购全新批次实物齿轮}：团队计划采购与定制一批完全未参与过此前训练的全新齿轮（包括 10 个正常齿轮、10 个划痕齿轮、10 个缺损齿轮，共 30 个全新实物）；
+%         \item \textbf{标准盲测实验设计}：在不微调、不重新训练现有模型参数的前提下，将新采购齿轮送入台架进行图像采集与全自动测试，严格统计基于物理实体工件维度的真实检出率与误报率，为算法泛化性能提供客观证据。
+%     \end{enumerate}
+% \end{itemize}
+
+\subsection*{2. 旋转多帧时序滑动窗口去重与双相机工件级判定算法研发}
+\begin{itemize}
+    \item \textbf{研究背景与针对问题}：
+    前期测试表明单张图像的误报率为 22.78\%，且台架虽然在物理上安装了上下两台工业相机，但在现阶段软件流程中主要还是基于单路相机独立图像进行测试，双相机各自检测后“取或”的工件级软件判定逻辑尚未闭环。
+    \item \textbf{具体实施方案}：
+    \begin{enumerate}
+        \item \textbf{多帧时序滑动窗口去重算法}：借鉴 Allam 等人在汽车齿轮检测中的连续多帧时序判定规则，在上位机软件中设计跨帧时序过滤模块。齿轮在旋转分度过程中，单帧检出的疑似缺陷仅标记为候选；系统在时序角度上维护滑动窗口，\textbf{只有当特定齿廓区域在连续 $N$ 帧（如连续 2$\sim$3 帧）中均被检测出疑似缺陷时，才真正触发工件级的不合格报警}，以此过滤单帧偶然反光带来的虚警；
+        \item \textbf{双相机软件联合判定闭环}：完善上位机多线程相机驱动，实现上下两台 2560 $\times$ 1440 工业相机的同步触发采图；上相机负责齿轮端面与齿顶轮廓，下相机负责齿面渐开线与齿根；两路画面分别经过 ROI 提取与缺陷识别后，在软件层实施“工件级逻辑或（Workpiece-level OR）”合并判定，彻底消除单视角遮挡死角。
+    \end{enumerate}
+\end{itemize}
+
+\subsection*{3. Jetson Orin NX 嵌入式边缘端深度量化部署与节拍压测}
+\begin{itemize}
+    \item \textbf{研究背景与针对问题}：
+    前期仅对齿轮定位模型完成了 TensorRT FP16 的基础加速转换（单环节 P95 耗时由 65.0 ms 降至 26.7 ms），核心缺陷识别的多模型融合系统（含 P2-YOLO 与分类网络）仍运行在 PyTorch 框架下，整体部署端的技术探索较少，尚未测量整套多模型流水线在边缘端的实际推理延迟、显存占用与长时温升。
+    \item \textbf{具体实施方案}：
+    \begin{enumerate}
+        \item \textbf{多模型深度 TensorRT 量化编译}：将划痕子系统与缺齿子系统的全部 YOLO 检测网络与分类网络导出为 ONNX 格式，在 Jetson Orin NX 目标板上利用 TensorRT 工具链进行 FP16 半精度（及校准集 INT8）量化编译，充分调用 Orin NX 的 GPU 与硬件加速核心；
+        \item \textbf{异步多线程流水线优化}：设计“双相机 SDK 视频流抓取 $\rightarrow$ 定位 ROI 裁剪 $\rightarrow$ 缺陷多模型并发推理 $\rightarrow$ 时序滑动窗口判定 $\rightarrow$ 串口指令下发”的异步多线程并发架构，消除 I/O 阻塞；
+        \item \textbf{长时连续运转与温升压测}：在台架上开展 4 小时以上的连续不间断运转试验，系统记录 Orin NX 的 GPU 利用率、显存峰值、芯片运行温度及功耗曲线，确保设备在长时间工业作业下不发生热降频或内存泄漏，使单件全流程处理时间稳定匹配产线输送节拍。
+    \end{enumerate}
+\end{itemize}
+
+% \section*{三、 预期交付成果与量化考核指标}
+
+% \subsection*{1. 预期交付的成果清单}
+% \begin{enumerate}
+%     \item \textbf{数据集成果}：包含严密实体工件 ID 标签的自建数据集，以及一份完全独立的《30 个全新实物齿轮独立盲测数据集》；
+%     \item \textbf{硬件成果}：一套升级了四方向受控频闪光度立体照明、上下双相机视野覆盖、透明亚克力载台与步进电机平滑分拣的第一代整机改进实物样机；
+%     \item \textbf{软件与算法成果}：基于 TensorRT 全面加速的嵌入式边缘端检测软件（含光度立体解耦模块、多帧时序滑动窗口去重模块及 Web 监控系统）；
+%     \item \textbf{工程技术文档}：包含《新齿轮工件级独立盲测技术报告》、《Jetson Orin NX 边缘部署性能与长时稳定性测试报告》及《齿轮外观质检人机协同复核 SOP 手册》。
+% \end{enumerate}
+
+% \subsection*{2. 量化技术考核指标}
+
+% \begin{table}[!htbp]
+% \centering
+% \caption*{\textbf{表 1　GearPro 齿轮外观缺陷检测系统后期研究量化技术指标}}
+% \small
+% \renewcommand{\arraystretch}{1.25}
+% \setlength{\tabcolsep}{6pt}
+% \begin{tabularx}{\linewidth}{@{}>{\bfseries\raggedright\arraybackslash}p{3.5cm}>{\centering\arraybackslash}p{3.2cm}>{\centering\arraybackslash}p{3.2cm}>{\raggedright\arraybackslash}X@{}}
+% \toprule
+% 考核维度 & 当前前期状态 & 后期预期指标 & 验证与测试方法 \\
+% \midrule
+% 独立工件盲测召回率 & 88.73\%（仅限单图） & \textbf{$\ge$ 90.0\%（工件级）} & 在 30 个全新未见齿轮盲测集上实测统计 \\
+% 整件综合误报率 (FPR) & 22.78\%（单图误报） & \textbf{$\le$ 8.0\%（工件级）} & 结合多帧时序滑动窗口规则后实测统计 \\
+% 单件全流程检测耗时 & 定位 26.7 ms（缺陷未测） & \textbf{$\le$ 1.5 秒 / 齿轮} & Orin NX 端端全链路实测（含抓拍、推理与分拣） \\
+% 长时连续运行稳定性 & 仅短时间功能测试 & \textbf{连续运转 $\ge$ 4 小时} & 台架连续运行无崩溃、无内存泄漏、无热降频 \\
+% 机械分拣执行响应率 & 初步物理闭环 & \textbf{100\% 正确触发} & 软件 REJECT 指令与步进电机分拣动作一一对应 \\
+% \bottomrule
+% \end{tabularx}
+% \end{table}
+
+\section*{二、后续研究实施计划}
+
+% 为确保后期研究工作扎实有序推进，团队制定了为期 12 周的详细进度计划：
+
+% \begin{center}
+% \begin{minipage}{0.96\linewidth}
+% \begin{lstlisting}[basicstyle=\zihao{-5}\ttfamily, frame=single, rulecolor=\color{gray!40}, backgroundcolor=\color{gray!4}, captionpos=b, xleftmargin=0.5em, xrightmargin=0.5em]
+%                       【后期研究实施进度甘特图】
+%  周次  1-2周   3-4周   5-6周   7-8周   9-10周  11-12周
+%   +---[模组研制]---+                                (光度立体硬件与频闪调试)
+%           +---[数据构建]---+                        (采购新齿轮与盲测集标定)
+%                   +---[算法研发]---+                (时序滑动窗口与双路判定)
+%                           +---[边缘优化]---+        (Orin NX TensorRT/INT8 量化)
+%                                   +---[整机压测]---+ (4小时连续运转与温升实测)
+%                                           +---[总结结题] (撰写盲测报告与复核 SOP)
+% \end{lstlisting}
+% \end{minipage}
+% \end{center}
+
+\begin{enumerate}
+    \item \textbf{2026 年 10 月 $\sim$ 2026 年 11 月（光度立体视觉）}：设计并装配四方向可控 LED 频闪光源模组，编写 STM32 微秒级脉冲同步控制程序，完成基础打光与法向量解耦测试；
+    \item \textbf{2026 年 10 月 $\sim$ 2026 年 12 月（数据集构建）}：采购 50 个全新批次齿轮，规范建立物理工件 ID 标签库，采集多角度光度立体图像并完成标注；
+    \item \textbf{2026 年 12 月 $\sim$ 2027 年 1 月（多帧时序去重）}：编写上位机双相机多线程同步采图模块，在软件中固化时序滑动窗口去重算法与工件级取或判定逻辑；
+    \item \textbf{2027 年 10 月 $\sim$ 2027 年 2 月（Jetson Orin NX 量化部署）}：将缺陷识别多模型全部导出并完成 TensorRT FP16/INT8 引擎编译，优化多线程异步调度流水线；
+    % \item \textbf{第 9 $\sim$ 10 周（整机长时连续运转与生产节拍压测）}：在台架上开展连续 4 小时以上的长时运转试验，记录系统处理节拍、Orin NX 温升曲线及分拣机构动作响应率；
+    % \item \textbf{第 11 $\sim$ 12 周（人机协同复核规程制定与结题总结）}：在车间现场模拟质检员复核流程，完善 Web 控制台交互界面，制定《复核 SOP 手册》，汇总形成全套结题技术材料。
+\end{enumerate}
+
+% \section*{五、 实训总结与后续展望}
+
+% 前期扎实的研究与实训验证了 GearPro 系统在打光设计、分缺陷建模、温度校准及第一代整机实物闭环上的可行性。面对前期总结出的客观短板，本后期研究方案不回避问题、不夸大成果，始终立足于大三学生的工程实践实际。通过系统推进光度立体多光源成像研制、新工件独立盲测、时序滑动窗口去重及边缘端深度量化部署，团队有信心在指导老师的带领下，扎实攻克工程细节，力争在结题前将系统打磨为兼具学术支撑与工业实用价值的质检样机成果。

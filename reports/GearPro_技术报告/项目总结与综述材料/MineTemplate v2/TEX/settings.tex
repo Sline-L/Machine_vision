@@ -61,3 +61,21 @@
 %* 设置多栏格式
 % \setlength{\columnsep}{0.8cm}   % 设置两栏之间的间距
 % \columnseprule 0.4pt          % 如果需要两栏中间有分隔线（可选，默认为0）
+
+% 综述排版：保留原文自带编号，不生成额外标题编号。
+\setlength{\parindent}{2em}
+\setlength{\emergencystretch}{2em}
+\setlist[itemize]{leftmargin=2em, itemsep=0.3em, topsep=0.4em}
+\setlist[enumerate]{leftmargin=2em, label=\arabic*., itemsep=0.4em}
+\captionsetup{font=small, justification=centering}
+
+% 图表可在页顶、页底与正文间排布，避免固定位置造成大块留白。
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\bottomfraction}{0.75}
+\renewcommand{\textfraction}{0.12}
+\renewcommand{\floatpagefraction}{0.8}
+\setcounter{topnumber}{3}
+\setcounter{totalnumber}{4}
+\setlength{\textfloatsep}{12pt plus 2pt minus 3pt}
+\setlength{\intextsep}{10pt plus 2pt minus 2pt}
+\setlength{\floatsep}{10pt plus 2pt minus 2pt}

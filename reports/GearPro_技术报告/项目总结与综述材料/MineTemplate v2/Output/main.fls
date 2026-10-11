@@ -1,7 +1,7 @@
-PWD /home/Sline/Work/VSCode/Papers/TEMPLATES/MineTemplate v2
+PWD /home/Sline/Work/VSCode/Projects/Machine_vision/reports/GearPro_技术报告/项目总结与综述材料/MineTemplate v2
 INPUT /usr/share/texmf-dist/web2c/texmf.cnf
 INPUT /var/lib/texmf/web2c/xetex/xelatex.fmt
-INPUT /home/Sline/Work/VSCode/Papers/TEMPLATES/MineTemplate v2/main.tex
+INPUT /home/Sline/Work/VSCode/Projects/Machine_vision/reports/GearPro_技术报告/项目总结与综述材料/MineTemplate v2/main.tex
 OUTPUT Output/main.log
 INPUT /usr/share/texmf-dist/tex/latex/ctex/ctexart.cls
 INPUT /usr/share/texmf-dist/tex/latex/ctex/ctexart.cls
@@ -169,6 +169,12 @@ INPUT /usr/share/texmf-dist/tex/latex/multirow/multirow.sty
 INPUT /usr/share/texmf-dist/tex/latex/multirow/multirow.sty
 INPUT /usr/share/texmf-dist/tex/latex/tools/multicol.sty
 INPUT /usr/share/texmf-dist/tex/latex/tools/multicol.sty
+INPUT /usr/share/texmf-dist/tex/latex/tools/indentfirst.sty
+INPUT /usr/share/texmf-dist/tex/latex/tools/indentfirst.sty
+INPUT /usr/share/texmf-dist/tex/latex/tools/tabularx.sty
+INPUT /usr/share/texmf-dist/tex/latex/tools/tabularx.sty
+INPUT /usr/share/texmf-dist/tex/latex/tocloft/tocloft.sty
+INPUT /usr/share/texmf-dist/tex/latex/tocloft/tocloft.sty
 INPUT /usr/share/texmf-dist/tex/latex/footmisc/footmisc.sty
 INPUT /usr/share/texmf-dist/tex/latex/footmisc/footmisc.sty
 INPUT /usr/share/texmf-dist/tex/latex/hyperref/hyperref.sty
@@ -245,16 +251,21 @@ OUTPUT Output/main.out
 INPUT ./document.tex
 INPUT ./document.tex
 INPUT document.tex
-INPUT /usr/share/texmf-dist/tex/latex/listings/lstlang1.sty
-INPUT /usr/share/texmf-dist/tex/latex/listings/lstlang1.sty
-INPUT /usr/share/texmf-dist/tex/latex/listings/lstlang1.sty
-INPUT Output/main.bbl
-INPUT Output/main.bbl
-INPUT Output/main.bbl
 OUTPUT Output/main.xdv
-INPUT ./TEX/appendices.tex
-INPUT ./TEX/appendices.tex
-INPUT TEX/appendices.tex
+INPUT ../figures/fig1_photometric_modality_ablation.png
+INPUT ../figures/fig1_photometric_modality_ablation.png
+INPUT ../figures/fig1_photometric_modality_ablation.png
+INPUT /usr/share/texmf-dist/fonts/tfm/public/cm/cmmi10.tfm
+INPUT /usr/share/texmf-dist/fonts/tfm/public/cm/cmmi7.tfm
+INPUT /usr/share/texmf-dist/fonts/tfm/public/cm/cmmi5.tfm
+INPUT ../figures/fig2_msfe_yolo_pareto_tradeoff.png
+INPUT ../figures/fig2_msfe_yolo_pareto_tradeoff.png
+INPUT ../figures/fig2_msfe_yolo_pareto_tradeoff.png
+INPUT ../figures/fig3_temporal_voting_tradeoff.png
+INPUT ../figures/fig3_temporal_voting_tradeoff.png
+INPUT ../figures/fig3_temporal_voting_tradeoff.png
+INPUT /usr/share/texmf-dist/fonts/tfm/public/cm/cmmi9.tfm
+INPUT /usr/share/texmf-dist/fonts/tfm/public/cm/cmmi6.tfm
 INPUT Output/main.aux
 INPUT Output/main.out
 INPUT Output/main.out
