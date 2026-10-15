@@ -1,0 +1,13 @@
+# Kuang 2023 量化高效网络的校准（ECE随位宽）
+- 完整引用：Joey Kuang, Alexander Wong. On Calibration of Modern Quantized Efficient Neural Networks. arXiv:2309.13866v2 [cs.LG], 26 Sep 2023. 首页注明 “Preprint. Under review”（扩展摘要）。
+- 来源核实：本地 OA_arXiv/2309.13866.pdf；首页 v2，26 Sep 2023；7页（含参考文献）。无差异。
+- 阅读深度：全文（正文仅约3页，图仅看图注，图中的ECE数值我没有读数）。
+- 一句话：在CIFAR-100与PathMNIST上，ShuffleNetV2、GhostNet-VGG、MobileOne在FP32、W8A8、W4A8、W4A4下，ECE（期望校准误差）随位宽降低变差，温度缩放（TS）能部分修复。
+- 问题设定：分类；指标 ECE（越低越好）与top-1误差；后处理校准=温度缩放（第2节）。
+- 方法：自训练的小网络（CIFAR改版），200轮SGD；PyTorch PTQ库（沿用Xia et al.的实现）：权重逐通道对称+滑动平均min-max观察器，激活逐张量非对称+直方图观察器；3个配置W8/A8、W4/A8、W4/A4；每配置3次试验，随机抽训练批做校准，校准总量1024；“All quantized inference is performed at 8-bit”（第2.1节，原文表述如此，含义我未能完全理解）。
+- 保证 / 结论：“The quality of calibration is observed to track the quantization quality”；4-bit激活区间尤其差（摘要）；GhostNet-VGG对精度和ECE的退化最稳健；ShuffleNetV2/MobileOne（含倒残差、深度可分离卷积）在低位宽更差；TS无法修复4-bit权重的MobileOne；“TS is at some point limited by how well the model performs in the first place”（第3节）。
+- 实验：数值全在图1-5（散点/可靠性图），**正文无ECE数字表**，故不引用具体ECE值（原文文本未见）。
+- 局限：作者承认是“preliminary insights / extended abstract”，需要更多架构、训练策略、量化方法与校准器的研究。我的判断：(1) 未报告决策翻转；(2) 小图（32×32/28×28）与自训练网络，和工业缺陷图差距大；(3) 无TensorRT；(4) “量化推理8-bit”设置含糊，W4实际是模拟还是真4位不清；(5) 未审稿稿件，证据力弱。
+- 和我们的关系：**背景（弱）**。可作为“量化降低位宽会使置信度校准变差，TS可部分修复”的旁证，说明部署后gatekeeper的得分分布可能漂移，需要在设备上重新校准阈值，而不是直接沿用PC的t1/t2。区别：校准=分类概率校准，不是共形/LTT风险控制；位宽是W/A设置而非TensorRT FP16/INT8/DLA。
+- 可引用的句子：“Lower bitwidth models are correlated with both poorer accuracy and poorer calibration”（图1图注）；“we show the exact opposite within a set of model's quantized counterparts”（第3节，指量化后误差低的模型反而ECE也低，与Guo/Minderer在FP32家族内的趋势相反）。
+- 疑点：该“exact opposite”结论仅基于3个架构×2数据集，且无数值表；引用时需弱化。

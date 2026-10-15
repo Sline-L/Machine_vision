@@ -1,0 +1,13 @@
+# Hooker 2021 压缩网络遗忘了什么（PIE，量化/剪枝导致的预测翻转）
+- 完整引用：Sara Hooker, Aaron Courville, Gregory Clark, Yann Dauphin, Andrea Frome. What Do Compressed Deep Neural Networks Forget? arXiv:1911.05248v3 [cs.LG], 6 Sep 2021. 首页未见会议名/DOI（预印本；我不据记忆补刊名）。
+- 来源核实：本地 OA_arXiv/1911.05248.pdf；首页 v3，6 Sep 2021；20页。arXiv号1911提示首发2019-11，PDF为2021年第3版。
+- 阅读深度：摘要、第1-4节（方法、实验、表2、人类研究、分布偏移节开头与图4）读完；附录（训练细节、其余表）只扫读；表2量化行靠栅格化第7页确认。
+- 一句话：压缩（剪枝、量化）不是均匀地损伤精度，而是集中损伤少数类别和少数“难样本”（PIE，Pruning Identified Exemplars），顶层精度掩盖了这点。
+- 问题设定：分类（CIFAR-10 WideResNet、ImageNet ResNet-50、CelebA ResNet-18）；每种设置独立训练30个模型构成“模型群体”，以群体统计检验排除训练随机性（第2.4节）。
+- 方法：PIE定义（第2.3节）：对图像i，取压缩模型群体预测的众数标签，若与未压缩群体的众数标签不同则为PIE；不需要真值，可在测试时无监督识别。类别层面用Welch t检验（p≤0.05）判断召回变化是否显著。量化三种，**均为TFLite风格训练后量化**：float16、动态范围int8（权重int8）、fixed-point int8（需小代表性数据集）。
+- 保证 / 结论：“Top-line metrics such as top-1 … hide critical details”；PIE更难（人也难）；量化“appears to introduce less disparate harm”（第3.1节）。
+- 实验（表2，ImageNet，均值）：基线Top-1 76.68/Top-5 93.25。剪枝30/50/70/90%：Top-1 76.46/75.87/75.02/72.60；显著变化类别数 68/170/372/637；PIE数 1,819/2,193/3,073/5,136。**量化：float16 Top-1 76.65、显著类58、PIE 2019；动态范围int8 76.10、144类、2193；fixed-point int8 76.46、119类、2093**（ImageNet测试集规模原文表中未直接给出）。90%稀疏时PIE占ImageNet测试集10.27%，CIFAR-10 2.16%，CelebA 16.17%。PIE上基线Top-1：ImageNet 76.75%→39.81%，CIFAR-10 94.89→43.64，CelebA 94.10→50.41；去掉PIE后ImageNet非PIE为81.20%。人类研究（85人，1230张）：PIE中多目标图59.15% vs 非PIE 39.53%；细粒度43.55% vs 8.9%；标签错误或不足20.05% vs 8.90%（第7页）。分布偏移：剪枝加剧对ImageNet-C/ImageNet-A的敏感（t=90时shot noise相对-40.11%）——**这是剪枝结果，不是量化结果**。
+- 局限：作者承认处于多数据集上结论一致但机制解释为推测；我的判断：(1) 量化是TFLite权重/定点int8，**非TensorRT/INT8/DLA**，且量化PIE数（约2000）只比较“模型群体众数”，不是同一模型在不同硬件上的逐样本翻转；(2) 没有按置信度分析翻转；(3) 分布偏移实验只做了剪枝；(4) 无缺陷检测。
+- 和我们的关系：**背景（支持“顶层指标掩盖逐样本变化”）**。可引：fixed-point int8在ImageNet上Top-1仅降0.22点，但仍有约2093张PIE（群体众数标签改变）；说明“精度几乎不变≠决策不变”，与Shin 2026互相印证。区别：不涉及阈值、保证或设备；其PIE偏向难/标注噪声样本，提示我们的缺陷数据中“边界样本”可能含标注不确定样本。
+- 可引用的句子：“Top-line metrics such as top-1 or top-5 test-set accuracy hide critical details in the ways that pruning and quantization impact model performance”（第1节）；PIE识别无需真值（第2.3节）。
+- 疑点：该论文是否为会议论文及刊名首页未见；表2中ImageNet测试集规模（用于换算PIE比例）未在已读部分明确。

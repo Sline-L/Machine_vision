@@ -1,0 +1,13 @@
+# Chen 2026 DVFSLM: 移动边缘设备上小语言模型推理的 DVFS
+- 完整引用：Jiesong Chen, Lixiang Han, Jiani Cao, Zhaoxi Yue, Zhenjiang Li（香港城市大学），"DVFS for Small Language Model Inference on Mobile Edge Devices"，arXiv:2609.13153v1 [cs.AR]，首页标注 8 Jul 2026，16 页；IEEE 样式（作者为 Member/Senior Member），投稿刊名原文未见。
+- 来源核实：本地 OA_arXiv/2609.13153.pdf；首页版本 v1，日期戳 "8 Jul 2026"。**日期/编号不一致**：arXiv 编号 2609 对应 2026 年 9 月，而首页日期为 7 月 8 日；同批的 2607.05933 日期 7 Jul 2026 与编号一致，2606.16106v3 在 8 Jul 2026 也合理。（我的判断）这篇的日期戳与编号不自洽，可能是 PDF 水印生成问题或元数据错误，应在 arXiv 列表页核对，当前仅凭 PDF 无法判断哪个对。
+- 阅读深度：摘要+引言+背景(§2)+系统设计开头+§3.3+§4 实现+§5 评估的一部分（Orin NX、模型大小微基准等）。未读：§3 估计器的全部推导、§5 其余消融与微基准、§6 以后（含相关工作）、参考文献仅扫读。
+- 一句话：为小语言模型的逐 token 解码设计协调 GPU 与 EMC 频率的 DVFS 治理器，在 token 期限约束下最小化每 token 能耗，比内置治理器最多省 12.4%，比 GearDVFS 最多省 8.4%。
+- 问题设定：min Σ e_i({f_r}) 约束 t_i({f_r}) ≤ τ（默认 50 ms，即 20 token/s）；解码工作量随上下文长度增长；CPU 频率固定在离线标定阈值 f̂_c（所有模型 0.6528 GHz）。
+- 方法：用矩阵乘规模与硬件元数据（XGBoost 解析）估计功率（∝ f³）与延迟（(r0+Σ…)/f_r），线性回归拟合；每 50 token 一个决策窗口；预填充阶段 GPU/EMC 取最大频率；解码阶段在 GPU-EMC 搜索空间（AGX Orin 44 种、Orin NX 28 种组合）内选。
+- 保证 / 结论：无统计保证；以 QoS（满足期限的比例）作指标："improving the latency QoS by up to 93.12% and 69.14%"（相对内置治理器与 GearDVFS）。Orin NX：能耗 336.5-453.0 mJ/token，比 RULE 省 8.6-9.4%，比 Gear 省 4.5-8.1%，三个模型均达 QoS（§5.3 "Different devices"）。小模型 GPT2-small 上比另两者好 4.0-10.4%（§5.3）。
+- 实验：Jetson AGX Orin 为主，Orin NX 为兼容性验证（20 token/s 期限）；模型 GPT2 系列、Qwen2.5-0.5B、TinyLLaMA、OLMoE-1B-7B，q4_0 量化，llama.cpp。能耗 = 平均功率 × 总时间，功率用**板载 INA3221，200 Hz**（§4），非外部表。基线：RULE（nvhost_podgov + schedutil，EMC 固定 2.133 GHz）与学习式 GearDVFS。治理器本身功耗 0.04 W。
+- 局限：作者承认：GPU-CPU 耦合建模"remains an open problem"（§3.2 末）；CPU 频率用阈值近似。我的看法：（1）全是 LLM 解码，不是视觉；（2）INA3221 功率；（3）没有使用 TensorRT、DLA、INT8；（4）已读部分未见多次重复的误差条。
+- 和我们的关系：背景。唯一价值：给出 Orin NX 上 GPU+EMC 协同 DVFS 的真实数字（相对内置治理器省 8.6-9.4%）。这是"在 Orin NX 上调节频率可得 ~10% 级能耗收益"的一个量级参照，与 Kang 的 EMC 结论方向一致（EMC 是重要状态）。区别：LLM 解码；无级联；无检测保证。
+- 可引用的句子：（可转述）在 Orin NX 上，GPU 与 EMC 协同的 DVFS 在满足 20 token/s 的期限下比内置治理器每 token 省约 8.6-9.4% 能耗（§5.3）。
+- 疑点：arXiv 编号与日期戳不一致（见上）；作者 Member/Senior Member 标注暗示已投 IEEE 刊，但无刊名；对 Kang 2026 无引用（全文 grep 未见 Kang、2606）。

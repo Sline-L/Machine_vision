@@ -1,0 +1,13 @@
+# Shalavi 2023 Jetson 板载功率传感器校准
+- 完整引用：Neda Shalavi, Aria Khoshsirat, Marco Stellini, Andrea Zanella, Michele Rossi，"Accurate Calibration of Power Measurements from Internal Power Sensors on NVIDIA Jetson Devices"，arXiv:2306.13107v1 [eess.SP]，19 Jun 2023，5 页；首页含 IEEE 版权声明（© 2023 IEEE），但具体会议/刊名与 DOI 原文未见；Padova 大学。
+- 来源核实：本地 OA_arXiv/2306.13107.pdf；首页 v1，19 Jun 2023；与已知元数据一致，但首页无投稿会议名（IEEE 版权声明在页脚）。
+- 阅读深度：全文（5 页，含参考文献）。
+- 一句话：用示波器在适配器输入端测"真值"功率，对 4 款 Jetson 的板载 INA3221 读数做线性回归校准，板载读数最多漏掉约 50% 功率，校准后误差 ≤3%。
+- 问题设定：把板载传感器读数 x（mW）映射到外部测得的整机输入功率。假设：二者关系近似线性，且差距"几乎恒定，与被测功率大小无关"（§IV）。
+- 方法：外部测量用 PicoScope 2204A（100 MS/s，8 bit，流式采样间隔 1 ms）加 Siglent CP4020 电流钳（缠 10 圈提高精度），串联在适配器与板之间；以 DSO-X 3024A 示波器和 Keysight 1147B 精密电流探头核验外部装置。内部读数用独立线程以最大速率读 sysfs 的 INA3221。两路数据对 100 ms 做滑动平均（MAF）后对齐，微秒时间戳。工作负载：空闲、有/无显示器、上网、高清视频、GPU 神经网络推理、多 Python 实例。每台设备拟合一条线性模型。AGX Orin 无整板传感器，把各部件传感器相加。
+- 保证 / 结论：Table I（校准模型，x 为板载读数 mW，误差为相对外部读数的平均绝对误差）：AGX Orin 1.02x+3115.39（±3%）；Xavier NX 1.10x+3130.41（±2%）；TX2 0.90x+1998.80（±3%）；Nano 1.11x+232.60（±0.8%）。（该表文本提取有错位，已用 -raw 模式核对行序。）摘要："internal sensors underestimate the actual power by up to 50% in most cases, but this calibration reduces the error to within ±3%"。差距在 Nano 上"even when the power is nearly constant"也存在，作者不认为是采样频率所致，推测来自供电电路损耗或传感器电路系统误差。
+- 实验：板卡为 AGX Orin、Xavier NX、TX2、Nano。**不含 Orin NX**（我们的板卡）。无推理精度/视觉任务指标，只测功率。Fig.4 给出各板两分钟轨迹；Fig.3 给出启动峰值电流（AGX Orin 5880 mA、TX2 6580 mA、Xavier NX 960 mA、Nano 1480 mA，持续 <1 ms）。拟合与验证看上去用同一批数据，训练/测试划分原文未见。
+- 局限：作者承认：只覆盖 4 款板；仅整机输入功率。我的看法：（1）验证集独立性未说明；（2）功率范围窄（Xavier NX 约 4.5-6 W 区间，见 Fig.5d 轴），外推到更高负载不明；（3）校准截距很大（约 2-3 W），说明板载读数不含适配器之后的固定损耗，不同电源适配器/温度可能改变；（4）板载读数最高漏 50%，这一数字未给每板具体值。
+- 和我们的关系：直接可用（方法论）/需区别（板型）。用来论证：若我们只用 Orin NX 的 INA3221/tegrastats 读能耗，需说明其系统性偏差，最好做外部功率计对照或报告"相对节能"而非绝对焦耳。区别：它没测 Orin NX，其 Xavier NX 的系数不能套用到 Orin NX。
+- 可引用的句子：（可转述）板载传感器读数相对外部示波器测得的整机功率存在近乎恒定的缺口，最高约 50% 的实际功率未被计入；线性校准后平均绝对误差 ≤3%（摘要、Table I）。
+- 疑点：会议名/DOI 首页未见；训练/验证是否同源未说；Orin NX 无数据。

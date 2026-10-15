@@ -1,0 +1,13 @@
+# Arya 2025 LLM 推理在 Jetson Orin AGX 上的性能与功耗
+- 完整引用：Mayank Arya, Yogesh Simmhan（印度理工学院 IISc），"Understanding the Performance and Power of LLM Inferencing on Edge Accelerators"，arXiv:2506.09554v2 [cs.DC]，12 Jun 2025，18 页；脚注称为短文的扩展版，短文将发表于 PAISE 2025（第 7 届 Workshop on Parallel AI and Systems for the Edge，随 IEEE IPDPS 2025）。DOI 原文未见。
+- 来源核实：本地 OA_arXiv/2506.09554.pdf；首页 v2，12 Jun 2025；与已知元数据一致。**这是一篇 LLM 论文，不是视觉。**
+- 阅读深度：正文全文（含结论）与附录大部分浏览；附录 A.1-A.3 的表和图只扫读，未逐项核对数字。
+- 一句话：在 Orin AGX 64GB 上测 4 个 LLM（Phi-2 2.7B 到 DeepSeek-R1-Qwen 32.8B）随 batch、序列长度、量化和 9 种自定义功耗模式变化的吞吐、延迟、功耗、能耗和困惑度。
+- 问题设定：LLM 推理（非训练），PyTorch 2.3.0 + Hugging Face，量化用 BitsAndBytes（FP32/FP16/INT8/INT4）。
+- 方法：WikiText2 与 LongBench 取 ≥256 token 段落作提示；batch 1-128，序列长度 128-1024；5 次平均（先热身）。功率用 jtop 记录，取批次中位功率；总能耗是以 2 s 采样间隔对功率做梯形积分（§2）。
+- 保证 / 结论：（原文）INT8 在小模型上更慢："for smaller models such as Phi-2 and Llama3.1-8B, INT8 inference reduces RAM usage by about 46% but is slower by 62% than FP16"；Mistral-24B 的 INT8 与 FP16 延迟相差 2% 以内（§3.3）。功率模式（§3.4，以 Llama 为例）：PM-A（GPU 降到 800 MHz，低 38%）瞬时功率降约 28%，延迟增约 26%，总能耗反而更低；PM-B（400 MHz）功率降 51% 但总能耗高于 MAXN；PM-H（内存降到 665 MHz）延迟增 370%、能耗增 72%、功率降 52%。（模式字母与 Table 2 行有错位的可能，PDF 文本表格有错行，此处按正文叙述。）
+- 实验：板卡 Orin AGX 开发套件 64GB（12 核 A78AE 2.2 GHz，GPU 2048 CUDA@1.3 GHz，JetPack 6.0，CUDA 12.2）。能耗来自板载传感器（jtop），**非外部功率计**。Table 3 困惑度（WikiText2）：Llama3 FP16 5.91、INT8 6.00、INT4 6.30；Mistral 4.99/5.00/5.08。
+- 局限：作者承认：多个组合 OOM（如 Phi2 序列长度 >256 OOM，原图注），问题限于 AGX Orin 64GB。我的看法：（1）不是视觉任务、不是 TensorRT，对象是 PyTorch + bitsandbytes，INT8 变慢的结论不能外推到 TensorRT 的 INT8；（2）jtop 2 s 采样很粗，只适合长批次；（3）功耗模式只有 9 种，且各因素在不同模式里同时变化，难以拆分；（4）无重复间的方差报告（已读部分原文未见）。
+- 和我们的关系：背景（弱）。仅可用作"Jetson 上降低 GPU/内存频率对能耗的影响不单调"的旁证。区别：LLM 工作负载、AGX Orin 非 NX、PyTorch 量化库而非 TensorRT PTQ、无 DLA。结论段提到未来要用 DLA（原文），说明他们没做。
+- 可引用的句子：（可转述）降低内存频率对延迟和能耗的损害显著大于降低 CPU 核数（§3.4）；小模型上 bitsandbytes 的 INT8 反而比 FP16 慢（§3.3，仅限该量化库）。
+- 疑点：功耗模式表（Table 2）与图 5 的字母对应需回看原图；附录中数字未逐项核。

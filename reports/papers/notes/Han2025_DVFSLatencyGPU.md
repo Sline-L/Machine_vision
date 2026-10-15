@@ -1,0 +1,13 @@
+# Han 2025 DVFS-Aware DNN Inference on GPUs: 延迟建模
+- 完整引用：Yunchu Han, Zhaojun Nan, Sheng Zhou, Zhisheng Niu（清华大学电子工程系），"DVFS-Aware DNN Inference on GPUs: Latency Modeling and Performance Analysis"，arXiv:2502.06295v2 [cs.LG]，20 Jun 2025，6 页。首页未见会议/刊名（原文未见）。
+- 来源核实：本地 OA_arXiv/2502.06295.pdf；首页 v2，20 Jun 2025；与已知元数据一致。
+- 阅读深度：全文（6 页）。
+- 一句话：GPU 上 DNN 推理时间不符合 CPU 式的 t=w/(g·f)，提出 t=a·f^(-b)+c 的经验模型，在 Jetson Xavier NX/Orin Nano 上拟合并用于期限约束下的 DVFS 与分割推理。
+- 问题设定：给定 DNN（或分块）和 GPU 频率 f，预测推理时间；能耗用 e=κ·f³·t（假设 V∝f，P=αCV²f）。（式 (2)）
+- 方法：先指出 FLOPs 与实测时延不成正比（VGG19 FLOPs 多于 ResNet152 但更快，Fig.1，两块板）。拟合 t = a·f^(-b) + c（式 (3)），a 对应工作量，b 反映频率影响（"close but not always equal to 1"），c 吸收其它因素，原因解释为高频时"memory access speed plays a leading role"。同形式用于分块（式 (4)，Table I/II 给出 AlexNet、ResNet152 在 Xavier NX 上各块的 a,b,c）。
+- 保证 / 结论：无统计保证。摘要：用该模型优化，与 CPU-DVFS 模型相比"a reduction of no less than 66% and 69% in inference time and energy consumption respectively"；协作推理中划分点更优、能耗更低（ResNet152 能耗降 62.3%，§IV-B）。
+- 实验：Jetson Xavier NX（GPU 0.12-1.10 GHz）和 Orin Nano；模型 AlexNet、VGG19、ResNet50/152、InceptionV3（Fig.1），CIFAR-10 分类；协作推理用 Xavier NX + GeForce RTX 4080，输入 0.57 MB，期限 D=200 ms。能耗：固定频率下"measure the GPU power consumption"，得等效系数 κ=1.3 W/(Hz)（文中单位原样），**测量方法（板载传感器还是外部表）原文未见**。Fig.8-9：期限 100/150/200 ms 与能耗约束 0.02/0.04 J 下与 CPU-DVFS 基线对比，例如 VGG19 能耗约降 70%、ResNet152 约降 84%。
+- 局限：作者承认：需要在更多设备和 DNN 上实验，需构建真实数据集提供参数（结论段）。我的看法：（1）基线（g=1536 FLOPs/周期的 CPU-DVFS 模型）本身较弱，"≥66%/69%"的比较对象选得对自己有利；（2）能耗用 f³ 理论式而非直接测量，未见能耗测量不确定度；（3）只用 PyTorch 式推理，无 TensorRT/量化/DLA；（4）无误差界或置信区间；（5）未涉及内存时钟，而 Kang 2026 表明 EMC 是缺失状态。
+- 和我们的关系：背景。只支持"GPU 频率与时延非反比，高频段收益递减"这一点；与 H 问题无直接关系。区别：它建模的是时延-频率，不涉及检测保证、量化精度、级联。
+- 可引用的句子：（可转述）在 GPU 上推理时间并不与所需 FLOPs 成正比，直接套用 CPU-DVFS 模型会带来显著误差（引言，Fig.1、Fig.3）；高频段推理时间下降变缓，作者归因于内存访问（§III-A）。
+- 疑点：功率测量方式未说；v1 与 v2 差异未知；无正式发表信息。

@@ -1,0 +1,16 @@
+# Karimov 2025 YOLO12量化对输入退化的鲁棒性（TensorRT INT8校准）
+- 完整引用：Toghrul Karimov, Hassan Imani, Allan Kazakov. Quantization Robustness to Input Degradations for Object Detection. arXiv:2508.19600v3 [cs.CV], 1 May 2026 (v3). 首页未见刊名/DOI。代码：github.com/AllanK24/QRID。
+- 来源核实：本地 OA_arXiv/2508.19600.pdf；首页版本 **v3，1 May 2026**；arXiv号2508提示首次提交为2025-08，故年份我按首发写2025，PDF实际为2026年修订版（需引用时写明版本）。7页。
+- 阅读深度：全文（7页，含全部表I-III）。
+- 一句话：在RTX 2070上比较YOLO12 n–x的FP32/FP16/动态UINT8/静态INT8（TensorRT）在COCO及合成退化下的mAP与延迟，并试了“50%干净+50%退化图”做INT8校准，结论是几乎无益。
+- 问题设定：COCO train2017抽1000张做校准，COCO val2017全集做评估，batch=1；评估用Ultralytics model.val()（第III节）。
+- 方法：静态INT8两种校准集：干净1000张 vs 50/50混合（退化来自同一干净池）。退化由Albumentations生成：高斯噪声（低σ∈(10,30)/255、中σ∈(35,55)/255）、模糊、低对比度、重JPEG（质量20–45）。**TensorRT校准算法类型（entropy/minmax/percentile）原文未指明**，只说“default TensorRT calibration mechanisms”（结论局限）。
+- 保证 / 结论：无统计保证。结论：静态INT8加速1.5–3.3×（摘要）、干净数据上掉3–7个百分点mAP50-95；混合校准整体“remarkably similar”于干净校准，仅YOLO12x在噪声下有益。
+- 实验（精确数字）：
+  - 表I mAP50-95：n：FP32 0.4047、FP16 0.4044、INT8干净校准 0.3325、混合 0.3327；x：FP32 0.5514、INT8干净 0.5202、混合 0.5032。
+  - 表II延迟(ms)：n：FP32 3.8、FP16 2.2、INT8 2.6；x：FP32 61.3、FP16 18.2、INT8 18.4；动态UINT8反而更慢（n：6.5 ms）。**FP16与INT8在大模型上几乎同速（x：18.2 vs 18.4）**，小模型FP16甚至更快（n：2.2 vs 2.6）。
+  - 表III相对mAP降(%)（中噪声）：n：FP32 59.3、INT8干净 60.6；x：FP32 27.2、INT8干净 34.7、混合 28.1。低噪声：x：INT8干净12.5、混合9.6；**M：INT8干净17.2、混合22.0（混合更差）**。
+- 局限：作者承认：仅YOLO12+COCO，退化类型/强度有限，只用默认TensorRT校准，未比QAT。我的判断：(1) **并未比较校准器类型（entropy/minmax/percentile）**，不能当作校准器比较的证据；(2) 单次运行无方差，Table III小差异不可解读；(3) 硬件是桌面RTX 2070，不是Jetson/DLA；(4) 摘要“3–7% mAP”实为**绝对百分点**（0.031–0.072），n模型相对降幅约17.8%（0.0722/0.4047，我自己的计算），措辞易误读；(5) 无逐样本翻转。
+- 和我们的关系：**背景/需区别**。可引：TensorRT INT8在检测器上掉点随模型小而大；噪声是INT8最敏感的退化（“consistently increased sensitivity”）；校准集分布影响有限（对我们是反向信息：校准集构成未必是主因）。对“缺陷图像有噪声/纹理”场景提示INT8对噪声更敏感。区别：非分类gatekeeper、无阈值保证、无Jetson。
+- 可引用的句子：“Static INT8 models consistently showed increased sensitivity to the applied noise levels”（结论）；“mixed calibration performed similarly to standard clean data calibration”（结论）。
+- 疑点：(1) 摘要/正文“1.5–3.3×”可由表II验证（n 3.8/2.6≈1.46；x 61.3/18.4≈3.33）；(2) 其参考文献[11]把Nagel白皮书作者写成“M. Nagel, R. A. Amjad, M. van Baalen, T. Blankevoort, M. Welling”，与Nagel白皮书PDF首页的作者列表不符（见Nagel2021笔记），说明该论文参考文献质量一般；(3) 作者邮箱同机构却标注Baku/Istanbul不同城市，无关紧要。

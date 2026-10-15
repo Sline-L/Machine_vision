@@ -1,0 +1,24 @@
+# Mishra & Lone 2026 Edge-TSR（Jetson Orin Nano 上的连续路侧交通标志识别）
+- 完整引用：Aditya Mishra, Haroon Lone (IISER Bhopal, 印度). "Beyond Benchmarks: Continuous Edge Inference for Fine-Grained Roadside Perception". arXiv:2606.17241v1 [cs.CV], 15 Jun 2026。PDF 首页未见期刊/会议与 DOI。
+- 来源核实：本地 OA_arXiv/2606.17241.pdf（18 页）；首页标注 arXiv:2606.17241v1 15 Jun 2026，与文件名一致，无元数据差异。代码与数据集声称发布于 github.com/adityamishra-ml/Edge-TSR（PDF 所述，我未核验）。
+- 阅读深度：全文（第 1-8 节、附录 9.1、9.4 的实现/硬件表；附录定性图 9.2 仅略读）。
+- 一句话：在 Jetson Orin Nano 8GB 上做"检测器 + ResNet-50 分类器 + ByteTrack + 滞回标签锁定"的交通标志流水线，论点是静态图像基准高估部署表现 20-30%，并给出 55 分钟车载实测。
+- 问题设定：输入为车载视频流；输出为每帧的 [bbox, cls]。无统计保证，无 i.i.d. 假设（恰恰强调视频流时间相关、非平稳）。
+- 方法：每 k=3 帧运行一次 YOLOv8 检测（640×640，类别无关），中间帧由 ByteTrack 卡尔曼预测传播；对每个检测框加 0.20 的上下文 padding 后送 ResNet-50（41 类，224×224）；每个轨迹维护长度 5 的滑窗，做置信度加权投票，再用"候选/锁定"两态滞回机制：同一标签出现 ≥3 次且平均置信度 >0.6 时锁定，之后需要更高置信度且 ≥3 次的反证才能改写（对 unknown 有更宽松的逃逸）。这是"稀疏调度 + 时间稳定"，不是"便宜分类器放行、贵检测器复核"的门控级联。
+- 保证 / 结论：无形式化保证。主要经验结论（原文 Finding 1）：YOLO-LLTS 从 90.00% 降到 60.50% mAP@50；YOLO-TS 90.82%→70.48%；LENS-Net 92.56%→65.73%（Table 2）；去掉滞回锁定使准确率由 75.33% 降到 65.17%（Finding 8）。
+- 实验：
+  - 板卡：NVIDIA Jetson Orin Nano 8GB（Table 9：6 核 Cortex-A78AE，1024 CUDA core，32 Tensor core，68 GB/s，"67 TOPS"）。非 Orin NX。电源模式写"10W (MAXN SUPER during deployment)"，正文 5.2 称全部实验在 MAXN SUPER。
+  - 软件：Ubuntu 22.04（JetPack 6.0），PyTorch 2.10，CUDA 12.6，OpenCV 4.13。**TensorRT 版本：原文未给，且明确未使用 TensorRT**（Sec 5.4："executed directly on the Jetson GPU in FP32 precision without TensorRT optimization"）。
+  - 精度：全部 FP32 PyTorch；无 FP16/INT8；无 DLA。
+  - 延迟/功率：延迟为端到端 FPS（含读图、预处理、前向、后处理、CUDA 同步）及各组件均值（Det/Cls/Trk ms）；**未测功率/能耗**（原文未见任何 W 或 J 测量）；FPS 标准差只在图 5a 给出（k=5 时 FPS Std 4.09）；**未见 P95/P99**。温度：由 jtop 1 s 间隔采样，报告 CPU/GPU 平均与最高温（Table 4；k=1 时 GPU 平均 56.74 C、最高 58.96 C；k=3 时 54.51 C、57.96 C）。车载实测 GPU 平均 48.15 C（最高 50.37 C）。
+  - 关键数字：k=1 仅 12.12 FPS，k=3 为 27.01 FPS（Table 4）；车载 55 min/26 km 平均 16.18 FPS（σ=0.93），检测延迟由 34.96 ms 升到 65.68 ms（Finding 11）。
+  - 测试集：4 段视频共 50,732 帧，其中 21,493 帧含标志，62,707 个标注实例（Sec 3.2）；但四种场景是各一条视频（Dense 27,030 帧等），属单城市数据。受控实验"五次独立运行取均值"，**未报置信区间**；分类指标无区间。
+  - PyTorch vs TensorRT 逐样本/决策级一致性：**原文未见**（根本未使用 TensorRT）。
+- 局限：
+  - 作者承认：封闭集 41 类无法拒识；固定采样间隔不随车速/热状态调整；仅印度单城市；单模态 RGB（Sec 7 Limitations）。
+  - 我的判断：(1) "20-30% 图像到视频退化"是把三种基线直接套到作者自采的视频集上，且视频集的光照条件（夜间、雨、无路灯）与训练集 INTSD 分布不同，退化主要是分布偏移，不能解释成"视频流本身"导致；LENS-Net 还因内存问题在 CPU 上跑，FPS 0.44 不可比。(2) 未使用 TensorRT，结论对优化部署不一定成立。(3) 稳定性模块的阈值（3 次、0.6）在同一数据上经验确定，无独立验证集说明。(4) 硬件表称 JetPack 6.0 却用 MAXN SUPER，且同表写 10W，这两项在原文内部不够一致（据我所知 MAXN SUPER 模式是后来的 JetPack 版本引入的，但此点我未在原文内核实，属推测）。（我的判断）
+- 和我们的关系：背景 / 需区别。可用作"静态基准高估部署表现、热降频与负载依赖吞吐"的外部佐证。区别：它没有统计保证、没有阈值校准、没有 PyTorch→TensorRT 一致性、没有功率测量、板卡为 Orin Nano 而非 NX 16GB、检测器对所有帧/稀疏帧全跑而非由分类器门控。它是"检测+分类两阶段"，但第二阶段是细分类，目标是识别精度而不是节省算力，不满足我们声明 (a) 的任何一条组合条件。
+- 可引用的句子：
+  - 每帧推理在 Orin Nano 上仅 12.12 FPS，每 3 帧检测一次可达 27.01 FPS 且 GPU 平均温度从 56.74 C 降到 54.51 C（Table 4, Finding 7）。
+  - 实机检测延迟由受控 34.96 ms 升至 65.68 ms，组件基准是上界而非部署目标（Finding 11）。
+- 疑点：图 5/表 2、3 在文本层有错位，上述 Table 2 数字已按行对照核实 mAP@50（60.50/65.73/70.48/73.12），Table 4 的列顺序部分错位，若要引用 CPU/GPU 利用率需看原图；"67 TOPS" 与 "10W" 的并列未解释。

@@ -1,0 +1,25 @@
+# Giedra 等 2026 边缘 LLM 推理基准（Jetson Orin Nano Super，外部万用表 vs tegrastats）
+- 完整引用：Henrikas Giedra, Dalius Matuzevicius, Tomyslav Sledevic, Giga Shubitidze, Artūras Serackis (Vilnius Gediminas Technical University). "Benchmarking Large Language Model Inference on Limited-Resource Edge Systems". Electronics 2026, 15(11), 2451（30 页）. DOI: 10.3390/electronics15112451. 收稿 27 Apr 2026，修订 26 May 2026，接收 28 May 2026，发表 3 Jun 2026。
+- 来源核实：本地 期刊正式版/A9_10.3390_electronics15112451.pdf；首页版权页信息（MDPI，CC BY）与上述一致，无与已知元数据的差异。
+- 阅读深度：全文（引言、方法 2.1-2.9、结果 3.1-3.7、局限与未来工作、参考文献条目核查）；附录 A 的功率时间序列图只看了图题，未逐图细读。
+- 一句话：用 Ollama/llama.cpp（GGUF 量化）在 Jetson Orin Nano Super 上测 12 个 0.27B-8B 的开源 LLM 的吞吐、功率和 tok/J，同时用外部万用表与 tegrastats 双通道测功率，精度在桌面 PC 上单独评测。
+- 问题设定：输入为固定的 7 类提示（short/medium/long/very_long/reasoning/code/JSON）；输出为 tok/s、W、tok/J 与 lm-eval 生成式任务得分。这是 LLM 工作负载，**不是视觉任务**，与缺陷检测无直接任务关联。
+- 方法：精度（IFEval、GSM8K、TruthfulQA_gen）在 PC（RTX 4080 SUPER）上用 lm-evaluation-harness 评；速度/功率在 Jetson 上用自写 Python 脚本调用 Ollama REST（stream=False，num_ctx=1024，num_predict=192，temperature=0）。每个模型每类提示 3 次预热 + 5 次测量，间隔 5 s 冷却，另测 10 s 空闲基线（Sec 2.6）。GPU 与 CPU-only 两种模式各 420 次测量（Sec 3）。功率：tegrastats 50 ms 间隔读 VDD_IN、VDD_CPU_GPU_CV、VDD_SOC 等轨与 CPU/GPU/结温；外部为 TTi 1604 台式数字万用表在 Jetson DC 输入处记电压电流，P=V×I，由 Raspberry Pi 5 记录，约 2 样本/秒，用墙钟时间戳同步（Sec 2.8）。
+- 保证 / 结论：无统计保证。主要结论（摘要，Table 4）：GPU 模式中位吞吐 18.13 tok/s、CPU-only 7.12 tok/s；外部表能效 GPU 0.823 tok/J、CPU 0.453 tok/J；平均外部功率 22.03 W（GPU）、15.11 W（CPU）；平均 VDD_IN 17.63 W、12.45 W。亚 1B 模型吞吐与能效最高，7-8B 模型精度最高但每 token 能耗高（Sec 3.4-3.5）。
+- 实验：
+  - 板卡：Jetson Orin Nano Super（8GB，1024 CUDA core，32 Tensor core，外接 NVMe）；非 NX。
+  - 软件：Ubuntu 22.04.5（JetPack 6.2），Ollama 0.11.10，Python 3.10.12（Table 2）。**TensorRT：未使用**（Sec 3.8 把 TensorRT-LLM 列为未来工作）；无 DLA；精度为 GGUF 的 Q4_K_M/Q4_0 等权重量化（Table 3），不是 TensorRT FP32/FP16/INT8。
+  - 功耗/时钟：固定 nvpmodel（具体模式 PDF 未写）+ jetson_clocks，headless；CPU-only 对照用全核最高频率。
+  - 测量方式：外部万用表（约 2 Hz，非严格固定间隔，无硬件触发，未做万用表实验室校准——原文自述，Sec 2.8）为主，tegrastats 为辅；作者把外部表作为主要基准，理由是两种通道得出相同相对结论，且外部更高（Sec 3.2）。内外偏差：GPU 模式外部均值 22.03 W 对 VDD_IN 17.63 W（约 4.4 W），CPU 模式 15.11 W 对 12.45 W（约 2.7 W）；这是我用 Table 4 数值相减得到的，原文只说外部更高，归因于输入通路与稳压损耗。
+  - 延迟指标：端到端请求时间与生成吞吐；**不测首 token 时间**；吞吐取全部运行的中位数，功率取均值；**未报 P95/P99**。
+  - 温度：tegrastats 中记录了 CPU/GPU/结温，**但正文未给出数值结果**，作者在局限中明确"不是持续热耐久测试"。
+  - 样本量/统计：5 次测量/配置；误差线为 ±1 标准差；无置信区间、无显著性检验。
+  - PyTorch vs TensorRT 逐样本/决策级一致性：**原文未见**（不适用）。精度在 PC 上评测，Jetson 上不评测，作者自己指出是"模型配置层面间接建立的权衡"，不是同一栈上的统一基准（Sec 2.1）。
+- 局限：
+  - 作者承认：精度与效率在不同硬件上分别测；单设备单运行时（Ollama/GGUF）；非流式未测 TTFT；短时运行非热耐久；万用表采样率低、无硬件触发，无法刻画瞬态功率（Sec 3.7）。
+  - 我的判断：(1) 与视觉缺陷检测、TensorRT、DLA 都无关，主要价值是"外部功率 vs 板载遥测存在系统性偏差"的第二个独立例证；(2) 外部表约 2 Hz 且未校准，绝对值可信度弱于 AgriJetsonBench 的校准 INA260；(3) 摘要称"Unlike prior Jetson-based evaluations relying solely on internal telemetry"是新颖性自述，未经我核实；(4) 在 Gemma 3 270M 上 CPU 与 GPU 能效几乎相等（3.68 vs 3.76 tok/J），说明 GPU 优势随模型规模变化，不是普适规律。（我的判断）
+- 和我们的关系：背景。可用于论证"板载 tegrastats 低估整板输入功率，应以外部输入功率为准"（与 Jahanifar 2026 的结论同向，两者偏差符号一致：内部 < 外部）。其他内容（LLM、Ollama）与我们无关，不应作为我们任务的证据。参考文献 [69] 为 Aljami 等"Benchmarking YOLOv8 Variants for Object Detection Efficiency on Jetson Orin NX for Edge Computing Applications", Computers 2026, 15, 74——这是 Orin NX 上的视觉基准，**值得单独核查是否含 TensorRT/功率测量**（本批我未读该文，仅见其参考文献条目）。
+- 可引用的句子：
+  - 外部板级输入功率高于 Jetson VDD_IN 轨读数，与片上遥测未覆盖输入通路及稳压损耗一致（Sec 3.2）。
+  - 作者将外部万用表作为功率主参考，tegrastats 作为补充（Sec 3.2, 2.8）。
+- 疑点：正文称"mean external input power increased by approximately 46%"（GPU 22.03 vs CPU 15.11 W），自洽；Fig. 3 热图中 Qwen3/DeepSeek 在 IFEval 等多项得分为 0.000，原因正文未在我读到的部分解释（可能与推理型模型输出格式有关，属推测），不影响本文用途。

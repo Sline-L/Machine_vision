@@ -1,0 +1,25 @@
+# Zhou 等 2026 LDA-YOLO11 路面缺陷检测（Jetson Orin NX 8GB，TensorRT 8.5 FP32/FP16）
+- 完整引用：Shiwei Zhou, Shujian Wang, Yang-Kwon Jeong, Jingyan Xiang. "LDA-YOLO11: a lightweight detail-attention detector for edge-deployable road surface defect detection". Scientific Reports（Article in Press，已接收，尚无卷期页）. DOI: 10.1038/s41598-026-69844-1. 收稿 28 May 2026，接收 31 Aug 2026。PDF 首页文本层未显示作者单位；伦理豁免由 Yichang Vocational College of Science and Technology 质量管理办公室出具（编号 YVST-ETH-2026-0002，Sec 伦理声明）。
+- 来源核实：本地 期刊正式版/D9_10.1038_s41598-026-69844-1.pdf（22 页）。**文件版本为 "Article in Press"（Scientific Reports 的早期录用稿）**，首页注明"最终编辑版将自动替换"，所以引用时需注明是在印稿、可能与定稿不同；与"期刊正式版"这个文件夹名称不完全相符。
+- 阅读深度：全文（引言、方法、实验设置、边缘部署、结果、消融、泛化、部署、讨论；网络模块的数学推导略读；参考文献略读）。
+- 一句话：在 YOLO11n 的颈部加入 P2 引导细节融合（P2-DN）和 ECA 通道注意力，用 3423 张私有路面图得到 mAP@0.5 0.951，并在 Jetson Orin NX 8GB 上比较 PyTorch、TensorRT FP32、TensorRT FP16 的精度与延迟。
+- 问题设定：路面三类缺陷（crack、damage、pothole）的框级检测。无零件级判定，无统计保证。
+- 方法：基线 YOLO11n；P2-DN 将 P2 高分辨率特征与 P3 融合后再降采样回 P3，不加 P2 检测头；ECA 加在最终 P3 和 P4 融合特征后（核大小 k=3，Table 9/10）。Ultralytics 训练：250 epoch，batch 16，AdamW，lr 0.0015，Mosaic 0.5（最后 30 轮关闭），关 AMP（Sec 训练配置）。数据：3423 张图，随机 8:1:1 → 2739/342/342；手工去重，但"无法保证场景级隔离"（作者自述）。
+- 保证 / 结论：无形式化保证。数字（Table 3, 6）：LDA-YOLO11 mAP@0.5 0.951、mAP@0.5:0.95 0.791，相对 YOLO11n（0.928/0.774）提升 2.3 和 1.7 个百分点；5 个随机种子的均值±标准差（Table 6）：LDA-YOLO11 0.951±0.004 / 0.791±0.002，YOLO11n 0.928±0.005 / 0.774±0.004。外部数据 RDD2022-China（Table 12）：0.872/0.736 对 0.850/0.712。
+- 实验：
+  - 板卡：**Jetson Orin NX 8GB**（1024 CUDA core，32 Tensor core，Table 2）；非 16GB。MAX-N 模式，jetson_clocks 开启，batch 1，输入 640×640，预热 50 次，计时 100 次（Table 2，字段在文本层错行，按项目名与值顺序还原）。
+  - 软件：**JetPack 5.1.2，CUDA 11.4，cuDNN 8.6.0，TensorRT 8.5.2.2，Ultralytics 8.3.2**（Table 2）。TensorRT 版本是 8.5，不是我们使用的 10.7；而且 TensorRT 8.5 与 10.x 在 DLA/INT8 校准行为上可能不同（此点为我的判断，原文未涉及）。无 DLA、无 INT8。
+  - 精度对照（Table 13，LDA-YOLO11，Jetson）：PyTorch：模型 5.39 MB、mAP@0.5 95.1%、131 ms/张、7.63 FPS；TensorRT FP32：16.29 MB、95.1%、63 ms、15.87 FPS；TensorRT FP16：8.69 MB、94.9%、27 ms、37.03 FPS。作者称 FP32 TensorRT 的 mAP@0.5 "与 PyTorch 结果一致"（只精确到 0.1%），FP16 降 0.2 个百分点。
+  - Table 14（TensorRT FP16，Jetson）：YOLO11n 92.7%/25.5 ms/39.22 FPS；YOLO11n+ECA 94.2%/26.0 ms；YOLO11n+P2-DN 94.0%/29.0 ms；LDA-YOLO11 94.9%/27.0 ms/37.03 FPS。
+  - 延迟定义：写的是"single-image inference latency"，**是否含前后处理原文未说明**；报告均值，**无 P95/P99、无标准差**；每个格式"重复推理取平均"。功率/能耗：**原文未见**；温度：**原文未见**。
+  - 测试集规模：342 张；表 11 给类级 AP（crack 0.785，damage 0.802，pothole 0.786 的 AP@0.5:0.95）；混淆矩阵（归一化）显示 crack 被预测为背景（漏检）的比例约 0.18，damage 0.05，pothole 0.04（Fig. 9, Sec 混淆矩阵分析）。
+  - 统计严谨性：精度端有 5 种子均值±SD（相对其他应用论文是较好的做法），但：延迟、FP16 与 FP32 之差均无重复或区间；Table 3 的 LDA-YOLO11 与 YOLO11n 数值与 Table 6 的"5 次均值"相同（0.921/0.904/0.951；0.918/0.890/0.928），说明 Table 3 的数字大概率就是 5 次均值，但正文没有明说。
+  - PyTorch vs TensorRT 逐样本/决策级一致性：**原文未见**。只有数据集级聚合 mAP@0.5（到 0.1%）。
+- 局限：
+  - 作者承认：数据集小且来源单一，地理、材料、天气、设备覆盖不足；私有数据集无法保证场景级隔离；只做图像检测，未用视频时序（Sec 讨论）。
+  - 我的判断：(1) 路面缺陷是目标检测而非零件级放行问题，crack 有 18% 被判为背景，这是个有用的真实"漏检"数字，但它是框级召回，与零件级漏检率不是同一指标；(2) 延迟差异在噪声量级：完整模型 LDA-YOLO11（27.0 ms）比只含 P2-DN 的子模型（29.0 ms）还快，而前者包含后者全部结构，说明 ±2 ms 级别的差异不能解释，作者又没给延迟方差；(3) 所用 TensorRT 8.5.2.2/JetPack 5.1.2 与我们的 TensorRT 10.7 栈不同，结论里的"FP16 仅降 0.2 个百分点"不能直接搬到我们环境；(4) 8GB 版 NX，GPU 频率/内存带宽与 16GB 版不同（此点为我的知识，原文未讨论）；(5) 论文为在印稿，数据为"经数据持有者许可"的私有数据，可复现性有限。（我的判断）
+- 和我们的关系：直接可用（作为外部证据）+ 需区别。可用：Orin NX 上 PyTorch FP32→TensorRT FP32→TensorRT FP16 的同模型对照，给出 FP16 仅 -0.2 个百分点 mAP@0.5 的实例（TensorRT 8.5，单数据集），与 Dimitrovski 2026 的 FP16 结果同向。区别：精度只在聚合 mAP 上比较；没有决策级一致率、没有阈值校准、没有级联、没有统计保证、没有功率/温度、没有 DLA、没有 INT8。因此它并不支持"部署后保证仍成立"，也没有证伪。
+- 可引用的句子：
+  - 在 Jetson Orin NX 上 TensorRT FP16 将延迟从 PyTorch 的 131 ms 降到 27 ms，同时 mAP@0.5 仅下降 0.2 个百分点（Table 13）。
+  - 作者承认私有数据集无法保证场景级隔离（Sec 数据集与讨论）。
+- 疑点：Table 2 在文本层错行（批大小/功耗模式/时钟/预热/计时项与值顺序错位），我按项目顺序还原为 batch=1、MAX-N、jetson_clocks、预热 50、计时 100，若要精确引用请看原图；PyTorch 推理 131 ms 对一个 2.6M 参数模型而言偏慢，是否含预/后处理未说明；Table 3 文本层行列错位。

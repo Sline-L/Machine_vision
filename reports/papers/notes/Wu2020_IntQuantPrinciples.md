@@ -1,0 +1,21 @@
+# Wu 2020 整数量化原理与实证（NVIDIA）
+- 完整引用：Hao Wu, Patrick Judd, Xiaojie Zhang, Mikhail Isaev, Paulius Micikevicius. Integer Quantization for Deep Learning Inference: Principles and Empirical Evaluation. arXiv:2004.09602v1 [cs.LG], 20 Apr 2020. 首页未见刊名（预印本）。
+- 来源核实：本地 OA_arXiv/2004.09602.pdf；首页 v1，20 Apr 2020，20页；作者单位NVIDIA与Georgia Tech，无差异。
+- 阅读深度：摘要、第1节引言、第3.4节校准、第4节（表3、4、5）、第5节（表6、7）、附录A的模型/校准样本表，经文本检索定位阅读；第2节数学推导、QAT细节与附录B-E只扫读。
+- 一句话：对19个网络比较权重/激活的INT8校准方法（max、entropy、百分位），给出“逐层max权重+多种激活校准取最优”的PTQ流程，并与QAT对比。
+- 问题设定：PyTorch中以自定义量化算子做**模拟量化**（第4节开头“experiments are conducted using PyTorch with custom quantization operations”），非TensorRT实机；对象含ImageNet分类、Faster/Mask R-CNN、RetinaNet、分割、GNMT、Transformer、Jasper、BERT。
+- 方法：校准=选取量化范围。三种（第3.4节）：Max（用校准中见到的最大绝对值）；Entropy（用KL散度最小化信息损失，原文称“the default method used by TensorRT [36]”）；Percentile（如99.99%，裁掉最大幅值的一部分）。权重一律按通道max校准（表3、4）；激活比较max、entropy、99.9%…99.9999%（表5）。校准样本：分类/检测1024或512张训练集图（附录A.1）。
+- 保证 / 结论：摘要：提出8-bit流程，“maintain accuracy within 1% of the floating-point baseline on all networks studied”。第4.2节：“no single calibration is best for all networks”；max校准在Inception v4、EfficientNet、Transformer上很差；99.9%百分位裁得过狠，多数网络掉点明显。
+- 实验（表5精确数字，Top-1，fp32 / Max / Entropy / 99.9% / 99.99% / 99.999% / 99.9999%）：
+  - ResNet50 v1.5：76.16 / 75.82 / 76.05 / 75.68 / 75.98 / 75.97 / 76.00
+  - Inception v4：79.71 / **0.12** / 79.60 / 78.16 / 79.63 / 79.12 / 71.19
+  - EfficientNet b0：76.85 / 22.3 / 72.06 / 70.87 / 68.33 / 51.88 / 42.49
+  - Faster R-CNN(mAP)：36.95 / 36.38 / 36.82 / 35.22 / 36.69 / 36.76 / 36.78
+  - Retinanet：39.30 / 38.90 / 38.97 / 35.34 / 38.55 / 39.19 / 39.19
+  - BERT Large(F1)：91.01 / 85.92 / 37.40 / 26.18 / 89.59 / 90.20 / 90.10
+  - 表7（PTQ最优 vs QAT）：ResNet50 PTQ最优=Entropy 76.05（-0.14%），QAT 76.85；EfficientNet b0 PTQ最优 Entropy 72.06（-6.23%），QAT 76.95；Faster R-CNN Entropy 36.82（-0.35%）。
+  - 权重粒度（表3）：EfficientNet b0 逐张量+折叠BN 仅12.93，逐通道76.72。
+- 局限：作者承认：没有单一最优校准；MobileNet/EfficientNet/Transformer/BERT的PTQ掉点>1%，需部分量化或QAT。我的判断：(1) **不是TensorRT实测**，且只报精度，**没有逐样本决策翻转/一致率**，没有置信度或校准误差分析；(2) 没有多次随机校准集的方差；(3) 没有检测框/漏检层面指标，且无缺陷检测数据。
+- 和我们的关系：**背景/方法依据**。可引：INT8 PTQ精度强依赖激活校准器与模型结构；entropy是TensorRT默认校准；PTQ优先、QAT作为PTQ失败时的补救的流程，与我们“PTQ first, QAT undecided”一致；对EfficientNet类轻量网络PTQ可大幅掉点，提示若gatekeeper用轻量分类器要小心。区别：精度均值而非逐件保证；模拟量化不等于TensorRT/DLA实机。
+- 可引用的句子：“no single calibration is best for all networks”（第4.2节）；“Entropy … default method used by TensorRT”（第3.4节）；PTQ失败可用部分量化（跳过敏感层）或QAT恢复（第5节、表6、7）。
+- 疑点：表5排版中EfficientNet b3的“Max=54.27、Entropy=76.96”等已按文本读取，未栅格化核对；“TensorRT默认entropy”系作者陈述（引用2017 GTC演讲），未与NVIDIA官方文档核对（官方文档请另核）。

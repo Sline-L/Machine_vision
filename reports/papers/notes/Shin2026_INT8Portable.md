@@ -1,0 +1,22 @@
+# Shin 2026 INT8可移植性跨平台测量（Is INT8 Portable?）
+- 完整引用：Yuyeong Shin（Korea Automotive Technology Institute, KATECH）. Is INT8 Portable? A Cross-Platform Measurement Study of Quantized Inference on Embedded and Automotive Accelerators. arXiv:2609.16085v1 [cs.AR], 14 Sep 2026. 原文首页未见刊名/DOI（预印本）。代码/报告：github.com/yyshin-katech/embedded-ai-quantization-guide（tag paper1-v1）。
+- 来源核实：本地 OA_arXiv/2609.16085.pdf；首页版本 v1，14 Sep 2026，22页。作者单人，与已知元数据无差异。
+- 阅读深度：全文正文（第1-11节，表1-7，图1-3）读完；附录A（claim-to-artifact表）只扫读，未逐项核对其链接的报告。
+- 一句话：控制“同一ONNX文件+同一量化scale”，测7类硬件，发现INT8的预测在换“整数核”后约4%输入上翻转而FP32完全一致，且top-1精度几乎看不出来。
+- 问题设定：输入=ResNet-50（ImageNet，1000张固定图包）、ResNet-18、DETR、YOLO26n/YOLOv5s（COCO）；固定模型文件与scale，唯一自由变量是目标硬件的整数kernel/ISA（第3.3节）。指标=两目标在同一批输入上top-1预测一致的个数/1000。
+- 方法：同一个 resnet50_int8_qdq.onnx 分别在多种CPU（ONNX Runtime/MLAS）上跑，并用它构建TensorRT INT8引擎在Jetson iGPU上跑；两两比较top-1是否一致，FP32作对照（第3.3、5节）。另做“强制所有scale为2的幂”的缓解实验（第5节）。
+- 保证 / 结论（原文，第5节、表3）：FP32 top-1 在所有测过的平台对均 1000/1000；INT8 在“共享整数kernel”的一对上 1000/1000（Jetson A78AE vs Pi5 A76），在“不共享”的各对上 958–965/1000。表3逐对：A53 vs A76 965；A53 vs x86 i9 961；A76 vs i9 958；**Jetson iGPU(TensorRT) vs A78AE(MLAS) 961/1000（即39/1000翻转）**；DEEPX DX-M1 vs 主机A76 939/1000（scale未固定，作者自己排除出“不变性”结论）。精度层面：Jetson iGPU INT8 top-1 = 0.7620（对自身FP32无损），高于CPU MLAS INT8 的 0.7500，“翻转净中性”，标准精度报告看不出（第5节“Accuracy hides it”）。
+- 实验：
+  - 硬件（表1）：**Jetson AGX Orin**（含iGPU与2×NVDLA v2，不是Orin NX）、RPi5、i.MX8M-Nano、i9-10900K、RTX3080、Qualcomm Hexagon HTP、DEEPX DX-M1；每类n=1。
+  - 2的幂scale缓解：x86↔A76 一致率由 958 降到 869（ceil）/ 919（nearest），即变差（第5节）。
+  - DLA（第8节“Accelerator note”，非一致性实验）：DLA为INT8-only数据通路，FP16 慢13.87×；51.29 inf/s/W，为iGPU的1.55×、功耗约一半；ResNet-50 用 --useDLACore=0 --allowGPUFallback 为“2个fallback”；DETR 为 326个DLA层/404个GPU fallback层/16个ForeignNode，398.64 ms vs iGPU FP16 13.28 ms。
+  - DETR INT8（ORT，MinMax校准100张图）：mAP 0.4207→0.2402（-42.9%）；Jetson上 0.4237→0.2383（第8.1节）。
+  - 方法学坑（第9节）：1000张ImageNet子集比全验证集top-1平均虚高 +9.77 pp；预处理差异 -1.07 pp 约为量化代价 -0.12 pp 的9倍；逐层SQNR与top-1变化无相关（Spearman ρ=-0.030，21层）；TensorRT EP“可用”却悄悄跑在CPU。
+- 局限：
+  - 作者承认（第10节）：多数延迟为单次p50无置信区间；部分准确率/一致性为子集（200–1000图）；每类硬件n=1；各CPU的ORT版本不同（1.17.1/1.23.2/1.28.0）；功耗测量边界不统一；2的幂实验仅一个模型/一个边界。
+  - 我的判断：（我的判断）(1) **没有测 Orin GPU vs DLA 的预测一致率**，DLA只出现在延迟/能效/碎片化讨论中；(2) 一致率只有top-1分类，无检测框/分数阈值层面的翻转；(3) 翻转率约4%是在1000图、ResNet-50、ImageNet上，没给出“翻转集中在低置信度/决策边界附近”的数据（只说净中性），所以不能直接引作“边界附近翻转”的证据；(4) TensorRT引擎的校准细节（校准器类型、张数）原文未见——引擎由带QDQ的ONNX直接构建，scale来自ONNX。
+- 和我们的关系：**直接可用（最强的单篇动机文献）但需区别**。可用：证明“同一模型在不同整数kernel上per-input预测不同，而top-1精度看不出”，支撑我们的H问题（PC上校准的保证部署后不一定成立）；FP32 bit一致可作PC FP32→Jetson FP32应基本无漂移的参照（仅限其配置）。区别：他测的是top-1一致率，不是“漏检率保证是否仍成立”；无阈值/共形/级联；硬件是AGX Orin不是Orin NX 16GB；未测TensorRT FP16/INT8 vs PyTorch FP32、未测DLA一致性——这正是我们可做的空白。
+- 可引用的句子：“INT8 predictions agree 1000/1000 exactly when two targets share an integer kernel and 958–965/1000 whenever they do not”（摘要、表3）；“disagreements are net-neutral … invisible to a standard accuracy report”（第5节）；“re-validate INT8 per target rather than once”（结论）。
+- 疑点：(1) 摘要说“DX-M1 939/1000”，表3与正文一致；(2) 摘要图2文字中CPU–accelerator一对写作 Jetson iGPU(TRT) vs A78AE(MLAS)=961，需注意不是GPU vs DLA；(3) 附录里所引“concurrent work” Chen arXiv:2608.13756/2609.00363 未在我们材料中，未核实；(4) 作者单位为汽车技术研究所，论文自述“框架面向汽车”，非同行评议。
+
+- 【2026-10-15 主对话核对，对照 PDF 原文】摘要与表 1 的 DLA 是 Jetson **AGX Orin** 的 2×NVDLA v2，不是 Orin NX。958–965/1000 的比较对象是不同整数核，论文未给出 Orin GPU 对 DLA 的一致率。引用时不要写成 Orin NX 上的结果。

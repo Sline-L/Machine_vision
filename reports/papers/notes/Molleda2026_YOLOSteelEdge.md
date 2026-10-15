@@ -1,0 +1,21 @@
+# Molleda 2026 YOLOv12/YOLOv26 实例分割的钢材表面缺陷边缘部署（Jetson AGX Orin / Orin Nano）
+- 完整引用：Julio Molleda, Darío G. Lema, Rubén Usamentiaga (Univ. of Oviedo, Spain), "Edge deployment of YOLOv12 and YOLOv26 instance segmentation for real-time steel surface defect inspection", Journal of Real-Time Image Processing 23:181 (2026), DOI 10.1007/s11554-026-01974-1。Received 25 Jun 2026; Accepted 24 Aug 2026; Published online 8 Sep 2026；开放获取（CC BY 4.0）。
+- 来源核实：期刊正式版/D4_10.1007_s11554-026-01974-1.pdf；首页刊名、文章号、DOI 与文件名一致，14 页。无差异。
+- 阅读深度：全文（摘要、第 1–7 节、表 1–10、参考文献前半；表 5/7/8/10 在文本中列部分错位，关键数字已与摘要和正文交叉核对，表格图像未栅格化）。
+- 一句话：在真实钢材缺陷数据上比较 YOLOv12 与 YOLOv26 实例分割的 PyTorch / TensorRT FP16 / INT8 部署，结论是 FP16 无损（mAP50-95 变化 ≤0.02），而 INT8 分割引擎在两块 Jetson（TensorRT 10.3）上根本无法构建，在工作站上精度也不可靠。
+- 问题设定：输入 640×640 钢材表面图像，输出缺陷实例掩码；8 类，3,097 张图、13,318 个实例，类不平衡 11:1；评估前做了泄漏审计。目标是在 30 FPS 实时预算内部署。无统计保证（只有 ANOVA / t 检验比较训练策略）。
+- 方法：2×2 消融（权重初始化：从零/预训练 × 采样：标准/类平衡），共 24 个模型，PyTorch 训练在 RTX 5090 工作站；各板上用 Ultralytics model.export() 经 ONNX 编译 TensorRT 引擎（引擎不可跨设备）；INT8 为 PTQ（训练后量化），校准集为训练集 624 张（与评估集不相交）。
+- 保证 / 结论：
+  - INT8 为什么失败（被问的重点）：Jetson 上 INT8 构建"确定性失败"，位置在 Segment26 的 mask-prototype 卷积，报 TensorRT Error Code 10 "no valid tactic"；作者称 Ultralytics 8.4.26 自己把它标记为已知的 TensorRT 10.3.0 INT8 问题（§6.2）。因此 Jetson 的 INT8 单元格为空（表 8、10）。作者提出可能的绕过办法——混合精度导出，让 mask-prototype 分支保持 FP16——但留作未来工作，未验证。
+  - 即便在工作站（TensorRT 10.16）上 INT8 能构建，精度也不稳定：预训练 nano/small 的 mAP50-95 从 FP16 的 0.372/0.421 掉到 0.118/0.117（表 7，§5.3）。
+  - FP16 精度保持在 PyTorch 的 0.02 mAP50-95 以内（摘要，表 7）。
+  - 训练期选择（架构、初始化、采样）在统计上无法区分：ANOVA F(2,9)=1.74，p=0.23；类平衡采样均值差 −0.002（配对 t 检验 df=11，95% CI [−0.009, +0.005]）（§5.1）。
+- 实验：
+  - 硬件/软件（表 3，§3.5）：Jetson AGX Orin（MAXN，Ubuntu 22.04，JetPack 6.1，CUDA 12.6，TensorRT 10.3.0，64GB）；Jetson Orin Nano 8GB（MAXN_SUPER，同样 TensorRT 10.3.0）；工作站 RTX 5090（TensorRT 10.16.0.72，CUDA 12.8）。原文强调 Jetson 上 TensorRT 版本由 JetPack 镜像固定，不能单独选择。Orin Nano 的 JetPack 小版本在表中是否同为 6.1 因表格错位未能确认。
+  - 数据：训练/验证/测试 2,188/624/285 张；泄漏审计发现 285 张测试图中 139 张有近重复，隔离后留 146 张（535 个实例）作为无泄漏测试集；D6 仅 9 个、D7 仅 15 个实例。
+  - 指标：mAP50-95、mAP50、P/R/F1（IoU 0.5）、FPS、端到端延迟（预处理+推理+后处理，batch 1，640×640）；每次运行 5 次预热 + 10 次计时；报告了平均、中位数、标准差、p95 延迟（§4.3），176 份推理报告中延迟变异系数中位数 0.46%、最大 10.2%；功耗：tegrastats 每 500 ms 采样整板功耗（AGX 用 VIN_SYS_5V0，Nano 用 VDD_IN），jetson_clocks 锁频，空闲功耗 3.8/4.8 W（AGX/Nano）、结温 48/51°C，称计时期间无热降频。DLA：原文未使用，未见任何 DLA 内容。
+  - 关键数字：YOLOv26 预训练 + TensorRT FP16：AGX Orin nano 146.7 FPS、Orin Nano nano 89.9 FPS（摘要）；AGX 功耗 5.03–6.48 W，Orin Nano 7.87–13.12 W（§5.6）；FP16 相对 PyTorch 能效 AGX 提升 3.4–4.0×，nano 规模 7.09→29.14 FPS/W（4.1×），Orin Nano 提升 3.6–3.8×。
+- 局限：作者承认：单一数据集、版本相关的 TensorRT 结果、单图 batch 状态、YOLOv12 没有预训练分割权重（初始化比较不对等）。我看出的（我的判断）：INT8 的失败原因是特定工具链 bug（TensorRT 10.3.0 + Ultralytics 的某个算子），不是 INT8 在缺陷检测上的普遍结论，不能外推成"INT8 不行"；校准样本为 624 张训练图，没有尝试其他校准算法；没有重复训练种子的方差（每组 n=4）；单阶段端到端，没有级联；评估集只有 146 张。
+- 和我们的关系：需区别 + 重要预警。直接相关点：(1) 它给出"用 Ultralytics 导出到 TensorRT 10.3 的 INT8 在 Jetson 上可能无法构建"的具体失败证据，说明我们必须固定并记录 JetPack/TensorRT 版本（我们计划用 10.7）并先做构建烟雾测试；(2) 它在 FP32 评估与 FP16 引擎间报告精度差并给出能效实测，可作为"部署后精度几乎不变（FP16）但 INT8 可能崩"的先例，支持我们 H 问题的动机；(3) 测量协议（锁频、tegrastats、预热 + 多次计时、p95）可借鉴。区别：它只做精度的比较，没有任何放行/拒绝阈值、没有部分级漏检率的概率保证，也没有说明 PC 上校准的阈值在设备上是否仍成立；不涉及 DLA；没有级联和算力节省量化。
+- 可引用的句子：(转述) 在 TensorRT 10.3 的 Jetson AGX Orin 与 Orin Nano 上，YOLOv26/YOLOv12 分割模型的 INT8 引擎在构建时失败（mask-prototype 卷积 "no valid tactic"），而 FP16 精度与 PyTorch 相差不超过 0.02 mAP50-95（摘要，§6.2）。(转述) 在 Jetson 上 TensorRT 版本由 JetPack 镜像固定，因此部署能力取决于工具链版本而非模型架构（§3.5，§6.2）。(转述) 作者对测试集做泄漏审计后，285 张测试图中有 139 张被剔除（§3.3）。
+- 疑点：(1) 表 5/7/8/10 的行列在文本提取中错位；摘要数字（0.43、146.7、89.9）与正文一致，但逐格数字使用前需看原表。(2) Table 8 的 YOLOv26 FP16 nano 数字（AGX 146.6、Nano 85.2）是"scratch 变体"，摘要的 89.9 是"pretrained 变体"，两者并不冲突，但引用时要区分。(3) 表 9 的 "AGX Orin 640 分辨率 mAP50-95" 等数字错位，未使用。(4) 本文发表日期晚于我们已知的 TensorRT 10.7 版本，是否在 10.7 中修复了该 INT8 构建问题：原文未见，需要我们自己在板上验证。

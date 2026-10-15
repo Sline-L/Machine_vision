@@ -1,0 +1,19 @@
+# Zhu 2026 LLM共形预测的配置偏移（Conformalized LLMs under Configuration Shift）
+- 完整引用：Yuqicheng Zhu, Jialin Yu, Lin Li, Gengyuan Zhang, Zhen Yang, Steffen Staab, Puneet Dokania, Philip Torr, Jie Tang, Evgeny Kharlamov. Conformalized Large Language Models under Configuration Shift. arXiv:2608.01460v2 [cs.LG], 30 Aug 2026. 首页未见刊名/DOI。
+- 来源核实：本地 OA_arXiv/2608.01460.pdf；首页版本 v2，30 Aug 2026，29页。作者与已知元数据无差异。
+- 阅读深度：正文（摘要、第1-9节、结论、局限）全读；附录只读了D.5（逐配置分析）与相关工作段、图11/12说明，其余附录（A、B、C模板、E证明、F估计器、G缓解细节）未读。
+- 一句话：LLM的共形预测（CP，conformal prediction）校准在一个“配置”（提示词模板/解码温度/权重量化）下、测试在另一个配置下，覆盖率会掉到目标以下；用校准/测试分数分布的KS距离给出覆盖下界。
+- 问题设定：非一致性分数 S=V(Z,θ) 依赖配置θ；校准用θ0，测试用θ≠θ0，数据分布P_Z不变，但分数分布P_S变，导致可交换性失效、分裂CP保证（Theorem 1，覆盖≥1-α）不再适用（第3节）。
+- 方法：(1) 实证：9个LLM×4数据集（MMLU、MedMCQA、NQ、TriviaQA）×4种分数（LAC、logit margin、self-consistency、LoFreeCP），每格10次独立划分；量化轴=4档GGUF精度（Q8/Q6/Q4/Q2），3个模型（Qwen3.5-9B、Meta-Llama-3-8B-Instruct、Gemma-3-12B-it）。(2) 理论：Prop.2 覆盖 C≥1-α-d_TV(P_S0,P_S)；Theorem 3 用单侧半直线限制得 C≥1-α-d_KS(P_S0,P_S)；Theorem 4 在“核稳定”假设下得无标签版本（TV或W1，Lipschitz常数L）。(3) 缓解：Reweight、Mos-U（均匀配置集成校准）、Mos-F、Anc、α-Inf、Recal（花少量测试标签k重算阈值）。
+- 保证 / 结论：原文给的是**下界**，且作者明言“not finite-sample certificates”“diagnostics”（第9节局限1）。Theorem 3：C≥1-α-d_KS(P_S0,P_S)（式9）。
+- 实验（精确数字）：
+  - 目标1-α=0.9时，欠覆盖率U（覆盖低于目标超过容差η的运行占比；η具体值正文未见）：温度偏移 0.46、提示词偏移 0.31、**量化偏移 0.20**，对比分布内基线≤0.03；偏移下集大小膨胀Infl∈[1.00,1.26]（第4.2节）。结论：主要是“有效性损失”而非效率损失。
+  - 校准预算越大偏移下U越高：量化 0.11→0.20，温度 0.36→0.46，提示词 0.20→0.31（图1b、第4.2节）。
+  - 量化的非对称性（D.5，图12）：从Q8/Q6/Q4校准、部署到Q2很脆弱；反向（Q2校准、部署到高精度）欠覆盖接近0但集合变大。平均U（MCQA/OEQA）：提示0.28/0.26，温度0.42/0.30，量化0.19/0.14；对角线0.03–0.05。
+  - 诊断（表1，1-α=0.9）：KS_S 平均松弛：量化MCQA 0.07、OEQA 0.14 附近（表格文本错位，仅可确认“KS_S对所有格保守性1.00、比TV_S紧0.03–0.15”）；W1最紧但保守性0.85–0.99。
+  - 缓解：Recal 使U由 0.319/0.490/0.305（提示/温度/量化）降到 0.060/0.075/0.087，膨胀与vanilla差≤0.04；k=50个标签即可；Mos-U降U 0.05–0.11无膨胀（第6.2节）。
+  - **硬件：原文未见**（未写GPU型号/推理引擎；GGUF量化暗示llama.cpp类CPU/GPU推理，但原文未明说，（我的判断）仅为推测）。
+- 局限：作者承认：界非有限样本证书；缓解为初步；只测三条受控轴，未测多轴复合偏移（第9节）。我的判断：量化只是LLM的GGUF权重量化，任务为问答集合预测（分数是连续置信度），与视觉缺陷检测、TensorRT/DLA、部件级漏检率保证无关；没有视觉分类器的“决策翻转”测量。
+- 和我们的关系：**需区别（方法论支持，非先行工作）**。支持：同一论点的LLM版——“量化会改变分数分布，使PC上校准的共形保证在部署配置下失效”，并给出用KS距离量化偏移与用少量部署端标签重校准（Recal）的思路，对应我们“如何在设备上恢复保证”。区别：(1) 对象是LLM问答、不是视觉缺陷/级联；(2) 保证类型是边际覆盖，不是Learn-then-Test的部件级漏检率+双阈值；(3) 无Jetson/TensorRT/DLA；(4) 其“下界”是总体量不是有限样本证书。因此**不构成对我们声明(a)的反例**（缺视觉缺陷、级联、部署引擎验证）。
+- 可引用的句子：“configuration shift consistently erodes CP validity, often driving empirical coverage below the target. By contrast, efficiency is largely preserved”（摘要）；“CP guarantees for LLMs should be understood as guarantees for a complete score-generating pipeline”（第8节）。
+- 疑点：表1数字因PDF文本错位无法逐格复核（未栅格化核对）；容差η取值原文正文未见（可能在附录）；“量化”所用推理硬件未见。

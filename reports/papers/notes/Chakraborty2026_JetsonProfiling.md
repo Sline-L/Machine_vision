@@ -1,0 +1,19 @@
+# Chakraborty 2026 Jetson 上并发视觉推理的多层级剖析（扩展版）
+- 完整引用：Abhinaba Chakraborty, Wouter Tavernier, Akis Kourtis, Mario Pickavet, Andreas Oikonomakis, Didier Colle (ID Lab, Ghent University-imec；NCSRD Demokritos, Athens), "Profiling Concurrent Vision Inference Workloads on NVIDIA Jetson - Extended", arXiv:2508.08430v2 [cs.DC], 19 Sep 2026。预印本。
+- 来源核实：OA_arXiv/2508.08430.pdf；首页版本 v2，19 Sep 2026，15 页；标题含 "Extended"，作者与已知元数据一致（我们不掌握原始元数据，如有差异请对照）。
+- 阅读深度：全文（第 I–VIII 节、表 I–II、各图的文本说明；图 3–12 的具体曲线未栅格化，只读了正文对图的描述数字；参考文献仅扫题录）。
+- 一句话：用 trtexec + jetson-stats + Nsight Systems 在 Jetson Orin Nano 与 Jetson Nano 上剖析 ResNet50 / FCN_ResNet50 / YOLOv8n 的精度（int8/fp16/tf32/fp32）、batch、并发进程数对吞吐、功耗、SM/Tensor Core 利用率的影响；与 DLA 无关。
+- 问题设定：只在 GPU 上跑，不涉及 DLA、级联或精度保证；"精度下降对准确率的影响不在研究范围"（§VI-A 原文：this aspect is outside the scope）。
+- 方法：两阶段剖析：第一阶段轻量（trtexec 取吞吐，jetson-stats 取功耗和显存）；第二阶段 Nsight Systems 取 SM、Tensor Core、CUDA 同步等，引入的侵入使吞吐下降 50%（§IV）。trtexec 预先入队一个 batch，所以测得吞吐近似理想上界（§IV）。TensorRT 引擎由 PyTorch→ONNX→TRT 生成，静态 batch。
+- 保证 / 结论：
+  - GPU 利用率可到 100%，但 SM 与 Tensor Core 利用率常只有约 15%–30%（摘要）；SM issue slot 利用率平均约 25%。
+  - Orin Nano 上 int8 吞吐：ResNet50 比 fp32 快 9.75×，FCN_ResNet50 12×，YOLOv8n 约 3×（§VI-A-1）。
+  - Orin Nano 上 FCN_ResNet50 吞吐 fp16/tf32/fp32 约为 97/47/14，功耗约 6.6/7.1/6.1 W，折合每图功率 68/151/435 mW（"per-image power"，原文用 mW，应理解为每张图的能量/功率换算，单位原文即如此，见疑点）。
+  - Jetson Nano（无 Tensor Core、无完整 int8 支持）上 fp16 最优。
+  - 并发进程数超过 CPU 大核数一半（Orin Nano 为 4 个进程起）时，执行上下文时长上升约 30×/70×（4/8 进程），原因是阻塞、线程重调度、缓存缺失（§VII）。
+  - DVFS（动态电压频率调节）使功耗与吞吐关系非线性；功耗不会超过约 7W（Orin Nano）/5W（Nano）。
+- 实验：硬件 Jetson Orin Nano（6 核 Cortex-A78AE，1024 核 Ampere GPU，32 Tensor Core，8GB，7–15W）与 Jetson Nano（4GB，5–10W）（表 I）。软件：TensorRT（版本号原文未见）、JetPack（原文未见）、Nsight Systems、jetson-stats。数据：没有评估数据集准确率；工作负载输入为 3×224×224 或 3×640×640。指标：吞吐、功耗、显存、SM/TC 利用率、EC 时长。重复次数/置信区间：原文未见。
+- 局限：作者承认：Nsight 对 Jetson Nano 不支持 SM 利用率；精度影响不在范围；trtexec 的预入队使结果是吞吐上界。我看出的（我的判断）：未涉及 DLA；没有准确率数据，所以不能说明 INT8 掉点；功耗来自 jetson-stats（片上传感器，Majeed 综述指出其会低估实际功耗），不是外部功率计；作者"相信 Orin Nano 的结论可外推到整个 Orin 系列"是假设（§III-A），而 Orin NX 16GB 有 2 个 DLA、更多 SM，不能直接外推。
+- 和我们的关系：背景。给我们的能耗/吞吐测量方法提供参照：INT8 在带 Tensor Core 的 Orin 上吞吐远高于 FP32/TF32，但"功耗-吞吐-DVFS"非线性，所以能耗应报告每张图的能量（J/图）而不是只看瓦数；并发进程会触发 CPU 调度瓶颈（Orin Nano 4 进程起），对我们同时跑 gatekeeper 与 detector 的设计是个提醒。区别：它不涉及 DLA，也不涉及准确率/保证。
+- 可引用的句子：(转述) 在 Orin Nano 上 INT8 TensorRT 引擎相对 FP32 的吞吐提升：ResNet50 9.75×，FCN_ResNet50 12×，YOLOv8n 约 3×（§VI-A-1）。(转述) 作者指出 GPU 利用率 100% 时 SM 与 Tensor Core 利用率仍只有 15%–30%，CPU 调度与上下文切换会成为瓶颈（摘要，§VII）。
+- 疑点：(1) 文中"power consumption per image ... 68mW, 151mW, 435mW"单位疑似应为"每图能量（mJ）"，吞吐 97 img/s、6.6 W 折算应约 68 mJ/图，数值吻合 mJ 而非 mW；原文写 mW，属单位笔误（我的判断，需谨慎引用）。(2) TensorRT/JetPack 版本原文未见。(3) 摘要中"GPU 利用率可到 100%"与结论中"99% GPU 利用率、100% Tensor Core 利用率"表述不完全一致（正文 §VI 说 TC 利用率任何精度下都未达 100%）。

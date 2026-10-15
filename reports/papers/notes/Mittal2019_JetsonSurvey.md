@@ -1,0 +1,17 @@
+# Mittal 2019 NVIDIA Jetson 平台上深度学习模型优化实现综述
+- 完整引用：Sparsh Mittal (IIT Hyderabad, India), "A Survey on optimized implementation of deep learning models on the NVIDIA Jetson platform", Journal of Systems Architecture, vol. 97, pp. 428–442, 2019, DOI 10.1016/j.sysarc.2019.01.011。版权页：Received 10 Dec 2018; revised 10 Jan 2019; accepted 22 Jan 2019; available online 25 Jan 2019。
+- 来源核实：期刊正式版/B5_10.1016_j.sysarc.2019.01.011.pdf；首页刊名、卷页、DOI 与文件名一致，15 页（PDF 页数）/文内页码 428–442。无差异。
+- 阅读深度：方法部分为主（读了 §1–§4 全文、§5 前半的应用举例、§6 展望；表 1–7；§5.3–5.4 与参考文献未细读）。已 grep 全文：不含 DLA；INT8 仅在 §6 出现一次；不含 conformal / miss rate。
+- 一句话：2019 年的 Jetson（TK1/TX1/TX2）上 CNN 优化与应用综述；它早于 Xavier/Orin，也早于 DLA 的普及，所以对 DLA、TensorRT 10、Orin NX 完全没有覆盖，只能作历史背景。
+- 问题设定：综述，不是实验论文。范围：作者明确只覆盖 Jetson TK1、TX1、TX2；Xavier "released very recently and has not been widely used in research"，因此不在综述内（§2.1）。排除与研究原型比较的工作和只把嵌入式设备当作卸载终端的工作（§1 Scope）。
+- 方法：按架构优化（CPU/GPU 异构、流水线、频率缩放、TensorRT、kernel fusion、降精度）、与其他平台比较、算法优化（降帧、降分辨率、蒸馏、轻量 CNN、按输入选模型）、应用领域分类综述。
+- 保证 / 结论：
+  - 作者在 §6 写到：Jetson TK1/TX1/TX2 不支持 INT8 操作，这限制了低精度深度学习（原文：do not support INT8 operations）。这与现在 Orin 的 INT8/DLA 情形形成对比，凸显本文已过时。
+  - §4.1 介绍 Wang 等 [96] 的无人机视频过滤：先用轻量 DNN 做 EarlyDiscard（只发"有趣"帧），再用云端训练并下发的 SVM 做 OTSL 级联过滤；作者指出 EarlyDiscard 因轻量分类器精度低而"precision 低、假阳性多"。这是 2019 年之前已有的"便宜过滤器 + 贵处理"思路，但目标是带宽而不是漏检保证。
+  - §4.6 介绍 Taylor 等 [65] 的"按输入选模型"的串联 kNN 选择器（Q 个 DNN 顺序尝试），属于一类自适应推理；无保证。
+  - §3.1 提到 Kang 等 [7]（LPIRC 2017 冠军）在 TX2 上用 FP16、Tucker 分解、CPU/GPU 频率缩放来节省能耗，利用截止时间余量降频以最小化能耗。注意：这是另一篇 2017/2018 年的 Kang 等工作，与我们要核对的 arXiv:2606.16106 的 Kang 等不是同一论文，不能互相佐证。
+- 实验：本文无自己的实验。引用的数字例如 Reddy 等 [30] 表 6（驾驶员疲劳检测，TK1）、Bechtel 等 [70] DeepPicar（TX2 上单次控制循环 >100 Hz）。均为二手数字。
+- 局限：作者承认：只覆盖到 TX2；Xavier 未涉及。我看出的（我的判断）：对 DLA、TensorRT、INT8、PTQ/QAT、能耗测量精度（后来的研究发现 tegrastats 低估功耗）无任何覆盖；对"保证"类、统计校准类工作无涉及；综述以应用和单点优化为主，缺乏统一的比较基准。
+- 和我们的关系：背景（弱）。只用于在引言/相关工作里一句话说明"早期 Jetson 综述聚焦 TK1–TX2，当时无 INT8/DLA，所以不覆盖 Orin 时代的量化部署问题"。可借其对"降精度/频率缩放以节省能耗"和"内容过滤降带宽"的早期例子作历史定位。区别：无漏检保证、无阈值校准、无 DLA、无量化后保证验证。不能用它支撑我们的声称（a）或 H。
+- 可引用的句子：(转述) 作者在 2019 年指出 Jetson TK1/TX1/TX2 不支持 INT8，限制了低精度推理（§6）。(转述) 作者指出 Xavier 当时刚发布、尚未被广泛研究，故综述只覆盖 TK1/TX1/TX2（§2.1）。
+- 疑点：Raju 2608.11770 或 Majeed 综述对 Mittal 的引用被描述为"针对老 Jetson（无 DLA）的综述"，与本文一致。本文 Table 1 在文本提取中列严重错位，其中参数未核对，不要引用具体表格数值。

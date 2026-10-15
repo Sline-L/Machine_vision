@@ -1,0 +1,23 @@
+# Raju 2026 DLA 零回退 INT8 分类器 + GPU 检测并行流水线
+- 完整引用：Vaishnav Raju (Newspace Research and Technologies, Bengaluru), "Achieving Near-Zero-Overhead Multi-Model Hierarchical Classification in Real-Time Detection Pipelines", arXiv:2608.11770v1 [cs.CV], 12 Aug 2026. 未见期刊/会议信息（预印本）。
+- 来源核实：OA_arXiv/2608.11770.pdf；首页版本 v1，日期 12 Aug 2026，14 页；标题/作者/编号与已知元数据一致，无差异。
+- 阅读深度：全文（14页文本全部读完，含表 I–VIII、图 2–5 的文本标注、参考文献；图片未栅格化）。
+- 一句话：给出把 ResNet-34 分类器改造成可在 Jetson Orin NX 的 DLA（深度学习加速器）上零 GPU 回退跑 INT8 的五步工程方法，并用 GPU 检测 + DLA 分类的"第 N-1 帧"异步流水线证明分类几乎不占检测吞吐。
+- 问题设定：输入为 YOLOv11m 检测出的人体裁剪（224×224），输出两个独立二分类头（匿名属性）；训练/测试用私有数据集（80/10/10 划分，测试集约 2,000 样本，§IV-A）。无任何统计保证设定，不涉及缺陷检测。
+- 方法：(1) 算子替换：Linear→1×1 Conv、AdaptiveAvgPool→AvgPool2d(k=7)、多头 Concat→导出时融合成单个 Conv2d(512→2)（表 I C1–C3）；(2) 用 pytorch-quantization 的 QuantConv2d，并在每个残差支路加 skip_connection_quantizer，另加 post_backbone/post_head 量化器（C4–C6）；(3) INT8 策略：PTQ（训练后量化）熵校准、"结构推导的手动动态范围"（输入[-4,4]、中间[-8,8]、输出[-1,1]，用 set_dynamic_range 直接设置，§III-D1）、QAT（量化感知训练，25 epoch，32 批校准，99.99 百分位校准）；(4) ONNX 简化 + 自写 graph surgery 脚本：抽取 Q/DQ 节点的 scale、剥离 Q/DQ、生成 TensorRT 校准缓存再建 DLA 引擎；(5) 检测在 GPU 默认流，分类在 DLA 独立 CUDA 流，对上一帧的裁剪做分类（延迟一帧），DLA 批大小固定 16，不足补零。
+- 保证 / 结论：
+  - 94.0% 的来源（被问的重点）：不是熵校准，也不是 QAT。是"PTQ 模型 + 手动结构推导动态范围，DLA INT8"，准确率 94.0%（表 IV；§III-D1）。熵校准（ENTROPY_CALIBRATION_2）的 DLA INT8 PTQ 只有 75.0%（ReLU6），标准 ReLU 下每头 66–69%（表 VIII A4）。QAT（99.99 百分位）DLA INT8 为 95.0%，FP32 PyTorch 94.5%（表 IV）。摘要所称"从 75% 恢复到 94.0%"即手动范围 PTQ。
+  - 作者说 QAT DLA INT8 "matches or marginally exceeds" FP32（表 IV 注）。
+  - 作者声称"熵校准在 DLA 上失败是文献中未报告的失效模式"（§I），属作者自述，本文只在一个模型一个私有数据集上验证。
+- 实验：
+  - 硬件/软件：Jetson Orin NX 16GB，JetPack 6.2.1（L4T 36.4.4），TensorRT 10.3.0，CUDA 12.6，25W 功耗模式（§V-A）；两个 DLA 核（2×20 TOPS）；两台 NX 重复 10 次。
+  - 表 V（batch 16）：DLA INT8 计算延迟中位数 PTQ 手动 19.68 ms / QAT 19.71 ms，吞吐 50.5 / 50.4 QPS。
+  - 表 VI：1080p：YOLO 单独 13.3 FPS；YOLO+1 分类器 GPU 串行 10.5；+2 个 9.6；GPU+DLA0 并行 12.5；GPU+DLA0+DLA1 12.5。720p：27.5 / 19.0 / 15.3 / 25.0 / 25.0。
+  - 消融 A3：去掉 skip_connection_quantizer，DLA 上 FP16 延迟 126.98 ms（7.6 QPS），或回退 36 层到 GPU（表 VIII）。
+  - 指标：准确率、AUC、F1、混淆矩阵；固定阈值 0.5。未报告：功耗/能耗测量、温度、延迟百分位（仅中位数）、置信区间、DLA 与 GPU 同时负载下的争用测量（仅给吞吐）。
+- 局限：作者承认：DLA 静态批大小需补零；结果滞后一帧；多头梯度纠缠；未与其他框架对比（§VI-E）。我看出的（我的判断）：单一私有数据集、测试集仅约 2,000、无置信区间；"近零开销"实测为 12.5 vs 13.3 FPS（约 6% 损失），并非零；"DLA 3–5 倍每瓦性能"引自 NVIDIA 博客，本文未实测；手动范围 [-4,4]/[-8,8]/[-1,1] 是针对此模型手工设定，通用性未验证；TensorRT 10.3.0 与我们计划的 10.7 不同。
+- 和我们的关系：背景 + 部分直接可用（工程路线）。可用：DLA 上 ResNet 类分类器的算子约束清单、skip 连接量化器必须有、熵校准在 DLA 上可能严重掉点这一警示（支持我们"PC 校准的保证需要在设备上重验"的动机）。区别：本文是检测→分类的"检测后属性分类"，不是"门控分类器放行、不确定才调用检测器"的级联；无任何阈值校准、无误检/漏检的概率保证；评估用固定阈值 0.5 的整体准确率；没有 PC 到设备的保证漂移分析。它在 DLA 上跑的是分类器（与我们的 gatekeeper 位置相近），但并行是为了吞吐，而不是为了节省检测器调用。
+- 可引用的句子：(转述) 熵校准的 DLA INT8 PTQ 在其 ResNet-34 上只有 75%，手动动态范围恢复到 94.0%，而 FP32 为 94.5%（表 IV）。(转述) DLA 分类与 GPU 检测并行时 1080p 下 12.5 FPS 对检测单独 13.3 FPS（表 VI）。(转述) 去掉残差支路量化器会导致 DLA 上 FP16 延迟 126.98 ms 或 36 层回退 GPU（表 VIII A3）。
+- 疑点：(1) 表 IV 的 PTQ 熵 AUC 0.8357/0.8590 与消融 A4 里 "Hd-A 73%→69%, Hd-B 77%→66%" 的逐头数字与"75%"平均准确率需对照，但文中口径一致性未能完全核实。(2) 文中"6–9% 开销"与 12.5/13.3（约 6%）基本吻合，720p 为 25.0/27.5（约 9%）。(3) 私有数据集与匿名属性，结果不可复现。(4) 论文写 batch=16 的"补零"但未报告实际每帧检测数分布。
+
+- 【2026-10-15 主对话核对，对照 PDF 原文】硬件与软件（§V-A）：Orin NX 16GB、JetPack 6.2.1、TensorRT 10.3.0，与用户设备的 TensorRT 10.7 不同，引用时必须写明版本差异，不可外推。94.0% 来自手动动态范围 PTQ，75.0% 为熵校准，95.0% 为 QAT，FP32 为 94.5%（表 IV），与上文一致。

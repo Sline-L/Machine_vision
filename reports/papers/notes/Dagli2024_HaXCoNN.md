@@ -1,0 +1,21 @@
+# Dagli 2024 HaX-CoNN 共享内存争用感知的并发 DNN 层级映射（GPU+DLA）
+- 完整引用：Ismet Dagli, Mehmet E. Belviranli (Colorado School of Mines), "Shared Memory-contention-aware Concurrent DNN Execution for Diversely Heterogeneous SoCs", arXiv:2308.05869v2 [cs.DC], 7 Feb 2024；首页注明 "accepted as a conference paper at PPoPP 2024: 29th ACM SIGPLAN Annual Symposium on Principles and Practice of Parallel Programming"。卷期页/DOI：PDF 内原文未见。
+- 来源核实：OA_arXiv/2308.05869.pdf；首页版本 v2，7 Feb 2024，14 页；与已知元数据无明显差异（会议页码、DOI 原文未见，需另行核对）。
+- 阅读深度：全文（正文 1–6 节、表 1–8、图 1–7 的文本；参考文献只扫了标题；表 6/8 在文本提取中列错位，数字按行读取，未栅格化核对）。
+- 一句话：提出 HaX-CoNN，把多个同时运行的 DNN 的各层映射到 GPU 与 DLA（深度学习加速器）上，显式建模共享内存争用和层间切换开销，用 SAT/SMT 求解器（Z3）求最优调度，延迟最多降 32%、吞吐最多升 29%。
+- 问题设定：给定一组并发运行的 DNN 与目标加速器集合，输出每层（层组）到加速器的映射，目标为最小化最大延迟或最大化吞吐（式 10、11）。假设可离线逐层剖析（用 TensorRT IProfiler），工作负载（控制流图）可预知；关注的是调度而非精度。
+- 方法：(1) 层分组，保证算子融合与格式转换不被打断；(2) 逐层剖析 GPU/DLA 执行时间及切换时间；(3) 争用建模：DLA 内存带宽无法直接测，作者用 GPU 上测得的吞吐按 EMC（外部内存控制器）利用率比例估算 DLA 吞吐，再套用已有的 PCCS 模型预测降速；(4) 以"争用区间"为单位把执行时间 + 争用降速 + 切换代价写成约束，用 Z3 求解；(5) D-HaX-CoNN：运行时在线逐步更新调度。
+- 保证 / 结论：作者声称"保证结果不劣于朴素基线"（§5.2，因为不划算时回退到 GPU-only 基线）；这是调度层面的性能保证，不是统计意义上的精度/漏检保证。摘要：争用最多降低 45%，延迟/吞吐最多提升 32%/29%。
+- 实验：
+  - 硬件（表 4）：NVIDIA AGX Orin（Ampere，NVDLA v2.0，32GB LPDDR5，204.8 GB/s，JetPack 5.0.1）、Xavier AGX（NVDLA v1.0，JetPack 4.5）、Qualcomm Snapdragon 865。注意：不是 Orin NX。
+  - 模型：Alexnet、GoogleNet、Inception-v4、ResNet18/52（原文写"52"，疑为 50）/101/152、VGG-19、FCN-ResNet18、CaffeNet、DenseNet、Inc-Res-v2。数据集 COCO、ImageNet、Cityscapes。
+  - 单独运行（表 5，AGX Orin，GPU/DLA，ms）：如 ResNet18 约 0.41/0.74、VGG19 2.49/5.66（按行读取，列错位，仅供参考）；DLA 对所有模型都比 GPU 慢。
+  - 表 2（GoogleNet 层组）：DLA/GPU 执行时间比 1.40×–2.02×。
+  - 表 6：10 组实验，如 Exp 6（AGX Orin，VGG-19+ResNet152）GPU-only 3.95 ms，HaX-CoNN 3.21 ms，改进 22%；Exp 4（ResNet101+GoogleNet，Xavier）不使用 DLA，改进 0%。
+  - 表 8：45 个模型对中 35 个有提升，10 个退回 GPU-only。
+  - 争用：作者称与争用无关的决策可使性能最多下降 70%（§2）；Herald、H2H 的延迟估计误差最多 75%；求解器在线运行使 DNN 变慢不超过 2%（表 7）。
+  - 未见：INT8/FP16 精度设置、能耗/功耗、准确率、温度。原文未见任何量化相关说明（grep 无 fp16/int8/precision 命中）。
+- 局限：作者承认：加速器最多只考虑两种；需要离线剖析（耗时按平台 3/10/15 分钟每模型）；需要自写 TensorRT 插件做跨进程层间同步。我看出的（我的判断）：所有对比都是延迟/吞吐，无精度；DLA 比 GPU 慢，故本文的收益来自把 DLA 当作"额外并行资源"；Table 7 标题写 "Xavier Orin" 疑为笔误；基线只含 Mensa/Herald/H2H 与朴素方案，没有与 NVIDIA 官方工具比较。
+- 和我们的关系：背景/需区别。涉及 DLA 与 AGX Orin，给出"GPU 与 DLA 同时跑会因共享 DRAM 带宽互相拖慢"的量化证据，可用来解释我们若让 gatekeeper 上 DLA、检测器上 GPU 时的争用风险，并说明我们需要同时在 GPU+DLA 并发下测延迟/能耗。区别：本文是把同一批 DNN 的层切到两种加速器的调度，不涉及级联决策、阈值、精度保证或缺陷检测；平台是 AGX Orin 而非 Orin NX 16GB，TensorRT 版本原文未见，我们不能直接套用其数值。
+- 可引用的句子：(转述) 在 Jetson 类共享内存 SoC 上，GPU 与 DLA 并发运行会因共享内存争用而互相降速，忽略争用的调度可使性能最多下降 70%（§2）。(转述) 在 Xavier AGX / AGX Orin 上 DLA 对测试的所有 DNN 都慢于 GPU，DLA/GPU 时间比约 1.40–2.02×（GoogleNet 层组，表 2）。
+- 疑点：(1) 表 6/8 列在文本中错位，具体每格数字需看原图后再引用。(2) "ResNet52" 应为 ResNet50？(3) DLA 内存吞吐是由 GPU 数据按 EMC 比例推算，不是直接测量，估计误差未单独报告。(4) 会议页码/DOI 未在 PDF 中见到。

@@ -1,0 +1,21 @@
+# Wang & Wu 2026 FCC-YOLO 车身点焊缺陷检测（改进 YOLOv8n，Jetson AGX Orin TensorRT FP16 部署）
+- 完整引用：Jian Wang, Haiwei Wu (College of Engineering and Technology, Jilin Agricultural University, Changchun, China). "An Improved YOLOv8n-Based Algorithm for Body-in-White Spot-Weld Defect Detection". Applied Sciences 2026, 16(17), 8509（19 页）. DOI: 10.3390/app16178509. 收稿 30 Jul 2026，修订 19 Aug 2026，接收 21 Aug 2026，发表 27 Aug 2026。通讯作者 Haiwei Wu。
+- 来源核实：本地 期刊正式版/D8_10.3390_app16178509.pdf；首页版权页与上述一致，无元数据差异。
+- 阅读深度：全文（引言、方法 2.1-2.4、结果 3.1-3.5、结论；模块结构细节 2.3.3 之后及 Grad-CAM 部分略读，参考文献仅略读）。表 2、5、6、7 的文本层有列错位，我按行内数值与正文互证后才引用。
+- 一句话：对 YOLOv8n 加入 FasterNet 块、Context-Guided 块与 C2f-CNCM，在 820 张点焊图（测试集 82 张）上 mAP50 96.0%、mAP50-95 74.7%，在 Jetson AGX Orin 上 TensorRT FP16 的端到端 56.26 FPS/17.77 ms。
+- 问题设定：8 类点焊目标检测（normal weld、edge weld、deep indentation、burn-through、spatter、incomplete weld、distorted weld、overlapping weld；注意"normal weld"也是被检测的类别）。输入单张图，输出框和类别。无零件级判定，无统计保证。
+- 方法：在 YOLOv8n 骨干中加 FasterNet Block（部分卷积 PConv），颈部加 Context-Guided Block，C2f 加列非均匀校正模块得到 C2f-CNCM（空间注意、列注意、自校准分支）。PC 上训练（RTX A6000，PyTorch 2.2.2，SGD，300 epoch，batch 16，lr 0.01，640，early stopping，Sec 2.4）。数据：现场手机拍摄 564 张（4208×3120）+ FIRC 公共数据 256 张（640×640），共 820 张；按组（同焊点/同部件/同来源网页）划分 8:1:1 → 656/82/82，防止泄漏；只对训练集增强到 2624 张（Sec 2.1-2.2）。
+- 保证 / 结论：无保证。原文数字：FCC-YOLO P 96.0%、R 91.6%、mAP50 96.0%、mAP50-95 74.7%、F1 93.66%（Table 4 第 8 行/Table 6）；相对 YOLOv8n 的 mAP50 +3.0、mAP50-95 +3.2 个百分点；增益并不一致：incomplete weld 与 overlapping weld 的 mAP50-95 反而分别下降 0.9 与 0.6 个百分点（Table 5, Sec 3.2）。
+- 实验：
+  - 板卡：Jetson AGX Orin（容量未写）；非 NX。JetPack、TensorRT 版本：**原文未见**。精度：TensorRT FP16；无 FP32/INT8 对照；无 DLA。
+  - 测量方式（Sec 3.5）：batch=1，实际点焊图，完整检测流程连续运行 500 次，取平均端到端延迟（含预处理、GPU 推理、后处理含 NMS）；FCC-YOLO：预处理 2.89 ms、推理 11.60 ms、后处理 2.63 ms、端到端 17.77 ms、56.26 FPS（FPS 与 1/17.77 ms 一致，应是由平均延迟换算）。对照：YOLOv8n 13.77 ms/72.64 FPS（推理 6.99 ms），RT-DETR 30.71 ms/32.57 FPS，YOLOv11n 99.32 FPS（Table 7）。**无功率/能耗、无温度、无 P95/P99、无标准差**；计时工具原文未说明。
+  - 精度评测：测试集 82 张图、162 个标注（Table 2 的 Total 行；各类测试标注 10-44 个，如 spatter 仅 10 个）；单次训练，无多种子、无置信区间，作者自己承认"Repeated-seed mean and standard-deviation estimates remain to be established"（Sec 3.2）。
+  - PyTorch vs TensorRT 精度或逐样本一致性：**原文未见**。所有精度来自 PyTorch 训练环境的评测；TensorRT FP16 引擎只测了速度，未重测精度。
+- 局限：
+  - 作者承认：数据集来自特定采集环境和公共图像；跨产线/材质/光照泛化未验证；极少样本类别；应补多种子不确定度与方位分层；新模块带来额外计算开销（Sec 4）。
+  - 我的判断：(1) 82 张测试图上的 3 个百分点差异在统计上无法与种子噪声区分，作者也承认；(2) Table 7 内部存在疑点：各阶段时间之和与端到端不符（如 FCC：2.89+11.60+2.63=17.12，对比 17.77 ms；YOLOv8n：3.11+6.99+2.96=13.06，对比 13.77），差约 0.5-0.7 ms，原文未解释；且 YOLOv5n 与 YOLOv3n 的 FPS（74.08）与端到端（13.5 ms）完全相同，疑似录入重复；(3) 以手机拍摄的 564 张 + 公开网页图片混合，两个来源的分布差异很大，测试集中来源比例未说明；(4) 评测的是"框级 mAP"，不是零件级放行/拒收判定，对我们的零件级漏检保证没有直接可比性；(5) 致谢中披露用 ChatGPT 5.5 做语法润色与"logical optimization"，经费项目名称与点焊检测主题无明显关联（原文列的是音乐教师素养课题），可能是项目号误填，这是对元数据质量的观察，不影响实验数字。（我的判断）
+- 和我们的关系：背景。工业缺陷检测的典型"应用论文"：说明此类论文通常测试集很小、无区间估计、只报平均延迟、部署只验证速度不验证精度——恰好是我们要补的空白（部署后精度/决策一致性未被检验）。它不是级联，没有阈值，没有保证，没有能耗，板卡是 AGX Orin。不构成对我们声明 (a) 的反例。
+- 可引用的句子：
+  - 在 82 张测试图上的结果被作者本人定性为"仅描述当前划分的结果"，多种子均值/标准差尚待建立（Sec 3.2）。
+  - 作者承认泛化到其他产线、材质、光照"remains to be validated"（摘要, Sec 4）。
+- 疑点：Table 2 在文本层的列错位（训练集标注数为增强后数值，作者在 2.2 节已说明）；Table 6 参数量列在文本层错行，仅 FCC-YOLO（约 5.24 M 参数、12.2 GFLOPs，Table 4 第 8 行）可由消融表互证；未说明 TensorRT 引擎构建环境与 JetPack 版本。

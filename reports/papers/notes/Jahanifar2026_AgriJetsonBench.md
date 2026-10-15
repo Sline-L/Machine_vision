@@ -1,0 +1,28 @@
+# Jahanifar 等 2026 AgriJetsonBench（农业视觉模型在 Jetson 上的外部功率基准）
+- 完整引用：Hasan Jahanifar, Hasan Mirzakhaninafchi, Wesley M. Porter, Abolfazl Najar, Glen C. Rains. "AgriJetsonBench: External-Power-Referenced TensorRT Benchmarking of Agricultural Vision Models on Jetson Edge Platforms". arXiv:2608.00927v1 [cs.PF], 2 Aug 2026（单位：University of Georgia）。PDF 首页未见期刊/DOI。
+- 来源核实：本地文件 OA_arXiv/2608.00927.pdf（21 页）；首页页边标注 arXiv:2608.00927v1 [cs.PF] 2 Aug 2026，与文件名一致，未发现元数据差异。数据与代码"可向通讯作者合理索取"（Data and code availability），并非公开链接。
+- 阅读深度：全文（第 1-5 节、表 1-12、图 1-9 说明、参考文献页略读）。表 8 的"推理次数"列在文本提取中错位，已用 FPS×时长交叉核对，未直接引用该列。
+- 一句话：用外部 INA260 板级输入功率计 + 电池续航，在 Jetson AGX Orin 64GB 与 Orin Nano Super 上测 7 个农业检测/分割模型的纯 TensorRT 引擎能耗，结论是"胜者取决于负载、精度、功耗模式和测量边界，而非板卡级别"。
+- 问题设定：输入为 CottonWeedDet12_v1（检测）和 CropAndWeed_v1（分割）上训好的模型；输出为延迟、FPS、焦耳/次推理、续航等部署指标。batch=1、640×640 为主矩阵。不涉及统计保证、不涉及置信度阈值。
+- 方法：PyTorch/Ultralytics 在 GPU 集群（Sapelo2）训练 → ONNX → TensorRT 引擎（FP32/FP16/INT8，INT8 校准用 256 张图，按输入尺寸单独校准）。计时边界为"纯 TensorRT 引擎"（trtexec 随机输入或预加载引擎 runner），不含图像读取、预/后处理、NMS（Sec 2.8）。外部 INA260 + TMP119 经 QT Py RP2040 以约 10 Hz 记录板级输入电压/电流/功率（Sec 2.11），内部 tegrastats 作诊断通道。电池续航：UGREEN 25,000 mAh 移动电源从 100% 跑到 20% 手动停止（Sec 2.13）。另有空闲基线 P0 与经验能耗模型 J/inf≈P0/FPS+β·C_m（式 17，作者自称 exploratory）。
+- 保证 / 结论：无统计保证。原文结论（摘要、Sec 5）："Nano Super wins matched-budget INT8 inference in the tested workloads, while AGX Orin wins native high-load SegFormer-B0 FP16 performance"。作者还称外部板级功率应作主能耗基准，内部遥测有偏差。
+- 实验：
+  - 板卡：Jetson AGX Orin 64GB Developer Kit；Jetson Orin Nano Super Developer Kit。**未用 Orin NX。** 功耗模式：匹配预算 15 W vs 15 W；原生 AGX 50 W vs Nano 25 W（Sec 2.6）。
+  - JetPack/L4T/CUDA/TensorRT 具体版本：正文说"已记录在硬件/软件元数据表中"，**但 PDF 正文未给出版本号（原文未见）**。
+  - 精度：FP32/FP16/INT8；INT8 保持性检查只覆盖 4 个主 640 引擎（YOLO11s、SegFormer-B0 各两板），判据为相对同板 FP16 的 mAP50-95/mAP50/AR100 绝对降幅 ≤0.03（检测）、mIoU/Dice ≤0.05（分割）（Sec 2.7）。SegFormer-B0 INT8 允许 TensorRT FP16 回退。
+  - 测试集规模：检测 1,112 张测试图（1,886 框）；分割 1,526 张（Table 2）。
+  - 延迟/功率测量：外部 INA260（约 10 Hz）为主、tegrastats 为辅；延迟报告 median 与 p95（Table 8）；未报告 P99。温度：只给最高内部温度（如 AGX 15 W SegFormer-B0 INT8 为 52.06 C，Sec 3.8），未给出完整热曲线；有 TMP119 局部温度传感但表中未见数值。
+  - 关键数字（Table 8）：15 W INT8 YOLO11s：Nano 145.82 FPS、0.0767 J/inf、p95 7.018 ms；AGX 80.90 FPS、0.1814 J/inf、p95 11.895 ms。15 W INT8 SegFormer-B0：Nano 47.18 FPS、0.2808 J/inf；AGX 31.95 FPS、0.5013 J/inf。原生 FP16 SegFormer-B0：AGX 103.61 FPS、p95 9.441 ms、0.3205 J/inf；Nano 67.47 FPS、p95 15.020 ms、0.3229 J/inf。
+  - 内外功率一致性：76,691 对 1 Hz 配对样本，内部减外部 pooled 偏差 -1.988 W，MAE 2.402 W，RMSE 2.720 W，MAPE 15.65%，Pearson 0.970，Spearman 0.932（Sec 3.14，Table 9）；分 run 的 Pearson 低至 0.395。
+  - 空闲基线（Table 10）：AGX 15 W 10.920 W、50 W 11.299 W；Nano 15 W 5.308 W、25 W 5.663 W。
+  - 端到端边界对照（Sec 3.16）：AGX YOLO11s INT8 端到端 1.075 FPS、中位延迟 914.758 ms，非优化管线，仅作补充。
+  - PyTorch vs TensorRT 逐样本/决策级一致性：**原文未见**。只有 INT8 vs 同板 FP16 TensorRT 的聚合指标降幅检查，没有 PyTorch FP32 对照，也没有逐样本一致率。
+- 局限：
+  - 作者承认：batch=1 可能让 AGX 利用不足；长续航试验是"持续部署试验"而非统计重复，需重复以量化 run 间方差；经验能耗模型非通用；仅覆盖作物/杂草数据；INT8 保持性检查范围有限；纯引擎边界不含应用管线（Sec 4.12）。
+  - 我的判断：每个配置基本只有一次长跑，无置信区间；所有数字为点估计；Table 1 的"gap mapping"由作者自己定义维度，带有为自己工作定位的倾向；论文宣称的"Nano 15 W 优于 AGX 15 W"在很大程度上是 15 W 模式下 AGX 欠利用的结果，不应外推为板卡优劣（作者自己也这么说）。（我的判断）
+- 和我们的关系：需区别 / 方法参考。它是目前读到的能耗测量方法最规范的例子（外部功率计、纯引擎 vs 端到端边界分离、内外功率偏差量化），可作为我们能耗实验设计的参照，也可引用"内部 tegrastats 与外部功率有约 2 W 偏差"来说明为何需外部表。区别：板卡是 AGX/Nano Super 而非 Orin NX 16GB；无 DLA；任务是通用检测/分割而非缺陷两阶段级联；无任何统计保证；没有 PyTorch→TensorRT 的决策一致性。
+- 可引用的句子：
+  - 外部板级功率应作为主要能耗基准，内部遥测偏差 pooled -1.988 W（Sec 3.14 / 4.7）。
+  - 纯引擎能耗与端到端图像管线能耗不应混用（Sec 4.6, 3.16）。
+  - 部署赢家取决于负载、精度、功耗模式、测量边界（摘要, Sec 5）。
+- 疑点：JetPack/TensorRT 版本正文缺失；Table 8 在文本层错位，若要引用推理总数需看原图；"Nano Super 在 15 W 下更快"的机制解释（AGX 欠利用、基线功率高）是作者推测，未经消融验证。

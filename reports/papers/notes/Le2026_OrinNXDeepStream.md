@@ -1,0 +1,29 @@
+# Le & Bui 2026 Jetson Orin NX 多路相机基准（PyTorch / TensorRT FP16 / DeepStream）
+- 完整引用：Nhat-Trinh Le, Cao Vu Bui (Department of Artificial Intelligence, FPT University, Da Nang, Vietnam). "Real-Time Multi-Camera Edge AI on Jetson Orin NX: A Comprehensive Benchmark of DeepStream, TensorRT, and Lightweight Object Detection Pipelines". 2026 3rd International Conference on Connected Innovation and Technology (IEEE-ICCITX 2026), pp. 46-51. DOI: 10.1109/ICCITX70146.2026.11679903.
+- 来源核实：本地 期刊正式版/D5_10.1109_ICCITX70146.2026.11679903.pdf（6 页）；页眉写 "3rd 2026 International Conference on Connected Innovation and Technology IEEE-ICCITX.0 2026"，页脚水印显示 2026-10-15 经东南大学权限从 IEEE Xplore 下载。**PDF 内部不一致**：首页版权行出现两个不同的 ISBN 号（979-8-3195-0621-4/26 与 979-8-3195-2077-7/26），属排版问题，不影响内容。
+- 阅读深度：全文（6 页全部，含全部 8 张表与参考文献）。
+- 一句话：在 Jetson Orin NX（8GB）上，对 YOLOv8n/v8s/YOLO11n 比较 PyTorch、TensorRT FP16 引擎和 DeepStream 的吞吐、延迟、GPU 占用、功耗，单路和双路 720p。
+- 问题设定：目标检测推理部署框架对比；输入为预录 720p 视频，输出为 FPS、延迟、功耗。无统计保证。
+- 方法：三条管线，同权重、同 640×640 预处理：PyTorch（NVDEC 解码 + Python 运行时 + CPU NMS）、TensorRT FP16 引擎（ONNX→trtexec，C++ 运行时，仅引擎）、DeepStream（NVDEC→批处理→TensorRT FP16→跟踪→OSD）。每项实验重复 5 次取平均（Sec IV-E，仅报平均）。
+- 保证 / 结论：无保证。结论：TensorRT 引擎上限最高；DeepStream 在单路 42 FPS、双路 22-26 FPS/路（摘要原文写 22-26，而 Table III/VII 的数据是 19-26，见疑点）；相比 PyTorch 功耗最多降 30%（摘要）。
+- 实验：
+  - 板卡：**Jetson Orin NX 8GB 模块**（1024 核 Ampere GPU、8GB LPDDR5、6 核 ARM，Sec IV-A）；非 16GB 版，MAXN 模式，20 W 电源供电。
+  - 软件：Ubuntu 20.04 + "JetPack 6.x"（Sec IV-B）；**具体 JetPack、TensorRT 版本号原文未给**。精度：TensorRT/DeepStream 用 FP16；PyTorch 基线精度未写明；无 INT8（列为未来工作）；无 DLA。
+  - 延迟/功率测量：功率、GPU 占用、温度全部来自 tegrastats（Sec IV-A），无外部功率计；引擎-only 延迟 Table I：YOLOv8n 4.90 ms/204 FPS，YOLOv8s 7.80 ms/128 FPS，YOLO11n 7.94 ms/126 FPS；端到端延迟只给 DeepStream（Table IV：单路 23/29/25 ms，双路 38/44/40 ms，按 v8n/v8s/11n 顺序）。**PyTorch 与 TensorRT-only 的端到端延迟未给**。
+  - **P99 / P95：原文未见（已确认全文无任何分位数）**。只有 5 次重复的平均值，也未报告标准差；延迟表是单一数值。
+  - 温度：Table V 以区间给出：PyTorch 1 路 55-65 C，TensorRT FP16 48-55 C，DeepStream 1 路 50-55 C，2 路 52-60 C；功率区间 PyTorch 14-18 W，TensorRT 10-14 W，DeepStream 1 路 10-12 W，2 路 12-15 W；GPU 占用 85-95%、55-70%、50-60%、60-75%。Table II（PyTorch 单路）：YOLOv8n 42 FPS/GPU 88%/14.2 W；YOLOv8s 28/92%/15.5 W；YOLO11n 33/90%/15.0 W（按 Table VI 的 FPS 顺序对行）。
+  - 精度：Table VIII 给 mAP50/mAP50-95：YOLOv8n 0.59/0.41，YOLOv8s 0.66/0.48，YOLO11n 0.64/0.46；**数据集、测试集规模、评测方式原文未见**。声称"各管线精度一致，因为权重和 FP16 精度相同"（Sec V-G），但并没有对每条管线分别测 mAP，该 Table VIII 只给一套数字。
+  - 视频规模：预录视频，时长/帧数未给；相机为"相机"但实际是预录文件，不是真实相机。
+  - 统计严谨性：无置信区间、无方差、无分位数、重复仅 5 次；视频内容与时长不明。
+  - PyTorch vs TensorRT 逐样本/决策级一致性：**原文未见**。
+- 局限：
+  - 作者承认：未来工作才做 INT8、调度策略、多设备（结论）。
+  - 我的判断：(1) 把"PyTorch 42 FPS"与"DeepStream 42 FPS"在 YOLOv8n 单路上写成"相当或略高于"，说明单路场景下 DeepStream 并没有吞吐优势，大头收益在功耗与双路缩放；(2) 视频标称 30 FPS，但单路结果达到 42 FPS/路，说明是以离线文件全速处理，不是"30 FPS 实时"含义，原文未解释；(3) TensorRT FP16 引擎 FPS 与 DeepStream 的比较混合了不同边界（引擎-only vs 含解码/跟踪/显示）；(4) YOLO11n 引擎延迟（7.94 ms）反而比 YOLOv8s 慢或持平，与"11n 比 v8s 小"的直觉相悖，原文未解释；(5) 参考文献质量可疑，见疑点。（我的判断）
+- 和我们的关系：背景（弱）。唯一的价值是它是 Orin NX 上的 TensorRT FP16 基准，可以作为"engine-only 吞吐远高于端到端管线，必须区分边界"的辅助证据；但板卡为 NX 8GB，不是我们的 16GB；没有 DLA；没有 INT8；没有分位数；没有精度对照；无级联；无统计保证。**不支持也不反驳** 声明 (a)。作者在结论中提到"automated defect detection"只是应用场景一笔带过，并无缺陷检测实验。
+- 可引用的句子：
+  - 引擎-only TensorRT 吞吐是上界，不代表完整多流部署（Sec V-A, V-F）。
+  - 双路 DeepStream 的端到端延迟比单路增加 15 ms 左右（Table IV：23→38、29→44、25→40 ms）。
+- 疑点：
+  - 摘要写双路"22-26 FPS per stream"，而 Table III/VII 双路为 26、19、24，最低 19 FPS，摘要与正文表格不一致；Sec V-C 正文写"19-26 FPS per stream"。
+  - 声称"JetPack 6.x"配"Ubuntu 20.04"：据我所知 JetPack 6 对应 Ubuntu 22.04，这个组合有疑，需要作者核实（属我的知识，不是原文证据）。
+  - 参考文献可核查性弱：[4] 题为 "DeepStream: Bandwidth-efficient multi-camera video streaming for deep learning analytics"（arXiv:2306.15129），据其标题这是另一项研究工作，并非 NVIDIA DeepStream SDK，却被用来支撑对 NVIDIA DeepStream SDK 的描述；[5] "YOLO26 ... arXiv:2503.08921" 的 arXiv 编号为 2025 年 3 月，而 YOLO26 发布较晚，时间上可疑；[2]、[12] 为泛称期刊条目，我无法核实其存在。以上均需在引用前核查，**请勿从本文转引这些参考文献**。

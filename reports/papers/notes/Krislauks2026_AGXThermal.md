@@ -1,0 +1,25 @@
+# Krislauks 等 2026 Jetson AGX Orin 户外机箱环境温度热/功耗特性
+- 完整引用：Rihards Krislauks, Deniss Tiscenko, Vladislavs Medvedevs, Juris Ormanis, Janis Judvaitis (LMT SIA 与拉脱维亚电子与计算机科学研究所 EDI). "Ambient Temperature Impact on the Thermal Behavior and Power Consumption of the NVIDIA Jetson AGX Orin in an Outdoor Enclosure". Electronics 2026, 15(11), 2467（19 页）. DOI: 10.3390/electronics15112467. 收稿 12 May 2026，修订 26 May，接收 31 May，发表 4 Jun 2026。
+- 来源核实：本地 期刊正式版/D2_10.3390_electronics15112467.pdf；版权页与上述一致。作者姓为 Krislauks（任务描述中写作 "Krisl auks"，属换行拆字，非元数据差异）。
+- 阅读深度：全文（引言、相关工作、方法、实验、讨论、结论、附录脚本；参考文献仅略读）。Table 2 因文本层错位，已栅格化第 9 页核对。
+- 一句话：把 Jetson AGX Orin 32GB 装进带温控风扇的户外机箱，在气候箱 -20 到 +40 C 做合成压力测试，再在 +40 C 做 YOLOv8s TensorRT FP16 推理，发现压力测试功耗约为推理的两倍，合成压力测试高估推理负载的热/功耗。
+- 问题设定：不是模型精度问题；研究环境温度对 Jetson 温度、功耗与性能的影响，针对户外部署。
+- 方法：被测物为 Auvidea ES-X230D 内的 AGX Orin 32GB 模块（2048 CUDA core、64 Tensor core、两个 NVDLA v2.0，MAXN 功耗模式，Sec 3），装在改装聚酯机箱内，含电源、LTE、PoE 注入器和温控风扇（≥+30 C 启动）。4 个校准 RTD（3×PT100、1×PT1000）测机箱内部温度；Jetson 芯片温度与功耗用 tegrastats 与 jtop，均 1 s 记录（Sec 3.3）。压力测试：stress --cpu 8 --io 4 + jetson-gpu-burn + 两路 1080p RTSP 视频（附录 A）。推理负载：YOLOv8s 导出 TensorRT FP16 引擎，640×640，循环输入默认 coco8 数据集（仅 8 张图）连续推理加后处理（Sec 3.5）。气候箱设定点：-20、-10、0、+20、+40 C（压力测试）；推理只在 +40 C 做（Sec 4）。
+- 保证 / 结论：无统计保证。原文结论：压力测试在 +40 C 触发降频，GPU/CPU 温度约 +95.6 C/+99.0 C（Sec 4.1, 摘要）；推理在 +40 C 下维持 108.8 FPS、平均 19.1 W，而压力测试 36.5 W（摘要，Fig. 8）；推理时芯片温度平台约 +75 C（Fig. 7 图注）。
+- 实验（表号/图号）：
+  - 板卡：Jetson AGX Orin 32GB（非 NX）。JetPack/TensorRT 版本：**原文未见**（只给 Python 3.8.10）。精度：TensorRT FP16；未用 DLA（原文未提使用）。
+  - Table 2（温度，C，压力测试，气候箱设定点 → Jetson CPU/Jetson GPU/Jetson-LTE 模块处/PSU1-PSU2/进风口/出风口）：-20 → +68/+64/+31/+12/+10/-11；-10 → +77/+73/+40/+24/+20/0；0 → +86/+81/+47/+32/+28/+10；+20 → +72/+67/+30/+24/+20/+21；+40 → +99/+95/+61/+61/+52/+48。表注：气候箱在 +40 C 测试期间由 +40 漂移到 +48 C。从 +20 C 起风扇启动，所以 +20 C 行比 0 C 行更冷。
+  - 降频起点：GPU 约 +95.6 C、CPU 约 +99.0 C，表现为功耗骤降和波动（Fig. 6）；压力测试在约 2.5 小时后进入降频（Fig. 6 图注），Fig. 9 图注写"within 150 min"。
+  - 功耗：推理 19.1 W（稳态，中位数，Fig. 11），压力测试 36.5 W（Fig. 8，+40 C）；功耗分解：CPU 轨降 5.7 倍、GPU+SoC 降 1.9 倍，"Other"轨几乎不变，占推理总功耗约 41%、压力测试约 25%（Sec 5）。这些是图和正文数字，**没有功耗表**。功率来自 tegrastats/jtop 的 Jetson 总功耗（"total Jetson power"），非外部功率计。
+  - 推理 FPS：中位 108.8，分布在 108.0-109.5 FPS（Fig. 11），气候箱在该次运行中漂移到 +43 C。
+  - 延迟分位数（P95/P99）：**原文未见**，只有 FPS 分布范围；每帧延迟均值被提及但未列数值。
+  - 样本/统计：单台设备、单次运行（每个设定点各一次）、无重复、无置信区间；作者自述"a single device was tested"。
+  - PyTorch vs TensorRT 一致性：**原文未见**，无精度评测。
+- 局限：
+  - 作者承认：单设备；只有一种推理负载；气候箱无主动降温，+40 C 设定点实际漂移到 +48 C 且未详细记录；气候箱温度未连续记录（Sec 4.1："Continuous measurements of the chamber temperature were not recorded"）；未评估风扇老化、灰尘、热循环；中间负载未测。
+  - 我的判断：(1) **推理实验只在 +40 C（实际漂移到 +43 C）做**，但结论写"sustains stable CPU and GPU temperatures alongside consistent inference performance across the full tested ambient range from -20 C to +40 C"，Discussion 也写风扇"keeps chip temperatures well below throttling onset across the full ambient range"，这两句与方法节不一致，推理并没有在全温度范围内测过（只能说最坏温度点下有余量）。(2) "+40 C 是上限"的说法与"降频发生在漂移到 +48 C 之后"相互混淆：结论一节写降频由漂移触发，而摘要写"At the +40 C setpoint ... triggered throttling"，两者不完全一致。(3) 推理输入只有 coco8（8 张图）循环，等价于近纯引擎重复负载，不含真实相机/解码/多路流，作者称其为"realistic"偏乐观；而且 AGX Orin MAXN 下 YOLOv8s 108.8 FPS 的绝对值与 Orin NX 无可比性。(4) 作者在致谢中披露用 ChatGPT 与 Claude 做了英文润色，不影响数据。（我的判断）
+- 和我们的关系：背景 / 需区别。可作为"持续负载下 Jetson 温度与降频会影响长时间运行"的参考，但它是 AGX Orin 32GB、户外机箱、YOLOv8s，与我们 Orin NX 16GB、DLA、缺陷级联无直接可比性。有用的点：同一 TensorRT FP16 推理的功耗约为压力测试的一半，说明用 TDP/压力测试估计级联节能会高估；以及报告温度时需同时给环境温度与风扇设置。不支持也不反驳我们的声明 (a)。
+- 可引用的句子：
+  - 合成压力测试大幅高估了所测推理负载的功耗与热需求：36.5 W 对 19.1 W（摘要, Fig. 8）。
+  - 降频起点 GPU 约 +95.6 C、CPU 约 +99.0 C，与 Orin SoC 的厂商推荐工作温度上限吻合（Sec 5）。
+- 疑点：Fig. 6/9 对降频时刻（约 2.5 h vs 150 min）二者一致（150 min = 2.5 h）；摘要与结论对"降频是否发生在 +40 C 设定点还是漂移到 +48 C 后"的表述不同；Fig. 8 误差条表示稳态区间标准差，具体数值在图中。

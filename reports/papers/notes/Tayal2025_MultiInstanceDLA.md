@@ -1,0 +1,17 @@
+# Tayal 2025 多实例 ResNet50 在 Jetson AGX Orin 多加速器上的评测（海报扩展）
+- 完整引用：Mumuksh Tayal, Yogesh Simmhan (Indian Institute of Science, Bangalore), "Evaluating Multi-Instance DNN Inferencing on Multiple Accelerators of an Edge Device", arXiv:2503.09546v1 [cs.DC], 12 Mar 2025。预印本，5 页；首页自称"extend previous work"，文中称自己为 "poster"。
+- 来源核实：OA_arXiv/2503.09546.pdf；首页版本 v1，12 Mar 2025。Raju 2026 把 "Tayal and Simmhan, 2024 IEEE 31st Int. Conf. HiPC Workshops (HiPCW), pp. 181-182" 作为 [3] 引用；本 PDF 没有标出该会议信息，二者是否为同一工作的扩展版，PDF 内无法确认。
+- 阅读深度：全文（仅 5 页，全部读完；图 1 只见到文本标注，未栅格化）。
+- 一句话：在 Jetson AGX Orin 上同时用 CUDA 核、Tensor 核和 DLA（深度学习加速器）跑多个 ResNet50 实例，发现 CUDA+Tensor 提升大 batch 吞吐，加 DLA 在小 batch 有小提升，三者同时用反而因资源争用变差。
+- 问题设定：ImageNet1K 验证集图像连续请求，每个并发实例处理 bs 张；比较 CPU、CUDA、CUDA+Tensor、CUDA+DLA、CUDA+Tensor+DLA 的吞吐和延迟。无统计保证。
+- 方法：PyTorch 跑 CUDA/Tensor 核（Tensor 核用自动混合精度 AMP）；DLA 路径把模型转 ONNX，用 TensorRT 编译，DLA 上的实例作为独立进程运行；用 jtop 监控；每种组合跑 2 个实例。
+- 保证 / 结论：
+  - 精度："准确率对所有硬件组合基本不变，约 76%（全部 50k 验证图）"（§3，图 1）。注意 ResNet50 的 76% 是 ImageNet top-1 的常规水平。
+  - 单组件：GPU CUDA 核最高 415.2 images/s（bs=64），CPU 最高 10.1 images/s（bs=1）（§3）。
+  - CUDA+DLA 在小 batch 提升 40–50 images/s；大 batch 因争用 CUDA 资源而收益递减。
+  - 三者同时用：bs=64 时比 CUDA+Tensor 少 29.5 images/s（§3）。
+- 实验：硬件 Jetson AGX Orin（12 核 ARM、2048 CUDA 核、64 Tensor 核、2 个 DLA、32GB、峰值 60W，§1）；模型 ResNet50；精度：CUDA 用 FP32，DLA 用 FP16，Tensor 核用 AMP（§2）；原文未见 TensorRT/JetPack 版本、功耗模式、能耗/温度测量（只说用 jtop 监控，未给数）、重复次数、方差。DLA 路径中 GlobalAveragePool 不支持，回退到 CUDA 核（§2）。
+- 局限：作者承认：三组件同时使用时的争用"we are examining"，尚未分析；未来工作为调度。我看出的（我的判断）：是 5 页海报级结果，只有一个模型、无 INT8、无误差棒；DLA 用 FP16 而不是 INT8，与我们 INT8/DLA 设定不同；"准确率不变"只给整体约 76%，没有分精度的数字对比；实验平台是 AGX Orin，不是 Orin NX。
+- 和我们的关系：背景（弱）。可佐证"DLA 与 GPU 并发会产生共享资源争用，收益随 batch 增大而递减"。区别：无级联、无阈值/保证、无量化精度分析、无能耗数字；DLA 上用 FP16 且发生 GAP 回退，说明我们 gatekeeper 若放 DLA 要做算子兼容检查（和 Raju 的 AvgPool 替换一致）。
+- 可引用的句子：(转述) 在 Jetson AGX Orin 上 CUDA 核 ResNet50 最高 415.2 images/s（bs=64），而同时启用 CUDA、Tensor 核和 DLA 的吞吐在大 batch 下低于只用 CUDA+Tensor（§3）。
+- 疑点：图 1 中具体吞吐/延迟数值（如 2.049、0.892…）在文本里是图坐标标注，无法对应到具体配置，不应引用。DLA 在"CUDA+DLA"配置里的单独吞吐未给出。

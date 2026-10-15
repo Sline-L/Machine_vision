@@ -1,0 +1,13 @@
+# Huang 2026 NP 线性分类中收紧控制（Tightening Control in NP Linear Classification）
+- 完整引用：Yijian Huang (Department of Biostatistics and Bioinformatics, Emory University). "Tightening Control in Neyman-Pearson Linear Classification". arXiv:2607.03590v1 [math.ST], 3 Jul 2026. 刊名/DOI：原文未见（预印本）。
+- 来源核实：本地 OA_arXiv/2607.03590.pdf，24页；首页 arXiv v1 戳，与文件名一致。
+- 阅读深度：第1-6节正文全文（含 Table 1-3、Fig.1）读完；附录只读了前两页（Proposition 1-3 的证明梗概，约第19-20页），后续证明与参考文献未读。
+- 一句话：用同一份数据同时选线性组合系数和阈值的"经验效用最大化（EUM）"分类器，在有限样本下平均达不到名义的优先类准确率（过乐观），作者用渐近理论解释并给出交叉审计投影（CAP）校正阈值的方法。
+- 问题设定：k>=2 个特征的线性分类器 (b,t)；类0为优先类，要求类0准确率 pi0(t,b) >= alpha（注意这里 alpha 是"准确率下限"，如95%灵敏度，不是误差上限，与 Tong 系列方向相反）；在此约束下最大化类1准确率。数据为病例-对照样本，各类内 i.i.d.（n0、n1，n1/n0 收敛到正常数，Condition 1）。系数与阈值用同一份数据估计，不留出独立阈值集。条件1-4为光滑性、可识别性假设。
+- 方法：EUM（公式3）：在经验准确率约束下最大化经验类1准确率。作者推导：经验阈值与总体阈值之差有二阶负偏（Theorem 3，公式9），源于立方根渐近（cube-root asymptotics）下的过乐观。校正：重复二折 CAP，阈值 t_c = t^(b^) - 2^(-2/3)(t_0.5 - t_0.5,cv)（公式12，第10页），得 cEUM。概率控制（CiP）：把水平 alpha 替换为 alpha_n = qBinom(delta; n0, alpha)/n0 后按同法校正，得 EUMp、cEUMp（第12页）。另给出性能预测与精度下界推断（第11页）。
+- 保证 / 结论：（1）摘要与引言第4页："no learned classifier that is consistent for the oracle classifier can guarantee satisfaction of the control constraint in finite samples"（原话，未见证明；见疑点）。（2）EUM 的类0控制有二阶负偏（Proposition 2，第8页）。（3）Corollary 7（第13页）：对 EUMp/cEUMp 的阈值，P{pi0 >= alpha} 渐近趋于 delta——是渐近结论；作者明说 "a formal theoretical guarantee remains to be established" 对 cEUMp 优于 EUMp 的有限样本表现（第13页）。（4）cEUM 是二阶渐近无偏，不是有限样本保证。
+- 实验：模拟取自 Huang and Sanda (2022) 的设定：对照生物标志物 i.i.d. N(0,1)，病例在 Scenario A-D 下变化；k=3 与 k=6；n0=n1 从100到500，1000次重复；灵敏度控制 95%（CiE）及 90% 灵敏度、概率0.9（CiP）；CAP 重复 r=16。Fig.1（第3页）：EUM 的预测灵敏度平均低于0.95。Table 1：cEUM 灵敏度均值约 94.2-94.8（n 大时），EUM 例如 n=100 时 91.9（Scenario A, k=3）、89.4（k=6）。Table 2（第16页，列在文本中错位，我只采信正文叙述）："The eLDA classifier fell substantially short of the nominal 90% probability level... even under Scenario A"，"The EUMp classifier also failed to attain the nominal probability level"，cEUMp 最好，接近名义。真实数据：Breast Cancer Coimbra，64 例癌症与 52 例对照，特征 glucose、resistin、age、BMI（取对数）（Table 3，第18页），仅作演示。无硬件实验。
+- 局限：作者承认——推断用一阶渐近，可能需高阶改进；仅限单个精炼 EUM 分类器的推断；未处理特征选择（第6节）。我看出来的（我的判断）——渐近而非有限样本；线性分类、少量低维生物标志物，不是图像/深度模型；理论条件（光滑密度）对卷积网络打分未经验证；未涉及漂移或部署。
+- 和我们的关系：背景/需区别。它支持一个我们可用的论点：若在同一份数据上既挑选模型/阈值又评估，经验 I 型误差会过乐观，需留出独立的校准集（这与我们的 held-out 做法一致）。区别：本文不留出独立阈值集而是用 CAP 做渐近校正，没有有限样本、分布无关的保证，因此不能替代 LTT/顺序统计量的方案；也不涉及两阶段级联。
+- 可引用的句子：（1）EUM 在有限样本下系统性达不到名义的优先类准确率，作者将其解释为过乐观偏差（摘要，第1页）。（2）CiP 的阈值水平可取 alpha_n=qBinom(delta;n0,alpha)/n0（第12页，渐近）。
+- 疑点：（A）"consistent for the oracle 的学习分类器无法在有限样本保证控制"一句的精确含义与范围（正文未见证明；NP 伞形算法在留出独立阈值集时能有限样本保证，作者自己在第3页也引用了，所以该句应理解为针对"不留出阈值集、同样本估计"的情形，这是我的推测）。（B）alpha 的方向与 Tong 系列相反，引用公式时需统一符号。（C）Table 2 列错位，未做图像核对。

@@ -1,0 +1,13 @@
+# Nagel 2021 神经网络量化白皮书（Qualcomm）
+- 完整引用：Markus Nagel, Marios Fournarakis, Rana Ali Amjad, Yelysei Bondarenko, Mart van Baalen, Tijmen Blankevoort. A White Paper on Neural Network Quantization. arXiv:2106.08295v1 [cs.LG], 15 Jun 2021 (Qualcomm AI Research). 首页未见刊名。
+- 来源核实：本地 OA_arXiv/2106.08295.pdf；首页 v1，15 Jun 2021；27页。PDF首页作者顺序即上列六人；另一篇论文（Karimov 2026 v3，arXiv:2508.19600）的引用把作者写成“M. Nagel, R. A. Amjad, M. van Baalen, T. Blankevoort, M. Welling”，**与本PDF首页不一致**，应以本PDF为准。
+- 阅读深度：第3.1节（范围设定）、3.5节（标准PTQ流程）、3.6节（PTQ实验）、4.5节（QAT实验，表10）读完；第1-2节基础、CLE/偏置校正/AdaRound、QAT其余部分、调试节只做目录级扫读。表6的文本栏位错位，未引用其数值。
+- 一句话：系统整理均匀量化原理，给出PTQ与QAT的“最佳实践流程”，PTQ通常只需500–1000张无标签校准图。
+- 问题设定：分类/检测/分割/NLP；硬件感知的均匀仿射量化；权重对称、激活非对称（通用加速器推荐，第3.5节）。
+- 方法：范围设定方法（第3.1节）：Min-max（无裁剪误差但对离群值敏感）、MSE（最小化量化前后Frobenius范数）、交叉熵（用于最后一层logits，目的是保持最大值的顺序）、BN based。标准PTQ流程：CLE → 加量化器 → 权重范围设定（逐层MSE）→ AdaRound（有校准集）或偏置校正（无校准集）→ 激活范围设定（MSE）（第3.5节）。
+- 保证 / 结论：W8A8“leads to only marginal loss of accuracy compared to floating-point (within 0.7%) for all models”（第3.6节）；W4A8下深度可分离卷积网络掉点更大。
+- 实验：表2（仅激活量化，权重FP32，ImageNet，5次均值），ResNet18(FP32 69.68) A8/A6/A4：Min-Max 69.60/68.19/18.82；MSE 69.59/67.84/31.40；MSE+Xent 69.60/68.91/59.07。MobileNetV2(71.72) A8/A6/A4：Min-Max 70.96/64.58/0.53；MSE 71.35/67.55/13.57；MSE+Xent 71.36/68.85/30.94。表10（QAT，3次均值，逐张量）：ResNet50 FP32 76.07→W8A8 76.21、W4A4 75.10；EfficientDet-D1 FP32 40.08→W8A8 38.94、W4A4 24.70。
+- 局限：作者定位为实践指南；我的判断：模拟量化，**无TensorRT/DLA**；只报精度均值，无逐样本翻转或校准误差；更偏向Qualcomm生态，与NVIDIA TensorRT的校准器（entropy/minmax/percentile）不一一对应——其“MSE”范围设定不等于TensorRT的entropy校准器，不能互相替代引用。
+- 和我们的关系：**背景/方法依据**。可引：PTQ校准需少量无标签数据（500–1000张）；W8A8通常接近无损、更激进位宽或轻量网络需QAT/更好范围设定；“交叉熵范围设定保持logit最大值顺序”这一点与分类级联gatekeeper的决策稳定性相关（（我的判断）仅为联想，原文未谈阈值）。区别：不涉及部署引擎、保证或级联。
+- 可引用的句子：“8-bit quantization of weights and activations (W8A8) leads to only marginal loss of accuracy compared to floating-point (within 0.7%) for all models”（第3.6节）；“Usually, between 500 and 1000 unlabeled images are sufficient as a calibration set”（脚注4）。
+- 疑点：第3.6节“within 0.7%”与表6的具体行因排版错位无法逐行核对；无任何TensorRT内容。

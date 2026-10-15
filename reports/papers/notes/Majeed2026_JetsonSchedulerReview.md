@@ -1,0 +1,19 @@
+# Majeed 2026 Jetson 异构边缘 GPU 上 AI 模型调度技术综述
+- 完整引用：Ashiyana Abdul Majeed, Mahmoud Meribout (Senior Member, IEEE), Safa Mohammed Sali (Khalifa University, Abu Dhabi), "Scheduling Techniques of AI Models on Modern Heterogeneous Edge GPU - A Critical Review", arXiv:2506.01377v2 [cs.DC], 12 Jul 2026。PDF 首页未标注正式刊名。Raju 2608.11770 的参考文献 [4] 把它引为 IEEE Transactions on Industrial Informatics, vol. 22, no. 4, pp. 2641–2652, 2026（作者名拼写为 "A. A. Majeed, M. Meribout, and S. M. Sali"，题名写为 "ai models on modern heterogeneous edge gpu--a critical review"）；该刊名/卷期在本 PDF 中原文未见，属二手信息。
+- 来源核实：OA_arXiv/2506.01377.pdf；首页版本 v2，12 Jul 2026，12 页。arXiv 编号 2506 表示首版为 2025 年 6 月，v2 为 2026 年 7 月，日期与编号并不矛盾（v2 修订）。无其他差异发现。
+- 阅读深度：全文（第 I–VI 节、表 I–IV、图的文本标注，参考文献只扫了题录；图 1–5 未栅格化）。
+- 一句话：对 Jetson AGX Xavier/Orin 上 GPU+DLA（深度学习加速器）调度器（LP、GA、Herald、H2H、Jedi、AxoNN、CP-CNN、Map-and-Conquer、MaGNAS、HaX-CoNN）的二手综述，结论是现有调度器主要优化延迟/吞吐，对能耗、内存争用、层兼容性处理有限，且缺少实时流评估。
+- 问题设定：综述，不是实验论文。检索词为 "NVIDIA Jetson AGX Orin/Xavier"、"DNN/CNN"、"DLA"、"scheduling"，范围限于 ACM/IEEE 会议/期刊论文，排除边缘-云混合系统（§II-A）。
+- 方法：按"启发式 vs 优化"分类调度器，并从空闲时间、并行类型、能耗、切换代价、内存争用、DLA 层兼容性、方法与延迟、性能比较等维度对比（§IV）。
+- 保证 / 结论（均为转述他人结果，非本文实验）：
+  - 作者称：除 HaX-CoNN 外，几乎没有调度器考虑内存争用（§IV-E）；大多数调度器基于 Xavier，"Xavier 与 Orin 架构上可比，调度器预期表现相似"（§III，作者推断，未经验证）。
+  - DLA 仅支持 FP16 和 INT8；卷积核大小 1–32；反卷积 padding 必须为 0；大多数调度器把模型前部放 DLA（§II-D 3）。
+  - Tegrastats 常低估实际功耗（引 [40]），一些调度器的功耗/能耗数据来源不明（§V-B）。
+  - 表 I（AGX Xavier，YOLOv3）：GPU-only 吞吐 50–55 fps、每图能耗 329–460 mJ；Jedi 128 fps / 340 mJ；CP-CNN 延迟 12.96 ms / 306 mJ；GA 119 fps / 400 mJ。表中注明部分能耗为近似换算。
+  - 表 II（转引 HaX-CoNN）：VGG-19+ResNet152，GPU-only 17.05 ms / 58 fps，HaX-CoNN 13.01 ms / 77 fps。
+  - "至今没有综述全面比较近期 Jetson 边缘加速器的调度器"（§I，作者自述）。
+- 实验：本文无自己的实验。
+- 局限：作者承认：各调度器使用的模型不同，没有统一基准；部分代码未公开；未见实时流评估；PVA/VIC 几乎未被使用。我看出的（我的判断）：文献检索只限 Google Scholar + ACM/IEEE，范围偏窄；多数结论基于 Xavier，外推到 Orin 缺证据；对"DLA 能耗优势"主要引用他人报告，未独立验证；综述是二手文献，其数字不应作为我们的事实来源，只能用于定位原论文再核对。
+- 和我们的关系：背景。可用来：(1) 定位 GPU+DLA 调度文献并确认它们都是"性能调度"，没有涉及精度/漏检保证；(2) 引用 DLA 算子限制和 Tegrastats 能耗低估的警示（我们若测能耗，应说明测量方法，必要时用外部功率计）。区别：本文及其所综述的所有调度器都不涉及缺陷检测、级联决策、阈值校准或部署后保证验证。它也没有提到"保证"类工作，因此它不能用来支撑我们声称（a）中"无人做过"的论断，只能说明在 GPU/DLA 调度文献这一子领域里没有出现。
+- 可引用的句子：(转述) 综述指出，被评审的 Jetson 调度器中仅 HaX-CoNN 考虑共享内存争用，且多数仅优化延迟，对能耗与切换代价处理有限（§IV-E，表 IV）。(转述) 作者提醒 Tegrastats 常低估真实功耗（§V-B）。
+- 疑点：(1) Raju 引用的 TII 2026 卷期页与本 PDF 的 arXiv v2 是否一致，需在期刊页面核对。(2) 文中把 HaX-CoNN 描述为"在 Herald 与 H2H 之上"，而 HaX-CoNN 原文说这些是对比基线，描述略有出入。(3) 综述称 HaX-CoNN 能耗最小化，而 HaX-CoNN 原文（Dagli 2024）未报告能耗，目标是延迟/吞吐——综述表 III 中"Minimizes latency and energy consumption based on thresholds"的归属（可能是 AxoNN/Map-and-Conquer）与 HaX-CoNN 原文不一致，不应据此引用。

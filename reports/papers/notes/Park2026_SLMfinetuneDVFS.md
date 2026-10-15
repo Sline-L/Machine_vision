@@ -1,0 +1,13 @@
+# Park 2026 SLM 微调的 GPU DVFS（Jetson AGX Orin）
+- 完整引用：Jurn-Gyu Park, Sanzhar Zholdybayev, Aidar Amangeldi, Ademi Zhanuzakova（纳扎尔巴耶夫大学，哈萨克斯坦），"Energy-Efficient GPU DVFS for Fine-Tuning of SLMs on Resource-constrained Embedded Devices"，arXiv:2607.05933v1 [cs.PF]，7 Jul 2026，4 页；首页注明"currently under review for publication"，未发表。
+- 来源核实：本地 OA_arXiv/2607.05933.pdf；首页 v1，7 Jul 2026；日期与 ID（2607）一致。
+- 阅读深度：全文（4 页）。Table II 文本错位，已栅格化第 4 页核对。
+- 一句话：对 BERT 与 Pythia 小语言模型（SLM，small language model）在 GLUE 上的**微调**（不是推理）扫 11 档 GPU 频率，能耗-频率呈 U 形，用决策树选频率，相对 MAXN（Mode 0）平均省 13.11%（最多 26.73%）。
+- 问题设定：微调能耗最小化的 GPU 频率选择；特征：模型类型、GPU 利用率、层数、隐层、平均序列长度；标签：最优频率档（510-1122 MHz，6 类）。数据 27 个模型-任务配对；用留一法交叉验证，验证准确率 0.62（原文称"moderate"）。
+- 方法：tegrastats 10 ms 采样记录时间、CPU+GPU 总功率；每配置跑 5 分钟（或固定步数）；FP16 混合精度（DeBERTa-xlarge 用 FP32）。规则：Layers ≤7 且 SeqLenAvg ≤32.5 → 510 MHz，否则 612；Layers >7 且 SeqLenAvg ≤53.0 → 714，否则 816；UGPU ≥22 → 1020（Algorithm 1，≤/≥符号在文本中丢失，按推测还原，需回看原图）。
+- 保证 / 结论：无保证。Table II（相对 Mode0 的节能百分比，正为省能）：BERT-small 平均 FFG -3.7 / MLG -1.42；BERT-medium 5.34 / 6.41；BERT-base 20.64 / 20.93；BERT-large 22.51 / 22.74；DeBERTa-xlarge 23.31 / 23.35；Pythia-31M -3.72 / -1.19；Pythia-70M 0.19 / 1.64；Pythia-410M 22.16 / 22.32；Pythia-1B 23.17 / 23.24；总平均 FFG 12.21、MLG 13.11。原文：参数量 ≤70M 的小模型"show uncertainty"，较大模型（>70M）MLG 平均省 >22%。
+- 实验：Jetson AGX Orin 64GB（Ampere 2048 核，CUDA 12.6，PyTorch 2.5.0）；GPU 11 档 306-1300 MHz；CPU 用 schedutil；功率来自板载 tegrastats（总功率 CPU+GPU，非外部表）。
+- 局限：作者承认：需要更多模型与基准，决策树精度有限。我的看法：（1）只含微调，无推理，无视觉；（2）基线 Mode0 是"unconstrained dynamic frequency scaling up to 1300 MHz"，不是固定最大时钟，所以"最大时钟 vs 最优频率"没有被直接比较；（3）27 个样本的 DT，LOOCV 精度 0.62，小模型出现负节能；（4）摘要中"average 13.11%"是 MLG 在 6 个未见任务上的平均。
+- 和我们的关系：背景（弱）。**不能**用来支持"小模型最大时钟与最低可行时钟能耗几乎相等"，但有一个间接相似点：对 ≤70M 参数的小模型，相对 MAXN 的节能接近 0 甚至为负（Table II，-3.7%到+6.4%），而大模型省 20% 以上。区别：任务是微调，板是 AGX Orin，对象是 Transformer，与缺陷检测推理无关。
+- 可引用的句子：（可转述）在 Jetson AGX Orin 上，SLM 微调能耗随 GPU 频率呈 U 形，最优点多在 510-816 MHz，相对 MAXN 平均省 13.11%（摘要，Fig.2，Table II）。
+- 疑点：Algorithm 1 的不等号方向；"Mode0"是否等价于固定 1300 MHz；Table II 的"Model average"与每行任务值的聚合方式未说明。

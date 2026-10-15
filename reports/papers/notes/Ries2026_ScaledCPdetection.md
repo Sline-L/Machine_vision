@@ -1,0 +1,13 @@
+# Ries 2026 概率目标检测中的（缩放）共形预测
+- 完整引用：Christopher Ries, Moussa Kassem Sbeyti, Nicolas Bianco, Nadja Klein. Probabilistic Object Detection with Conformal Prediction. Proceedings of Machine Learning Research 329:1-21, 2026 (Conformal and Probabilistic Prediction with Applications, COPA)。arXiv:2605.07549v2 [cs.CV], 27 Sep 2026。代码 github.com/mos-ks/OD-CP。
+- 来源核实：本地 OA_arXiv/2605.07549.pdf，21页；首页 PMLR 329 版式，arXiv v2，27 Sep 2026。与已知元数据无冲突。
+- 阅读深度：全文（摘要至局限、表1-4、图1-3说明；参考文献仅扫）。
+- 一句话：对框的四个角点分别做 split CP（Bonferroni），用 loss attenuation（损失衰减）得到的偶然不确定性缩放区间，在 KITTI/BDD/CODA 上比较缩放与不缩放，覆盖仍有效但区间更紧。
+- 问题设定：每个目标一个真值框和类别；校准集/测试集可交换（假设）；EfficientDet-d0 概率检测器。逐目标（框级）保证，不是零件级或图像级。
+- 方法：split CP，分数 s=|f̂(x)-y|（不缩放）或 /σ̂(x)（缩放）；区间 f̂±q̂·σ̂。框级覆盖用 Bonferroni：每个坐标 α/4，由 Boole 不等式得整框覆盖 ≥1-4α（式7）。类别条件 CP：按真值类分层。两步法：先用 RAPS 得类别集，再对类别集内最大的类专属分位数（沿用 Timans 等人 ECCV 2024）；联合覆盖界在"分类与定位覆盖事件协方差非负"的假设下为 (1-α_class)(1-α_bbox)（第3.2节，作者把独立假设放宽为非负相关，并承认此假设无经验验证）。
+- 保证 / 结论：边际有限样本覆盖 P(Y∈C(X)) ≥ 1-α（式1）；经验覆盖落在 [1-α, 1-α+1/(n+1)]（第3.1节）；这是边际的，对校准集联合平均，没有 1-δ 概率；单参数（每个角点一个分位数）。作者自己列的局限：可交换假设在天气/光照/传感器变化下可能破坏（第6节）。
+- 实验：KITTI 1589、BDD 37189、CODA 4931 个预测；100 次 80/20 随机划分；α 为每坐标水平，α=0.1 时整框名义覆盖下界为 1-4α=0.6（第4节"Experimental setup"）。表1（α=0.1）：KITTI 未缩放 覆盖0.75/IoU75.01%/区间分数130529；缩放(LA) 0.72/80.40%/106572。BDD：0.74/43.18%/5154395 vs 0.72/46.21%/4732494。CODA：0.72/44.82% vs 0.70/50.56%。所有差异 p<0.01（配对t检验）。摘要称"up to 19% higher IoU and 39% lower interval scores"（我未在表中逐项核对19%/39%的出处，只看到绝对IoU差约3.0-6.3个百分点）。两步法仅在 KITTI（表3、4）：α_class=0.01；RAPS 无空集的覆盖99.85%、集大小1.77。域漂移（BDD→CODA）：覆盖略低（0.70 vs 0.75-ish），回收率下降。
+- 局限：作者承认：类别条件需每类约1000校准样本，未满足；RAPS 超参未调；可交换假设；两步法联合保证依赖非负相关；Bonferroni 保守。我看出的：覆盖指标是"整框包含"，阈值水平（4α）使得名义0.6的保证很弱；实测0.70-0.75；不是漏检/误报的任务级风险；无硬件、无部署、无量化；无 δ。
+- 和我们的关系：背景。区别点：框级边际覆盖 vs 我们的零件级漏检率 + 1-δ；无级联。唯一可借的是其"域漂移下可交换性破坏、保证退化"的实证（BDD→CODA，覆盖/回收下降），可作为"PC 校准的保证在另一个条件下不一定成立"的间接文献支持，但它研究的是数据域漂移而非数值精度/推理引擎变化（我的判断）。
+- 可引用的句子：CP 保证"relying solely on the exchangeability"（第1节）；"This assumption may be violated when calibration and deployment conditions differ, for example under domain shift"（第2节）；Bonferroni 整框下界 1-4α（式7）。
+- 疑点：摘要里的"19%/39%"需要核对正文表；α 在摘要/正文中是"每坐标"，容易与整框水平混淆。

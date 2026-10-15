@@ -1,0 +1,13 @@
+# Andéol 2025 Sequential Conformal Risk Control（SeqCRC）共形目标检测
+- 完整引用：Léo Andéol, Luca Mossina, Adrien Mazoyer, Sébastien Gerchinovitz. Conformal Object Detection by Sequential Risk Control. arXiv:2505.24038v2 [stat.ML], 31 Oct 2025。首页注明"submitted to the IEEE for possible publication"，尚未正式发表。代码 github.com/leoandeol/cods。
+- 来源核实：本地 OA_arXiv/2505.24038.pdf，29页；首页版本 v2，31 Oct 2025。与已知元数据无冲突。
+- 阅读深度：正文全文（第I-VI节、表I-III、图1-8、证明附录A开头）；附录B-E（额外损失、完整实验）仅扫读/未细读。
+- 一句话：把 CRC 扩展到"先置信度阈值、再定位+分类"的两步顺序调参，证明有限样本下的期望风险保证，在 MS-COCO 上测 DETR-101 和 YOLOv8x。
+- 问题设定：检测器 f 固定（含NMS）、确定性；校准与测试样本 i.i.d.（假设1，注：可交换用于证明处实际用 i.i.d.）；损失对每个参数非增、右连续、取值于[0,B]，且在最大参数处为0（假设3）。需要的实际条件：NMS 后每图至少有预测（或至少与真值数目一样多），否则损失在 λ̄ 处不为0（第III-B节）。
+- 方法：三参数 λ_cnf（置信度阈值）、λ_loc（框边距）、λ_cls（LAC/APS 分类集阈值）。步骤：第一步用保守化风险 R̃（三项风险取最大）求 λ⁺_cnf 与乐观的 λ⁻_cnf（式4、5）；第二步在 λ⁻_cnf 条件下分别求 λ⁺_loc、λ⁺_cls（式6）。推理只用 λ⁺（算法2）。因为定位/分类损失对 λ_cnf 本身不单调（匹配随 λ_cnf 变），用"单调化"：取对 λ_cnf 的上确界（第IV-E节、图4）。
+- 保证 / 结论：定理2（式7）：E[L_test^μ(λ⁺_cnf, λ⁺_μ)] ≤ α_μ，μ∈{loc,cls}；若置信度损失 L_cnf(λ̄)≤α_cnf 则 E[L_cnf]≤α_cnf（式8）。推论1（式9）：E[max(L_loc, L_cls)] ≤ α_tot=α_loc+α_cls。均为期望（边际）意义，对 D_cal 和测试点联合平均；作者明确写道不存在对每个测试实例成立的保证，且"不存在对每个校准集成立的保证"（第III-A节，"There is no guarantee that (2) holds for all possible test instances, or for all calibration data sets"）。原文也指出本文单次划分有限样本保证优于 [25]（需两次划分）；LTT 被描述为"可依赖多个参数、用多重检验"（第I-A节）。
+- 实验：MS-COCO 验证集分成 n=2500 校准 + 2500 推理（第V-A节，作者自认可能违反假设1）；DETR-101（60M）、YOLOv8x（68M）；α_tot=0.1（α_cnf=0.02, α_loc=α_cls=0.05）与 0.2。表I（DETR，α_tot=0.1）：box_count_threshold 置信度集大小25.588、任务风险0.022、全局风险0.086；pixelwise 定位集大小1.043，任务风险0.047；LAC 分类集大小0.994，风险0.051。表III 对 YOLOv8x 同理。作者称风险基本都在目标以下，"a few experiments showcase a risk slightly above"（第V-C节）。图7：集合大小呈重尾，"a notable share results in excessively large sets"，部分与整图一样大，分类集含数十类。
+- 局限：作者承认：只"经验性"限制误报（精度非单调，单调化可能无解）；全局风险（推论1）常偏保守；COCO 标注不一致；校准与推理均取自 val 可能破坏假设1。我看出的：保证是期望意义，没有 δ；图像/物体级期望混用（第IV-A节选图像级）；无部署、无量化、无硬件数据；无缺陷零件的"漏检"概念不存在（空真值图损失取0，第IV-E节"Edge cases"）。
+- 和我们的关系：需区别（最接近的"多参数顺序校准"工作之一）。区别点：(1) 它的三个参数服务于"一个检测器内部的筛选、定位、分类"，我们的 t1/t2 是"门控分类器两级放行/拒绝 + 昂贵检测器调用"的级联；(2) 它是期望保证，我们是 LTT 的以1-δ概率成立的零件级保证；(3) 它不优化算力、无级联、无部署。可借鉴：单调化技巧（如我们的损失对 t1/t2 联合不单调时）、"校准参数不能在看到数据后改分配 α"的警告（推论1后）。对声明(a)：本文不满足四条中的"视觉缺陷""部件级高概率""级联省算力""部署验证"，不构成反例。
+- 可引用的句子："no work offers a holistic framework to build sets ... with statistical guarantees on both the number of predicted objects and their localization and classification accuracies"（第I-A节）；"guarantee ... conditional on each test instance ... impossible ... without further assumptions"（第III-A节）；LTT 已被用于医学图像检测以同时控制精度与召回（Blot et al.，第I-A节转述）。
+- 疑点：附录E完整结果未读；其中是否有 δ 版本原文未见；是否有 LTT 做的对比原文未见（仅在相关工作提到）。

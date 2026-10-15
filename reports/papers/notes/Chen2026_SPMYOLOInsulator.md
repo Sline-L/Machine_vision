@@ -1,0 +1,21 @@
+# Chen 等 2026 SPM-YOLO 绝缘子缺陷检测（Jetson Orin NX 机载部署）
+- 完整引用：Yexuan Chen, Yance Shu, Xinyuan Hu, Ruize Zhang*, Tiancheng Yan, Guanghao Zhu, Wenjun Bi (均为南京工程学院 Nanjing Institute of Technology，School of Electric Power Engineering / School of Automation / School of Mechanical Engineering). "Multi-Strategy Lightweight Insulator Defect Detection for Jetson Orin NX Real-time Onboard Application". International Journal of Pattern Recognition and Artificial Intelligence (World Scientific), Vol. 40, No. 7 (2026), 2659006 (32 pages). DOI: 10.1142/S0218001426590068. Received 17 June 2025, Accepted 13 December 2025, Published 20 March 2026。（* 为通讯作者 Ruize Zhang）
+- 来源核实：本地 期刊正式版/D10_10.1142_S0218001426590068.pdf（32 页）；页眉水印"Downloaded ... by SOUTHEAST UNIVERSITY on 10/15/26"。**PDF 内部命名不一致**：摘要中写的是 "SOM-YOLO"，正文与结论写 "SPM-YOLO"；摘要还把系统称为 MLIDD。
+- 阅读深度：全文通读到结论（引言、相关工作、实验平台与数据、消融、SOTA 对比、泛化、部署 5.1-5.2、结论）；2.2-2.4 节中 SPD-Conv/PPA/MobileNetV4 的结构公式只略读；4.5 的可视化与参考文献略读。
+- 一句话：在 YOLOv11m 上加 SPD-Conv、PPA 注意力和 MobileNetV4 主干，在自建 4016 张绝缘子图上 mAP@0.5 0.786，并"部署在 Jetson Orin NX 上平均 36.1 FPS"，但部署部分几乎没有给出实验细节。
+- 问题设定：输入为 4000×3000 无人机拍摄图（含好绝缘子、缺陷绝缘子、闪络绝缘子、红外图），目标平均尺寸仅 12.0 像素（Sec 3.2）；输出为框级检测。无零件级判定，无统计保证。
+- 方法：基线 YOLOv11m；SPD-Conv 取代下采样；PPA（多分支+注意力）；换 MobileNet V4 主干以减少计算。PC 训练：RTX 4090D，PyTorch 2.5.1，300 epoch，batch 64（Sec 3.1）。数据增强 9 种方式，增强后数量为原来的 3 倍，共 10,542 张（Sec 3.2）。
+- 保证 / 结论：无保证。消融表（Table 1）：YOLOv11m：P 0.697、R 0.696、mAP@0.5 0.742、mAP@0.5:0.95 0.373、68.5 GFLOPs、20,114,688 参数；SPM-YOLO：0.782、0.752、0.786、0.385、121.9 GFLOPs、41,651,795 参数。中间模型（+SPD-Conv+PPA）mAP@0.5 0.797，305.5 GFLOPs，43.67 M 参数。CPLID 泛化（Sec 4.4）：作者称 mAP@0.5 超过 0.791、比原模型高 20.2%（Table 5 数值在文本层未读到逐项）。
+- 实验：
+  - 板卡：**Jetson Orin NX**（容量 8GB 还是 16GB：**原文未见**）；平台介绍称"最高 100 TOPS、15-25 W、8 路相机、第五代 NVDLA、双核 DLA"（Sec 5.1.1，这是产品宣传性描述，不是实验测量）。JetPack/CUDA/TensorRT 版本：**原文未见**；全文**没有出现 "TensorRT"、FP16、FP32、INT8 或 ONNX 等词**，推理运行时与数值精度均未说明；DLA 是否被使用：原文未见。
+  - 部署实验（Sec 5.2）：Orin NX 装在四旋翼无人机上，配 Mid-360 雷达与 D435i 深度相机；报告部署后 mAP@0.5 为 0.786、mAP@0.5:0.95 为 0.385（**与 PC 上 Table 1 的 SPM-YOLO 数值完全相同**）；FPS 最低 30.8、最高 42.6、平均 36.1，高于视频帧率 30。无延迟分解、无 P95/P99、无功耗、无温度、无模型输入尺寸、无测试集大小、无重复次数。
+  - 测试集规模：数据共 4016 张，"3514 training images ... 9681 instances ... 7:2:1 划分"，**各子集张数与测试集张数原文未见，且 3514 与 4016×0.7=2811 对不上**，数据划分描述自相矛盾。
+  - 统计严谨性：单次训练，无多种子，无置信区间。
+  - PyTorch vs TensorRT 逐样本/决策级一致性：**原文未见**；部署后精度的测量方式亦未说明。
+- 局限：
+  - 作者承认：在结论的未来工作里列出需要 NAS、结构化剪枝、QAT、动态推理、多模态融合、极端天气鲁棒性、GUI 等（Sec 6）；没有明确列出自身局限节。
+  - 我的判断：(1) 标题与摘要突出"Jetson Orin NX 实时机载应用"，但部署实验只有一段文字，缺少运行时、精度、测量方法，等于只给出了一个未经解释的平均 FPS；(2) "轻量化"表述误导：SPM-YOLO 的 121.9 GFLOPs/41.65 M 参数是基线 YOLOv11m（68.5 GFLOPs/20.11 M）的约 1.8 倍/2.1 倍，"降低 60.1% GFLOPs"是相对中间模型（305.5 GFLOPs）而言，并非相对基线；(3) 部署后 mAP 与 PC 值逐位相同，很可能是把 PC 评测结果当成了板端结果，而不是在设备上重新评测；(4) 数据划分与增强顺序不清（增强后总数为 3514×3=10,542，若增强在划分之前，则同一原图的增强副本可能跨越训练/测试，存在泄漏风险，此点为推断，原文未明确）；(5) SPD-Conv 被写成 "Spatial Pyramid Deformable Convolution"，据我所知 SPD-Conv 为 space-to-depth 卷积，命名与描述存疑（我的知识，非原文证据）；(6) 其对比的 SO-DETR、UAV-DETR 等是在自建数据上重训，条件是否一致原文未详述。（我的判断）
+- 和我们的关系：背景（弱）。可作为"应用论文通常只报单次平均 FPS，不给运行时/精度/功耗，并默认部署后精度不变"的例证；不能作为 TensorRT 量化损失或 DLA 的证据来源。无级联、无阈值校准、无统计保证、无能耗。不构成对声明 (a) 的反例。
+- 可引用的句子：
+  - 作者报告在 Jetson Orin NX 上平均 36.1 FPS（范围 30.8-42.6 FPS），高于 30 FPS 视频帧率（Sec 5.2）；该数字缺少测量边界、精度与运行时说明，引用时应注明。
+- 疑点：摘要与正文模型名不一致（SOM-YOLO vs SPM-YOLO）；3514/4016/7:2:1 数字对不上；部署后精度与 PC 精度逐位相同；Orin NX 内存版本未写；Table 5（CPLID）逐项数字我未核对。

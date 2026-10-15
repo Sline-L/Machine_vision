@@ -1,0 +1,13 @@
+# Singh, Srikantha, Lakhanpal 2026 代价敏感的共形预测与人工复核弃权（Mondrian CP 基准）
+- 完整引用：Manpreet Singh (Boston University), Akshatha Srikantha (UC Irvine), Shyamal Lakhanpal (University of Maryland). "Cost-Sensitive Conformal Prediction and Human-in-the-Loop Abstention for Imbalanced High-Stakes Decision Support: A Multi-Domain Benchmark". arXiv:2607.27143v1 [cs.LG], 29 Jul 2026. 页眉 "Preprint submitted to Elsevier"，具体刊名、DOI：原文未见。
+- 来源核实：本地 OA_arXiv/2607.27143.pdf，24页（正文22页 + 参考文献）；首页含 Graphical Abstract/Highlights 页，arXiv v1 戳与文件名一致。
+- 阅读深度：第1-7节正文全文读完（含 Table 1-3，图只读图注）；参考文献后半未读。
+- 一句话：在15个不平衡的 OpenML 表格数据集上，边际（marginal）共形预测会严重漏掉少数类（平均少数类覆盖率 30.5%），按类分别校准的 Mondrian 共形预测可恢复到约 92.2%，再接"集合非单点则转人工"的弃权规则可降低期望决策代价。
+- 问题设定：二分类，正类（少数、代价高）y=1，先验 pi1<0.5；代价矩阵 c_FP=1、c_FN=10、复核代价 c_rev ∈ [0.1,5.0]（§4.4）。校准集与基模型训练集独立，假设可交换（§3.2）。非一致性得分 s(x,y)=1-p_hat(Y=y|x)。
+- 方法：边际 CP：全部校准样本的分位数 q_marg=Quantile_{⌈(n+1)(1-alpha)⌉/n}（公式3）；Mondrian CP：按类各自取分位数 q_0、q_1（公式6）；预测集 C(x)={y: s(x,y)<=q_y}。行动规则：集合为 {0} 自动判负，{1} 自动判正，|C|≠1（含空集）则 DEFER（公式9）。盈亏平衡：c_rev* = [(1-pi1)c_FP(FPR_pt-FPR_conf)+pi1 c_FN(FNR_pt-FNR_conf)]/rho_abs（公式13，第5页），rho_abs 为弃权率。基模型 7 种（HGB、LogReg、RF、ET、GB、AdaBoost、GNB），校准 3 种（无、Platt、Isotonic），10 个随机种子，共 15×7×3×10=3150 次运行（§4.5）。
+- 保证 / 结论：公式8（第4页）：P(Y ∈ C_Mondrian(X) | Y=y) >= 1-alpha 对每个类 y 成立，引用 [28]；文中未区分"对校准抽样取平均的边际覆盖"与"以 1-delta 概率对给定校准集成立"，从公式写法看是前者（共形预测标准结论，我的判断），不是 LTT/NP 那种 PAC 型高概率保证。实验结论（均为多数据集平均，目标覆盖 90%）：Table 2：Marginal CP 少数类覆盖 30.5%，Mondrian 92.2%（第9页），差 61.71 个百分点（95%CI [58.20, 65.22]，Wilcoxon p=1.52e-82）；aps_failure（不平衡 58:1）边际 CP 覆盖 0.8%（梯度提升模型），Mondrian 89.8%（§5.5）。
+- 实验：15个OpenML表格集（信用、欺诈、医疗、工业、环境等），无图像、无硬件、无计算量/能耗指标；cost-controlled Mondrian 的平均弃权率 71.9%（Table 2），复核代价 c_rev=0.5 时平均代价 0.313，比默认点预测（0.682）降 54.1%，比 Bayes 代价调阈（0.510）降 38.6%（§5.2，第12页）；盈亏平衡 c_rev* 随 c_FN 从5到50由 0.82 升至 4.35；复核者错误率 eps_hum<0.18 时仍有净收益（§5.4）。
+- 局限：作者承认——可交换假设在漂移下失效；仅二分类；极端稀有类校准样本不足（n1<30 时分位数方差大）；表格特征（§6.3）。我看出来的（我的判断）——"弃权"目的地是人工，不是更贵的检测器，没有量化计算节省；覆盖率是类条件的集合覆盖，不是"零件级漏检率 <= epsilon"；报告的是平均覆盖率，未报告逐次运行违反率；弃权率达 71.9% 在实际中接近全部复核。
+- 和我们的关系：背景。唯一关联是术语：Mondrian（按类分别校准）与"稀有缺陷类需要类条件而非边际保证"的论点，可用于论证我们用缺陷类样本单独校准漏检率。区别：不是两阶段级联节省算力，不含视觉缺陷数据集，不含部署验证，也无高概率（delta）保证。因此不影响我们主张 (a)。
+- 可引用的句子：（1）边际 CP 在不平衡数据上可满足全局覆盖但对少数类覆盖仅 30.5%（Table 2，§5.1）。（2）按类分位数校准的 Mondrian CP 把少数类覆盖恢复到 92.2%（同上）。
+- 疑点：（A）内部不一致：Table 1 与 §4.1 逐项描述错位，例如 Table 1 将 fraud 记为 130,064 条、mammography 记为 284,807 条，而 §4.1 说 fraud 为 284,807 条、miniboone 为 130,064 条、mammography 为 11,183 条；pc1 在 Table 1 为 2,534 条，§4.1 写 1,109 条；Table 1 行列在文本提取中亦错位。（B）Table 2 的 cost-controlled 平均代价 0.021 与 §5.2 在 c_rev=0.5 的 0.313 差别很大，Table 2 未说明所取 c_rev；§4.4 写 c_rev ∈ [0.1,5.0]，§4.5 写 {0,0.5,1,2}。（C）Table 3 最后一行（Linear, Isotonic）平均代价 0.351 远高于其余行（0.109-0.182），未解释。（D）未获得代码仓库内容，未复现。

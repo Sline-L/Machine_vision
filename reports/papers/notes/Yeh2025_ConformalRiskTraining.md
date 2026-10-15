@@ -1,0 +1,13 @@
+# Yeh 2025 Conformal Risk Training（端到端共形风险控制，OCE/CVaR）
+- 完整引用：Christopher Yeh, Nicolas Christianson, Adam Wierman, Yisong Yue（Caltech）. Conformal Risk Training: End-to-End Optimization of Conformal Risk Control. arXiv:2510.08748v1 [cs.LG], 9 Oct 2025；首页注明 39th Conference on Neural Information Processing Systems (NeurIPS 2025)。代码 github.com/chrisyeh96/conformal-risk-training。
+- 来源核实：本地 OA_arXiv/2510.08748.pdf，30页；首页 v1，9 Oct 2025。与已知元数据无冲突。
+- 阅读深度：正文第1-6节全文、附录A（附加结果）、附录D开头（实验细节）；附录B/C/E的证明与算法只做关键词扫读，未逐行检查。
+- 一句话：把 CRC 从控制期望损失推广到 OCE 风险（含 CVaR 尾部风险），并提出"共形风险训练"——在训练/微调中对 CRC 的阈值求导，减少事后 CRC 带来的性能损失（息肉分割的假阳性、电池调度的利润）。
+- 问题设定：损失 L(θ,λ) 对 λ 单调（本文约定非降）、有上界 B、可交换（假设1-2）；风险可行性假设（假设3：E[L(λmin)]≤α）。
+- 方法：标准 CRC：h(λ)=(B(λ)+ΣL_i(λ))/(N+1) ≤ α 的最大 λ（命题1，允许 B 随 λ 变化是对原 CRC 的小推广）。OCE 版：把损失变换为 t+φ(L-t)，定理1对任意 OCE 风险成立；CVaR 版定理2仅需单调（可增可减）。超参 t 须不依赖校准数据（用另一份保留数据调）。训练：把每个小批量分成 D_cal 和 D_pred，用 D_cal 计算 λ̂(θ)，用 D_pred 的代价函数对 θ 求梯度，λ̂ 对 θ 的导数在分段常数/凸情形有闭式（定理3，非形式版）；训练后用新的校准集重算 λ̂ 得到保证。
+- 保证 / 结论：命题1：E[L_{N+1}(λ̂)] ≤ α（期望、边际）。定理1：R[L_{N+1}(λ̂)] ≤ α（OCE 风险，也是"certain"保证而非高概率；原文第1节："first conformal-style approach that provides a certain (as opposed to high-probability) bound on risk measures beyond expected loss"）。作者明确把 RCPS 和 LTT 归为"高概率界"一类，并说 LTT 因多重检验校正界通常更松（第1节相关工作）。
+- 实验：(1) 息肉分割：PraNet，4个公开数据集共2188张，1450训练，其余738张做10个不同的 400验证/338测试划分；目标 FNR α∈{0.01,0.05,0.1}。图1：三种方法 FNR 均被控制；事后CRC在 α=0.01 时 FPR 高达约80%（正文"as high as 80%"，附录表2：0.841±0.014）；CRT 将 FPR 平均降低23-42%（正文）。附录表2：CRT(α=.01) FPR 0.465±0.057，α=.1 时 0.152±0.041 vs 事后0.256±0.035。(2) 电池调度 CVaR：10个种子，α_CVaR∈{2,5,10}，q∈{0.9,0.95,0.99}，利润比事后基线提升7.2%-22.6%。硬件：A100 / RTX A6000 GPU（附录D），无嵌入式。
+- 局限：作者承认：只适用于单调且可交换的损失；梯度存在性未完全刻画（第6节）。我看出的：保证仍是期望；CRT 训练后需要新的校准集；不涉及部署、量化、级联；任务是息肉分割而非工业缺陷。
+- 和我们的关系：背景/可选延伸。区别：我们要 1-δ 的零件级保证（LTT），本文明确不覆盖高概率；我们的目标是"门控分类器 + 检测器"级联省算力，本文是单模型。可借的思想：事后校准代价（FPR、误报）可以通过"为保证而训练"（类比 QAT：训练时纳入校准）改善——对"QAT 是否做"有概念支持（我的判断，需区别：本文未讨论量化）。也提供了"校准集大小越大阈值越不保守"的实证（附录图5：校准集100/300/613）。
+- 可引用的句子："CRC ... may significantly degrade model performance"（第1节）；LTT 以更松的界为代价处理一般风险与非单调损失（第1节）；"conformal risk training ... first to incorporate conformal risk control differentiably during model training"（第1节）。
+- 疑点：附录证明未逐行核；"certain bound"一词指的是期望意义下的确定性成立（对校准集平均），不要译成"以概率1"，原文该处未展开。

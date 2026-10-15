@@ -1,0 +1,13 @@
+# Prashanthi 2025 Pagoda: 边缘加速器 DNN 的时间与能量 roofline
+- 完整引用：Prashanthi S. K., Kunal Kumar Sahoo, Amartya Ranjan Saikia, Pranav Gupta, Atharva Vinay Joshi, Priyanshu Pansari, Yogesh Simmhan（IISc），"Pagoda: An Energy and Time Roofline Study for DNN Workloads on Edge Accelerators"，arXiv:2509.20189v1 [cs.DC]，24 Sep 2025，36 页。正式刊名/DOI 原文未见。
+- 来源核实：本地 OA_arXiv/2509.20189.pdf；首页 v1，24 Sep 2025；与已知元数据一致。
+- 阅读深度：方法与主要结果。已读：摘要、§1-§4、§5 开头、§7.2.4、§7.3 全部、§9、§10；§5.2-§7.2.3、§8（训练）、参考文献只扫读或未读。
+- 一句话：为 Jetson Orin AGX 建立时间与能量 roofline（屋顶线）模型，并用 96 种功耗模式说明 MAXN 并不是最省能的、时间效率蕴含能量效率，最后用改功耗模式做一次推理优化。
+- 问题设定：DNN 推理（主）与训练（简述），按解析式估计 FLOP 与访存字节，得到算术强度 AI=W/Q，放到各功耗模式下的 roofline 上。
+- 方法：时间 roofline 用微基准测峰值 FLOP/s 与带宽；能量 roofline 用线性回归得每 FLOP 能耗 ε_flop 与每字节能耗 ε_mop（MAXN 下 ε_flop=3.86 pJ/FLOP，ε_mop≈141.38 pJ/byte，比值 36.6×，§7.3.1），含/不含静态功耗两版。DVFS 关闭，风扇设最大避免热降频。
+- 保证 / 结论：（§7.3.1）MAXN 下能量平衡点 39.8 FLOP/byte 在时间平衡点 89.4 左侧，"time efficiency implies energy efficiency"（race-to-halt 成立）。§7.3.2：96 种模式中，GPU 0.7 GHz 在 22/24 模式下峰值能效最高，"the highest GPU frequency is not the most energy-efficient"；全局最高峰值能效模式为 0.7 GHz GPU + 2.1 GHz 内存，不是 MAXN；最高内存频率也不总是最省能（2.1 GHz 比 3.2 GHz 高 2.4% 的例子）。§9：对 MobileNet（低 AI），GPU 从 1.3 降到 1.1/0.7/0.3 GHz，时间劣化 <1%，节能 6%/11.5%/15.4%（"not shown"，数字原文给出但无图表）；ResNet 时间增加 1.8%/7%/24%，节能仅 4%/10%/5%；降内存频率对所有 5 个网络都无节能而时间变差（ResNet 为 7.26%、41.5%）。摘要："up to 15% lower energy and minimal degradation in inference time"。作者承认 roofline 预测与观测不符（预测劣化 1.2/9.8/17.5%，观测 1.8/7.0/24.0%），"cannot directly be used as a fine-grained predictive tool"。
+- 实验：Orin AGX **32GB** 开发套件（表 1 与 §4.1；注意与 Arya 的 64GB 不同），JetPack 5.0.1，PyTorch 1.12，FP32（Ampere 自动 TF32），batch 1。模型：MobileNetV3、ResNet-50、YOLOv8n、LSTM、BERT-Large（Table 2）。**DLA 与 PVA 未使用**（"DLA supports only a restricted set of DNN workloads but with GPU fallback"）。功率：板载 jtop/tegrastats，1 s 采样，"captures the power of the module and not the carrier board"，稳定需 2-3 s；非外部功率计。能耗 = 采样功率按时间间隔加权求和。
+- 局限：作者承认：未建模 CPU，未考虑缓存和算子融合，roofline 不是精细预测器，能量 roofline 优化在 ResNet/MobileNet 上无增益需进一步研究（§9、§10）。我的看法：（1）全是 PyTorch FP32，无 TensorRT/INT8；（2）1 s 功率采样对 ms 级推理很粗，须靠长批次平均；（3）§9 中 MobileNet 的节能是"未显示"的数字；（4）单板单次，无误差条。
+- 和我们的关系：背景/需区别。对"降 GPU 频率不一定损失时间、可省 6-15% 能耗"提供了小模型（MobileNet）旁证：即小模型（低 AI）降频可省能，这与"小模型最大时钟与最低可行时钟能耗几乎相等"的说法**不一致**（此处小模型降到 0.3 GHz 省 15.4%，时间 <1%）。但板卡是 AGX Orin 32GB，且是批量连续推理，非周期性释放。区别：无级联、无 DLA、无 TensorRT、无检测保证。
+- 可引用的句子：（可转述）在 Orin AGX 上默认 MAXN 不是最省能的功耗模式（摘要）；对低 AI 的 MobileNet，把 GPU 频率从 1.3 GHz 降到 0.3 GHz 时间增加不到 1%，能耗降低 15.4%（§9）；降低内存频率会显著拖慢所有测试网络且无功率节约（§9）。
+- 疑点：§9 的 MobileNet 节能数字"(not shown)"，无法在文中核；"DVFS disabled"在与功耗模式并存时的含义未展开；表 1 里 32GB 与引言里"64GB RAM"的描述同篇并存，需以 §4.1（32GB）为准（我的判断：引言文字可能沿用了 64GB 规格）。

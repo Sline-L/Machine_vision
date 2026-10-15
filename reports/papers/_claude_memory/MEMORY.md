@@ -1,0 +1,8 @@
+- [GearPro project map](gearpro-project-map.md) — two local clones, report LaTeX pipeline, board is Orin NX; dual cameras installed, testing single-camera
+- [GearPro report decisions](gearpro-report-decisions.md) — audience, structure, voice, camera/NX facts for the tech report rewrite
+- [Repo docs are AI-written](repo-docs-are-ai-written.md) — use GitHub docs for facts only; abstracts must open with what the project does
+- [Advisor review Oct 2026](advisor-review-2026-10.md) — what the 导师 criticised: task/route/lit review, metrics, 0.25/0.75 & 0.3003, trivial details, abbreviations
+- [Jetson acceleration study](jetson-acceleration-study.md) — tooling on feat/jetson-bench, NX runs pending; lit survey 590b6cd says GPU+DLA split alone is not novel
+- [保研 paper rules](baoyan-paper-rules.md) — 东南信院 draft: only listed journals count (15 domestic 学报 / SCI list), first-author + author-share rules
+- [Jetson paper directions](jetson-paper-directions.md) — candidate NX innovation directions A–E and the prior works that bound them
+- [Jetson survey (LaTeX)](jetson-survey-latex.md) — standalone survey in reports/papers/jetson-survey; secs 1,2,7 drafted, rest stubs; red \todo = unverified

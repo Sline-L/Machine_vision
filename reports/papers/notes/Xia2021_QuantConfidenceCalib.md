@@ -1,0 +1,13 @@
+# Xia 2021 量化网络中置信度与校准的矛盾
+- 完整引用：Guoxuan Xia, Sangwon Ha, Tiago Azevedo, Partha Maji. An Underexplored Dilemma between Confidence and Calibration in Quantized Neural Networks. arXiv:2111.08163v2 [cs.LG], 2 Dec 2021；NeurIPS 2021 “I (Still) Can't Believe It's Not Better” Workshop（首页脚注）。代码：github.com/Guoxoug/PTQ-acc-cal。
+- 来源核实：本地 OA_arXiv/2111.08163.pdf；首页 v2，2 Dec 2021；6页（含附录）。无差异。
+- 阅读深度：全文（含附录说明，图仅看图注）。
+- 一句话：PTQ后CNN的预测翻转（swap）主要发生在低置信度样本上，而这些样本本来准确率就低，所以top-1精度几乎不掉；过度自信反而有助于量化鲁棒性。
+- 问题设定：分类CNN，softmax置信度；把量化看作加在激活/输出上的噪声；要变更预测需噪声足以改变top logit（第2节）。
+- 方法：ResNet56@CIFAR-100、ResNet50@ImageNet（附录ResNet20、MobileNetV2）。权重逐通道对称（min/max），激活逐张量非对称，用PyTorch默认直方图（迭代最小化MSE）；BN折叠；**PyTorch模拟量化**，非实机（第3节）。固定激活8位，权重由8位降至4位以逐步增大噪声。统计“被翻转的预测百分比”、误差率变化、二者比值，以及被翻转样本按原始置信度的直方图（图2）。
+- 保证 / 结论：无形式保证。原文：“low confidence predictions are more likely to change post-quantization, whilst being less accurate”（摘要）；随噪声增大，起初被翻转的是低置信样本，权重精度更低时高置信样本才开始翻转，误差率/翻转比随之快速上升（第3.2节、图2）。
+- 实验：精确数值多在图中，**文本只给ResNet56 overall accuracy 70.09%，ResNet50 76.13%（图1），MobileNetV2 71.86%/ResNet20 66.62%（附录图）**；翻转比例的具体数值未在文字中给出（需看图2，我没有栅格化读数）。
+- 局限：作者承认：没有对logit层面噪声分布做建模，只看softmax之后；训练期校准方法（标签平滑等）可能改变结论（第4节）。我的判断：(1) 只做权重位宽扫描（激活固定8位），**没有TensorRT/INT8/DLA实机**；(2) 没有阈值保证或共形；(3) 没给出ECE随位宽的数值表。
+- 和我们的关系：**背景，但机制上直接支持我们的设计动机**。“量化翻转集中在低置信/靠近决策边界的样本”正好说明：gatekeeper在t1/t2阈值附近的样本最易受部署量化影响，而级联的“放行”决策恰取决于这些样本的得分——这是为什么PC上校准的阈值上的漏检保证在设备上可能偏移。区别：它度量的是top-1精度，不涉及“以阈值做放行/拒绝”的部件级风险；是视觉分类器翻转的少数实证之一（CIFAR-100/ImageNet，非缺陷数据）。
+- 可引用的句子：“low confidence predictions are more likely to change post-quantization, whilst being less accurate”（摘要）；“Even though post-training quantization may have caused a large number of predictions to change, the predictive accuracy of the models remains robust”（第3.2节）。
+- 疑点：“flip集中于低置信”在ResNet56上被翻转比例“quite high”，具体数值需读图；原文自称不直接比较两模型（噪声分布不同）。

@@ -1,0 +1,27 @@
+# Dimitrovski 等 2026 水果检测与视频分析（Jetson Orin Nano Super，PyTorch vs TensorRT FP32/FP16/INT8）
+- 完整引用：Ivica Dimitrovski, Vlatko Spasev, Ivan Kitanovski, Petre Lameski, Dane Bosheva（PDF 首页作者行末为 "Dane Boshev"，单位标注 b，疑为排版把上标并入）. "Towards Practical Precision Agriculture: Real-Time Fruit Detection and Video Analytics on Embedded Edge Hardware". arXiv:2609.13551v1 [cs.CV], 11 Sep 2026（Ss Cyril and Methodius University, Skopje）。首页未见期刊/DOI。
+- 来源核实：本地 OA_arXiv/2609.13551.pdf（55 页，PDF 文本约 2,300 行）；首页 arXiv:2609.13551v1 11 Sep 2026，与文件名一致。作者名"Boshev"与"Dane Bosheva"的差异属排版问题，非元数据冲突。
+- 阅读深度：方法与实验设置（第 3.2-3.4、4 节）、检测与部署结果（第 5.1-5.3 节、表 2-4）、视频吞吐部分（5.4.3、表 7）、讨论 6.2/6.5/6.6 与结论全文读过。跟踪/计数精度（5.4.1、5.4.2，HOTA、F1 等）与 6.3/6.4 只读了摘要里的数字，未读细节；附录未读。
+- 一句话：在 Jetson Orin Nano Super 上对同一冻结 YOLO26s 检查点做 PyTorch FP32/FP16 与 TensorRT FP32/FP16/INT8 的对照，报告 mAP 变化、延迟与 tegrastats 整机功耗，结论是 TensorRT FP16 最优，INT8 没有额外吞吐收益但精度损失明显更大。
+- 问题设定：4 个公开水果数据集（MangoYOLO、DeepBlueberry、StrawDI_Db1、APPLE MOTS）上的目标检测；APPLE MOTS 另做 ByteTrack 跟踪与过线计数。无统计保证，无阈值校准。
+- 方法：同一架构 YOLO26s、每个数据集独立训练；基准精度用 5 个随机种子（0-4）的均值±样本标准差（Table 2）；部署实验使用"按验证集选出并冻结的单个检查点"，保证 PyTorch 与各 TensorRT 精度之间只差后端/精度。TensorRT 引擎直接在 Jetson 上构建（不从 PC 迁移），静态 batch=1、640×640、置信度阈值 0.25、最多 300 检测。INT8 为训练后量化，校准集为"整个训练集"，MINMAX 校准（Sec 4.3）。测量：预加载最多 200 张测试图，50 次预热 + 连续 60 s 推理，CUDA 同步，tegrastats 100 ms 采样整机功耗，20 s 空闲功耗，每次运行前降温到约 50 C。
+- 保证 / 结论：无形式化保证。原文结论（Sec 6.2/7）：TensorRT FP16 相对 PyTorch FP32 mAP@50:95 仅降 0.0020-0.0054，总能耗降约 64-66%；INT8 吞吐与 FP16 几乎相同（67.20-74.54 vs 66.76-74.56 img/s），但 mAP@50:95 降 0.0213-0.0393，能耗再低约 12-14%（Sec 5.3）。
+- 实验：
+  - 板卡：Jetson Orin Nano Super（非 NX）；MAXN SUPER 模式，jetson_clocks 锁频，主动风扇（Sec 4.3）。
+  - 软件：JetPack 6.2.1，L4T 36.4.7，CUDA 12.9，cuDNN 9.20，**TensorRT 10.7.0**，PyTorch 2.8.0，Ultralytics 8.4.117，DeepStream 7.1（Sec 4.3）。TensorRT 10.7.0 恰与我们使用的版本一致（此点便于对照，但它是 Orin Nano Super 的 GPU 路径，**无 DLA**；全文未出现 DLA）。
+  - 精度：PyTorch FP32/FP16，TensorRT FP32/FP16/INT8。
+  - 延迟/功率测量：延迟为 CUDA 同步的"推理"与"预测（含前后处理，不含读盘）"两个口径；功率为 tegrastats 整机（whole-module）功耗，非外部功率计；报告均值，方法节称"均值、中位数、标准差、P95、P99 按适用情况保留"，但 Table 4 只列均值；**P95/P99 仅在视频时间戳同步实验的输出帧间隔中出现**：P95 为 36.95、36.64、37.13 ms，P99 为 39.26、37.35、38.55 ms（Sec 5.4.3），序列 0006/0007/0008 顺序对应。温度：Jetson 各配置最高 50.7-54.1 C（Sec 5.3，仅一句话，无表）。
+  - 关键数字（Table 4，Jetson，APPLE MOTS 行为例）：PyTorch FP32 mAP@50:95 0.4954、预测延迟 37.999 ms、0.4860 J/image；TensorRT FP16 0.4923（-0.0031）、14.979 ms、0.1754 J/image；TensorRT INT8 0.4716（-0.0238）、14.881 ms、0.1536 J/image。MangoYOLO：TensorRT FP32 相对 PyTorch FP32 为 -0.0023，INT8 为 -0.0213。StrawDI_Db1：TensorRT FP32 -0.0052，INT8 -0.0393。PyTorch FP16 在 Jetson 上无加速（推理约 29-30 ms 与 FP32 相同）但功率降低（12.79-13.06 W → 10.57-10.73 W）。
+  - 视频管线（Table 7）：DeepStream + FP16 引擎，最大吞吐 44.96-54.11 FPS，约 0.187-0.188 J/帧，时间戳同步下 30 FPS 无丢帧（101/101、103/103、322/322 帧）。
+  - 测试集规模：Table 1 只给每个数据集总图数（305 至 3,100 张）与实例数；各数据集测试集张数**原文未见**（APPLE MOTS 测试为序列 0006-0008，视频同步实验的帧数 101/103/322 见 Sec 5.4.3）。DeepBlueberry 总共仅 305 张，按 70/15/15 划分，测试集约几十张量级（我的推断，原文未直接给）。
+  - 统计严谨性：检测精度有 5 种子均值±标准差（APPLE MOTS mAP@50:95 为 0.4957 ± 0.0184，Table 2）；但**部署对比（Table 4）是单个冻结检查点、单次运行**，没有置信区间，也没有对 TensorRT 与 PyTorch 差异做配对检验。注意 APPLE MOTS 的种子间标准差（0.0184）比 FP16 的 -0.0031 大一个数量级，说明这类小幅变化只能说"同检查点下的差异"，不能外推。（我的判断）
+  - PyTorch vs TensorRT 逐样本/决策级一致性：**原文未见**。只有数据集级聚合 mAP 变化；没有检测框/置信度/逐图决策一致率。有趣的是 TensorRT FP32 相对 PyTorch FP32 也有 -0.0019 到 -0.0052 的 mAP 差，说明即使 FP32 也不是数值等价（作者未解释原因，我推测与引擎融合/NMS-free 输出路径/预处理实现差异有关，属推测）。
+- 局限：
+  - 作者承认：单一架构 YOLO26s；时间评估仅 APPLE MOTS；视频测试仅 3 条序列；仅一块 Orin Nano Super、固定 MAXN SUPER 与风扇；ByteTrack 非最优（Sec 6.6）。
+  - 我的判断：(1) 能耗来自 tegrastats 整机功耗而非外部表，且视频能耗只是"有限时长序列"的数值，作者自己说明不能代表长期稳定性；(2) INT8 用 MINMAX 校准且校准集为整个训练集，是较粗的校准方式，"INT8 无益"是这种具体 PTQ 配方在小模型+GPU 路径上的结论，不能推广为 INT8 本身无用，也不涉及 DLA（DLA 上 INT8 往往是被迫选择）；(3) 无重复运行的延迟方差；(4) 目标检测的 mAP 变化不等于我们需要的"零件级漏检率保证"是否保持。
+- 和我们的关系：直接可用（作为证据）+ 需区别。可用：在与我们同一 TensorRT 10.7.0 栈、同一 Orin 系列上，给出 PyTorch FP32→TensorRT FP32/FP16/INT8 的真实精度损失量级（FP16 约 0.002-0.005 mAP、INT8 约 0.02-0.04 mAP），支持我们假设 H 中"校准在 PC 上、部署后性质会漂移"的动机，以及"FP16 基本无损、INT8 有明显损失"的先验。区别：它只看聚合 mAP，不看决策级一致性或阈值化后的漏检率；无级联；无统计保证；无 DLA；板卡是 Orin Nano Super 而非 Orin NX 16GB。
+- 可引用的句子：
+  - TensorRT FP16 在 Jetson Orin Nano Super 上相对 PyTorch FP32 使 mAP@50:95 降低 0.0020-0.0054，总能耗约降 64-66%（摘要, Sec 5.3）。
+  - INT8 吞吐与 FP16 几乎相同，但 mAP@50:95 降 0.0213-0.0393（Sec 5.3）。
+  - 作者特别强调要区分推理延迟、含前后处理的预测延迟与端到端延迟（Sec 4.2, 5.2）。
+- 疑点：Table 7 在文本层行错位（0006 行功率/能耗位置对应关系需看原图，我按 Sec 5.4.3 文字核对：吞吐 44.96/47.88/54.11 FPS、功率 8.41-10.14 W）；"总能耗降 64-66%"为 0.4789-0.4860 → 0.1650-0.1754 J/image，数值自洽；TensorRT FP32 与 PyTorch FP32 的 mAP 差异原因文中未交代。
