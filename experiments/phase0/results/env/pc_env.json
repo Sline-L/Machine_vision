@@ -1,0 +1,18 @@
+{
+  "ts": "2026-10-16T11:05:31.567567+00:00",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "python": "3.10.19 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 16:41:31) [MSC v.1929 64 bit (AMD64)]",
+  "torch": "2.1.0+cu118",
+  "torchvision": "0.16.0+cu118",
+  "cuda_available": true,
+  "gpu_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "nvidia_driver": "591.86",
+  "numpy": "1.26.4",
+  "opencv": "4.13.0",
+  "Pillow": "12.1.1",
+  "onnx": "1.21.0",
+  "onnxruntime": "1.23.2",
+  "ultralytics": "8.4.21",
+  "conda_env": "srtp_yolo",
+  "conda_prefix": "D:\\ANACONDA\\ANACONDA\\envs\\srtp_yolo"
+}

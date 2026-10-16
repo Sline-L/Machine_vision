@@ -1,0 +1,19 @@
+{
+  "ts": "2026-10-16T10:57:17.021112+00:00",
+  "o0_vs_r0c_max_logit_diff": 0.00012969970703125,
+  "onnx_files": [
+    {
+      "path": "experiments/phase0/engines/onnx/f_efficientnet_b0_384_w1_s20260911.onnx",
+      "sha256": "f6d58057538dbe1cca726aab10c2ff8db8250cacac46029826e9fad3fb515555"
+    },
+    {
+      "path": "experiments/phase0/engines/onnx/p_resnet18_384_w1.onnx",
+      "sha256": "9152310b8fb2dfc47b6188b69a1b117447364bc335a3c80de68b6f0397ceedc6"
+    },
+    {
+      "path": "experiments/phase0/engines/onnx/detector.onnx",
+      "sha256": "e60dc5a186fba9b5b9c9f1f8ed95539819352fd917c3a125e40619b8b59fbda8"
+    }
+  ],
+  "status": "OK"
+}

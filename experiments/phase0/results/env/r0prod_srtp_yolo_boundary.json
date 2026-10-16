@@ -1,0 +1,9 @@
+{
+  "ts": "2026-10-16T11:08:00+00:00",
+  "conda_env": "srtp_yolo",
+  "decision_match": 149,
+  "n_val": 150,
+  "boundary_stem": "val_069",
+  "note": "ref REJECT at fused=threshold; yolo_pro matches 150/150",
+  "env_file": "results/env/pc_env_srtp_yolo.json"
+}

@@ -1,0 +1,24 @@
+{
+  "weights": "G:\\CODE\\Machine_vision-phase0\\model\\model2\\detector.pt",
+  "end2end_attr": false,
+  "last_module_type": "Detect",
+  "last_module_str": "Detect(\n  (cv2): ModuleList(\n    (0): Sequential(\n      (0): Conv(\n        (conv): Conv2d(32, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)\n        (bn): BatchNorm2d(16, eps=0.001, momentum=0.03, affine=True, track_running_stats=True)\n        (act): SiLU(inplace=True)\n      )\n      (1): Conv(\n        (conv): Conv2d(16, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)\n        (bn): BatchNorm2d(16, eps=0.001, momentum=0.03, affine=True, track_running_stats=Tr",
+  "names": {
+    "0": "scratch"
+  },
+  "onnx_input_name": "images",
+  "onnx_input_shape": [
+    1,
+    3,
+    960,
+    960
+  ],
+  "onnx_output_name": "output0",
+  "onnx_output_shape": [
+    1,
+    5,
+    76500
+  ],
+  "onnx_max_conf_rule": "max over output[:, 4:, :] (class channels)",
+  "onnx_sample_max_conf": 0.9999995827674866
+}
